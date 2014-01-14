@@ -52,7 +52,12 @@ function sfiab_load_config($mysqli)
 		$config[$db_var] = $db_val;
 	}
 
-	$config['fair_url'] = $config['document_root'];
+	if($_SERVER['HTTPS'] != '')
+		$proto = 'https://';
+	else
+		$proto = 'http://';
+	
+	$config['fair_url'] = $config['fair_host'].$config['document_root'];
 }
 
 function sfiab_log($mysqli, $type, $data, $uid=-1)

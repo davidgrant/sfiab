@@ -20,11 +20,11 @@
    Boston, MA 02111-1307, USA.
 */
 
-require_once('../common.inc.php');
-require_once('../email.inc.php');
-require_once('../user.inc.php');
+require_once('common.inc.php');
+require_once('email.inc.php');
+require_once('user.inc.php');
 
-require_once('../PHPMailer/PHPMailerAutoload.php');
+require_once('PHPMailer/PHPMailerAutoload.php');
 
 
 $sleepmin=500000;  // 0.5 seconds
@@ -40,11 +40,6 @@ if(count($_SERVER['argv']) > 1) {
 	case '--force':
 		$config['email_queue_lock'] = '';
 		break;
-
-	case '--test':
-		test_email();
-		exit();
-
 	}
 }
 
@@ -97,12 +92,12 @@ while(true) {
 	/* Load additional replacements */
 	$rep = unserialize($db_rep);
 
+	$subject = email_replace_vars($db_email_subject, $u, $rep);
 	$body = email_replace_vars($db_email_body, $u, $rep);
-
-	if($db_email_body_html == '') {
-	    $body_html = $body;
-	} else {
+	if($db_email_body_html != '') {
 		$body_html = email_replace_vars($db_email_body_html, $u, $rep);
+	} else {
+		$body_html = '';
 	}
 
 	$mail = new PHPMailer();
@@ -117,9 +112,15 @@ while(true) {
 //	$mail->addReplyTo('replyto@example.com', 'First Last');
 	//Set who the message is to be sent to
 	$mail->addAddress($db_email, $db_to);
-	$mail->Subject = $db_email_subject;
-	$mail->Body    = $body_html;
-	$mail->AltBody = $body;
+	$mail->Subject = $subject;
+	if($db_email_body_html == '') {
+		$mail->isHTML(false);
+		$mail->Body    = $body;
+	} else {
+		$mail->isHTML(true);
+		$mail->Body    = $body_html;
+		$mail->AltBody = $body;
+	}
 
 //	$mail->msgHTML("ile_get_contents('contents.html'), dirname(__FILE__));
 	//Replace the plain text body with one created manually

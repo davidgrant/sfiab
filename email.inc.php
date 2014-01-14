@@ -48,6 +48,8 @@ function email_get_user_replacements(&$u) {
 	/* Replacements that depend on the configuration */
 	$rep = array(	'FAIRNAME' => $config['fair_name'],
 			'LOGIN_LINK' => $config['fair_url'].'/index.php#login',
+			'FAIR_URL' => $config['fair_url'],
+			'YEAR' => $config['year'],
 		);
 
 	if(is_array($u)) {

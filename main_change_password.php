@@ -19,7 +19,7 @@ if($_SESSION['password_expired']) {
 
 ?>
 
-<div data-role="page" id="change_password"><div data-role="main" class="jqm-content" > 
+<div data-role="page" id="change_password"><div data-role="main" class="sfiab_page" > 
 
 
 	<div id="change_password_msg" class="error <?=$error_class?>">
@@ -28,12 +28,12 @@ if($_SESSION['password_expired']) {
 
 	<form action="/" id="change_password_form">
 	<div data-role="fieldcontain">
-		<label for="register_email">New Password:</label>
-		<input data-clear-btn="true" name="email" id="change_pw" value="" type="password">
+		<label for="change_pw">New Password:</label>
+		<input name="pw" id="change_pw" value="" type="password">
 	</div>
 	<div data-role="fieldcontain">
-		<label for="register_email2">New Password Again:</label>
-		<input data-clear-btn="true" name="email2" id="change_pw2" value="" type="password">
+		<label for="change_pw2">New Password Again:</label>
+		<input name="pw2" id="change_pw2" value="" type="password">
 	</div>
 	<button type="submit" data-inline="true" data-icon="check" data-theme="g">Change Password</button>
 	</form>
@@ -58,10 +58,12 @@ if($_SESSION['password_expired']) {
 			var hash = hex_sha512(p1);
 			$.post( "login.php", { p: hash, action: "change_pw" }, function( data ) {
 				if(data == '0') {
+					window.location = "<?=$config['fair_url']?>/main.php";
+					/*
 					$('#change_password_msg').text("Password Changed");
 					$('#change_password_msg').removeClass("error_hidden");
 					$('#change_password_msg').removeClass("error");
-					$('#change_password_msg').addClass("happy");
+					$('#change_password_msg').addClass("happy");*/
 					/* Success */
 				} else {
 					$('#change_password_msg').text(data);

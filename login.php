@@ -122,8 +122,8 @@ case 'register':
 	$q = $mysqli->real_query("DELETE FROM users WHERE `username`='$username' AND `state`='new'");
 	print($mysqli->error);
 
-	/* Create new 12 character scrambled password */
-	$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 12);
+	/* Create new 9 character scrambled password */
+	$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
 	$password_hash = hash('sha512', $password);
 	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`firstname`,`lastname`,`password`,`salt`,`password_expired`) 
 				VALUES('$username', 'new','$email',{$config['year']},'$as','$fn','$ln','$password_hash','','1')");
@@ -133,7 +133,7 @@ case 'register':
 	$mysqli->query("UPDATE users SET unique_uid=$uid WHERE uid=$uid");
 
 	/* Send an email */
-	$result = email_send($mysqli, "Registration New", $uid, array('PASSWORD'=>$password) );
+	$result = email_send($mysqli, "New Registration", $uid, array('PASSWORD'=>$password) );
 
 	sfiab_log($mysqli, "register", "username: {$username}, email: {$email}, as: $as, email status: $result");
 	
