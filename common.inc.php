@@ -1,4 +1,6 @@
 <?php
+require_once('config.inc.php');
+
 /* It's kinda important that there be no blank lines BEFORE this, or they're sent as newlines.  This messes
  * up login.php */
 
@@ -15,13 +17,18 @@ $sfiab_roles = array(	'student' => array(),
 
 function sfiab_db_connect()
 {
-	$host = "127.0.0.1";
-	$user = "sfiab";
-	$password = "gvrsf2013";
-	$database = "sfiab_new";
- 
-	$mysqli = new mysqli($host, $user, $password, $database);
+	global $dbhost, $dbuser, $dbpassword, $dbdatabase;
+	$mysqli = new mysqli($dbhost, $dbuser, $dbpassword, $dbdatabase);
 	return $mysqli;
+}
+
+function sfiab_session_is_active()
+{
+	 if ( version_compare(phpversion(), '5.4.0', '>=') ) {
+	  return session_status() === PHP_SESSION_ACTIVE ? TRUE : FALSE;
+	         } else {
+	 return session_id() === '' ? FALSE : TRUE;
+   }
 }
 
 function sfiab_load_config($mysqli)
@@ -51,7 +58,7 @@ function sfiab_load_config($mysqli)
 function sfiab_log($mysqli, $type, $data, $uid=-1)
 {
 	$ip = $_SERVER['REMOTE_ADDR'];
-	if ($uid == -1 && session_status() != PHP_SESSION_NONE) {
+	if ($uid == -1 && !sfiab_session_is_active()) {
 		$uid = $_SESSION['uid'];
 	}
 	$type = $mysqli->real_escape_string($type);
