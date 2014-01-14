@@ -52,11 +52,12 @@ function sfiab_load_config($mysqli)
 		$config[$db_var] = $db_val;
 	}
 
-	if($_SERVER['HTTPS'] != '')
+/*
+	if(array_key_exists('HTTPS', $_SERVER)) {
 		$proto = 'https://';
 	else
 		$proto = 'http://';
-	
+*/	
 	$config['fair_url'] = $config['fair_host'].$config['document_root'];
 }
 

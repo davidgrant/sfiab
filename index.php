@@ -133,6 +133,29 @@ sfiab_page_begin('Welcome', 'welcome');
 	</div>
 </div>
 
+<div data-role="page" id="forgot_password_sent">
+	<div data-role="main" class="sfiab_page" > 
+	<div><p>An email with a temporary password was sent to your email
+	address.  Click on the button below to proceed to the login page.
+
+	</div>
+	<a href="#login" data-role="button">Proceed to Login</a>
+	</div>
+</div>
+
+<div data-role="page" id="forgot_username_sent">
+	<div data-role="main" class="sfiab_page" > 
+	<div><p>An email with your username was sent to your email
+	address.  If you have also forgotten your password, you can use the link
+	on the login page again to reset yor password.
+	
+	Click on the button below to proceed to the login page.
+
+	</div>
+	<a href="#login" data-role="button">Proceed to Login</a>
+	</div>
+</div>
+
 
 
 <div data-role="page" id="contact">
@@ -158,7 +181,7 @@ sfiab_page_begin('Welcome', 'welcome');
 		<button type="submit" data-inline="true" data-icon="check" data-theme="g">Log in</button>
 	</form>
 
-	<p>If you can't remember your username or password, <a href="#forgot">click here</a> to recover them.
+	<p>If you can't remember your username or password, <a href="<?=$config['fair_url']?>/main_forgot.php" data-ajax="false">click here</a> to recover them.
 	<script src="scripts/sha512.js"></script>
 	<script>
 		// Attach a submit handler to the form
@@ -190,63 +213,6 @@ sfiab_page_begin('Welcome', 'welcome');
 			return false;
 		});
 	</script>		
-	</div>
-</div>
-
-<div data-role="page" id="forgot">
-	<div data-role="main" class="sfiab_page" > 
-	<div id="login_forgot_msg" class="error error_hidden">
-	</div>
-
-	<h3>Recover Password</h3>
-	Enter your Username and we will email you a link to reset your password
-	<form action="/" id="forgot_password_form">
-		<div data-role="fieldcontain">
-			<label for="fp_un" >Username:</label>
-			<input name="user" id="fp_un" value="" placeholder="Username" type="text">
-		</div>			
-		<button type="submit" data-inline="true" data-icon="check" data-theme="b">Reset My Password</button>
-	</form>
-	<hr/>
-
-	<h3>Recover Username</h3>
-	Enter your email address and we will email you your Username
-	<form action="/" id="forgot_username_form">
-		<div data-role="fieldcontain">
-			<label for="fu_em" >Email:</label>
-			<input name="user" id="fu_em" value="" placeholder="Email" type="email">
-		</div>			
-		<button type="submit" data-inline="true" data-icon="check" data-theme="b">Recover Username</button>
-	</form>
-
-	<script>
-		$( "#forgot_password_form" ).submit(function( event ) {
-			// Stop form from submitting normally
-			event.preventDefault();
-			$('#register_msg').addClass("error_hidden");
-			// Get some values from elements on the page:
-			var u = $('#register_username').val();
-			var e = $('#register_email').val();
-			var a = $('#register_as').val();
-			var fn = $('#register_firstname').val();
-			var ln = $('#register_lastname').val();
-
-			$.post( "login.php", { username: u, email: e, as: a, action: "register", firstname: fn, lastname: ln }, function( data ) {
-				if(data == '0') {
-					/* Success */
-					$.mobile.changePage('#register_sent');
-				} else {
-					/* Error */
-					$('#register_msg').text(data);
-					$('#register_msg').removeClass("error_hidden");
-					$.mobile.changePage('#register', { allowSamePageTransition: true } );
-				}
-			});
-			// Stop any more actions
-			return false;
-		});
-
-	</script>
 	</div>
 </div>
 
