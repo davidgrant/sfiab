@@ -52,7 +52,7 @@ function sfiab_load_config($mysqli)
 		$config[$db_var] = $db_val;
 	}
 
-	$config['fair_url'] = 'http://muon/sfiab_new';
+	$config['fair_url'] = $config['document_root'];
 }
 
 function sfiab_log($mysqli, $type, $data, $uid=-1)

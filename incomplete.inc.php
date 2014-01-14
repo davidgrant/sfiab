@@ -95,7 +95,7 @@ function incomplete_fields($mysqli, $section, &$u, $force_update=false)
 		break;
 	case 's_mentor':
 		$p = project_load($mysqli, $u['student_pid']);
-		incomplete_check_gt_zero($ret, $p, array('num_mentors'));
+//		incomplete_check_gt_zero($ret, $p, array('num_mentors'));
 		break;
 	}
 
