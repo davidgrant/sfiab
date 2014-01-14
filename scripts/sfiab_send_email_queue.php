@@ -20,9 +20,12 @@
    Boston, MA 02111-1307, USA.
 */
 
-require_once('common.inc.php');
-require_once('email.inc.php');
-require_once('user.inc.php');
+require_once('../common.inc.php');
+require_once('../email.inc.php');
+require_once('../user.inc.php');
+
+require_once('../PHPMailer/PHPMailerAutoload.php');
+
 
 $sleepmin=500000;  // 0.5 seconds
 $sleepmax=2000000; // 2.0 second
@@ -37,6 +40,11 @@ if(count($_SERVER['argv']) > 1) {
 	case '--force':
 		$config['email_queue_lock'] = '';
 		break;
+
+	case '--test':
+		test_email();
+		exit();
+
 	}
 }
 
@@ -50,22 +58,23 @@ $mysqli->query("UPDATE config SET val='".time(NULL)."' WHERE var='email_queue_lo
 
 
 $q = $mysqli->prepare("SELECT `id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`additional_replace` FROM email_queue WHERE result='queued' LIMIT 1");
-$q1 = $mysqli->prepare("SELECT `name`,`from`,`subject`,`body`,`bodyhtml` FROM emails WHERE id = ?");
+$q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body`,`bodyhtml` FROM emails WHERE id = ?");
 //loop forever, but not really, it'll get break'd as soon as there's nothing left to send
 while(true) {
+   	/* Get an entry from the queue, exit if there are no more */
 	$q->execute(); 
 	$q->store_result();
 	$q->bind_result($db_id, $db_emails_id,$db_uid,$db_to,$db_email,$db_rep);
 
 	if($q->num_rows == 0) break;
-
 	$q->fetch();
 
-	/* Now lookup the email to send*/
+	/* Now lookup the email to send from the database of emails.. we don't copy
+	 * the full email text into the queue, just the ID of the email to send */
 	$q1->bind_param('i', $db_emails_id);
 	$q1->execute();
 	$q1->store_result();
-	$q1->bind_result($db_email_name, $db_email_from, $db_email_subject, $db_email_body, $db_email_body_html);
+	$q1->bind_result($db_email_name, $db_email_from_name, $db_email_from_addr, $db_email_subject, $db_email_body, $db_email_body_html);
 
 	if($q->num_rows == 0) {
 		/* Email in queue, but the ID doesn't exist?  someone deleted it between sending an email and 
@@ -84,34 +93,47 @@ while(true) {
 	} else {
 		$u = false;
 	}
-
-	/* Do replacements */
+	
+	/* Load additional replacements */
 	$rep = unserialize($db_rep);
 
-	if($db_email_body) 
-		$body = $db_email_body;
-	else if($db_email_body_html) 
-		$body = $db_email_body_html;
-	else
-		$body="No message body specified";
+	$body = email_replace_vars($db_email_body, $u, $rep);
 
+	if($db_email_body_html == '') {
+	    $body_html = $body;
+	} else {
+		$body_html = email_replace_vars($db_email_body_html, $u, $rep);
+	}
 
-	$body = email_replace_vars($body, $u, $rep);
-			
-//	if($email->bodyhtml)
-//		$bodyhtml=communication_replace_vars($email->bodyhtml,$blank,$replacements);
+	$mail = new PHPMailer();
+	$mail->isSMTP();	// Use smtp
+	$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
+	$mail->Debugoutput = 'echo'; /*or 'html' friendly debug output */
+	$mail->Host = "localhost";
+	$mail->Port = 25;
+	$mail->SMTPAuth = false;	/* No auth */
+	$mail->setFrom($db_email_from_addr, $db_email_from_name);
+	//Set an alternative reply-to address
+//	$mail->addReplyTo('replyto@example.com', 'First Last');
+	//Set who the message is to be sent to
+	$mail->addAddress($db_email, $db_to);
+	$mail->Subject = $db_email_subject;
+	$mail->Body    = $body_html;
+	$mail->AltBody = $body;
 
-	if($db_to)
-		$to = "\"$db_to\" <$db_email>";
-	else
-		$to = $db_email;
+//	$mail->msgHTML("ile_get_contents('contents.html'), dirname(__FILE__));
+	//Replace the plain text body with one created manually
+//	$mail->AltBody = 'This is a plain-text message body';
+	//Attach an image file
+//	$mail->addAttachment('images/phpmailer_mini.gif');
 
-//	$result=email_send_new($to,$email->from,$email->subject,$body,$bodyhtml);
-
-	print("Would have sent email to: $to\n");
-	print("$body");
-
-	$mysqli->query("UPDATE email_queue SET `result`='failed' WHERE id=$db_id");
+	//send the message, check for errors
+	if (!$mail->send()) {
+		$mysqli->real_query("UPDATE email_queue SET `result`='failed' WHERE id=$db_id");
+		sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id}: {$mail->ErrorInfo}");
+	} else {
+		$mysqli->real_query("UPDATE email_queue SET `result`='sent', `sent`=NOW() WHERE id=$db_id");
+	}
 
 /*
 			if($result) {
