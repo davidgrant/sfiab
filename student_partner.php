@@ -1,0 +1,428 @@
+<?php
+require_once('common.inc.php');
+require_once('form.inc.php');
+require_once('user.inc.php');
+require_once('incomplete.inc.php');
+require_once('project.inc.php');
+require_once('isef.inc.php');
+$mysqli = sfiab_db_connect();
+sfiab_load_config($mysqli);
+
+sfiab_session_start($mysqli, array('student'));
+
+$u = user_load($mysqli);
+if( $u['student_pid'] == 0) {
+	print("Error 1011: pid {$u['username']}");
+	exit();
+}
+$p = project_load($mysqli, $u['student_pid']);
+
+$page_id = 's_partner';
+
+$action = '';
+if(array_key_exists('action', $_POST)) {
+	$action = $_POST['action'];
+}
+
+/* We need these numbers for everything */
+$q_in_project = $mysqli->query("SELECT uid,firstname,lastname,username FROM users WHERE `student_pid`='{$p['pid']}'");
+$students_in_project = $q_in_project->num_rows;
+$students_missing = $p['num_students'] - $students_in_project;
+
+$q_sent = $mysqli->query("SELECT * FROM partner_requests WHERE `from_uid`='{$u['uid']}'");
+$invites_sent = $q_sent->num_rows;
+
+$invite_error = "";
+$need_sent_reload = false;
+$need_missing_reload = false;
+
+switch($action) {
+case 'save':
+
+	$n = (int)$_POST['num_students'];
+	if($n > 0 && $n <= 2) {
+		$p['num_students'] = $n;
+	} else {
+		$p['num_students'] = NULL;
+	}
+
+	project_save($mysqli, $p);
+
+//	$ret = incomplete_fields($mysqli, $page_id, $u, true);
+//	print(json_encode($ret));
+//	exit();
+	break;
+
+case 'invite':
+	$un = $mysqli->real_escape_string($_POST['un']);
+	if(strlen($un) > 0) {
+		/* Find this user */
+
+		/* To send a request the user must have a project with num_students set to zero (or NULL), or 
+		 * must have num_students set > 1 with fewer students attached tot he project and no
+		  * partner requests sent at all (let's avoid creating accept loops) */
+		$q = $mysqli->query("SELECT uid FROM users WHERE username='$un' 
+							AND year='{$config['year']}' 
+							AND 'student' IN (roles) 
+							AND `state`='active'");
+		if($q->num_rows == 1) {
+			/* Found, is there still room in this project (the user isn't reloading the post)? */
+			if(($students_missing - $invites_sent) > 0) {
+				$r = $q->fetch_assoc();
+
+				/* Load the remote user and get the remote project */
+				$u_partner = user_load($mysqli, $r['uid']);
+				$p_partner = project_load($mysqli, $u_partner['student_pid']);
+
+				$request_ok = true;
+
+				if($p_partner['num_students'] == 1) {
+					$request_ok = false;
+					$invite_error = "Unable to send partner request because that user has specified there is only one student in his/her project.  If that really is your partner, have them go into their Partner settings, and change the number of students to 2.";
+				}
+
+				if($request_ok && $p_partner['num_students'] > 1) {
+					/* Make sure the project isn't full */
+					$q1 = $mysqli->query("SELECT uid FROM users WHERE `student_pid`='{$p_partner['pid']}'");
+					if($q1->num_rows != 1) {
+						$request_ok = false;
+						$invite_error = "Unable to send partner request because that user is already in a project with more than one student.  Have the user send you a partner request.";
+					}
+
+				}
+
+				if($request_ok) {
+					/* Check that the user has no pending sent requests */
+					$q1 = $mysqli->query("SELECT id FROM partner_requests WHERE `from_uid`='{$u_partner['uid']}'");
+					if($q1->num_rows != 0) {
+						$request_ok = false;
+						$invite_error = "Unable to send partner request because that user has pending partner requests already.  Have the user send you a partner request or cancel the requests they have sent.";
+					}
+				}
+
+				if($request_ok == true) {
+					$mysqli->real_query("INSERT INTO partner_requests (`from_uid`,`to_uid`) VALUES
+								('{$u['uid']}', '{$r['uid']}')");
+					/* Redo invites query */
+					$need_sent_reload = true;
+				}
+			}
+		} else {
+			$invite_error = "Username not found";
+		}
+	}
+	break;
+
+case 'cancel':
+	$id = (int)$_POST['id'];
+	/* Add the from_uid to the reqest so users can't delete any ID */
+	$mysqli->real_query("DELETE FROM partner_requests WHERE id='$id' AND from_uid='{$u['uid']}'");
+	/* Reload the partners */
+	$need_sent_reload = true;
+	break;
+
+case 'remove':
+	$uid = (int)$_POST['uid'];
+	if($uid == $u['uid']) {
+		/* Remove us from the project - create a new project and link that to us */
+		$new_pid = project_create($mysqli);
+		$u['student_pid'] = $new_pid;
+		user_save($mysqli, $u);
+		$need_missing_reload = true;
+	} else {
+		/* Remove this UID from the project */
+		$this_u = user_load($uid);
+		/* Make sure they're in this project */
+		if($this_u['student_pid'] == $p['pid']) {
+			/* Create a new project and set that to be the user's project */
+			$new_pid = project_create($mysqli);
+			$this_u['student_pid'] = $new_pid;
+			user_save($mysqli, $this_u);
+			$need_missing_reload = true;
+		}
+	}
+	break;
+
+case 'accept_request':
+	$id = (int)$_POST['id'];
+	$q = $mysqli->query("SELECT from_uid,to_uid FROM partner_requests WHERE `id`='$id' AND `to_uid`='{$u['uid']}'");
+	if($q->num_rows != 1) {
+		print("Error 1012: $id\n");
+		exit();
+	}
+
+	$r = $q->fetch_assoc();
+	$from_uid = $r['from_uid'];
+
+	$u_partner = user_load($mysqli, $from_uid);
+	$new_pid = $u_partner['student_pid'];
+	$p_partner = project_load($mysqli, $new_pid);
+
+	$old_pid = $u['student_pid'];
+
+	$u['student_pid'] = $new_pid;
+	user_save($mysqli, $u);
+
+	/* Set to the new project */
+	$p = $p_partner;
+
+
+	$mysqli->real_query("DELETE FROM projects WHERE pid='$old_pid'");
+//	$mysqli->real_query("DELETE FROM mentors WHERE pid='$old_pid'");
+	$mysqli->real_query("DELETE FROM partner_requests WHERE id='$id' AND to_uid='{$u['uid']}'");
+	$need_missing_reload = true;
+
+	/* Update incomplete status of everything related to the project */
+	incomplete_fields($mysqli, 's_project', $u, true);
+	incomplete_fields($mysqli, 's_mentor', $u, true);
+	incomplete_fields($mysqli, 's_ethics', $u, true);
+	incomplete_fields($mysqli, 's_safety', $u, true);
+	incomplete_fields($mysqli, 's_awards', $u, true);
+	incomplete_fields($mysqli, 's_signature', $u, true);
+
+
+	break;
+
+case 'reject_request':
+	$id = (int)$_POST['id'];
+	$mysqli->real_query("DELETE FROM partner_requests WHERE id='$id' AND to_uid='{$u['uid']}'");
+	break;
+}
+
+if($need_sent_reload) {
+	$q_sent = $mysqli->query("SELECT * FROM partner_requests WHERE `from_uid`='{$u['uid']}'");
+	$invites_sent = $q_sent->num_rows;
+}
+
+if($need_missing_reload) {
+	$q_in_project = $mysqli->query("SELECT uid,firstname,lastname,username FROM users WHERE `student_pid`='{$p['pid']}'");
+	$students_in_project = $q_in_project->num_rows;
+	$students_missing = $p['num_students'] - $students_in_project;
+}
+
+
+$help = '
+<p>
+</ul>
+';
+
+/* Recompute incomplete fields for this page before printing the leftnav */
+$fields = incomplete_fields($mysqli, $page_id, $u, true);
+
+sfiab_page_begin("Project Partner", $page_id, $help);
+
+?>
+
+<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
+
+<?php
+	form_incomplete_error_message($page_id, $fields);
+
+	/* Check for an incoming request first */
+	$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
+	if($q->num_rows > 0) { 
+		$i=0;
+		while($r = $q->fetch_assoc()) {
+			$from_uid = $r['from_uid'];
+			$request_id = $r['id'];
+
+			$from_u = user_load($mysqli, $from_uid);
+			?>
+			<h3>Partner Request</h3>
+			<p>You have a partner request from <b><?=$from_u['name']?></b> (Username: <?=$from_u['username']?>).
+			<p>If you <b>accept</b> this request, the same project will be linked
+			to both your accounts.  All information
+			you have entered in the Project Info, Project Ethics,
+			Project Safety, Mentor Info, and Awards pages will be
+			lost and replaced with the information from <b><?=$from_u['name']?></b>.
+
+			<p>If you have already entered all this information, you should reject this request and send a parter request 
+			to <b><?=$from_u['name']?></b> (Username: <?=$from_u['username']?>).
+
+			<p>If you <b>reject</b> this request, nothing will
+			happen except that the request will be deleted.
+
+			<form action="student_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
+				
+			<div class="ui-field-contain">
+				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="accept_request" type="submit" data-inline="true" data-theme="g">
+					Accept Request
+				</button>
+				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="reject_request" type="submit" data-inline="true" data-theme="r">
+					Reject Request
+				</button>
+			</div>
+			<input type="hidden" name="id" value="<?=$request_id?>"/>
+			</form>
+
+
+<?php			$i++;
+		} 
+		/* Cut the page short */ ?>
+		</div>
+<?php		sfiab_page_end();
+		exit();
+	} 
+
+
+
+	
+	?>
+
+
+	<h3>Number of Students</h3>
+
+	<p>Enter the Number of Students who worked on the this project.</p>
+	<form action="student_partner.php" method="post" data-ajax="false" id="<?=$page_id?>_form">
+<?php		$num_data = array(1=>'1', 2=>'2');
+		form_select($page_id, 'num_students', "Num Students", $num_data, $p);
+		form_submit($page_id, 'Save');
+?>		<input type="hidden" name="action" value="save"/>
+	</form>
+
+<?php	$form_id = $page_id . "_form";
+	$button_id = $page_id . "_form_submit";
+?>
+	<script>
+		// highlight any incomplete fields
+<?php 		foreach($fields as $f) { ?>
+			$("label[for='<?=$page_id?>_<?=$f?>']").addClass('error');
+<?php		}?>
+		$( "#<?=$form_id?> :input" ).change(function() {
+	               $('#<?=$button_id?>').removeAttr('disabled');
+		       $('#<?=$button_id?>').text('Save');
+		});
+
+		$( "#<?=$form_id?> :input" ).keyup(function() {
+	               $('#<?=$button_id?>').removeAttr('disabled');
+		       $('#<?=$button_id?>').text('Save');
+		});
+
+	</script>
+
+<?php
+
+
+	if( ($students_missing - $invites_sent) > 0) {
+?>
+		<h3>Invite Partner(s) to this Project</h3>
+		<p>Enter your partner's full name or username to invite them to
+		this project.  Their account must already exist for this to
+		work.  If your partner hasn't created an account yet, have them
+		do that first. </p>
+
+
+<?php		if($invite_error != '') {
+			sfiab_error($invite_error);
+		}
+
+		for($i=$students_missing-$invites_sent+1; $i <= $p['num_students']; $i++) { 
+			$this_form_id = $page_id.'_invite_'.$i;
+			$button_id = "invite_submit_$i";
+			$v = '';
+?>			<form action="student_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
+				
+			<div class="ui-field-contain">
+				<label class="error" for="<?$page_id?>_invite_<?=$i?>">Username:</label>
+				<input id="<?$page_id?>_invite_<?=$i?>" name="un" value="<?=$v?>" placeholder="Username" data-clear-btn="true" type="text">
+			</div>
+
+			<button id="<?=$button_id?>" disabled="disabled" type="submit" data-inline="true" data-theme="g">
+				Invite
+			</button>
+			<input type="hidden" name="action" value="invite"/>
+			</form>
+			<script>
+				$( "#<?=$this_form_id?> :input" ).change(function() {
+				       $('#<?=$button_id?>').removeAttr('disabled');
+				       $('#<?=$button_id?>').text('Invite');
+				});
+
+				$( "#<?=$this_form_id?> :input" ).keyup(function() {
+				       $('#<?=$button_id?>').removeAttr('disabled');
+				       $('#<?=$button_id?>').text('Invite');
+				});
+			</script>
+					
+
+<?php		} 
+	}
+
+	if($invites_sent > 0) {
+?>
+		<h3>Partner(s) Invited</h3>
+		<p>You have invited these student(s) to your project.  You may
+		cancel invitations here if they were sent to the wrong
+		person.</p>
+<?php		
+		$i=0;
+		while($r = $q_sent->fetch_assoc()) {
+			$id = $r['id'];
+			$to_uid = $r['to_uid'];
+			$this_u = user_load($mysqli, $to_uid);
+			$this_form_id = $page_id.'_cancel_'.$i;
+			$button_id = "cancel_submit_$i";
+
+			$v = "{$this_u['name']}<br/>({$this_u['username']})";
+?>			<form action="student_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
+				
+			<div class="ui-field-contain-wide ui-field-contain">
+				<label class="error" for="<?$page_id?>_cancel_<?=$i?>"><?=$v?></label>
+				<button id="<?$page_id?>_cancel_<?=$i?>" type="submit" data-inline="true" data-theme="b">
+					Cancel Invitation
+				</button>
+			</div>
+			
+			<input type="hidden" name="action" value="cancel"/>
+			<input type="hidden" name="id" value="<?=$id?>"/>
+			</form>
+<?php		} 
+	}
+
+?>
+
+	<br/>		
+	<h3>Students for this Project</h3>
+
+<?php
+
+	while($r = $q_in_project->fetch_assoc()) {
+		$uid = $r['uid'];
+		$name = $r['firstname']. ' ' .$r['lastname'];
+		$username = $r['username'];
+		if($students_in_project == 1) {
+			$button_disabled = "disabled='disabled'";
+			$button_text = "Cannot Remove Only Student";
+		} else {
+			$button_disabled = '';
+			$button_text = "Remove from Project";
+		}
+?>
+		<form action="student_partner.php" method="post" data-ajax="false">
+			<div class="ui-field-contain ui-field-contain-wide">
+				<label for="<?$page_id?>_remove_<?=$i?>"><?=$name?></label>
+				<button id="<?=$form_id?>_form_submit_<?=$i?>" type="submit" data-inline="true" data-theme="r" <?=$button_disabled?>>
+					<?=$button_text?>
+				</button>
+			</div>
+			<input type="hidden" name="action" value="remove"/>
+			<input type="hidden" name="uid" value="<?=$uid?>"/>
+		</form>
+<?php	}?>
+
+
+
+
+
+
+
+
+</div>
+	
+
+
+
+
+<?php
+sfiab_page_end();
+?>
