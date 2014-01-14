@@ -16,3 +16,6 @@
 *.exe
 *.out
 *.app
+
+#config
+config.inc.php
