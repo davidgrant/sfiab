@@ -24,6 +24,7 @@ function project_load($mysqli, $pid)
 	int_or_null($p['isef_id']);
 	int_or_null($p['req_electricity']);
 	int_or_null($p['num_students']);
+	int_or_null($p['num_mentors']);
 
 	/* Store an original copy so save() can figure out what (if anything) needs updating */
 	unset($p['original']);

@@ -103,45 +103,116 @@ function divider($name, $text)
 	
 <?php
 	divider('human', 'Human Participation');
-	question('human1',  'Does your project involve "Human Participants"?', array('Human Participants are any people such as other students, family members, or even yourself.','Participation can include taking surveys, doing tests, using products, or even just being observed.'), $answers);
+	question('human1',  'Does your project involve "Human Participants"?', 	array('Human Participants are any people such as other students, family members, or even yourself.','Participation can include taking surveys, doing tests, using products, or even just being observed.'), $answers);
 	
-	question('humansurvey1',  'Does the project involve a Survey of the Participants, a Test of Skill, or an Observation of Behaviour?', array(), $answers);
-	question('humantest1',  'Does this project involve any invasive procedures?', array(), $answers);
+	question('humansurvey1',  'Does the project involve a Survey of the Participants, a Test of Skill, or an Observation of Behaviour?', array('Surveys may be verbal, written, or done on computer or over the internet.'), $answers);
+	question('humantest1',  'Does this project involve any invasive procedures?', array('Invasive procedures including taking blood samples, tissues samples, or samples of any other bodily fluids.'), $answers);
 
 	divider('humanfood', 'Human Participation involving Food');
-	question('humanfood1',  'Does this project involve the Participant taking and/or consuming Food, Drink, Medicine or Drugs?', array(), $answers);
-	question('humanfood2',  'Does this project involve smelling or tasting any substances or products?', array(), $answers);
-	question('humanfood6',  'Does this project involve a product or substance that is applied to the skin or absorbed through the skin?', array(), $answers);
+	question('humanfood1', 'Does this project involve the Participant taking and/or consuming Food, Drink, Medicine or Drugs?', array(), $answers);
+	question('humanfood2', 'Does this project involve smelling or tasting any substances or products?', array(), $answers);
+	question('humanfood6', 'Does this project involve a product or substance that is applied to the skin or absorbed through the skin?', array(), $answers);
+        question('humanfood5', 'Does this project involve ingesting a Natural Health Product regulated by Health Canada?', array('These products are identified by a Health Canada Natural Product Number (NPN), Homeopathic Medicine Number (DIN-HM), or Exemption Number (EN) and are listed in the Health Canada Natural Health Product Database.'), $answers);
+        question('humanfood4', 'Does this project involve foods, drinks or products for which a health benefit is claimed?', array(), $answers);
+        question('humanfood3', 'Does this project involve Caffeinated Drinks?', array('Caffeine is found in soft drinks, coffee, tea, iced coffee, energy drinks, and many other food and drink products.'), $answers);
+        question('humanfooddrug', 'Does this project involve consuming, tasting or smelling any product defined as a drug?', array('Definition of a "drug" includes any substance or mixture of substances for use in:','i) the diagnosis, treatment, mitigation or prevention of a disease, disorder, abnormal physical state, or its symptoms, in humans or animals;','(ii)	restoring, correcting, or modifying organic functions in humans beings or animals;','(iii)	disinfection in premises in which food is manufactured, prepared or kept.'), $answers);
+	question('humanfoodlow1', 'Is the Food or Drink to be used in this project not usually considered as Food or Drink for human beings, or not commonly encountered in everyday life as Food or Drink?', array('Answer \'No\' only if the product being consumed or tested is generally manufactured or sold for use as food or drink for human beings.','(For more information see YSC Policy 4.1.1.1 section 3.2).'), $answers);
+        question('humanfoodlow2', 'Does the food or drink to be used in this project contain additives that exceed the Recommended Daily Allowance Guidelines (RDI) normally associated with those foods ?', array(), $answers);
 
 	divider('animals', 'Animal Participation');
 	question('animals',  'Does this project involve any non-human animals or animal tissue?', array(), $answers);
+        question('animal_vertebrate', 'Does this project involve any Vertebrate animals ?', array('Vertebrate animals include fish, amphibians, reptiles, birds, and mammals'), $answers);
+        question('animal_ceph', 'Does this project include the use of Cephalopods (such as squid, octopus or cuttlefish)?', array(), $answers);
+        question('animal_tissue', 'Does this project involve animal parts or tissues, including organs, plasma, serum, or embryos, from Vertebrate Animals?', array(), $answers);
+        question('animal_drug', 'Does this project involve the use of drugs on animals?', array('See the definition of Drugs in YSC Policy 4.1.2 Section 10'), $answers);
 
-	divider('safety', 'Safety');
-	question('hazardbio',  'Does this project involve any potentially hazardous biological agents?', array(), $answers);
-	question('hazardother',  'Does this project involve hazardous chemicals, explosives, firearms, or other hazardous materials or activities?', array(), $answers);
-	question('institution',  'Will your project be conducted at or assisted by a Research Institution such as a Hospital, University, College, or Commercial Laboratory?', array(), $answers);
-
-    
+   
 ?>
 </ul>
 
 		<input type="hidden" name="action" value="save"/>
 	</form>
 	<script>
+		$("#<?=$page_id?>_humansurvey1_li").hide();
+		$("#<?=$page_id?>_humanfood_li").hide();
+		$("#<?=$page_id?>_humanfood1_li").hide();
+		$("#<?=$page_id?>_humanfood2_li").hide();
+		$("#<?=$page_id?>_humanfood6_li").hide();
+		$("#<?=$page_id?>_humantest1_li").hide();
+		$("#<?=$page_id?>_humanfood3_li").hide();
+		$("#<?=$page_id?>_humanfood4_li").hide();
+		$("#<?=$page_id?>_humanfood5_li").hide();
+		$("#<?=$page_id?>_animal_vertebrate_li").hide();
+		$("#<?=$page_id?>_animal_ceph_li").hide();
+		$("#<?=$page_id?>_animal_tissue_li").hide();
+		$("#<?=$page_id?>_animal_drug_li").hide();
+		$("#<?=$page_id?>_humanfooddrug_li").hide();
+		$("#<?=$page_id?>_humanfoodlow1_li").hide();
+		$("#<?=$page_id?>_humanfoodlow2_li").hide();
+
+
 <?php 	foreach($fields as $f) { ?>
 			$("label[for='<?=$page_id?>_<?=$f?>']").addClass('error');
 <?php		}?>
 
 
-		$( "#<?=$page_id?>_human1" ).change(function() {
-			var value = $(this).val();
+		$( "#<?=$page_id?>_form :input" ).change(function() {
+			var human1 = $("#<?=$page_id?>_human1 input:checked").val();
+			var humanfood1 = $("#<?=$page_id?>_humanfood1 input:checked").val();
+			var humanfood2 = $("#<?=$page_id?>_humanfood2 input:checked").val();
+			var animals = $("#<?=$page_id?>_animals input:checked").val();
+			var animal_vertebrate = $("#<?=$page_id?>_animal_vertebrate input:checked").val();
 
-			if(value == 0) {
-			  	/* Disable questions */
-				$("#<?=$page_id?>_humansurvey1_li").hide();
-			} else {
+//			alert(human1);
+
+			if(human1 == 1) {
 				$("#<?=$page_id?>_humansurvey1_li").show();
+				$("#<?=$page_id?>_humanfood_li").show();
+				$("#<?=$page_id?>_humanfood1_li").show();
+				$("#<?=$page_id?>_humanfood2_li").show();
+				$("#<?=$page_id?>_humanfood6_li").show();
+				$("#<?=$page_id?>_humantest1_li").show();
+			} else {
+				$("#<?=$page_id?>_humansurvey1_li").hide();
+				$("#<?=$page_id?>_humanfood_li").hide();
+				$("#<?=$page_id?>_humanfood1_li").hide();
+				$("#<?=$page_id?>_humanfood2_li").hide();
+				$("#<?=$page_id?>_humanfood6_li").hide();
+				$("#<?=$page_id?>_humantest1_li").hide();
 			}
+
+			if(humanfood1 == 1 || humanfood2 == 1) {
+				$("#<?=$page_id?>_humanfood3_li").show();
+				$("#<?=$page_id?>_humanfood4_li").show();
+				$("#<?=$page_id?>_humanfood5_li").show();
+				$("#<?=$page_id?>_humanfooddrug_li").show();
+				$("#<?=$page_id?>_humanfoodlow1_li").show();
+				$("#<?=$page_id?>_humanfoodlow2_li").show();
+			} else {
+				$("#<?=$page_id?>_humanfood3_li").hide();
+				$("#<?=$page_id?>_humanfood4_li").hide();
+				$("#<?=$page_id?>_humanfood5_li").hide();
+				$("#<?=$page_id?>_humanfooddrug_li").hide();
+				$("#<?=$page_id?>_humanfoodlow1_li").hide();
+				$("#<?=$page_id?>_humanfoodlow2_li").hide();
+			}
+
+			if(animals == 1) {
+				$("#<?=$page_id?>_animal_vertebrate_li").show();
+				if(animal_vertebrate == 0) {
+					$("#<?=$page_id?>_animal_ceph_li").show();
+				} else {
+					$("#<?=$page_id?>_animal_ceph_li").hide();
+				}
+				$("#<?=$page_id?>_animal_tissue_li").show();
+				$("#<?=$page_id?>_animal_drug_li").show();
+			} else {
+				$("#<?=$page_id?>_animal_vertebrate_li").hide();
+				$("#<?=$page_id?>_animal_ceph_li").hide();
+				$("#<?=$page_id?>_animal_tissue_li").hide();
+				$("#<?=$page_id?>_animal_drug_li").hide();
+			}
+				
 		});
 
 

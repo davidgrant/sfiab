@@ -194,4 +194,30 @@ function form_scripts($action, $page_id, $fields)
 <?php
 
 }
+
+function form_scripts_no_ajax($action, $page_id, $fields)
+{
+	$form_id = $page_id . "_form";
+	$button_id = $page_id . "_form_submit";
+?>
+	<script>
+		// highlight any incomplete fields
+<?php 		foreach($fields as $f) { ?>
+			$("label[for='<?=$page_id?>_<?=$f?>']").addClass('error');
+<?php		}?>
+
+		$( "#<?=$form_id?> :input" ).change(function() {
+	               $('#<?=$button_id?>').removeAttr('disabled');
+		       $('#<?=$button_id?>').text('Save');
+		});
+
+		$( "#<?=$form_id?> :input" ).keyup(function() {
+	               $('#<?=$button_id?>').removeAttr('disabled');
+		       $('#<?=$button_id?>').text('Save');
+		});
+
+	</script>			
+<?php
+
+}
 ?>

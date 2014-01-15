@@ -37,6 +37,18 @@ function incomplete_check_gt_zero(&$ret, &$data, $fields)
 	}
 }
 
+function incomplete_check_ge_zero(&$ret, &$data, $fields)
+{
+	if(!is_array($data)) $ret = array_merge($ret, $fields);
+	foreach($fields as $f) {
+		$v = $data[$f];
+		if(!is_int($v) || $v < 0) {
+			$ret[] = $f;
+		}
+	}
+}
+
+
 function incomplete_check_text(&$ret, &$data, $fields)
 {
 	if(!is_array($data)) $ret = array_merge($ret, $fields);
@@ -94,8 +106,17 @@ function incomplete_fields($mysqli, $section, &$u, $force_update=false)
 		}
 		break;
 	case 's_mentor':
+		$fields = array('firstname','lastname','phone','email','organization','position','desc');
 		$p = project_load($mysqli, $u['student_pid']);
-//		incomplete_check_gt_zero($ret, $p, array('num_mentors'));
+		incomplete_check_ge_zero($ret, $p, array('num_mentors'));
+		if($p['num_mentors'] > 0) {
+			$q = $mysqli->query("SELECT * FROM mentors WHERE pid='{$p['pid']}'");
+			for($i=$q->num_rows; $i < $p['num_mentors']; $i++) {
+				foreach($fields as $f) {
+					$ret[] = "$f".$i;
+				}
+			}
+		}
 		break;
 	}
 
