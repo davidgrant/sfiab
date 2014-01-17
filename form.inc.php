@@ -2,7 +2,7 @@
 
 function form_text($page_id, $name, $label, &$value = '', $type='text', $required=false) 
 { 
-	if(!in_array($type, array('text', 'tel','date','email'))) {
+	if(!in_array($type, array('text', 'tel','date','email','password'))) {
 		print("Error 1001: $type\n");
 		exit();
 	}
@@ -21,6 +21,24 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $require
 	</div>
 <?php
 }
+
+function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL) 
+{ 
+	/* This is so we can pass $u or $p in, and use the name to index into the array */
+	$v = (is_array($value)) ? $value[$name] : $value;
+
+	$id = $page_id.'_'.$name;
+	$placeholder = $label;
+	$minv = ($min === NULL) ? '' : "min=\"$min\"";
+	$maxv = ($max === NULL) ? '' : "max=\"$max\"";
+?>
+	<div class="ui-field-contain">
+		<label for="<?=$id?>"><?=$label?>:</label>
+		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> >
+	</div>
+<?php
+}
+
 
 function form_radio_h($page_id, $name, $label, $data, &$value) { 
 	$id = $page_id.'_'.$name;
@@ -43,13 +61,13 @@ function form_radio_h($page_id, $name, $label, $data, &$value) {
 <?php
 }
 
-function form_yesno($page_id, $name, $label, &$value) { 
+function form_yesno($page_id, $name, $label, &$value, $wide=false) { 
 	$data = array(0 => 'No', 1 => 'Yes');
-	form_select($page_id, $name, $label, $data, $value, 'slider');
+	form_select($page_id, $name, $label, $data, $value, 'slider', $wide);
 }
 
 
-function form_select($page_id, $name, $label, $data, &$value, $data_role='')
+function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false)
 { 
 	$id = $page_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
@@ -58,8 +76,10 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='')
 	if($data_role != '') 
 		$data_role = "data-role=\"$data_role\"";
 
+	$extra_class = $wide ? 'ui-field-contain-wide' : '';
+
 ?>
-	<div class="ui-field-contain">
+	<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>"><?=$label?>:</label>
 		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> >
 <?php 			if($data_role == '') { ?>
@@ -104,6 +124,12 @@ function form_lang($page_id, $name, $label, &$value)
 	form_select($page_id, $name, $label, $data, $value);
 }
 
+function form_province($page_id, $name, $label, &$value)
+{
+	$data = array( 'bc' => 'British Columbia', 'yk' => 'Yukon');
+	form_select($page_id, $name, $label, $data, $value);
+}
+
 function form_textbox($page_id, $name, $label, &$value)
 {
 	$id = $page_id.'_'.$name;
@@ -117,79 +143,58 @@ function form_textbox($page_id, $name, $label, &$value)
 <?php
 }
 
-function form_submit($form_id, $text)
+function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved")
 {
 ?>
-	<button id="<?=$form_id?>_form_submit" disabled="disabled" type="submit" data-inline="true" data-icon="check" data-theme="g">
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-icon="check" data-theme="g" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" >
 		<?=$text?>
 	</button>
 <?php
 }
 
-function form_incomplete_error_message($page_id, $fields)
+function form_action($form_id, $txt)
 {
-	$error_class = (count($fields) == 0) ? 'error_hidden' : '';
-?>	
-	<div id="<?=$page_id?>_error_msg" class="error <?=$error_class?>">
-		This page is incomplete.  Missing information fields are highlighted in red.
+?>
+	<input type="hidden" name="action" value="<?=$txt?>" class="sfiab_form_action" />
+<?php
+}
+
+
+function form_begin($form_id, $action)
+{
+	form_messages($form_id);
+?>
+	<form action="<?=$action?>" id="<?=$form_id?>" class="sfiab_form">
+	<input type="hidden" name="action" value="" class="sfiab_form_action" />
+<?php
+}
+
+function form_end($form_id)
+{
+	print("</form>");
+}
+
+function form_messages($form_id, $missing_message="This page is incomplete.  Missing information fields are highlighted in red.")
+{
+?>
+	<div id="<?=$form_id?>_missing_msg" class="error" style="display:none">
+	<?=$missing_message?>
+	</div>
+	<div id="<?=$form_id?>_error_msg" class="error" style="display:none">
+	</div>
+	<div id="<?=$form_id?>_happy_msg" class="happy" style="display:none">
 	</div>
 <?php
 }
 
-function form_scripts($action, $page_id, $fields)
+function form_scripts($form_id, $fields)
 {
-	$form_id = $page_id . "_form";
-	$button_id = $page_id . "_form_submit";
 ?>
 	<script>
 		// highlight any incomplete fields
 <?php 		foreach($fields as $f) { ?>
-			$("label[for='<?=$page_id?>_<?=$f?>']").addClass('error');
+			$("label[for='<?=$form_id?>_<?=$f?>']").addClass('error');
 <?php		}?>
-
-		// Attach a submit handler to the form
-		$( "#<?=$form_id?>" ).submit(function( event ) {
-		
-			// Stop form from submitting normally
-			event.preventDefault();
-			$.post( "<?=$action?>", $('#<?=$form_id?>').serialize(), function( data ) {
-		                $('#<?=$button_id?>').attr('disabled', true);
-			        $('#<?=$button_id?>').text('Information Saved');
-
-				// Clear all errors
-				$("#<?=$form_id?> label").removeClass('error');
-
-				if(data.length > 0) {
-					$("#left_nav_<?=$page_id?> span").show();
-					$("#left_nav_<?=$page_id?> span").text(data.length);
-					$("#<?=$page_id?>_error_msg").removeClass('error_hidden');
-
-					for (var i = 0; i < data.length; i++) {
-						var $label = $("label[for='<?=$page_id?>_"+data[i]+"']");
-						$label.addClass('error');
-					}
-				} else {
-					// No error fields 
-					$("#<?=$page_id?>_error_msg").addClass('error_hidden');
-					$("#left_nav_<?=$page_id?> span").hide();
-				}
-
-				return false;
-			}, "json");
-			// Stop any more actions
-			return false;
-		});
-
-		$( "#<?=$form_id?> :input" ).change(function() {
-	               $('#<?=$button_id?>').removeAttr('disabled');
-		       $('#<?=$button_id?>').text('Save');
-		});
-
-		$( "#<?=$form_id?> :input" ).keyup(function() {
-	               $('#<?=$button_id?>').removeAttr('disabled');
-		       $('#<?=$button_id?>').text('Save');
-		});
-
 	</script>			
 <?php
 
@@ -218,6 +223,18 @@ function form_scripts_no_ajax($action, $page_id, $fields)
 
 	</script>			
 <?php
+}
 
+function form_ajax_response($status, $missing_fields=array(), $left_nav_error_counts=array(), 
+				$error_text='', $happy_text='', $location='')
+{
+	$response = array('status'=>$status, 
+			'missing' => $missing_fields,
+			'left_error_count' => $left_nav_error_counts,
+			'error' => $error_text,
+			'happy' => $happy_text,
+			'location' => $location,
+			);
+	return json_encode($response);
 }
 ?>

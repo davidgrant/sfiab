@@ -77,22 +77,22 @@ sfiab_page_begin("Student Personal", $page_id);
 		/* Clear out invalid input so the placeholder is shown again */
 		if($u['birthdate'] == '0000-00-00') $u['birthdate'] = '';
 
-		form_text($page_id, 'firstname', "First Name", $u['firstname']);
-		form_text($page_id, 'lastname', "Last Name", $u['lastname']);
-		form_text($page_id, 'pronounce', "Name Pronunciation Key", $u['pronounce']);
-		form_radio_h($page_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u['sex']);
-		form_text($page_id, 'birthdate', "Date of Birth", $u['birthdate'], 'date');
-		form_text($page_id, 'phonehome', "Phone", $u['phonehome'], 'tel');
-		form_text($page_id, 'address', 'Address 1', $u['address']);
-		form_text($page_id, 'address2', 'Address 2', $u['address2']);
-		form_text($page_id, 'city', 'City', $u['city']);
-		form_select($page_id, 'province', 'Province', array( 'bc' => 'British Columbia', 'yk' => 'Yukon'), $u['province']);
-		form_text($page_id, 'postalcode', 'Postal Code', $u['postalcode']);
-		form_select($page_id, 'schools_id','School', $schools, $u['schools_id']);
-		form_select($page_id, 'grade', 'Grade', $grades, $u['grade']);
-		form_text($page_id, 'teacher', 'Teacher Name', $u['teacher']);
-		form_text($page_id, 'teacheremail', 'Teacher E-Mail', $u['teacheremail']);
-		form_text($page_id, 'medicalert', 'Medical Alert Info', $u['medicalert']);
+		form_text($page_id, 'firstname', "First Name", $u);
+		form_text($page_id, 'lastname', "Last Name", $u);
+		form_text($page_id, 'pronounce', "Name Pronunciation Key", $u);
+		form_radio_h($page_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u);
+		form_text($page_id, 'birthdate', "Date of Birth", $u, 'date');
+		form_text($page_id, 'phone1', "Phone", $u, 'tel');
+		form_text($page_id, 'address', 'Address 1', $u);
+		form_text($page_id, 'address2', 'Address 2', $u);
+		form_text($page_id, 'city', 'City', $u);
+		form_province($page_id, 'province', 'Province', $u);
+		form_text($page_id, 'postalcode', 'Postal Code', $u);
+		form_select($page_id, 'schools_id','School', $schools, $u);
+		form_select($page_id, 'grade', 'Grade', $grades, $u);
+		form_text($page_id, 's_teacher', 'Teacher Name', $u);
+		form_text($page_id, 's_teacheremail', 'Teacher E-Mail', $u);
+		form_text($page_id, 'medicalert', 'Medical Alert Info', $u);
 		form_submit($page_id, 'Save');
 ?>
 		<input type="hidden" name="action" value="save"/>

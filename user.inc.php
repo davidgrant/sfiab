@@ -1,4 +1,5 @@
 <?php
+require_once('filter.inc.php');
 
 function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 {
@@ -47,6 +48,30 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	$u['roles'] = explode(",", $u['roles']);
 	$u['password_expired'] = ((int)$u['password_expired'] == 1) ? true : false;
 
+	filter_bool_or_null($u['j_willing_lead']);
+	filter_bool_or_null($u['j_dinner']);
+	filter_bool_or_null($u['j_mentored']);
+	if($u['j_rounds'] === NULL) 
+		$u['j_rounds'] = array(NULL,NULL);
+	else {
+		$a = explode(',',$u['j_rounds']);
+		$u['j_rounds'] = array(0,0);
+		foreach($a as $r) {
+			$u['j_rounds'][$r] = 1;
+		}
+	}
+
+	if($u['j_languages'] === NULL)
+		$u['j_languages'] = array();
+	else 
+		$u['j_languages'] = unserialize($u['j_languages']);
+	foreach(array('en','fr') as $l) {
+		if(!array_key_exists($l, $u['j_languages'])) {
+			$u['j_languages'][$l] = NULL;
+		}
+	}
+
+
 	/* Store an original copy so save() can figure out what (if anything) needs updating */
 	unset($u['original']);
 	$original = $u;
@@ -72,11 +97,12 @@ function user_save($mysqli, &$u)
 		if($key == 'original') continue;
 		if(!array_key_exists($key, $u['original'])) continue;
 
-		if($val != $u['original'][$key]) {
+		if($val !== $u['original'][$key]) {
 			/* Key changed */
 			if($set != '') $set .= ',';
 
-			if($key == 'roles') {
+			switch($key) {
+			case 'roles':
 				/* Make a list of comma-separated roles, sanity checking
 				 * them all first */
 				foreach($u['roles'] as $r) {
@@ -88,19 +114,33 @@ function user_save($mysqli, &$u)
 				/* It's all ok, join it with commas so the query
 				 * looks like ='teacher,committee,judge' */
 				$v = implode(',', $r);
-			} else {
+				break;
+			case 'j_rounds':
+				$a = array();
+				foreach($u['j_rounds'] as $round=>$en) {
+					if($en == 1) $a[] = $round;
+				}
+				$v = implode(',', $a);
+				break;
+
+			default:
 				/* Serialize any non-special arrays */
 				if(is_array($val)) 
 					$v = serialize($val);
+				else if(is_null($val)) 
+					$v = NULL;
 				else 
 					$v = $val;
-
-				/* Then for everything, strip slashes and escape */
-				$v = stripslashes($v);
-				$v = $mysqli->real_escape_string($v);
+				break;
 			}
 
-			$set .= "`$key`='$v'";
+			if(is_null($v)) {
+				$set .= "`$key`=NULL";
+			} else {
+				$v = stripslashes($v);
+				$v = $mysqli->real_escape_string($v);
+				$set .= "`$key`='$v'";
+			}
 
 			/* Set the original to the unprocessed value */
 			$u['original'][$key] = $val;

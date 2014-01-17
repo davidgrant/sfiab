@@ -12,12 +12,12 @@ sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
 
-if($u['student_pid'] == NULL || $u['student_pid'] == 0) {
+if($u['s_pid'] == NULL || $u['s_pid'] == 0) {
 	print("Error 1010: no project.\n");
 	exit();
 }
 
-$p = project_load($mysqli, $u['student_pid']);
+$p = project_load($mysqli, $u['s_pid']);
 
 $page_id = 's_project';
 

@@ -172,10 +172,10 @@ function isef_get_div_names()
 	$ret = array();
 
 	foreach($isef_divs as $d) {
-		if($d['parent'] == false) {
-			$curr_array = array();
+		if($d['parent'] === false) {
 			$curr_parent = $d['div'];
-			$ret[$d['name']] = &$curr_array;
+			$curr_parent_name = $d['name'];
+			$ret[$d['name']] = array();
 			continue;
 		}
 
@@ -186,7 +186,7 @@ function isef_get_div_names()
 
 		$id = $d['id'];
 
-		$curr_array[$id] = $d['name'];
+		$ret[$curr_parent_name][$id] = $curr_parent_name." - ".$d['name'];
 	}
 	return $ret;
 }

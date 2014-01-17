@@ -9,6 +9,8 @@ sfiab_session_start();
 $page = $config['fair_url'] . '/';
 if(sfiab_user_is_a('student')) {
 	$page .= 'student_main.php';
+} else if (sfiab_user_is_a('judge')) {
+	$page .= 'judge_main.php';
 } else {
 	$page .= 'index.php';
 }

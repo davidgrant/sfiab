@@ -3,6 +3,7 @@
 require_once('common.inc.php');
 require_once('email.inc.php');
 require_once('incomplete.inc.php');
+require_once('form.inc.php');
 
 if(!array_key_exists('action', $_POST)) { 
 	$action = "logout";
@@ -210,18 +211,7 @@ case 'login':
 
 	/* Populate the complete status of all fields */
 	$_SESSION['incomplete'] = array();
-	if(sfiab_user_is_a('student')) {
-		incomplete_fields($mysqli, 's_personal', $u, true);
-		incomplete_fields($mysqli, 's_reg_options', $u, true);
-		incomplete_fields($mysqli, 's_emergency', $u, true);
-		incomplete_fields($mysqli, 's_project', $u, true);
-		incomplete_fields($mysqli, 's_partner', $u, true);
-		incomplete_fields($mysqli, 's_mentor', $u, true);
-		incomplete_fields($mysqli, 's_ethics', $u, true);
-		incomplete_fields($mysqli, 's_safety', $u, true);
-		incomplete_fields($mysqli, 's_awards', $u, true);
-		incomplete_fields($mysqli, 's_signature', $u, true);
-	}
+	incomplete_check($mysqli, $u);
 
 	sfiab_log($mysqli, 'login ok', $username);
 	print(0);
@@ -229,18 +219,17 @@ case 'login':
 
 case 'change_pw':
 	sfiab_session_start();
-
-	$hash = $mysqli->real_escape_string(filter_hash($_POST['p']));
+	$hash = $mysqli->real_escape_string(filter_hash($_POST['pw1']));
 	if(strlen($hash) != 128) {
-		print("Invalid Hash");
-		exit();
+//		print("Invalid Hash");
+//		exit();
 	}
 
 	$_SESSION['password_expired'] = false;
 	$uid = $_SESSION['uid'];
-	$mysqli->query("UPDATE users SET password='$hash', password_expired='0' WHERE uid=$uid");
+//	$mysqli->query("UPDATE users SET password='$hash', password_expired='0' WHERE uid=$uid");
 	sfiab_log($mysqli, 'change pw', "");
-	print(0);
+	print(form_ajax_response(0));
 	exit();
 	
 

@@ -173,7 +173,7 @@ function sfiab_print_left_nav_menu_entries($current_page_id, $menu, $inset=false
 { ?>	
 <?php 	foreach($menu as $id=>$d) {
 		$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-		$e = 'rel="external"';
+		$e = 'data-ajax="false"';//'rel="external"';
 
 		$count = 0;
 		if(array_key_exists('incomplete', $_SESSION)) {
@@ -213,16 +213,25 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			      's_signature' => array('Signature Form', 'student_signature.php'),
 			      );
 
+	$judge_menu = array('j_home' => array('Judge Home', 'judge_main.php'),
+			    'j_personal' => array('Personal Info', 'judge_personal.php'),
+			    'j_options' => array('Judging Options', 'judge_options.php'),
+			    'j_expertise' => array('Judging Expertise', 'judge_expertise.php'),
+			    'j_mentorship' => array('Mentorship', 'judge_mentorship.php'),
+			    );
+
 	$login_menu = array('register' => array('Registration', 'index.php#register'),
 			    'login' => array('Login', 'index.php#login'),
 		);
-	$logout_menu = array('logout' => array('Logout', 'login.php?action=logout'),
+	$logout_menu = array('account' => array('Account', 'main_account.php'),
+			     'logout' => array('Logout', 'login.php?action=logout'),
 		);
 
 	/* Determine which menu shoudl be visible */
 	$main_collapsed = array_key_exists($current_page_id, $main_menu) ? 'false' : 'true';
 	$main_collapsed = array_key_exists($current_page_id, $login_menu) ? 'false' : $main_collapsed ;
 	$student_collapsed = array_key_exists($current_page_id, $student_menu) ? 'false' : 'true';
+	$judge_collapsed = array_key_exists($current_page_id, $judge_menu) ? 'false' : 'true';
 
 //<?=//$config['fair_abbreviation']
 ?>
@@ -247,6 +256,15 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 		</div>
 <?php	} ?>
 
+<?php	if(sfiab_user_is_a('judge')) { ?>
+		<div data-role="collapsible" data-inset="true" data-collapsed="<?=$judge_collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right" class="ui-shadow ui-alt-icon ui-nodisc-icon">
+		        <h3>Judge Menu</h3>
+			<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
+				<?=sfiab_print_left_nav_menu_entries($current_page_id, $judge_menu);?>
+			</ul>
+		</div>
+<?php	} ?>
+
     	<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
 <?php	
 	if(sfiab_logged_in()) {
@@ -267,6 +285,9 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 ?>
 	</ul>
 	</div>
+	<script>
+//		.mobile.changePage( ".sfiab_page", { allowSamePageTransition:true } );
+	</script>
 
 <?php
 }
@@ -306,6 +327,14 @@ function output_start()
   <title></title>
   <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css" />
   <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<?php /* This allows the same page to be reloaded by default... it must be done before jquerymobile is loaded */ ?>
+  <script>
+    $(document).on("mobileinit", function(){ 
+//    	$.mobile.changePage.defaults.allowSamePageTransition = true;
+//	$.mobile.page.prototype.options.domCache = false;
+//    	$.mobile.changePage.defaults.reloadPage = true; 
+	});
+  </script>
   <script src="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>
   <link rel="stylesheet" href="sfiab.css">
   <script src="sfiab.js"></script>
