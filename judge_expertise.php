@@ -66,8 +66,8 @@ sfiab_page_begin("Expertise", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
+	$form_id = $page_id.'_form';
 	$fields = incomplete_fields($mysqli, $page_id, $u);
-	form_incomplete_error_message($page_id, $fields);
 
 	$cats = categories_load($mysqli);
 	$isef_data = isef_get_div_names();
@@ -87,52 +87,48 @@ sfiab_page_begin("Expertise", $page_id, $help);
 		$normal_style = "style=\"display:none\"";
 	}
 
+	form_begin($form_id, 'judge_expertise.php', $fields);
 ?>
-	<form action="#" id="<?=$page_id?>_form">
 		<h3>Sponsor Judges</h3>
 <?php
-		form_yesno($page_id, 'j_special_award_only', "Do you represent a sponsor of a special award?", $sa_only, true);
-		
-//		form_sa($page_id, 'j_dinner', "Will you be attending the Judge's Dinner (5-6pm on judging day)?", $u, true);
+	form_yesno($form_id, 'j_special_award_only', "Do you represent a sponsor of a special award?", $sa_only, true);
+	
 ?>
-		<div id="j_expertise_sa" <?=$sa_style?> >
-		Note: Our chief judge will double-check with anyone who selects 'Yes' here to ensure they
-		are a sponsor for a special award.  If you're not sure then you're probably not a Sponsor judge.
+	<div id="j_expertise_sa" <?=$sa_style?> >
+	Note: Our chief judge will double-check with anyone who selects 'Yes' here to ensure they
+	are a sponsor for a special award.  If you're not sure then you're probably not a Sponsor judge.
 
-		SA selector
-		</div>
+	SA selector
+	</div>
 
 
-		<div id="j_expertise_normal" <?=$normal_style?> >
-		<h3>Years of Judging Experience</h3>
-		Enter how many years of judging experience you have at each level of science fair competitions:
+	<div id="j_expertise_normal" <?=$normal_style?> >
+	<h3>Years of Judging Experience</h3>
+	Enter how many years of judging experience you have at each level of science fair competitions:
 <?php
 
-		form_int($page_id, 'j_years_school', "School/District", $u, 0, 100);
-		form_int($page_id, 'j_years_regional', "Regional", $u, 0, 100);
-		form_int($page_id, 'j_years_national', "National", $u, 0, 100);
+	form_int($form_id, 'j_years_school', "School/District", $u, 0, 100);
+	form_int($form_id, 'j_years_regional', "Regional", $u, 0, 100);
+	form_int($form_id, 'j_years_national', "National", $u, 0, 100);
 ?>
-		<h3>Judging Preferences</h3>
-		Select your top three detailed divisions to judge and an age category preference if you have one.
+	<h3>Judging Preferences</h3>
+	Select your top three detailed divisions to judge and an age category preference if you have one.
 <?php
 
-		form_select_optgroup($page_id, 'j_pref_div1', "Detailed Division 1", $isef_data, $u);
-		form_select_optgroup($page_id, 'j_pref_div2', "Detailed Division 2", $isef_data, $u);
-		form_select_optgroup($page_id, 'j_pref_div3', "Detailed Division 3", $isef_data, $u);
-		form_select($page_id, 'j_pref_cat', "Category Preference", $cats_data, $u);
+	form_select_optgroup($form_id, 'j_pref_div1', "Detailed Division 1", $isef_data, $u);
+	form_select_optgroup($form_id, 'j_pref_div2', "Detailed Division 2", $isef_data, $u);
+	form_select_optgroup($form_id, 'j_pref_div3', "Detailed Division 3", $isef_data, $u);
+	form_select($form_id_id, 'j_pref_cat', "Category Preference", $cats_data, $u);
 ?>
-		</div>
+	</div>
 <?php
-		form_submit($page_id, 'Save');
+	form_submit($form_id, 'save', 'Save', "Information Saved");
+	form_end($form_id);
 ?>
-		<input type="hidden" name="action" value="save"/>
-	</form>
-
-	<?=form_scripts('judge_expertise.php', $page_id, $fields);?>
 
 	<script>
-		$( "#<?=$page_id?>_j_special_award_only" ).change(function() {
-			var sa_only = $("#<?=$page_id?>_j_special_award_only option:selected").val();
+		$( "#<?=$form_id?>_j_special_award_only" ).change(function() {
+			var sa_only = $("#<?=$form_id?>_j_special_award_only option:selected").val();
 			if(sa_only == '0') {
 				$('#j_expertise_sa').hide();
 				$('#j_expertise_normal').show();

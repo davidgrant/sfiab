@@ -54,10 +54,10 @@ sfiab_page_begin("Judge Personal", $page_id);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$form_id = $page_id."_form";
-	$fields = incomplete_fields($mysqli, $form_id, $u);
+	$fields = incomplete_fields($mysqli, $page_id, $u);
 
-	form_begin($form_id, 'judge_personal.php');
+	$form_id = $page_id."_form";
+	form_begin($form_id, 'judge_personal.php', $fields);
 
 	form_text($form_id, 'salutation', "Salutation", $u);
 	form_text($form_id, 'firstname', "First Name", $u);
@@ -72,8 +72,6 @@ sfiab_page_begin("Judge Personal", $page_id);
 	form_text($form_id, 'j_psd', "Highest Post-Secondary Degree", $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
-
-	form_scripts($form_id, $fields);
 ?>
 
 

@@ -1,4 +1,14 @@
 <?php
+$form_incomplete_fields = array();
+
+function form_inc($id)
+{
+	global $form_incomplete_fields;
+	if(in_array($id, $form_incomplete_fields)) 
+		return "class=\"error\"";
+	return "";
+}
+		
 
 function form_text($page_id, $name, $label, &$value = '', $type='text', $required=false) 
 { 
@@ -16,7 +26,7 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $require
 	
 	?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"><?=$label?>:</label>
+		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>">
 	</div>
 <?php
@@ -130,14 +140,14 @@ function form_province($page_id, $name, $label, &$value)
 	form_select($page_id, $name, $label, $data, $value);
 }
 
-function form_textbox($page_id, $name, $label, &$value)
+function form_textbox($form_id, $name, $label, &$value)
 {
-	$id = $page_id.'_'.$name;
+	$id = $form_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<textarea rows="8" name="<?=$name?>" id="<?=$id?>"><?=$v?></textarea>
 	</div>
 <?php
@@ -160,10 +170,29 @@ function form_action($form_id, $txt)
 }
 
 
-function form_begin($form_id, $action)
+function form_begin($form_id, $action, $fields)
 {
-	form_messages($form_id);
+	global $form_incomplete_fields;
+	$missing_message = "This page is incomplete.  Missing information fields are highlighted in red.";
+
+	$ids = array();
+	foreach($fields as $f) {
+		$ids[] = $form_id.'_'.$f;
+	}
+	$form_incomplete_fields = array_merge($form_incomplete_fields, $ids);
+	$missing_style ='';
+	if(count($fields) == 0) 
+		$missing_style = 'style="display:none"';
+
 ?>
+	<div id="<?=$form_id?>_missing_msg" class="error" <?=$missing_style?>>
+	<?=$missing_message?>
+	</div>
+	<div id="<?=$form_id?>_error_msg" class="error" style="display:none">
+	</div>
+	<div id="<?=$form_id?>_happy_msg" class="happy" style="display:none">
+	</div>
+
 	<form action="<?=$action?>" id="<?=$form_id?>" class="sfiab_form">
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php

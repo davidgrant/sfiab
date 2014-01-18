@@ -53,37 +53,24 @@ sfiab_page_begin("Options", $page_id, $help);
 
 <?php
 	$fields = incomplete_fields($mysqli, $page_id, $u);
-	form_incomplete_error_message($page_id, $fields);
+	$form_id=$page_id.'_form';
+	form_begin($form_id,'judge_options.php', $fields);
+?>	
+	<h3>Judging Options</h3> 
+<?php	form_yesno($form_id, 'j_willing_lead', "Are you willing to be the team-lead on your judging team?", $u, true);
+	form_yesno($form_id, 'j_dinner', "Will you be attending the Judge's Dinner (5-6pm on judging day)?", $u, true);
+?>	
+	<h3>Judging Languages</h3>
+<?php	form_yesno($form_id, 'j_lang_en', "Can you judge English projects?", $u['j_languages']['en'], true);
+	form_yesno($form_id, 'j_lang_fr', "Can you judge French projects?", $u['j_languages']['fr'], true);
 ?>
-	<form action="#" id="<?=$page_id?>_form">
-		<h3>Judging Options</h3>
-<?php
-		form_yesno($page_id, 'j_willing_lead', "Are you willing to be the team-lead on your judging team?", $u, true);
-		form_yesno($page_id, 'j_dinner', "Will you be attending the Judge's Dinner (5-6pm on judging day)?", $u, true);
+	<h3>Time Availability</h3>
+	Note: You will be scheduled to judge in ALL of the judging rounds you answer 'Yes' to, not just one.
+<?php	form_yesno($form_id, 'j_round0', "Are you available to judge in Round 1 (April 10, 2-5pm)?", $u['j_rounds'][0], true);
+	form_yesno($form_id, 'j_round1', "Are you available to judge in Round 2 (April 10, 6-9pm)?", $u['j_rounds'][1], true);
+	form_submit($form_id, 'save','Save','Information Saved');
+	form_end($form_id);
 ?>
-		<h3>Judging Languages</h3>
-<?php
-		form_yesno($page_id, 'j_lang_en', "Can you judge English projects?", $u['j_languages']['en'], true);
-		form_yesno($page_id, 'j_lang_fr', "Can you judge French projects?", $u['j_languages']['fr'], true);
-?>
-		<h3>Time Availability</h3>
-		Note: You will be scheduled to judge in ALL of the judging rounds you answer 'Yes' to, not just one.
-<?php
-		
-		form_yesno($page_id, 'j_round0', "Are you available to judge in Round 1 (April 10, 2-5pm)?", $u['j_rounds'][0], true);
-		form_yesno($page_id, 'j_round1', "Are you available to judge in Round 2 (April 10, 6-9pm)?", $u['j_rounds'][1], true);
-		form_submit($page_id, 'Save');
-?>
-		<input type="hidden" name="action" value="save"/>
-	</form>
-
-	<?=form_scripts('judge_options.php', $page_id, $fields);?>
-
-
-	<script>
-		
-	</script>
-
 </div></div>
 	
 
