@@ -220,6 +220,10 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'j_mentorship' => array('Mentorship', 'judge_mentorship.php'),
 			    );
 
+	$committee_menu = array('c_main' => array('Committee Home', 'c_main.php'),
+			    'c_awards' => array('Edit Awards', 'c_awards.php'),
+		);
+
 	$login_menu = array('register' => array('Registration', 'index.php#register'),
 			    'login' => array('Login', 'index.php#login'),
 		);
@@ -232,6 +236,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	$main_collapsed = array_key_exists($current_page_id, $login_menu) ? 'false' : $main_collapsed ;
 	$student_collapsed = array_key_exists($current_page_id, $student_menu) ? 'false' : 'true';
 	$judge_collapsed = array_key_exists($current_page_id, $judge_menu) ? 'false' : 'true';
+	$committee_collapsed = array_key_exists($current_page_id, $committee_menu) ? 'false' : 'true';
 
 //<?=//$config['fair_abbreviation']
 ?>
@@ -261,6 +266,15 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 		        <h3>Judge Menu</h3>
 			<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
 				<?=sfiab_print_left_nav_menu_entries($current_page_id, $judge_menu);?>
+			</ul>
+		</div>
+<?php	} ?>
+
+<?php	if(sfiab_user_is_a('committee')) { ?>
+		<div data-role="collapsible" data-inset="true" data-collapsed="<?=$committee_collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right" class="ui-shadow ui-alt-icon ui-nodisc-icon">
+		        <h3>Committee Menu</h3>
+			<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
+				<?=sfiab_print_left_nav_menu_entries($current_page_id, $committee_menu);?>
 			</ul>
 		</div>
 <?php	} ?>
@@ -397,8 +411,6 @@ function categories_load($mysqli, $year = false) {
 	while($c=$q->fetch_assoc()) $cats[$c['id']] = $c;
 	return $cats;
 }
-
-
 
 /* It's kinda important that there be no blank lines AFTER this, or they're sent as newlines.  This messes
  * up login.php */

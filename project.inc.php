@@ -46,7 +46,7 @@ function project_create($mysqli)
 	return $pid;
 }
 
-function project_save($mysqli, &$p) 
+function generic_save($mysqli, &$p, $table, $table_key) 
 {
 
 	global $sfiab_roles;
@@ -62,10 +62,9 @@ function project_save($mysqli, &$p)
 			/* Key changed */
 			if($set != '') $set .= ',';
 
-			if($key == 'something_special_not_defined_yet') {
-				/* It's all ok, join it with commas so the query
-				 * looks like ='teacher,committee,judge' */
-				$v = implode(',', $r);
+			if($key == 'categories' || $key == 'trophies') {
+				/* For awards */
+				$v = implode(',', $val);
 			} else {
 				/* Serialize any non-special arrays */
 				if(is_array($val)) 
@@ -83,12 +82,17 @@ function project_save($mysqli, &$p)
 			$p['original'][$key] = $val;
 		}
 	}
-//	print_r($p);
+	//print_r($p);
 	if($set != '') {
-		$query = "UPDATE projects SET $set WHERE pid='{$p['pid']}'";
-//		print($query);
+		$query = "UPDATE $table SET $set WHERE $table_key='{$p[$table_key]}'";
+	//	print($query);
 		$mysqli->query($query);
 	}
+}
+
+function project_save($mysqli, &$p)
+{
+	generic_save($mysqli, $p, "projects", "pid");
 }
 
 

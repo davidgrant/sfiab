@@ -43,22 +43,17 @@ sfiab_page_begin("Mentorship", $page_id, $help);
 <?php
 	$fields = incomplete_fields($mysqli, $page_id, $u);
 	$form_id = $page_id.'_form';
-
-	form_messages($form_id);
 ?>
-	<form action="judge_mentorship.php" id="<?=$form_id?>" class="sfiab_form">
-		<h3>Mentorship</h3>
+	<h3>Mentorship</h3>
 <?php
-		form_yesno($form_id, 'j_mentored', "Have you mentored or acted in an advisory role for any project at the fair?", $u, true);
-		form_action($form_id, '');
-		form_submit($form_id, 'save', 'Save', 'Information Saved');
+	form_begin($form_id, 'judge_mentorship.php', $fields);
+	form_yesno($form_id, 'j_mentored', "Have you mentored or acted in an advisory role for any project at the fair?", $u, true);
+	form_action($form_id, '');
+	form_submit($form_id, 'save', 'Save', 'Information Saved');
+	form_end($form_id);
 ?>
-	</form>
 
-	<?=form_scripts($form_id, $fields);?>
-
-
-</div>
+</div></div>
 	
 
 

@@ -32,6 +32,24 @@ function post_int(&$val, $var)
 			$val = (int)$_POST[$var];
 	}
 }
+function post_float(&$val, $var)
+{
+	if(array_key_exists($var, $_POST)) {
+		if($_POST[$var] == '') 
+			$val = NULL;
+		else 
+			$val = (float)$_POST[$var];
+	}
+}
 
+function post_text(&$val, $var)
+{
+	if(array_key_exists($var, $_POST)) {
+		if($_POST[$var] == '') 
+			$val = NULL;
+		else 
+			$val = $_POST[$var];
+	}
+}
 
 ?>

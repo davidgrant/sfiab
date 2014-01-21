@@ -7,6 +7,9 @@ require_once('incomplete.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+
+$mysqli->real_query('ALTER TABLE `projects` ADD `num_mentors` INT( 4 ) NOT NULL ');
+
 sfiab_session_start($mysqli);
 
 print('<pre>');

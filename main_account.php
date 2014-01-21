@@ -23,23 +23,14 @@ $fields = incomplete_fields($mysqli, 'account', $u, true);
 <?php
 	$form_id = 'account_change_password_form';
 	
-	form_messages($form_id, "Your password has expired, please enter a new password");
-?>
-	<form action="login.php" id="account_change_password_form" class="sfiab_form">
-<?php
+	//form_messages($form_id, "Your password has expired, please enter a new password");
+	form_begin($form_id, 'login.php');
 	$pw1 = '';
 	$pw2 = '';
 	form_text($form_id, 'pw1','New Password',$pw1, 'password');
 	form_text($form_id, 'pw2','New Password Again',$pw2, 'password');
-	form_action($form_id, '');
 	form_submit($form_id, 'change_pw', "Change Password", 'Password Saved');
-?>
-	</form>
-
-	<?=form_scripts($form_id, $fields);?>
-
-
-<?php
+	form_end($form_id);
 /*
 <script src="scripts/sha512.js"></script>
 	<script>

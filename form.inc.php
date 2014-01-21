@@ -71,13 +71,44 @@ function form_radio_h($page_id, $name, $label, $data, &$value) {
 <?php
 }
 
+function form_check_group($form_id, $name, $label, $data, &$value)
+{
+	$id = $form_id.'_'.$name;
+	/* This is so we can pass $u or $p in, and use the name to index into the array */
+	if(is_array($value)) {
+		if(array_key_exists($name, $value))
+			$v = $value[$name];
+		else 
+			$v = $value;
+	} else {
+		$v = array($value);
+	}
+?>
+	<div class="ui-field-contain">
+		<label for="<?=$id?>"><?=$label?>:</label>
+		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
+<?php
+			$x=0;
+			foreach($data as $key=>$val) {
+				if(is_array($val)) $val = $val['name'];
+				$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
+				
+			        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox">
+			        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
+<?php				$x++;
+			} ?>
+		</fieldset>
+	</div>
+<?php
+}
+
 function form_yesno($page_id, $name, $label, &$value, $wide=false) { 
 	$data = array(0 => 'No', 1 => 'Yes');
 	form_select($page_id, $name, $label, $data, $value, 'slider', $wide);
 }
 
 
-function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false)
+function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false)
 { 
 	$id = $page_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
@@ -88,20 +119,27 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 
+	$mstr = ($multi) ?  'multiple="true"' : '';
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>"><?=$label?>:</label>
-		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> >
+		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> data-native-menu="false">
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
 <?php			}
 			foreach($data as $key=>$val) {
+				if(is_array($val)) $val = $val['name'];
 				$sel = ($v == $key) ? 'selected="selected"' : ''; ?>
 			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php			} ?>
 		</select>
 	</div>
 <?php
+}
+
+function form_multiselect($form_id, $name, $label, $data, &$value)
+{
+	form_select($form_id, $name, $label, $data, $value, '',false, true);
 }
 
 function form_select_optgroup($page_id, $name, $label, $data, &$value)
@@ -153,19 +191,27 @@ function form_textbox($form_id, $name, $label, &$value)
 <?php
 }
 
-function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved")
+function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g')
 {
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-icon="check" data-theme="g" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-icon="check" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" >
+		<?=$text?>
+	</button>
+<?php
+}
+function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check")
+{
+?>
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" >
 		<?=$text?>
 	</button>
 <?php
 }
 
-function form_action($form_id, $txt)
+function form_hidden($form_id, $name, $txt)
 {
 ?>
-	<input type="hidden" name="action" value="<?=$txt?>" class="sfiab_form_action" />
+	<input type="hidden" name="<?=$name?>" value="<?=$txt?>" />
 <?php
 }
 
