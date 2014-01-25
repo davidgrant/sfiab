@@ -25,7 +25,7 @@ case 'save':
 	user_save($mysqli, $u);
 
 	$ret = incomplete_fields($mysqli, $page_id, $u, true);
-	print(form_ajax_response(0, $ret));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
 
@@ -48,7 +48,6 @@ sfiab_page_begin("Mentorship", $page_id, $help);
 <?php
 	form_begin($form_id, 'judge_mentorship.php', $fields);
 	form_yesno($form_id, 'j_mentored', "Have you mentored or acted in an advisory role for any project at the fair?", $u, true);
-	form_action($form_id, '');
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>

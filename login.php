@@ -63,7 +63,13 @@ case 'salt':
 
 case 'register':
 	global $sfiab_roles;
-	$not_allowed_roles = array('committee');
+	sfiab_session_start();
+
+	if(sfiab_user_is_a('committee')) {
+		$not_allowed_roles = array();
+	} else {
+		$not_allowed_roles = array('committee');
+	}
 
 	$username = $mysqli->real_escape_string($_POST['username']);
 	$as = $mysqli->real_escape_string($_POST['as']);
@@ -197,6 +203,12 @@ case 'login':
 		exit();
 	}
 
+	/* User is new? */
+	if($u['state'] == 'new') {
+		$u['state'] = 'active';
+		user_save($mysqli, $u);
+	}
+
 	sfiab_session_start();
 	$_SESSION['uid'] = $u['uid'];
 	$_SESSION['unique_uid'] = $u['unique_uid'];
@@ -219,19 +231,32 @@ case 'login':
 
 case 'change_pw':
 	sfiab_session_start();
-	$hash = $mysqli->real_escape_string(filter_hash($_POST['pw1']));
-	if(strlen($hash) != 128) {
-//		print("Invalid Hash");
-//		exit();
+	$pw1 = $mysqli->real_escape_string($_POST['pw1']);
+	$pw2 = $mysqli->real_escape_string($_POST['pw2']);
+	$letters = 'abcdefgjijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	$numbers = '1234567890';
+	if(strlen($pw1) < 8 || !strpbrk($pw1, $letters) || !strpbrk($pw1, $numbers) || strspn($pw1, $letters.$numbers) == strlen($pw1) ) {
+		form_ajax_response_error(1, 'Passwords must be at least 8 characters long and contain at least one letter, one number, and one non-alphanumberic character (something other than a letter and a number)');	
+		exit();
 	}
 
-	$_SESSION['password_expired'] = false;
+	if($pw1 != $pw2) {
+		form_ajax_response_error(1, 'Passwords don\'t match');
+		exit();
+	}
+
+	$hash = hash('sha512', $pw1);
 	$uid = $_SESSION['uid'];
-//	$mysqli->query("UPDATE users SET password='$hash', password_expired='0' WHERE uid=$uid");
+	$mysqli->query("UPDATE users SET password='$hash', password_expired='0' WHERE uid=$uid");
 	sfiab_log($mysqli, 'change pw', "");
-	print(form_ajax_response(0));
+
+	if($_SESSION['password_expired']) {
+		$_SESSION['password_expired'] = false;
+		form_ajax_response(array('status'=>0, 'location'=>'main.php'));
+	} else {
+		form_ajax_response(array('status'=>0,'happy'=>'Password changed'));
+	}
 	exit();
-	
 
 case 'logout':
 	sfiab_session_start();

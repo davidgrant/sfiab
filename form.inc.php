@@ -43,7 +43,7 @@ function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL)
 	$maxv = ($max === NULL) ? '' : "max=\"$max\"";
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"><?=$label?>:</label>
+		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> >
 	</div>
 <?php
@@ -56,7 +56,7 @@ function form_radio_h($page_id, $name, $label, $data, &$value) {
 	$v = (is_array($value)) ? $value[$name] : $value;
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"><?=$label?>:</label>
+		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
@@ -85,7 +85,7 @@ function form_check_group($form_id, $name, $label, $data, &$value)
 	}
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"><?=$label?>:</label>
+		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
@@ -119,11 +119,11 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 
-	$mstr = ($multi) ?  'multiple="true"' : '';
+	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>"><?=$label?>:</label>
-		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> data-native-menu="false">
+		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> >
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
 <?php			}
@@ -150,7 +150,7 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"><?=$label?>:</label>
+		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
 		<select name="<?=$name?>" id="<?=$id?>" >
 		<option value="">Choose...</option>
 <?php		foreach($data as $name=>$group) { ?>
@@ -211,12 +211,12 @@ function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check
 function form_hidden($form_id, $name, $txt)
 {
 ?>
-	<input type="hidden" name="<?=$name?>" value="<?=$txt?>" />
+	<input id="<?=$form_id?>_<?=$name?>" type="hidden" name="<?=$name?>" value="<?=$txt?>" />
 <?php
 }
 
 
-function form_begin($form_id, $action, $fields)
+function form_begin($form_id, $action, $fields=array(), $initial_error='')
 {
 	global $form_incomplete_fields;
 	$missing_message = "This page is incomplete.  Missing information fields are highlighted in red.";
@@ -226,15 +226,14 @@ function form_begin($form_id, $action, $fields)
 		$ids[] = $form_id.'_'.$f;
 	}
 	$form_incomplete_fields = array_merge($form_incomplete_fields, $ids);
-	$missing_style ='';
-	if(count($fields) == 0) 
-		$missing_style = 'style="display:none"';
 
+	$none = 'style="display:none"';
 ?>
-	<div id="<?=$form_id?>_missing_msg" class="error" <?=$missing_style?>>
+	<div id="<?=$form_id?>_missing_msg" class="error" <?=(count($fields)==0) ? $none : ''?>>
 	<?=$missing_message?>
 	</div>
-	<div id="<?=$form_id?>_error_msg" class="error" style="display:none">
+	<div id="<?=$form_id?>_error_msg" class="error" <?=($initial_error=='') ? $none : ''?>>
+	<?=$initial_error?>
 	</div>
 	<div id="<?=$form_id?>_happy_msg" class="happy" style="display:none">
 	</div>
@@ -300,16 +299,24 @@ function form_scripts_no_ajax($action, $page_id, $fields)
 <?php
 }
 
-function form_ajax_response($status, $missing_fields=array(), $left_nav_error_counts=array(), 
-				$error_text='', $happy_text='', $location='')
+function form_ajax_response_error($status, $error) 
 {
-	$response = array('status'=>$status, 
-			'missing' => $missing_fields,
-			'left_error_count' => $left_nav_error_counts,
-			'error' => $error_text,
-			'happy' => $happy_text,
-			'location' => $location,
-			);
-	return json_encode($response);
+	form_ajax_response(array('status'=>$status, 'error'=>$error));
+}
+
+function form_ajax_response($response)
+{
+	$headers = array( 'status', 'missing', 'left_error_count', 'error', 'happy', 'location');
+	if(!is_array($response)) {
+		$response = array('status'=>$response);
+	}
+	foreach($headers as $h) {
+		if(array_key_exists($h, $response)) {
+			$r[$h] = $response[$h];
+		} else {
+			$r[$h] = '';
+		}
+	}
+	print(json_encode($r));
 }
 ?>

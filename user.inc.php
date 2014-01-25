@@ -48,6 +48,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	$u['roles'] = explode(",", $u['roles']);
 	$u['password_expired'] = ((int)$u['password_expired'] == 1) ? true : false;
 
+	filter_bool_or_null($u['j_sa_only']);
 	filter_bool_or_null($u['j_willing_lead']);
 	filter_bool_or_null($u['j_dinner']);
 	filter_bool_or_null($u['j_mentored']);
@@ -58,6 +59,18 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 		$u['j_rounds'] = array(0,0);
 		foreach($a as $r) {
 			$u['j_rounds'][$r] = 1;
+		}
+	}
+
+	if($u['j_sa'] === NULL)
+		$u['j_sa'] = array(NULL,NULL,NULL);
+	else {
+		$a = explode(',',$u['j_sa']);
+		$u['j_sa'] = array(NULL, NULL, NULL);
+		$i = 0;
+		foreach($a as $id) {
+			$u['j_sa'][$i] = $id;
+			$i++;
 		}
 	}
 
@@ -115,13 +128,24 @@ function user_save($mysqli, &$u)
 				 * looks like ='teacher,committee,judge' */
 				$v = implode(',', $r);
 				break;
+
 			case 'j_rounds':
 				$a = array();
-				foreach($u['j_rounds'] as $round=>$en) {
-					if($en == 1) $a[] = $round;
+				foreach($val as $id=>$enabled) {
+					if($enabled == 1) $a[] = $id;
+				}
+				print_r($a);
+				$v = implode(',', $a);
+				break;
+
+			 case 'j_sa':
+				$a = array();
+				foreach($val as $index=>$id) {
+					if($id !== NULL) $a[] = $id;
 				}
 				$v = implode(',', $a);
 				break;
+
 
 			default:
 				/* Serialize any non-special arrays */

@@ -23,7 +23,9 @@ sfiab_page_begin("Committee Main", 'c_main', $help);
 	<h3>Hello <?=$u['firstname']?></h3>
 
 	This is the incomplete committee page.  All I've implemented is the awards editor.
+
 	<hr/>
+	<a href="index.php#register" data-ajax="false">Regsiter Someone</a>
 
 </div></div>
 

@@ -57,8 +57,15 @@ $( document ).on( "pagecreate", function( event ) {
 		var form = $(event.target);
 		var form_id = form.attr('id');
 		var form_missing_msg = $("#"+form_id+"_missing_msg");
+		var form_error_msg = $("#"+form_id+"_error_msg");
+		var form_happy_msg = $("#"+form_id+"_happy_msg");
 		var form_button = $("#"+form_id+"_submit");
 		var page = form.closest("div[data-role=page]");
+
+		var pre_submit_fn = window[form_id + '_pre_submit'];
+		if(typeof pre_submit_fn === 'function') {
+			pre_submit_fn(form);
+		}
 
 		// Stop form from submitting normally
 		event.preventDefault();
@@ -69,21 +76,57 @@ $( document ).on( "pagecreate", function( event ) {
 				$(this).text($(this).attr('data-alt2'));
 			});
 
-			// Clear all errors and add
+			// Any error message?
+			if(data.error != '') {
+				form_error_msg.text(data.error);
+				form_error_msg.show();
+			} else {
+				form_error_msg.hide();
+			}
+			// Or a happy message ?
+			if(data.happy != '') {
+				form_happy_msg.text(data.happy);
+				form_happy_msg.show();
+			} else {
+				form_happy_msg.hide();
+			}
+
+			/* Use the incomplete fields to update the count in the left nav menu */
 			$("#"+form_id+" label").removeClass('error');
 			var nav_li = $('#left_nav_'+page.attr('id')+' span');
+			var menu_div_id = $(nav_li).closest("div.ui-collapsible").attr('id');
+			var menu_span = $('#'+menu_div_id+" h3 a span.ui-li-count");
+			var old_error_count = menu_span.text();
+
+			var old_li_count = nav_li.text();
+			var new_li_count = 0;
 			if(data.missing.length > 0) {
 				nav_li.show();
 				nav_li.text(data.missing.length);
+				new_li_count = data.missing.length;
 				form_missing_msg.show();
 				for(var i=0; i<data.missing.length; i++) {
 					var label = $("label[for='"+form_id+"_"+data.missing[i]+"']");
 					label.addClass('error');
 				}
 			} else {
+				nav_li.text(0);
 				nav_li.hide();
 				form_missing_msg.hide();
 			}
+
+			var li_delta = new_li_count - parseInt(old_li_count);
+			var new_error_count = parseInt(old_error_count) + li_delta;
+
+			if(new_error_count == 0) {
+				menu_span.text(0);
+				menu_span.hide();
+			} else {
+				menu_span.show();
+				menu_span.text(new_error_count);
+			}
+
+	//		alert(old_li_count + ' ' + new_li_count + ' ' + old_error_count + ' ' + new_error_count);
 
 			// Redo any specified leftnav error counts 
 			for(var i=0; i<data.left_error_count.length; i++) {
@@ -96,6 +139,11 @@ $( document ).on( "pagecreate", function( event ) {
 				} else {
 					nav_li.hide();
 				}
+			}
+
+			var post_submit_fn = window[form_id + '_post_submit'];
+			if(typeof post_submit_fn === 'function') {
+				post_submit_fn(form);
 			}
 
 			if(data.location != '') {

@@ -27,11 +27,10 @@ case 'save':
 	post_bool($u['j_rounds'][1], 'j_round1');
 	post_bool($u['j_languages']['en'], 'j_lang_en');
 	post_bool($u['j_languages']['fr'], 'j_lang_fr');
-
 	user_save($mysqli, $u);
 
 	$ret = incomplete_fields($mysqli, $page_id, $u, true);
-	print(json_encode($ret));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
 

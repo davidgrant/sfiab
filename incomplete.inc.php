@@ -59,7 +59,7 @@ function incomplete_check_text(&$ret, &$data, $fields)
 	}
 }
 
-function incomplete_fields($mysqli, $section, &$u, $force_update=false)
+function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 {
 	if(array_key_exists($section, $_SESSION['incomplete']) && !$force_update) {
 		return $_SESSION['incomplete'][$section];
@@ -141,14 +141,17 @@ function incomplete_fields($mysqli, $section, &$u, $force_update=false)
 
 	case 'j_expertise':
 		/* If j_sa isn't entered, that's the one that's missing */
-		if($u['j_sa'] === NULL) {
-			$ret[] = 'j_sa_only';
+		if($u['j_sa_only'] === NULL)
 			$ret[] = 'j_sa';
+
+		if($u['j_sa_only']) {
+			if($u['j_sa'] == array(NULL, NULL, NULL)) {
+				$ret[] = 'j_sa';
+			}
+		} else {
+			incomplete_check_gt_zero($ret, $u, array('j_pref_div1', 'j_pref_div2','j_pref_div3'));
+			incomplete_check_ge_zero($ret, $u, array('j_pref_cat', 'j_years_school', 'j_years_regional','j_years_national'));
 		}
-		if($u['j_sa'] == '') {
-			incomplete_check_gt_zero($ret, $u, array('j_pref_div1', 'j_pref_div2','j_pref_div3','j_pref_cat'));
-		} 
-		incomplete_check_ge_zero($ret, $u, array('j_years_school', 'j_years_regional','j_years_national'));
 		break;
 	case 'j_mentorship':
 		incomplete_check_bool($ret, $u, array('j_mentored'));
@@ -162,30 +165,57 @@ function incomplete_fields($mysqli, $section, &$u, $force_update=false)
 	return $ret;
 }
 
-function incomplete_check($mysqli, &$u) 
+function incomplete_fields($mysqli, $section, &$u, $force_update=false)
+{
+	$ret = incomplete_fields_check($mysqli, $section, $u, $force_update);
+	if(count($ret) == 0) {
+		/* count is zero, check for entire session complete */
+		if($_SESSION['complete'] == false) {
+			incomplete_check($mysqli, $u, true);
+		}
+	} else {
+		if($_SESSION['complete'] == true) {
+			incomplete_check($mysqli, $u, true);
+		}
+	}
+}
+
+
+function incomplete_check($mysqli, &$u, $force = true)
 {
 	/* Set session to complete.  Each of the checks below will set it to incomplete
 	 *  if they find an incomplete item. */
-	$_SESSION['complete'] = true;
+	$old_status = $_SESSION['complete'];
 	if(sfiab_user_is_a('student')) {
-		
-		incomplete_fields($mysqli, 's_personal', $u, true);
-		incomplete_fields($mysqli, 's_reg_options', $u, true);
-		incomplete_fields($mysqli, 's_emergency', $u, true);
-		incomplete_fields($mysqli, 's_project', $u, true);
-		incomplete_fields($mysqli, 's_partner', $u, true);
-		incomplete_fields($mysqli, 's_mentor', $u, true);
-		incomplete_fields($mysqli, 's_ethics', $u, true);
-		incomplete_fields($mysqli, 's_safety', $u, true);
-		incomplete_fields($mysqli, 's_awards', $u, true);
-		incomplete_fields($mysqli, 's_signature', $u, true);
+		$_SESSION['complete'] = true;
+		incomplete_fields_check($mysqli, 's_personal', $u, $force);
+		incomplete_fields_check($mysqli, 's_reg_options', $u, $force);
+		incomplete_fields_check($mysqli, 's_emergency', $u, $force);
+		incomplete_fields_check($mysqli, 's_project', $u, $force);
+		incomplete_fields_check($mysqli, 's_partner', $u, $force);
+		incomplete_fields_check($mysqli, 's_mentor', $u, $force);
+		incomplete_fields_check($mysqli, 's_ethics', $u, $force);
+		incomplete_fields_check($mysqli, 's_safety', $u, $force);
+		incomplete_fields_check($mysqli, 's_awards', $u, $force);
+		incomplete_fields_check($mysqli, 's_signature', $u, $force);
+		$student_complete = $_SESSION['complete'];
 	}
 
 	if(sfiab_user_is_a('judge')) {
-		incomplete_fields($mysqli, 'j_personal', $u, true);
-		incomplete_fields($mysqli, 'j_expertise', $u, true);
-		incomplete_fields($mysqli, 'j_options', $u, true);
-		incomplete_fields($mysqli, 'j_mentorship', $u, true);
+		$_SESSION['complete'] = true;
+		incomplete_fields_check($mysqli, 'j_personal', $u, $force);
+		incomplete_fields_check($mysqli, 'j_expertise', $u, $force);
+		incomplete_fields_check($mysqli, 'j_options', $u, $force);
+		incomplete_fields_check($mysqli, 'j_mentorship', $u, $force);
+		$judge_complete = $_SESSION['complete'];
+	}
+
+	if($judge_complete && $u['j_status'] != 'complete') {
+		$u['j_status'] = 'complete';
+		user_save($mysqli, $u);
+	} else if($judge_complete == false && $u['j_status'] == 'complete') {
+		$u['j_status'] = 'incomplete';
+		user_save($mysqli, $u);
 	}
 }
 ?>

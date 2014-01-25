@@ -113,7 +113,7 @@ function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = fals
 
 	/* Mostly from http://www.wikihow.com/Create-a-Secure-Login-Script-in-PHP-and-MySQL */
 	if(!sfiab_logged_in()) {
-		print("Access Denied<br/>");
+		header("Location: index.php#login");
 		exit();
 	}
 
@@ -122,7 +122,7 @@ function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = fals
 ?>
 		<html><head>
 		<script>
-		window.location = "<?=$config['fair_url']?>/main_change_password.php";
+		window.location = "<?=$config['fair_url']?>/a_change_password.php";
 		</script></head></html>
 <?php		exit();
 	}
@@ -169,24 +169,49 @@ function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = fals
 	}
 }
 
-function sfiab_print_left_nav_menu_entries($current_page_id, $menu, $inset=false)
+function sfiab_left_nav_incomplete_count($page_id)
+{
+	$count = 0;
+	if(array_key_exists('incomplete', $_SESSION)) {
+		if(array_key_exists($page_id, $_SESSION['incomplete'])) {
+			$fields = $_SESSION['incomplete'][$page_id];
+			$count = count($fields);
+		}
+	}
+	return $count;
+}
+function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
 { ?>	
 <?php 	foreach($menu as $id=>$d) {
-		$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-		$e = 'data-ajax="false"';//'rel="external"';
+			$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
+			$e = 'data-ajax="false"';//'rel="external"';
 
-		$count = 0;
-		if(array_key_exists('incomplete', $_SESSION)) {
-			if(array_key_exists($id, $_SESSION['incomplete'])) {
-				$fields = $_SESSION['incomplete'][$id];
-				$count = count($fields);
-			}
-		}
-		$style = ($count == 0) ? 'style="display: none;"' : '';
-		$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
+			$count = sfiab_left_nav_incomplete_count($id);
+			$style = ($count == 0) ? 'style="display: none;"' : '';
+			$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
 ?>
-		<li data-icon="false" <?=$sel?>><a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" ><?=$d[0]?><?=$incomplete?></a></li>
+			<li data-icon="false" <?=$sel?>><a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" ><?=$d[0]?><?=$incomplete?></a></li>
 <?php	} 
+}
+
+function sfiab_print_left_nav_menu($menu_id, $text, $current_page_id, $menu)
+{
+	/* Count all incomplete */
+	$count = 0;
+	foreach($menu as $id=>$d) {
+		$count += sfiab_left_nav_incomplete_count($id);
+	}
+	$style = ($count == 0) ? 'style="display: none;"' : '';
+	$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
+	$collapsed = array_key_exists($current_page_id, $menu) ? 'false' : 'true';
+?>
+	<div id="<?=$menu_id?>" data-role="collapsible" data-inset="true" data-collapsed="<?=$collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" class="ui-shadow ui-alt-icon ui-nodisc-icon">
+		<h3><?=$text?><?=$incomplete?></span></h3>
+		<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
+			<?=sfiab_print_left_nav_menu_entries($current_page_id, $menu);?>
+		</ul>
+	</div>
+<?php
 }
 
 function sfiab_print_left_nav($menu, $current_page_id="")
@@ -227,60 +252,33 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	$login_menu = array('register' => array('Registration', 'index.php#register'),
 			    'login' => array('Login', 'index.php#login'),
 		);
-	$logout_menu = array('account' => array('Account', 'main_account.php'),
-			     'logout' => array('Logout', 'login.php?action=logout'),
+
+	$account_menu = array('a_change_password' => array('Change Password', 'a_change_password.php'),
+		);
+	$logout_menu = array( 'logout' => array('Logout', 'login.php?action=logout'),
 		);
 
-	/* Determine which menu shoudl be visible */
-	$main_collapsed = array_key_exists($current_page_id, $main_menu) ? 'false' : 'true';
-	$main_collapsed = array_key_exists($current_page_id, $login_menu) ? 'false' : $main_collapsed ;
-	$student_collapsed = array_key_exists($current_page_id, $student_menu) ? 'false' : 'true';
-	$judge_collapsed = array_key_exists($current_page_id, $judge_menu) ? 'false' : 'true';
-	$committee_collapsed = array_key_exists($current_page_id, $committee_menu) ? 'false' : 'true';
-
-//<?=//$config['fair_abbreviation']
 ?>
 
 	<div id="leftnav" data-role="panel" class="leftnav_panel" data-position="left" data-display="overlay" data-theme="a">
 	<br/><br/>
 
-    	
-	<div id="leftnav_main" data-role="collapsible" data-inset="true" data-collapsed="<?=$main_collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right" class="ui-shadow ui-alt-icon ui-nodisc-icon">
-	        <h3>Main Menu</h3>
-		<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
-			<?=sfiab_print_left_nav_menu_entries($current_page_id, $main_menu);?>
-		</ul>
-	</div>
+<?php
+	sfiab_print_left_nav_menu('leftnav_main', 'Main Menu', $current_page_id, $main_menu);
+	if(sfiab_user_is_a('student'))
+		sfiab_print_left_nav_menu('leftnav_student', 'Student Menu', $current_page_id, $student_menu);
 
-<?php	if(sfiab_user_is_a('student')) { ?>
-		<div data-role="collapsible" data-inset="true" data-collapsed="<?=$student_collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right" class="ui-shadow ui-alt-icon ui-nodisc-icon">
-		        <h3>Student Menu</h3>
-			<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
-				<?=sfiab_print_left_nav_menu_entries($current_page_id, $student_menu);?>
-			</ul>
-		</div>
-<?php	} ?>
+	if(sfiab_user_is_a('judge'))
+		sfiab_print_left_nav_menu('leftnav_judge', 'Judge Menu', $current_page_id, $judge_menu);
 
-<?php	if(sfiab_user_is_a('judge')) { ?>
-		<div data-role="collapsible" data-inset="true" data-collapsed="<?=$judge_collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right" class="ui-shadow ui-alt-icon ui-nodisc-icon">
-		        <h3>Judge Menu</h3>
-			<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
-				<?=sfiab_print_left_nav_menu_entries($current_page_id, $judge_menu);?>
-			</ul>
-		</div>
-<?php	} ?>
+	if(sfiab_user_is_a('committee')) 
+		sfiab_print_left_nav_menu('leftnav_committee', 'Committee Menu', $current_page_id, $committee_menu);
 
-<?php	if(sfiab_user_is_a('committee')) { ?>
-		<div data-role="collapsible" data-inset="true" data-collapsed="<?=$committee_collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right" class="ui-shadow ui-alt-icon ui-nodisc-icon">
-		        <h3>Committee Menu</h3>
-			<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
-				<?=sfiab_print_left_nav_menu_entries($current_page_id, $committee_menu);?>
-			</ul>
-		</div>
-<?php	} ?>
-
-    	<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
-<?php	
+	if(sfiab_logged_in())
+		sfiab_print_left_nav_menu('leftnav_account', 'Account Menu', $current_page_id, $account_menu);
+?>
+	<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
+<?php
 	if(sfiab_logged_in()) {
 		sfiab_print_left_nav_menu_entries($current_page_id, $logout_menu, true);
 ?>

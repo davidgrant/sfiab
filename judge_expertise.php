@@ -4,6 +4,7 @@ require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('isef.inc.php');
+require_once('awards.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
@@ -18,18 +19,22 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
-$fields = array('j_pref_div1', 'j_pref_div2', 'j_pref_div3', 'j_pref_cat', 
-		'j_years_school','j_years_regional','j_years_national');
-
 switch($action) {
 case 'save':
-
-	$sa_only = NULL;
-	post_bool($sa_only, 'j_special_award_only');
-
-	if($sa_only) {
+	post_bool($u['j_sa_only'], 'j_sa_only');
+	if($u['j_sa_only']) {
+		post_int($u['j_sa'][0], 'j_sa');
+		post_int($u['j_sa'][1], 'j_sa2');
+		post_int($u['j_sa'][2], 'j_sa3');
+		$u['j_pref_div1'] = NULL;
+		$u['j_pref_div2'] = NULL;
+		$u['j_pref_div3'] = NULL;
+		$u['j_pref_cat'] = NULL;
+		$u['j_years_school'] = NULL;
+		$u['j_years_regional'] = NULL;
+		$u['j_years_national'] = NULL;
 	} else {
-		$u['j_sa'] = NULL;
+		$u['j_sa'] = array(NULL, NULL, NULL);
 		post_int($u['j_pref_div1'], 'j_pref_div1');
 		post_int($u['j_pref_div2'], 'j_pref_div2');
 		post_int($u['j_pref_div3'], 'j_pref_div3');
@@ -42,12 +47,12 @@ case 'save':
 	user_save($mysqli, $u);
 
 	$ret = incomplete_fields($mysqli, $page_id, $u, true);
-	print(json_encode($ret));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
 
 $help = '
-<ul><li><b>Sponsor Judge</b> - If you represent a sponsor of a specific special award, then choose \'Yes\' here and select which special award(s) you will be judging.
+<ul><li><b>Sponsor Judge</b> - If you represent the sponsor of a specific special award, then choose \'Yes\' here and select which special award(s) you will be judging.
 <li><b>School/District</b> - Years of judging experience at the school or district level
 <li><b>Regional</b> - Years of judging experience at regional fairs (the GVRSF is a regional fair)
 <li><b>National</b> - Years of judging experience at the national (CWSF or ISEF) fair.
@@ -77,32 +82,28 @@ sfiab_page_begin("Expertise", $page_id, $help);
 		$cats_data[$cid] = $c['name'];
 	}
 
-	if($u['j_sa'] === NULL) {
-		$sa_only = false;
-		$sa_style = "style=\"display:none\"";
-		$normal_style = "";
-	} else {
-		$sa_only = true ;
-		$sa_style = "";
-		$normal_style = "style=\"display:none\"";
-	}
+	$sa_only = ($u['j_sa_only'] == 1) ? 1 : 0;
+	$hidden = "style=\"display:none\"";
 
 	form_begin($form_id, 'judge_expertise.php', $fields);
 ?>
 		<h3>Sponsor Judges</h3>
 <?php
-	form_yesno($form_id, 'j_special_award_only', "Do you represent a sponsor of a special award?", $sa_only, true);
+	form_yesno($form_id, 'j_sa_only', "Do you represent the sponsor of a special award?", $u, true);
 	
 ?>
-	<div id="j_expertise_sa" <?=$sa_style?> >
-	Note: Our chief judge will double-check with anyone who selects 'Yes' here to ensure they
-	are a sponsor for a special award.  If you're not sure then you're probably not a Sponsor judge.
-
-	SA selector
+	<div id="j_expertise_sa" <?=$sa_only ? '' : $hidden?> >
+		Note: Our chief judge will double-check with anyone who selects 'Yes' here to ensure they
+		are a sponsor for a special award.  If you're not sure then you're probably not a Sponsor judge.
+<?php
+		$awards = award_load_special_for_select($mysqli);
+		form_select($form_id, 'j_sa', "Special Award", $awards, $u['j_sa'][0]);
+		form_select($form_id, 'j_sa2', "Special Award", $awards, $u['j_sa'][1]);
+		form_select($form_id, 'j_sa3', "Special Award", $awards, $u['j_sa'][2]);
+?>		
 	</div>
 
-
-	<div id="j_expertise_normal" <?=$normal_style?> >
+	<div id="j_expertise_normal" <?=$sa_only ? $hidden : '' ?> >
 	<h3>Years of Judging Experience</h3>
 	Enter how many years of judging experience you have at each level of science fair competitions:
 <?php
@@ -118,7 +119,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	form_select_optgroup($form_id, 'j_pref_div1', "Detailed Division 1", $isef_data, $u);
 	form_select_optgroup($form_id, 'j_pref_div2', "Detailed Division 2", $isef_data, $u);
 	form_select_optgroup($form_id, 'j_pref_div3', "Detailed Division 3", $isef_data, $u);
-	form_select($form_id_id, 'j_pref_cat', "Category Preference", $cats_data, $u);
+	form_select($form_id, 'j_pref_cat', "Category Preference", $cats_data, $u);
 ?>
 	</div>
 <?php
@@ -127,8 +128,8 @@ sfiab_page_begin("Expertise", $page_id, $help);
 ?>
 
 	<script>
-		$( "#<?=$form_id?>_j_special_award_only" ).change(function() {
-			var sa_only = $("#<?=$form_id?>_j_special_award_only option:selected").val();
+		$( "#<?=$form_id?>_j_sa_only" ).change(function() {
+			var sa_only = $("#<?=$form_id?>_j_sa_only option:selected").val();
 			if(sa_only == '0') {
 				$('#j_expertise_sa').hide();
 				$('#j_expertise_normal').show();
@@ -143,8 +144,6 @@ sfiab_page_begin("Expertise", $page_id, $help);
 
 </div></div>
 	
-
-
 
 
 <?php

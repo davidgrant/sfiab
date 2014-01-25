@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
+require_once('awards.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -14,65 +15,6 @@ sfiab_session_start($mysqli, array('committee'));
 $u = user_load($mysqli);
 
 $page_id = 'c_awards';
-
-function award_load($mysqli, $id , $data = NULL)
-{
-		$id = (int)$id;
-	if($id != 0) {
-		$q = $mysqli->query("SELECT * FROM awards WHERE id='$id'");
-		$a = $q->fetch_assoc();
-		print($mysqli->error);
-	} else {
-		$a = $data;
-		$id = $a['id'];
-	}
-
-	$a['categories'] = explode(',',$a['categories']);
-
-	$a['prizes'] = array();
-	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `order`");
-	while($p = $q->fetch_assoc()) {
-		$a['prizes'][] = prize_load($mysqli, 0, $p);
-	}
-
-	unset($a['original']);
-	$original = $a;
-	$a['original'] = $original;
-	return $a;
-}
-
-function award_load_all($mysqli)
-{
-	global $config;
-	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' ORDER BY `type`,`order`");
-	$awards = array();
-	while($d = $q->fetch_assoc()) {
-		$awards[] = award_load($mysqli, 0, $d);
-	}
-	return $awards;
-}
-
-function prize_load($mysqli, $pid, $data=NULL)
-{
-	if($data === NULL) {
-		$q = $mysqli->query("SELECT * FROM award_prizes WHERE id='$pid'");
-		$p = $q->fetch_assoc();
-	} else {
-		$p = $data;
-		$pid = $p['id'];
-	}
-
-	$p['trophies'] = explode(',', $p['trophies']);
-	unset($p['original']);
-	$original = $p;
-	$p['original'] = $original;
-	return $p;
-}
-
-function award_save($mysqli, $a)
-{
-	generic_save($mysqli, $a, "awards", "id");
-}
 
 $page = '';
 if(array_key_exists('page',$_GET)) {
@@ -107,7 +49,7 @@ case 'save':
 	}
 	award_save($mysqli, $a);
 
-	print(form_ajax_response(0 ));
+	form_ajax_response(0);
 	exit();
 
 case 'psave':
@@ -127,7 +69,7 @@ case 'psave':
 		$p['trophies'][] = $val;
 	}
 	generic_save($mysqli, $p, "award_prizes", "id");
-	print(form_ajax_response(0 ));
+	form_ajax_response(0);
 	exit();
 
 
@@ -137,10 +79,10 @@ case 'del':
 		/* Delete prizes and awards */
 		$mysqli->real_query("DELETE FROM award_prizes WHERE award_id='$aid'");
 		$mysqli->real_query("DELETE FROM awards WHERE id='$aid'");
-		print(form_ajax_response(0));
+		form_ajax_response(0);
 		exit();
 	}
-	print(form_ajax_response(1));
+	form_ajax_response(1);
 	exit();
 
 case 'pdel':
@@ -148,10 +90,10 @@ case 'pdel':
 	if($pid > 0) {
 		/* Delete prizes and awards */
 		$mysqli->real_query("DELETE FROM award_prizes WHERE id='$pid'");
-		print(form_ajax_response(0));
+		form_ajax_response(0);
 		exit();
 	}
-	print(form_ajax_response(1));
+	form_ajax_response(1);
 	exit();
 }
 

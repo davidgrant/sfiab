@@ -17,30 +17,23 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
-$fields = array('salutation', 'firstname', 'lastname', 'phone1','phone2',
-		'organization', 'sex', 'city', 'province', 
-		'language', 'j_psd');
-
-
 switch($action) {
 case 'save':
-	foreach($fields as $f) {
-		if(!array_key_exists($f, $u)) {
-			/* Key doesn't exist, user is injecting their own keys? */
-			print("Error 1100: $f");
-			exit();
-		}
-		/* Since 'sex' is a radiobutton, it's only included if there's a checked value */
-		if(array_key_exists($f, $_POST)) {
-			/* Save it to the user */
-			$u[$f] = $_POST[$f];
-		} 
-	}
-
+	post_text($u['salutation'], 'salutation');
+	post_text($u['firstname'], 'firstname');
+	post_text($u['lastname'], 'lastname');
+	post_text($u['phone1'], 'phone1');
+	post_text($u['phone2'], 'phone2');
+	post_text($u['organization'], 'organization');
+	post_text($u['sex'], 'sex');
+	post_text($u['city'], 'city');
+	post_text($u['province'], 'province');
+	post_text($u['language'], 'language');
+	post_text($u['j_psd'], 'j_psd');
 	user_save($mysqli, $u);
 
 	$ret = incomplete_fields($mysqli, $page_id, $u, true);
-	print(form_ajax_response(0, $ret));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
 
