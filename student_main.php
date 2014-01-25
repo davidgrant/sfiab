@@ -20,6 +20,11 @@ sfiab_page_begin("Student Main", 's_home');
 
 	<h3>Student Home</h3>
 
+	Under construction, only the first few menus on the left work, the rest throw an error.  
+
+	Don't try student registration yet, I know it doesn't work.
+
+
 <?php
 	/* Check for any incoming project requests */
 	$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
