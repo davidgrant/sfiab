@@ -171,7 +171,7 @@ function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
 		$ret = incomplete_fields_check($mysqli, $page_id, $u, $force);
 
 		/* Nothing else to do */
-		if(count($ret) == 0) {
+		if(count($ret) == 0)) {
 			/* No missing fields here, and session is already complete? */
 			if($_SESSION['complete'] == true) 
 				return $ret;
