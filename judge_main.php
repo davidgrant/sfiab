@@ -50,6 +50,10 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
+	<p> Welcome to the new GVRSF registration system.  
+	
+	<p>Help for most pages is available by clicking the information icon on the top right of the page.
+
 <?php
 	if($u['j_status'] == 'complete') {
 ?>
