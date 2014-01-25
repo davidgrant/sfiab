@@ -48,6 +48,13 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	$u['roles'] = explode(",", $u['roles']);
 	$u['password_expired'] = ((int)$u['password_expired'] == 1) ? true : false;
 
+	filter_int_or_null($u['j_pref_div1']);
+	filter_int_or_null($u['j_pref_div2']);
+	filter_int_or_null($u['j_pref_div3']);
+	filter_int_or_null($u['j_pref_cat']);
+	filter_int_or_null($u['j_years_school']);
+	filter_int_or_null($u['j_years_regional']);
+	filter_int_or_null($u['j_years_national']);
 	filter_bool_or_null($u['j_sa_only']);
 	filter_bool_or_null($u['j_willing_lead']);
 	filter_bool_or_null($u['j_dinner']);

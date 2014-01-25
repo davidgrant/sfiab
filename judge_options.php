@@ -29,7 +29,7 @@ case 'save':
 	post_bool($u['j_languages']['fr'], 'j_lang_fr');
 	user_save($mysqli, $u);
 
-	$ret = incomplete_fields($mysqli, $page_id, $u, true);
+	$ret = incomplete_check($mysqli, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
@@ -51,7 +51,7 @@ sfiab_page_begin("Options", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"  ><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$fields = incomplete_fields($mysqli, $page_id, $u);
+	$fields = incomplete_check($mysqli, $u, $page_id);
 	$form_id=$page_id.'_form';
 	form_begin($form_id,'judge_options.php', $fields);
 ?>	

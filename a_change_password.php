@@ -14,9 +14,6 @@ $u = user_load($mysqli);
 
 sfiab_page_begin("Change Password", "a_change_password");
 
-
-#$fields = incomplete_fields($mysqli, 'account', $u, true);
-
 ?>
 
 <div data-role="page" id="a_change_password"><div data-role="main" class="sfiab_page" > 

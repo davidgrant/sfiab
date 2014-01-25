@@ -46,7 +46,7 @@ case 'save':
 
 	user_save($mysqli, $u);
 
-	$ret = incomplete_fields($mysqli, $page_id, $u, true);
+	$ret = incomplete_check($mysqli, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
@@ -72,7 +72,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 
 <?php
 	$form_id = $page_id.'_form';
-	$fields = incomplete_fields($mysqli, $page_id, $u);
+	$fields = incomplete_check($mysqli, $u, $page_id);
 
 	$cats = categories_load($mysqli);
 	$isef_data = isef_get_div_names();

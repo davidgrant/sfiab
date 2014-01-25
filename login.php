@@ -223,6 +223,7 @@ case 'login':
 
 	/* Populate the complete status of all fields */
 	$_SESSION['incomplete'] = array();
+	$_SESSION['complete'] = false;
 	incomplete_check($mysqli, $u);
 
 	sfiab_log($mysqli, 'login ok', $username);
