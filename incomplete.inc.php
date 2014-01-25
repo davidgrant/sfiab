@@ -1,6 +1,8 @@
 <?php
 require_once('project.inc.php');
 
+$incomplete_errors = array();
+
 function incomplete_user_fields($mysqli, $required_fields, &$u)
 {
 	$ret = array();
@@ -61,6 +63,8 @@ function incomplete_check_text(&$ret, &$data, $fields)
 
 function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 {
+	global $incomplete_errors;
+
 	if(array_key_exists($section, $_SESSION['incomplete']) && !$force_update) {
 		return $_SESSION['incomplete'][$section];
 	}
@@ -92,6 +96,14 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 		incomplete_check_text($ret, $p, array('title','summary','language'));
 		incomplete_check_bool($ret, $p, array('req_electricity'));
 		incomplete_check_gt_zero($ret, $p, array('cat_id','challenge_id','isef_id'));
+
+		/* Check words in summary */
+		$w = str_word_count($p['summary']);
+		if($w < 200 || $w > 1000) {
+			$incomplete_errors[] = "Project summary must contain between 200 and 1000 words";
+			$ret[] = 'summary';
+		}
+
 		break;
 	case 's_partner':
 		$p = project_load($mysqli, $u['s_pid']);
@@ -166,7 +178,11 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 
 function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
 {
+	global $incomplete_errors;
+
 	$ret = array();
+	$incomplete_errors = array();
+
 	if($page_id !== false) {
 		$ret = incomplete_fields_check($mysqli, $page_id, $u, $force);
 

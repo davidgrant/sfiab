@@ -10,7 +10,7 @@ function form_inc($id)
 }
 		
 
-function form_text($page_id, $name, $label, &$value = '', $type='text', $required=false) 
+function form_text($page_id, $name, $label, &$value = '', $type='text') 
 { 
 	if(!in_array($type, array('text', 'tel','date','email','password'))) {
 		print("Error 1001: $type\n");
@@ -26,7 +26,7 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $require
 	
 	?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>">
 	</div>
 <?php
@@ -43,27 +43,29 @@ function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL)
 	$maxv = ($max === NULL) ? '' : "max=\"$max\"";
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> >
 	</div>
 <?php
 }
 
 
-function form_radio_h($page_id, $name, $label, $data, &$value) { 
-	$id = $page_id.'_'.$name;
+function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false) { 
+	$id = $form_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
+	$extra_class = $wide ? 'ui-field-contain-wide' : '';
+
 ?>
-	<div class="ui-field-contain">
-		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+	<div class="ui-field-contain <?=$extra_class?>">
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
 			foreach($data as $key=>$val) {
-				$sel = ($v == $key) ? 'checked="checked"' : ''; ?>
-			        <input name="<?=$name?>" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio">
-			        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
+				$sel = ($v === $key) ? 'checked="checked"' : ''; ?>
+			        <input name="<?=$name?>" id="<?=$id.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio">
+			        <label for="<?=$id.'-'.$x?>"><?=$val?></label>
 <?php				$x++;
 			} ?>
 		</fieldset>
@@ -85,7 +87,7 @@ function form_check_group($form_id, $name, $label, $data, &$value)
 	}
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
@@ -102,11 +104,14 @@ function form_check_group($form_id, $name, $label, $data, &$value)
 <?php
 }
 
-function form_yesno($page_id, $name, $label, &$value, $wide=false) { 
+function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false) { 
 	$data = array(0 => 'No', 1 => 'Yes');
-	form_select($page_id, $name, $label, $data, $value, 'slider', $wide);
+	if(!$slider ) {
+		form_radio_h($form_id, $name, $label, $data, $value, $wide);
+	} else {
+	        form_select($form_id, $name, $label, $data, $value, 'slider', $wide);
+	}
 }
-
 
 function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false)
 { 
@@ -122,7 +127,7 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> >
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
@@ -150,7 +155,7 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>"<?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
 		<select name="<?=$name?>" id="<?=$id?>" >
 		<option value="">Choose...</option>
 <?php		foreach($data as $name=>$group) { ?>

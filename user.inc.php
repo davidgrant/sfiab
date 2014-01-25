@@ -54,6 +54,8 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	/* Clear out invalid input so the placeholder is shown again */
 	if($u['birthdate'] == '0000-00-00') $u['birthdate'] = NULL;
 
+
+
 	/* Judge filtering */
 
 	filter_int_or_null($u['j_pref_div1']);

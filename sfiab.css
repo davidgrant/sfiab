@@ -712,7 +712,11 @@ html head + body .ui-body-r.ui-focus {
 }
 
 
+/* Adjust label/fieldset ratio to make the label wide */
 .ui-field-contain-wide > label {
 	width: 65% !important;
+}
+.ui-field-contain-wide > fieldset {
+	width: 30% !important;
 }
 

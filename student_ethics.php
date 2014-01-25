@@ -43,7 +43,7 @@ case 'save':
 
 
 
-sfiab_page_begin("Student Emergency Contact", $page_id);
+sfiab_page_begin("Project Ethics", $page_id);
 
 function question($name, $text, $help, $v)
 {
@@ -89,8 +89,7 @@ function divider($name, $text)
 
 <?php
 	$answers = array();
-	$fields = incomplete_fields($mysqli, $page_id, $u);
-	form_incomplete_error_message($page_id, $fields);
+	$fields = incomplete_check($mysqli, $u, $page_id);
 ?>
 	<form action="#" id="<?=$page_id?>_form">
 <?php
@@ -221,7 +220,7 @@ function divider($name, $text)
 	<?=form_scripts('student_ethics.php', $page_id, $fields);?>
 
 
-</div>
+</div></div>
 
 
 

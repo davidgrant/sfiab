@@ -37,7 +37,11 @@ case 'save':
 	exit();
 }
 
-sfiab_page_begin("Student Registration Options", $page_id);
+$help='
+<p>You can add a tshirt to your registration.  Tshirts are picked up at the fair during check-in
+';
+
+sfiab_page_begin("Student Registration Options", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
