@@ -218,7 +218,8 @@ function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
 		if($judge_complete && $u['j_status'] != 'complete') {
 			$u['j_status'] = 'complete';
 			user_save($mysqli, $u);
-		} else if($judge_complete == false && $u['j_status'] == 'complete') {
+		} else if($judge_complete == false && $u['j_status'] != 'incomplete') {
+			/* CHeck for != incomplete because we could be coming off a notattedning */
 			$u['j_status'] = 'incomplete';
 			user_save($mysqli, $u);
 		}

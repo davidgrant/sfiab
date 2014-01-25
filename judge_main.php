@@ -2,6 +2,7 @@
 require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('form.inc.php');
+require_once('incomplete.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
@@ -23,12 +24,15 @@ case 'save':
 	if($attending !== NULL) {
 		if($attending == 0) {
 			$u['j_status'] = 'notattending';
+			user_save($mysqli, $u);
 		} else {
-			$u['j_status'] = 'inprogress';
+			/* Do  a full check, this will set the user
+			 * status to complete or incomplete and save it */
+			incomplete_check($mysqli, $u, false, true);
 		}
 	}
-	user_save($mysqli, $u);
-	form_ajax_response(0);
+
+	form_ajax_response(array('status'=>0, 'location'=>'judge_main.php'));
 	exit();
 }
 
@@ -44,37 +48,69 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-	<h3>Hello <?=$u['firstname']?></h3>
+	<h3>Hello <?=$u['firstname']?>,</h3>
 
-	<h3>Status</h3>
-		j_status: <?=$u['j_status']?><br/>
-		isession complete: <?=$_SESSION['complete']?>
+<?php
+	if($u['j_status'] == 'complete') {
+?>
+		<h3>Registration Status: <font color="green">Complete</font></h3>
 
-	<h3>Judging Team and Schedule</h3>
-	Judging teams have not been assigned yet.  Look for this information after March 31, 2014.
+		Thank you for completing your registration.  We will send out an email 
+		when judging teams have been created and project abstracts are ready 
+		for judges to view.
+
+		<h3>Judging Team and Schedule</h3>
+		Judging teams have not been assigned yet.  Look for this information
+		approximately one week before the fair.  
+
+<?php
+	} else if($u['j_status'] == 'notattending') {
+?>
+		<h3>Registration Status: <font color="blue">Not Attending</font></h3>
+
+		<p>You have indicated that you're not able to judge at the
+		fair this year, thanks for letting us know.  You won't be
+		assigned to judge anything and you don't need to fill out
+		anything else.  
+		
+		<p>Your registration will still be here next year if you are
+		able to judge again.  
+		
+		<p>If your plans change for this year, just indicate below that
+		you are able to judge at the fair again, and finish the registration
+		process.  If the registration deadline has passed, please contact
+		the chief judges (leonard@gvrsf.ca or ceddy@gvrsf.ca)
+		
+		<p>Thank you.
+<?php
+	} else {
+?>
+		<h3>Registration Status: <font color="red">Incomplete</font></h3>
+		
+		The red numbers in the menu on the left indicate which sections
+		have missing data.  Registration closes on March 30, 2014.  You
+		have until this day to complete your registration.  After this
+		date, the registration system closes and you will not be
+		assigned to a judging team.
+<?php
+	}
+?>
+		
 
 	<hr/>
 	<h3>Cancelling</h3>
-	If your plans change and you're unable to judge this year, just flip
-	the switch below to let us know.  You can always flip the switch back again.
+	If you are regrettably unable to judge at the fair this year, just flip
+	the switch below to let us know.  This helps us re-organize judging teams if 
+	judging assignments have already been made.  You can always flip the switch back again.
 	<?php
 
-	if($u['j_status'] == 'notattending') {
-		$attending = 0;
-		sfiab_error("You have indicated that you're not attending the
-		fair this year, thanks for letting us know.  You won't be
-		assigned to judge anything and you don't need to fill out
-		anything else.  The information will be here next year if you
-		are able to judge again.  If your plans change for this year,
-		just indicate below that you are attending the fair, and finish
-		the registration process.  Thank you.");
-	} else {
-		$attending = 1;
-	}
+	$attending = ($u['j_status'] == 'notattending') ? 0 : 1;
+
+	$sel = array('1'=>'Yes, I\'ll be there', '0'=>'No, I can\'t make it');
 
 	$form_id = 'j_attending_form';
 	form_begin($form_id, 'judge_main.php');	
-	form_yesno($form_id, 'j_attending', "Are you judging at the fair?", $attending, true);
+	form_radio_h($form_id, 'j_attending', "Judging at the fair", $sel, $attending);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>
