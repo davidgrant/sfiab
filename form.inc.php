@@ -318,6 +318,14 @@ function form_ajax_response($response)
 			$r[$h] = '';
 		}
 	}
+
+	$r['val'] = array();
+	if(array_key_exists('val', $response)) {
+		foreach($response['val'] as $k=>$v) {
+			$r['val'][] = array($k, $v);
+		}
+	}
+
 	print(json_encode($r));
 }
 ?>

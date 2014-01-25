@@ -17,39 +17,44 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
-$fields = array('firstname', 'lastname', 'pronounce', 'sex', 'birthdate', 'address', 'address2',
-	'city', 'province', 'postalcode', 'schools_id', 'grade', 'teacher', 'teacheremail',
-	'medicalert');
-
-
 switch($action) {
 case 'save':
-	foreach($fields as $f) {
-		if(!array_key_exists($f, $u)) {
-			/* Key doesn't exist, user is injecting their own keys? */
-			print("Error 1000: $f");
-			exit();
+	post_text($u['firstname'],'firstname');
+	post_text($u['lastname'],'lastname');
+	post_text($u['pronounce'],'pronounce');
+	post_text($u['sex'],'sex');
+	post_text($u['birthdate'],'birthdate');
+	post_text($u['phone1'],'phone1');
+	post_text($u['address'],'address');
+	post_text($u['address2'],'address2');
+	post_text($u['city'],'city');
+	post_text($u['province'],'province');
+	post_text($u['postalcode'],'postalcode');
+	post_int($u['schools_id'],'schools_id');
+	post_int($u['grade'],'grade');
+	post_text($u['s_teacher'],'s_teacher');
+	post_text($u['s_teacheremail'],'s_teacheremail');
+	post_text($u['medicalert'],'medicalert');
+
+	/* Scrub data */
+	$update = array();
+	if($u['birthdate'] !== NULL) {
+		$d = date_parse($u['birthdate']);
+		if($d['year'] > 1900 && $d['month'] > 0 && $d['day'] > 0) {
+			$u['birthdate'] = sprintf("%04d-%02d-%02d", $d['year'], $d['month'], $d['day']);
+			$update['birthdate'] = $u['birthdate'];
+		} else {
+			$update['birthdate'] = '';
+			$u['birthdate'] = NULL;
 		}
-		/* Since 'sex' is a radiobutton, it's only included if there's a checked value */
-		if(array_key_exists($f, $_POST)) {
-			/* Save it to the user */
-			$u[$f] = $_POST[$f];
-		} 
 	}
-
-
-	/* Filter special fields */
-	$u['grade'] = (int)$u['grade'];
-	$u['schools_id'] = (int)$u['schools_id'];
 
 	user_save($mysqli, $u);
 
-	$ret = incomplete_fields($mysqli, $page_id, $u, true);
-	print(json_encode($ret));
+	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$update));
 	exit();
 }
-
-
 
 sfiab_page_begin("Student Personal", $page_id);
 
@@ -59,53 +64,39 @@ sfiab_page_begin("Student Personal", $page_id);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$fields = incomplete_fields($mysqli, $page_id, $u);
-	form_incomplete_error_message($page_id, $fields);
+	$form_id = $page_id.'_form';
+	$fields = incomplete_check($mysqli, $u, $page_id);
+
+	$q=$mysqli->query("SELECT id,school,city FROM schools WHERE year='{$config['year']}' ORDER by city,school");
+	while($r=$q->fetch_assoc()) {
+		$schools[$r['id']] = "{$r['city']} - {$r['school']}";
+	}
+
+	$grades = array();
+	for($x=7;$x<=12;$x++) $grades[$x] = $x;
+
+	form_begin($form_id, 'student_personal.php', $fields);
+	form_text($form_id, 'firstname', "First Name", $u);
+	form_text($form_id, 'lastname', "Last Name", $u);
+	form_text($form_id, 'pronounce', "Name Pronunciation Key", $u);
+	form_radio_h($form_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u);
+	form_text($form_id, 'birthdate', "Date of Birth", $u, 'date');
+	form_text($form_id, 'phone1', "Phone", $u, 'tel');
+	form_text($form_id, 'address', 'Address 1', $u);
+	form_text($form_id, 'address2', 'Address 2', $u);
+	form_text($form_id, 'city', 'City', $u);
+	form_province($form_id, 'province', 'Province', $u);
+	form_text($form_id, 'postalcode', 'Postal Code', $u);
+	form_select($form_id, 'schools_id','School', $schools, $u);
+	form_select($form_id, 'grade', 'Grade', $grades, $u);
+	form_text($form_id, 's_teacher', 'Teacher Name', $u);
+	form_text($form_id, 's_teacheremail', 'Teacher E-Mail', $u);
+	form_text($form_id, 'medicalert', 'Medical Alert Info', $u);
+	form_submit($form_id, 'save', 'Save', 'Information Saved');
+	form_end($form_id);
+
 ?>
-	<form action="#" id="<?=$page_id?>_form">
-<?php
-		$q=$mysqli->query("SELECT id,school,city FROM schools WHERE year='{$config['year']}' ORDER by city,school");
-		while($r=$q->fetch_assoc()) {
-			$schools[$r['id']] = "{$r['city']} - {$r['school']}";
-		}
-
-		$grades = array();
-		for($x=7;$x<=12;$x++) {
-			$grades[$x] = $x;
-		}
-
-		/* Clear out invalid input so the placeholder is shown again */
-		if($u['birthdate'] == '0000-00-00') $u['birthdate'] = '';
-
-		form_text($page_id, 'firstname', "First Name", $u);
-		form_text($page_id, 'lastname', "Last Name", $u);
-		form_text($page_id, 'pronounce', "Name Pronunciation Key", $u);
-		form_radio_h($page_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u);
-		form_text($page_id, 'birthdate', "Date of Birth", $u, 'date');
-		form_text($page_id, 'phone1', "Phone", $u, 'tel');
-		form_text($page_id, 'address', 'Address 1', $u);
-		form_text($page_id, 'address2', 'Address 2', $u);
-		form_text($page_id, 'city', 'City', $u);
-		form_province($page_id, 'province', 'Province', $u);
-		form_text($page_id, 'postalcode', 'Postal Code', $u);
-		form_select($page_id, 'schools_id','School', $schools, $u);
-		form_select($page_id, 'grade', 'Grade', $grades, $u);
-		form_text($page_id, 's_teacher', 'Teacher Name', $u);
-		form_text($page_id, 's_teacheremail', 'Teacher E-Mail', $u);
-		form_text($page_id, 'medicalert', 'Medical Alert Info', $u);
-		form_submit($page_id, 'Save');
-?>
-		<input type="hidden" name="action" value="save"/>
-	</form>
-
-	<?=form_scripts('student_personal.php', $page_id, $fields);?>
-
-
-</div>
-	
-
-
-
+</div></div>
 
 <?php
 sfiab_page_end();

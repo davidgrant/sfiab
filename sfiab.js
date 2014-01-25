@@ -91,6 +91,13 @@ $( document ).on( "pagecreate", function( event ) {
 				form_happy_msg.hide();
 			}
 
+			// Change field values based on the response
+			for(var i=0; i<data.val.length; i++) {
+				v = data.val[i];
+				// For some reason using # notation doesn't work, but input[ does.
+				$("input[id="+form_id+"_"+v[0]+"]").val(v[1]);
+			}
+
 			/* Use the incomplete fields to update the count in the left nav menu */
 			$("#"+form_id+" label").removeClass('error');
 			var nav_li = $('#left_nav_'+page.attr('id')+' span');

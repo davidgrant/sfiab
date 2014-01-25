@@ -48,6 +48,14 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	$u['roles'] = explode(",", $u['roles']);
 	$u['password_expired'] = ((int)$u['password_expired'] == 1) ? true : false;
 
+	/* Student filtering */
+	filter_int_or_null($u['schools_id']);
+	filter_int_or_null($u['grade']);
+	/* Clear out invalid input so the placeholder is shown again */
+	if($u['birthdate'] == '0000-00-00') $u['birthdate'] = NULL;
+
+	/* Judge filtering */
+
 	filter_int_or_null($u['j_pref_div1']);
 	filter_int_or_null($u['j_pref_div2']);
 	filter_int_or_null($u['j_pref_div3']);

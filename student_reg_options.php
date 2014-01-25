@@ -27,12 +27,13 @@ $tshirt_sizes = array('none' => 'None',
 
 switch($action) {
 case 'save':
-	if(array_key_exists($_POST['tshirt'], $tshirt_sizes)) {
-		$u['tshirt'] = $_POST['tshirt'];
+	post_text($u['s_tshirt'], 's_tshirt');
+	if(!array_key_exists($u['s_tshirt'], $tshirt_sizes)) {
+		$u['s_tshirt'] = NULL;
 	}
 	user_save($mysqli, $u);
-	$ret = incomplete_fields($mysqli, $page_id, $u, true);
-	print(json_encode($ret));
+	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
 
@@ -41,19 +42,19 @@ sfiab_page_begin("Student Registration Options", $page_id);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 <?php
-	$fields = incomplete_fields($mysqli, $page_id, $u);
-	form_incomplete_error_message($page_id, $fields); ?>
+	$form_id = $page_id.'_form';
+	$fields = incomplete_check($mysqli, $u, $page_id);
 
-	<form action="#" id="s_reg_options_form">
-<?php
-		printf(" The cost of each T-Shirt is $%.2f, sizes are Adult sizes. ", $config['tshirt_cost']);
-		form_select($page_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $u);
-		form_submit($page_id, 'Save');
 ?>
-		<input type="hidden" name="action" value="save"/>
-	</form>
-	<?=form_scripts('student_reg_options.php', $page_id, $fields);?>
-</div>
+	<h3>T-Shirt</h3>
+	<p>The cost of each T-Shirt is $<?=$config['tshirt_cost']?>, sizes are Adult sizes.
+<?php
+	form_begin($form_id, 'student_reg_options.php', $fields);
+	form_select($form_id, 's_tshirt', 'T-Shirt', $tshirt_sizes, $u);
+	form_submit($form_id, 'save', 'Save', 'Information Saved');
+	form_end($form_id);
+?>
+</div></div>
 
 <?php
 sfiab_page_end();
