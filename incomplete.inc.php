@@ -126,7 +126,7 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 		break;
 
 	case 'j_personal':
-		incomplete_check_text($ret, $u, array('salutation', 'firstname', 'lastname', 'phone1',
+		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'phone1',
 				'city', 'province', 'language','j_psd'));
 		break;
 	case 'j_options':

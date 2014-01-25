@@ -37,9 +37,13 @@ case 'save':
 	exit();
 }
 
+$help = '
+<ul><li><b>Salutation</b> - Will appear before your name on your judge name badge.  Dr. for example.
+<li><b>Language</b> - Preferred language of communication (the system is only in English right now, sorry.)
+<li><b>Highest Post-Secondary Degreey</b> - PhD, MSC, BASC, etc.
+</ul>';
 
-
-sfiab_page_begin("Judge Personal", $page_id);
+sfiab_page_begin("Judge Personal", $page_id, $help);
 
 ?>
 
@@ -68,7 +72,7 @@ sfiab_page_begin("Judge Personal", $page_id);
 ?>
 
 
-</div>
+</div></div>
 	
 
 
