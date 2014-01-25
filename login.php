@@ -85,6 +85,7 @@ case 'register':
 		exit();
 	}
 
+
 	/* Get the most recent username from any year that isn't deleted or new
 	 * Deleted users can be created in the same year (so there could be more than one
 	 *  username result for the same year, we don't want the username check to keep
