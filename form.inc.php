@@ -168,8 +168,8 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 
 function form_lang($page_id, $name, $label, &$value)
 {
-	$f = json_decode('"Fran\u00e7ais"');
-	$data = array('en' => 'English', 'fr'=>$f);
+//	$f = json_decode('"Fran\u00e7ais"');
+	$data = array('en' => 'English', 'fr'=>'Fran&#231;ais');
 	form_select($page_id, $name, $label, $data, $value);
 }
 
