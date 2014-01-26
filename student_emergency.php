@@ -44,7 +44,7 @@ case 'save':
 
 
 $help = '
-Please provide the name and phone number of at least one adult who can be contacted during the fair in case of emergency.
+<p>Please provide the name and phone number of at least one adult who can be contacted during the fair in case of emergency.
 ';
 
 sfiab_page_begin("Student Emergency Contact", $page_id, $help);

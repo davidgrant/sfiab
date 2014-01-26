@@ -31,7 +31,7 @@ switch($action) {
 case 'save':
 	/* Num mentors */
 
-	post_bool($mentors, 'mentors');
+	post_bool($mentors, 'num_mentors');
 
 	if($mentors === NULL) {
 		form_ajax_response(array('status'=>0));
@@ -138,6 +138,7 @@ $num_mentors = $p['num_mentors'];
 
 <?php
 	$fields = incomplete_check($mysqli, $u, $page_id);	
+	print_r($fields);
 	form_page_begin($page_id, $fields);
 ?>
 	<h3>Project Mentorship Information</h3>
@@ -154,7 +155,7 @@ $num_mentors = $p['num_mentors'];
 	}
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'student_mentor.php');
-	form_yesno($form_id, 'mentors', "Were you assisted by mentors in doing this project?", $mentors, true);
+	form_yesno($form_id, 'num_mentors', "Were you assisted by mentors in doing this project?", $mentors, true);
 	form_submit($form_id, 'save', 'Save', 'Mentor Info Saved');
 	form_end($form_id);
 

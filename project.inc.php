@@ -182,5 +182,48 @@ function mentor_create($mysqli, $pid)
 	return $mid;
 }
 
+function tour_load($mysqli, $id , $data = NULL)
+{
+	$id = (int)$id;
+	if($id != 0) {
+		$q = $mysqli->query("SELECT * FROM tours WHERE id='$id'");
+		$t = $q->fetch_assoc();
+		print($mysqli->error);
+	} else {
+		$t = $data;
+		$id = $t['id'];
+	}
+	unset($t['original']);
+	$original = $t;
+	$t['original'] = $original;
+	
+	return $t;
+}
+
+
+function tour_load_all($mysqli)
+{
+	global $config;
+	$q = $mysqli->query("SELECT * FROM tours WHERE year='{$config['year']}'");
+	$tours = array();
+	while($d = $q->fetch_assoc()) {
+		$t = tour_load($mysqli, false, $d);
+		$tours[$t['id']] = $t;
+	}
+	return $tours;
+}
+
+function tour_save($mysqli, &$t)
+{
+	generic_save($mysqli, $t, "tours", "id");
+}
+
+function tour_create($mysqli) 
+{
+	global $config;
+	$r = $mysqli->real_query("INSERT INTO tours(`year`) VALUES('{$config['year']}')");
+	$tid = $mysqli->insert_id;
+	return $tid;
+}
 
 ?>

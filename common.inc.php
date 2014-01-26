@@ -235,13 +235,13 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	$student_menu = array('s_home' => array('Student Home', 'student_main.php'),
 			      's_personal' => array('Personal Info', 'student_personal.php'),
 			      's_emergency' => array('Emergency Contact', 'student_emergency.php'),
-			      's_reg_options' => array('Registration Options', 'student_reg_options.php'),
+			      's_reg_options' => array('Options and Tours', 'student_reg_options.php'),
 			      's_partner' => array('Partner', 'student_partner.php'),
 			      's_project' => array('Project Info', 'student_project.php'),
 			      's_ethics' => array('Project Ethics', 'student_ethics.php'),
 			      's_safety' => array('Project Safety', 'student_safety.php'),
 			      's_mentor' => array('Mentor Info', 'student_mentor.php'),
-			      's_awards' => array('Awards', 'student_awards.php'),
+			      's_awards' => array('Award Selection', 'student_awards.php'),
 			      's_signature' => array('Signature Form', 'student_signature.php'),
 			      );
 
@@ -254,6 +254,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 
 	$committee_menu = array('c_main' => array('Committee Home', 'c_main.php'),
 			    'c_awards' => array('Edit Awards', 'c_awards.php'),
+			    'c_tours' => array('Edit Tours', 'c_tours.php'),
 		);
 
 	$login_menu = array('register' => array('Registration', 'index.php#register'),
