@@ -16,6 +16,16 @@ function filter_bool_or_null(&$val)
 	$val = (int)$val;
 }
 
+function filter_phone(&$val)
+{
+	$ret = preg_match('/.*1?[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9][0-9]) *(.*)/', $val, $matches);
+	if($ret > 0) {
+		$val = "{$matches[1]}-{$matches[2]}-{$matches[3]} {$matches[4]}";
+	} else {
+		$val = NULL;
+	}
+}
+
 function post_bool(&$val, $var)
 {
 	if(array_key_exists($var, $_POST)) {

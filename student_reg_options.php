@@ -46,14 +46,15 @@ sfiab_page_begin("Student Registration Options", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 <?php
-	$form_id = $page_id.'_form';
 	$fields = incomplete_check($mysqli, $u, $page_id);
+	form_page_begin($page_id, $fields);
 
 ?>
 	<h3>T-Shirt</h3>
 	<p>The cost of each T-Shirt is $<?=$config['tshirt_cost']?>, sizes are Adult sizes.
 <?php
-	form_begin($form_id, 'student_reg_options.php', $fields);
+	$form_id = $page_id.'_form';
+	form_begin($form_id, 'student_reg_options.php');
 	form_select($form_id, 's_tshirt', 'T-Shirt', $tshirt_sizes, $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);

@@ -54,10 +54,14 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	/* Clear out invalid input so the placeholder is shown again */
 	if($u['birthdate'] == '0000-00-00') $u['birthdate'] = NULL;
 
+	if($u['s_sa_nom'] === NULL || $u['s_sa_nom'] === '') 
+		$u['s_sa_nom'] = array();
+	else 
+		$u['s_sa_nom'] = explode(',', $u['s_sa_nom']);
+
 
 
 	/* Judge filtering */
-
 	filter_int_or_null($u['j_pref_div1']);
 	filter_int_or_null($u['j_pref_div2']);
 	filter_int_or_null($u['j_pref_div3']);
@@ -151,18 +155,20 @@ function user_save($mysqli, &$u)
 				foreach($val as $id=>$enabled) {
 					if($enabled == 1) $a[] = $id;
 				}
-				print_r($a);
 				$v = implode(',', $a);
 				break;
 
-			 case 'j_sa':
-				$a = array();
-				foreach($val as $index=>$id) {
-					if($id !== NULL) $a[] = $id;
+			 case 'j_sa': case 's_sa_nom':
+			 	if(count($val) == 0) {
+					$v = NULL;
+				} else {
+					$a = array();
+					foreach($val as $index=>$id) {
+						if($id !== NULL) $a[] = $id;
+					}
+					$v = implode(',', $a);
 				}
-				$v = implode(',', $a);
 				break;
-
 
 			default:
 				/* Serialize any non-special arrays */

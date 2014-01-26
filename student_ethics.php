@@ -9,6 +9,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$p = project_load($mysqli, $u['s_pid']);
 
 $page_id = 's_ethics';
 
@@ -21,20 +22,13 @@ $fields = array('');
 
 switch($action) {
 case 'save':
-	foreach($fields as $f) {
-		if(!array_key_exists($f, $u)) {
-			/* Key doesn't exist, user is injecting their own keys? */
-			print("Error 1005: $f");
-			exit();
-		}
-		/* Since 'sex' is a radiobutton, it's only included if there's a checked value */
-		if(array_key_exists($f, $_POST)) {
-			/* Save it to the user */
-			$u[$f] = $_POST[$f];
-		} 
-	}
-
-	user_save($mysqli, $u);
+	$a = array('human1', 'humansurvey1', 'humantest1', 
+		'humanfood1', 'humanfood2', 'humanfood6', 'humanfood5', 'humanfood4', 'humanfood3', 
+	        'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2', 
+		'animals', 'animal_vertebrate', 'animal_ceph', 'animal_tissue', 'animal_drug' );
+	foreach($a as $f) {
+		post_bool($p['ethics'][$f], $f);
+	project_save($mysqli, $p);
 
 	$ret = incomplete_fields($mysqli, $page_id, $u, true);
 	print(json_encode($ret));
@@ -88,14 +82,11 @@ function divider($name, $text)
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$answers = array();
+	$answers = $p['ethics'];
 	$fields = incomplete_check($mysqli, $u, $page_id);
 ?>
-	<form action="#" id="<?=$page_id?>_form">
+	<form action="project_ethics.php" method="post" data-ajax="false" id="<?=$page_id?>_form">
 <?php
-		$relations=array('parent'=>"Parent",'legalguardian'=>"Legal Guardian",'grandparent'=>"Grandparent",
-				'familyfriend'=>"Family Friend", 'other'=>"Other");
-
 ?>		<h3>Ethics Questions</h3>
 
 <ul data-role="listview" data-inset="true">
@@ -125,11 +116,11 @@ function divider($name, $text)
         question('animal_tissue', 'Does this project involve animal parts or tissues, including organs, plasma, serum, or embryos, from Vertebrate Animals?', array(), $answers);
         question('animal_drug', 'Does this project involve the use of drugs on animals?', array('See the definition of Drugs in YSC Policy 4.1.2 Section 10'), $answers);
 
-   
 ?>
 </ul>
 
-		<input type="hidden" name="action" value="save"/>
+	<input type="hidden" name="action" value="save"/>
+		
 	</form>
 	<script>
 		$("#<?=$page_id?>_humansurvey1_li").hide();
@@ -150,7 +141,7 @@ function divider($name, $text)
 		$("#<?=$page_id?>_humanfoodlow2_li").hide();
 
 
-<?php 	foreach($fields as $f) { ?>
+<?php 		foreach($fields as $f) { ?>
 			$("label[for='<?=$page_id?>_<?=$f?>']").addClass('error');
 <?php		}?>
 

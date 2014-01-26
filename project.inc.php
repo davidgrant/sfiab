@@ -35,6 +35,22 @@ function project_filter(&$p)
 	filter_int_or_null($p['req_electricity']);
 	filter_int_or_null($p['num_students']);
 	filter_int_or_null($p['num_mentors']);
+
+	if(!is_array($p['ethics'])) {
+		if($p['ethics'] == NULL) {
+			$p['ethics'] = array();
+		} else {
+			$p['ethics'] = unserialize($p['ethics']);
+		}
+	}
+	if(!is_array($p['safety'])) {
+		if($p['safety'] == NULL) {
+			$p['safety'] = array();
+		} else {
+			$p['safety'] = unserialize($p['safety']);
+		}
+	}
+		
 }
 
 
@@ -121,5 +137,50 @@ function project_get_legal_category_ids($mysqli, $pid)
 	}
 	return $ret;
 }
+
+function mentor_load($mysqli, $id , $data = NULL)
+{
+	$id = (int)$id;
+	if($id != 0) {
+		$q = $mysqli->query("SELECT * FROM mentors WHERE id='$id'");
+		$m = $q->fetch_assoc();
+		print($mysqli->error);
+	} else {
+		$m = $data;
+		$id = $m['id'];
+	}
+
+	unset($m['original']);
+	$original = $m;
+	$m['original'] = $original;
+	
+	return $m;
+}
+
+
+function mentor_load_all($mysqli, $pid)
+{
+	$q = $mysqli->query("SELECT * FROM mentors WHERE pid='$pid'");
+	$mentors = array();
+	while($d = $q->fetch_assoc()) {
+		$m = mentor_load($mysqli, false, $d);
+		$mentors[$m['id']] = $m;
+	}
+	return $mentors;
+}
+
+function mentor_save($mysqli, &$m)
+{
+	generic_save($mysqli, $m, "mentors", "id");
+}
+
+function mentor_create($mysqli, $pid) 
+{
+	global $config;
+	$r = $mysqli->real_query("INSERT INTO mentors(`pid`) VALUES('$pid')");
+	$mid = $mysqli->insert_id;
+	return $mid;
+}
+
 
 ?>

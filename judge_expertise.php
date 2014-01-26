@@ -71,8 +71,8 @@ sfiab_page_begin("Expertise", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$form_id = $page_id.'_form';
 	$fields = incomplete_check($mysqli, $u, $page_id);
+	form_page_begin($page_id, $fields);
 
 	$cats = categories_load($mysqli);
 	$isef_data = isef_get_div_names();
@@ -85,7 +85,8 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	$sa_only = ($u['j_sa_only'] == 1) ? 1 : 0;
 	$hidden = "style=\"display:none\"";
 
-	form_begin($form_id, 'judge_expertise.php', $fields);
+	$form_id = $page_id.'_form';
+	form_begin($form_id, 'judge_expertise.php');
 ?>
 		<h3>Sponsor Judges</h3>
 <?php

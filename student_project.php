@@ -26,8 +26,6 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
-$fields = array('title', 'cat_id', 'challenge_id', 'isef_id', 'language', 'req_electricity', 'summary');
-
 
 switch($action) {
 case 'save':
@@ -65,10 +63,10 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$form_id = $page_id.'_form';
 	$fields = incomplete_check($mysqli, $u, $page_id, true);
-?>
-<?php
+	$e = join('<br/>', $incomplete_errors);
+	form_page_begin($page_id, $fields, $e);
+
 	$chals = challenges_load($mysqli);
 	$cats = categories_load($mysqli);
 	$legal_ids = project_get_legal_category_ids($mysqli, $p['pid']);
@@ -82,12 +80,11 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 	foreach($legal_ids as $cid) {
 		$cats_data[$cid] = $cats[$cid]['name'];
 	}
-
-	$e = join('<br/>', $incomplete_errors);
-	form_begin($form_id, 'student_project.php', $fields, $e);
-
-	print("<h3>Project Information</h3>");
-
+?>
+	<h3>Project Information</h3>
+<?php	
+	$form_id = $page_id.'_form';
+	form_begin($form_id, 'student_project.php', $e);
 	form_text($form_id, 'title', "Title", $p);
 	form_select($form_id, 'cat_id', "Category", $cats_data, $p);
 	form_select($form_id, 'challenge_id', "Challenge", $chals_data, $p);

@@ -1,10 +1,12 @@
 <?php
 $form_incomplete_fields = array();
+$form_page_id = NULL;
+$form_form_id = NULL;
 
-function form_inc($id)
+function form_inc($name)
 {
 	global $form_incomplete_fields;
-	if(in_array($id, $form_incomplete_fields)) 
+	if(in_array($name, $form_incomplete_fields)) 
 		return "class=\"error\"";
 	return "";
 }
@@ -23,10 +25,12 @@ function form_text($page_id, $name, $label, &$value = '', $type='text')
 	$id = $page_id.'_'.$name;
 	$placeholder = $label;
 	if($type == 'date') $placeholder.= ' (YYYY-MM-DD)';
+	if($type == 'tel') $placeholder .= ' (NNN-NNN-NNNN)';
+
 	
 	?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>">
 	</div>
 <?php
@@ -43,7 +47,7 @@ function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL)
 	$maxv = ($max === NULL) ? '' : "max=\"$max\"";
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> >
 	</div>
 <?php
@@ -58,7 +62,7 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false) {
 
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
@@ -87,7 +91,7 @@ function form_check_group($form_id, $name, $label, $data, &$value)
 	}
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
@@ -101,6 +105,24 @@ function form_check_group($form_id, $name, $label, $data, &$value)
 			} ?>
 		</fieldset>
 	</div>
+<?php
+}
+
+function form_checkbox($form_id, $name, $label, $data_value, &$value) 
+{
+	$id = $form_id.'_'.$name.'_'.$data_value;
+	/* This is so we can pass $u or $p in, and use the name to index into the array */
+	if(is_array($value)) {
+		if(array_key_exists($name, $value))
+			$v = $value[$name];
+		else 
+			$v = $value;
+	} else {
+		$v = array($value);
+	}
+	$sel = (in_array($data_value,$v)) ? 'checked="checked"' : ''; ?>
+        <input name="<?=$name?>[]" id="<?=$id?>" value="<?=$data_value?>" <?=$sel?> type="checkbox">
+        <label for="<?=$id?>"><?=$label?></label>
 <?php
 }
 
@@ -127,14 +149,14 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> >
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
 <?php			}
 			foreach($data as $key=>$val) {
 				if(is_array($val)) $val = $val['name'];
-				$sel = ($v == $key) ? 'selected="selected"' : ''; ?>
+				$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
 			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php			} ?>
 		</select>
@@ -155,7 +177,7 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<select name="<?=$name?>" id="<?=$id?>" >
 		<option value="">Choose...</option>
 <?php		foreach($data as $name=>$group) { ?>
@@ -191,7 +213,7 @@ function form_textbox($form_id, $name, $label, &$value)
 	$v = (is_array($value)) ? $value[$name] : $value;
 ?>
 	<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($id)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<textarea rows="8" name="<?=$name?>" id="<?=$id?>"><?=$v?></textarea>
 	</div>
 <?php
@@ -221,29 +243,11 @@ function form_hidden($form_id, $name, $txt)
 <?php
 }
 
-
-function form_begin($form_id, $action, $fields=array(), $initial_error='')
+function form_begin($form_id, $action)
 {
-	global $form_incomplete_fields;
-	$missing_message = "This page is incomplete.  Missing information fields are highlighted in red.";
-
-	$ids = array();
-	foreach($fields as $f) {
-		$ids[] = $form_id.'_'.$f;
-	}
-	$form_incomplete_fields = array_merge($form_incomplete_fields, $ids);
-
-	$none = 'style="display:none"';
+	global $form_form_id;
+	$form_form_id = $form_id;
 ?>
-	<div id="<?=$form_id?>_missing_msg" class="error" <?=(count($fields)==0) ? $none : ''?>>
-	<?=$missing_message?>
-	</div>
-	<div id="<?=$form_id?>_error_msg" class="error" <?=($initial_error=='') ? $none : ''?>>
-	<?=$initial_error?>
-	</div>
-	<div id="<?=$form_id?>_happy_msg" class="happy" style="display:none">
-	</div>
-
 	<form action="<?=$action?>" id="<?=$form_id?>" class="sfiab_form">
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php
@@ -254,30 +258,30 @@ function form_end($form_id)
 	print("</form>");
 }
 
-function form_messages($form_id, $missing_message="This page is incomplete.  Missing information fields are highlighted in red.")
+function form_page_begin($page_id, $fields, $error_msg = '', $happy_msg = '', $missing_message = '')
 {
+	global $form_incomplete_fields;
+	global $form_page_id;
+	
+	$form_page_id = $page_id;
+	if($missing_message == '') {
+		$missing_message = "This page is incomplete.  Missing information fields are highlighted in red.";
+	}
+
+	$form_incomplete_fields = array_merge($form_incomplete_fields, $fields);
+
+	$none = 'style="display:none"';
 ?>
-	<div id="<?=$form_id?>_missing_msg" class="error" style="display:none">
+	<div id="<?=$page_id?>_missing_msg" class="error" <?=(count($fields)==0) ? $none : ''?>>
 	<?=$missing_message?>
 	</div>
-	<div id="<?=$form_id?>_error_msg" class="error" style="display:none">
+	<div id="<?=$page_id?>_error_msg" class="error" <?=($error_msg=='') ? $none : ''?>>
+	<?=$error_msg?>
 	</div>
-	<div id="<?=$form_id?>_happy_msg" class="happy" style="display:none">
+	<div id="<?=$page_id?>_happy_msg" class="happy" <?=($happy_msg=='') ? $none : ''?>>
+	<?=$happy_msg?>
 	</div>
 <?php
-}
-
-function form_scripts($form_id, $fields)
-{
-?>
-	<script>
-		// highlight any incomplete fields
-<?php 		foreach($fields as $f) { ?>
-			$("label[for='<?=$form_id?>_<?=$f?>']").addClass('error');
-<?php		}?>
-	</script>			
-<?php
-
 }
 
 function form_scripts_no_ajax($action, $page_id, $fields)

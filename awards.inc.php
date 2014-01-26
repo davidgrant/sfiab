@@ -48,6 +48,21 @@ function award_load_special_for_select($mysqli)
 	return $awards;
 }
 
+function award_load_special_for_project_select($mysqli, &$p)
+{
+	global $config;
+	$q = $mysqli->query("SELECT * FROM awards WHERE `type`='special' 
+					AND FIND_IN_SET('{$p['cat_id']}',`categories`)>0
+					AND `self_nominate` = 1
+					AND year='{$config['year']}'
+					ORDER BY `name`");
+	print($mysqli->error);
+	while($d = $q->fetch_assoc()) {
+		$awards[$d['id']] = award_load($mysqli, 0, $d);
+	}
+	return $awards;
+}
+
 function prize_load($mysqli, $pid, $data=NULL)
 {
 	if($data === NULL) {

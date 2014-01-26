@@ -261,6 +261,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 		);
 
 	$account_menu = array('a_change_password' => array('Change Password', 'a_change_password.php'),
+			      'a_delete_account' => array('Delete Account', 'a_delete_account.php'),
 		);
 	$logout_menu = array( 'logout' => array('Logout', 'login.php?action=logout'),
 		);

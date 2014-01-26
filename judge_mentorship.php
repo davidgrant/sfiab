@@ -42,11 +42,12 @@ sfiab_page_begin("Mentorship", $page_id, $help);
 
 <?php
 	$fields = incomplete_check($mysqli, $u, $page_id);
-	$form_id = $page_id.'_form';
+	form_page_begin($page_id, $fields);
 ?>
 	<h3>Mentorship</h3>
 <?php
-	form_begin($form_id, 'judge_mentorship.php', $fields);
+	$form_id = $page_id.'_form';
+	form_begin($form_id, 'judge_mentorship.php');
 	form_yesno($form_id, 'j_mentored', "Have you mentored or acted in an advisory role for any project at the fair?", $u, true);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);

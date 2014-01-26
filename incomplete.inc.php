@@ -128,14 +128,30 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 		$p = project_load($mysqli, $u['s_pid']);
 		incomplete_check_ge_zero($ret, $p, array('num_mentors'));
 		if($p['num_mentors'] > 0) {
-			$q = $mysqli->query("SELECT * FROM mentors WHERE pid='{$p['pid']}'");
-			for($i=$q->num_rows; $i < $p['num_mentors']; $i++) {
+			$mentors = mentor_load_all($mysqli, $p['pid']);
+			foreach($mentors as $mid=>$m) {
+				$ret_temp = array();
+				/* Check for missing fields, but then remap the
+				missing fields to be the name plus the mentor
+				id */
+				incomplete_check_text($ret_temp, $m, $fields);
 				foreach($fields as $f) {
-					$ret[] = "$f".$i;
+					if(in_array($f, $ret_temp)) {
+						$ret[] = "{$f}{$mid}";
+					}
 				}
 			}
 		}
 		break;
+
+	case 's_awards':
+		if(count($u['s_sa_nom']) > 0) {
+//			if($u['s_sa_nom'][0] === NULL || $u['s_sa_nom'][0] === '') {
+		} else {
+			$ret[] = 'award';
+		}
+		break;
+
 
 	case 'j_personal':
 		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'phone1',

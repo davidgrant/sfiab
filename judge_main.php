@@ -47,7 +47,9 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
-
+<?php
+	form_page_begin($page_id, array());
+?>
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
 	<p> Welcome to the new GVRSF registration system.  

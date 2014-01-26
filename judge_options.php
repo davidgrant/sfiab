@@ -52,8 +52,10 @@ sfiab_page_begin("Options", $page_id, $help);
 
 <?php
 	$fields = incomplete_check($mysqli, $u, $page_id);
+	form_page_begin($page_id, $fields);
+
 	$form_id=$page_id.'_form';
-	form_begin($form_id,'judge_options.php', $fields);
+	form_begin($form_id,'judge_options.php');
 ?>	
 	<h3>Judging Options</h3> 
 <?php	form_yesno($form_id, 'j_willing_lead', "Are you willing to be the team-lead on your judging team?", $u, true);

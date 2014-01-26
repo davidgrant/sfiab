@@ -38,6 +38,10 @@ case 'save':
 
 	/* Scrub data */
 	$update = array();
+
+	filter_phone($u['phone1']);
+	$update['phone1'] = $u['phone1'];
+
 	if($u['birthdate'] !== NULL) {
 		$d = date_parse($u['birthdate']);
 		if($d['year'] > 1900 && $d['month'] > 0 && $d['day'] > 0) {
@@ -66,6 +70,7 @@ sfiab_page_begin("Student Personal", $page_id);
 <?php
 	$form_id = $page_id.'_form';
 	$fields = incomplete_check($mysqli, $u, $page_id);
+	form_page_begin($page_id, $fields);
 
 	$q=$mysqli->query("SELECT id,school,city FROM schools WHERE year='{$config['year']}' ORDER by city,school");
 	while($r=$q->fetch_assoc()) {
@@ -75,7 +80,7 @@ sfiab_page_begin("Student Personal", $page_id);
 	$grades = array();
 	for($x=7;$x<=12;$x++) $grades[$x] = $x;
 
-	form_begin($form_id, 'student_personal.php', $fields);
+	form_begin($form_id, 'student_personal.php');
 	form_text($form_id, 'firstname', "First Name", $u);
 	form_text($form_id, 'lastname', "Last Name", $u);
 	form_text($form_id, 'pronounce', "Name Pronunciation Key", $u);

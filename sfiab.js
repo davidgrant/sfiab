@@ -56,11 +56,12 @@ $( document ).on( "pagecreate", function( event ) {
 
 		var form = $(event.target);
 		var form_id = form.attr('id');
-		var form_missing_msg = $("#"+form_id+"_missing_msg");
-		var form_error_msg = $("#"+form_id+"_error_msg");
-		var form_happy_msg = $("#"+form_id+"_happy_msg");
 		var form_button = $("#"+form_id+"_submit");
 		var page = form.closest("div[data-role=page]");
+		var page_id = page.attr('id');
+		var form_missing_msg = $("#"+page_id+"_missing_msg");
+		var form_error_msg = $("#"+page_id+"_error_msg");
+		var form_happy_msg = $("#"+page_id+"_happy_msg");
 
 		var pre_submit_fn = window[form_id + '_pre_submit'];
 		if(typeof pre_submit_fn === 'function') {
@@ -93,9 +94,16 @@ $( document ).on( "pagecreate", function( event ) {
 
 			// Change field values based on the response
 			for(var i=0; i<data.val.length; i++) {
-				v = data.val[i];
+				var v = data.val[i];
 				// For some reason using # notation doesn't work, but input[ does.
-				$("input[id="+form_id+"_"+v[0]+"]").val(v[1]);
+				var e = $("input[id="+form_id+"_"+v[0]+"]");
+				var type = e.prop('type');
+				if(type == 'checkbox') {
+					e.prop('checked', v[1]);
+					e.checkboxradio("refresh");
+				} else {
+					e.val(v[1]);
+				}
 			}
 
 			/* Use the incomplete fields to update the count in the left nav menu */

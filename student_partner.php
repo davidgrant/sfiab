@@ -229,7 +229,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-//	form_incomplete_error_message($page_id, $fields);
+	form_page_begin($page_id, $fields);
 
 	/* Check for an incoming request first */
 	$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
@@ -282,7 +282,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 	/* Put this way up here so we can use it's error div for the entire
 	 * page */
 	$form_id = $page_id.'_num_students_form';
-	form_begin($form_id, 'student_partner.php', $fields);
+	form_begin($form_id, 'student_partner.php');
 	?>
 
 
@@ -317,7 +317,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			$button_id = "invite_submit_$i";
 			$v = '';
 
-			$form_incomplete_fields[] = $this_form_id.'_un';
+			$form_incomplete_fields[] = 'un';
 			form_begin($this_form_id, 'student_partner.php');
 			form_text($this_form_id, 'un', 'Username', $v);
 			form_submit($this_form_id, 'invite', 'Invite', 'Invite');

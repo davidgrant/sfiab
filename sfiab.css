@@ -711,6 +711,10 @@ html head + body .ui-body-r.ui-focus {
 	color: #ff3333 !important;
 }
 
+.ui-checkbox label.ui-btn {
+	font-weight: 400 !important;
+}
+
 
 /* Adjust label/fieldset ratio to make the label wide */
 .ui-field-contain-wide > label {

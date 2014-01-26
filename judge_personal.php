@@ -30,10 +30,17 @@ case 'save':
 	post_text($u['province'], 'province');
 	post_text($u['language'], 'language');
 	post_text($u['j_psd'], 'j_psd');
+
+	$updates = array();
+	filter_phone($u['phone1']);
+	filter_phone($u['phone2']);
+	$updates['phone1'] = $u['phone1'];
+	$updates['phone2'] = $u['phone2'];
+
 	user_save($mysqli, $u);
 
 	$ret = incomplete_check($mysqli, $u, $page_id, true);
-	form_ajax_response(array('status'=>0, 'missing'=>$ret));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$updates));
 	exit();
 }
 
@@ -52,9 +59,10 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 
 <?php
 	$fields = incomplete_check($mysqli, $u, $page_id);
+	form_page_begin($page_id, $fields);
 
 	$form_id = $page_id."_form";
-	form_begin($form_id, 'judge_personal.php', $fields);
+	form_begin($form_id, 'judge_personal.php');
 
 	form_text($form_id, 'salutation', "Salutation", $u);
 	form_text($form_id, 'firstname', "First Name", $u);

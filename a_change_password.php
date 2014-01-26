@@ -26,6 +26,10 @@ sfiab_page_begin("Change Password", "a_change_password");
 	}
 
 	form_begin($form_id, 'login.php', array(), $initial_error);
+
+?>
+	<p>Passwords must be at least 8 characters long and contain at least one letter, one number, and one non-alphanumberic character (something other than a letter and a number)
+<?php
 	$pw1 = '';
 	$pw2 = '';
 	form_text($form_id, 'pw1','New Password',$pw1, 'password');
