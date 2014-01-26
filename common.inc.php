@@ -70,7 +70,9 @@ function sfiab_log($mysqli, $type, $data, $uid=-1)
 {
 	$ip = $_SERVER['REMOTE_ADDR'];
 	if ($uid == -1 && sfiab_session_is_active()) {
-		$uid = $_SESSION['uid'];
+		if(array_key_exists('uid', $_SESSION)) {
+			$uid = $_SESSION['uid'];
+		}
 	}
 	$type = $mysqli->real_escape_string($type);
 	$data = $mysqli->real_escape_string($data);
