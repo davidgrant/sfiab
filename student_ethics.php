@@ -134,7 +134,7 @@ function policy($name, $text, $link = '')
 		policy('YSC Policy 4.1.1.2 - Significant Risk', '', 'http://youthscience.ca/participation-humans-research-significant-risk');
 
 	if($e['animals'])
-		policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2, which can be found here:','www.youthscience.ca/policy/use-animals-research">Use of Animals in Research');
+		policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2, which can be found here:','http://www.youthscience.ca/policy/use-animals-research');
 
 	if($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] ) 
 		policy('Survey Low Risk', 'Most Surveys, Skill Tests, and Observations of Behaviour are considered Low Risk (See YSC Policy 4.1.1.1 Section 3.1).');
@@ -193,14 +193,14 @@ function policy($name, $text, $link = '')
 
 	if( ($e['human1'] && !$e['humanfood3'] && !$e['humanfood4'] && !$e['humanfood5'] && !$e['humantest1'] && !$e['humanfooddrug'] && !$e['humanfoodlow1'] && !$e['humanfoodlow2']) 
 			|| ($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1']) ) 
-		policy('Participation of Humans - Low Risk', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 'www.basef.ca/sites/default/files/4.1A_Humans_Low_Risk_BASEF.pdf');
+		policy('Participation of Humans - Low Risk', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 'http://www.basef.ca/sites/default/files/4.1A_Humans_Low_Risk_BASEF.pdf');
 
 		
         if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) 
-		policy('Participation of Humans - Significant Risk', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here', 'www.basef.ca/sites/default/files/4.1B_Humans_Significant_Risk_BASEF.pdf');
+		policy('Participation of Humans - Significant Risk', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here', 'http://www.basef.ca/sites/default/files/4.1B_Humans_Significant_Risk_BASEF.pdf');
 
 	if ($e['animal_vertebrate'] || $e['animal_ceph'] || $e['animal_tissue'] )
-		policy('Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, the Scientific Supervisor, and approved by the school\'s Ethics Committee. This form can be found here.','www.basef.ca/sites/default/files/4.1C_Animals_BASEF.pdf');
+		policy('Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, the Scientific Supervisor, and approved by the school\'s Ethics Committee. This form can be found here.','http://www.basef.ca/sites/default/files/4.1C_Animals_BASEF.pdf');
 
 		
 //        rules_form_ysc_3: [$e['hazardbio'] or $e['hazardother']] 
