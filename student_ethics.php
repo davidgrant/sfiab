@@ -134,7 +134,7 @@ function policy($name, $text, $link = '')
 		policy('YSC Policy 4.1.1.2 - Significant Risk', '', 'http://youthscience.ca/participation-humans-research-significant-risk');
 
 	if($e['animals'])
-		policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2, which can be found here:   <a href="www.youthscience.ca/policy/use-animals-research">Use of Animals in Research</a>');
+		policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2, which can be found here:','www.youthscience.ca/policy/use-animals-research">Use of Animals in Research');
 
 	if($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] ) 
 		policy('Survey Low Risk', 'Most Surveys, Skill Tests, and Observations of Behaviour are considered Low Risk (See YSC Policy 4.1.1.1 Section 3.1).');
