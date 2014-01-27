@@ -85,7 +85,6 @@ function generic_save($mysqli, &$p, $table, $table_key)
 	$set = "";
 	foreach($p as $key=>$val) {
 		if($key == 'original') continue;
-		print_r($p);
 		if(!array_key_exists($key, $p['original'])) continue;
 
 		if($val !== $p['original'][$key]) {
