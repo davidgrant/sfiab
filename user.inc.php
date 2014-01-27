@@ -158,13 +158,13 @@ function user_save($mysqli, &$u)
 				$v = implode(',', $a);
 				break;
 
-			 case 'j_sa': case 's_sa_nom':
+			 case 'j_sa': case 's_sa_nom': case 'tour_id_pref':
 			 	if(count($val) == 0) {
 					$v = NULL;
 				} else {
 					$a = array();
 					foreach($val as $index=>$id) {
-						if($id !== NULL) $a[] = $id;
+						if($id !== NULL) $a[] = (int)$id;
 					}
 					$v = implode(',', $a);
 				}

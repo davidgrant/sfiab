@@ -91,6 +91,11 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 	case 's_reg_options':
 		incomplete_check_text($ret, $u, array('s_tshirt'));
 		break;
+
+	case 's_tours':
+		
+		break;
+
 	case 's_project':
 		$p = project_load($mysqli, $u['s_pid']);
 		incomplete_check_text($ret, $p, array('title','summary','language'));
