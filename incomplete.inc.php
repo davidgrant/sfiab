@@ -177,6 +177,8 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 		$e = $p['ethics'];
 
 		incomplete_check_bool($ret, $e, array('human1', 'animals'));
+
+		
 		if($e['human1']) {
 			incomplete_check_bool($ret, $e, array(
 				'humansurvey1', 'humanfood1', 

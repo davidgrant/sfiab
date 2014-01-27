@@ -42,6 +42,19 @@ function project_filter(&$p)
 		} else {
 			$p['ethics'] = unserialize($p['ethics']);
 		}
+
+		$fields = array(
+			'human1', 'animals', 'humansurvey1', 'humanfood',
+			'humanfood1', 'humanfood2', 'humanfood6', 'humantest1',
+			'humanfood3', 'humanfood4', 'humanfood5', 'animal_vertebrate',
+			'animal_ceph', 'animal_tissue', 'animal_drug', 'humanfooddrug',
+			'humanfoodlow1', 'humanfoodlow2');
+		foreach($fields as $f) {
+			if(!array_key_exists($f, $p['ethics'])) {
+				$p['ethics'][$f] = NULL;
+			}
+		}
+
 	}
 	if(!is_array($p['safety'])) {
 		if($p['safety'] == NULL) {
@@ -72,6 +85,7 @@ function generic_save($mysqli, &$p, $table, $table_key)
 	$set = "";
 	foreach($p as $key=>$val) {
 		if($key == 'original') continue;
+		print_r($p);
 		if(!array_key_exists($key, $p['original'])) continue;
 
 		if($val !== $p['original'][$key]) {

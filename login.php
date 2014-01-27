@@ -207,6 +207,11 @@ case 'login':
 	/* User is new? */
 	if($u['state'] == 'new') {
 		$u['state'] = 'active';
+
+		if(in_array('student', $u['roles'])) {
+			$pid = project_create($mysqli);
+			$u['s_pid'] = $pid;
+		}
 		user_save($mysqli, $u);
 	}
 

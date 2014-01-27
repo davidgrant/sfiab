@@ -99,10 +99,7 @@ function policy($name, $text, $link = '')
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-
 <?php
-
-
 	$answers = $p['ethics'];
 	$fields = incomplete_check($mysqli, $u, $page_id);
 //	print_r($fields);
@@ -119,6 +116,7 @@ function policy($name, $text, $link = '')
 
 ?>
 	<h3>Ethics Information and Forms</h3>
+
 <?php
 	$e = $p['ethics'];
 
