@@ -59,6 +59,19 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 	else 
 		$u['s_sa_nom'] = explode(',', $u['s_sa_nom']);
 
+	if($u['tour_id_pref'] === NULL)
+		$u['tour_id_pref'] = array(NULL,NULL,NULL);
+	else {
+		$a = explode(',',$u['tour_id_pref']);
+		$u['tour_id_pref'] = array(NULL, NULL, NULL);
+		$i = 0;
+		foreach($a as $id) {
+			$u['tour_id_pref'][$i] = (int)$id;
+			$i++;
+		}
+	}
+
+	filter_int_or_null($u['tour_id']);
 
 
 	/* Judge filtering */
@@ -164,7 +177,7 @@ function user_save($mysqli, &$u)
 				} else {
 					$a = array();
 					foreach($val as $index=>$id) {
-						if($id !== NULL) $a[] = (int)$id;
+						if($id !== NULL) $a[] = $id;
 					}
 					$v = implode(',', $a);
 				}

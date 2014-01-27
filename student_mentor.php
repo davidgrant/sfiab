@@ -192,7 +192,6 @@ $num_mentors = $p['num_mentors'];
 	form_begin($form_id, 'student_mentor.php');
 	form_button($form_id, 'add', 'Add A Mentor', 'Add A Mentor');
 	form_end($form_id);
-	
 ?>
 
 </div></div>

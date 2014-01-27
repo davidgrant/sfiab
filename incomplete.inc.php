@@ -19,6 +19,10 @@ function incomplete_check_bool(&$ret, &$data, $fields)
 {
 	if(!is_array($data)) $ret = array_merge($ret, $fields);
 	foreach($fields as $f) {
+		if(!array_key_exists($f, $data))  {
+			$ret[] = $f;
+			continue;
+		}
 		$v = $data[$f];
 		/* Using !== will make this fail if it's NULL and thus incomplete */
 		if($v !== 0 && $v !== 1) {
@@ -93,7 +97,19 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 		break;
 
 	case 's_tours':
-		
+		if(count($u['tour_id_pref']) > 0) {
+			$x = 0;
+			foreach($u['tour_id_pref'] as $tid) {
+				if($tid === NULL or $tid == 0) {
+					$ret[] = "tour$x";
+				}
+				$x++;
+			}
+		} else {
+			$ret[] = "tour1";
+			$ret[] = "tour2";
+			$ret[] = "tour3";
+		}
 		break;
 
 	case 's_project':
@@ -148,6 +164,33 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 			}
 		}
 		break;
+
+	case 's_ethics':
+		$p = project_load($mysqli, $u['s_pid']);
+		$e = $p['ethics'];
+
+		incomplete_check_bool($ret, $e, array('human1', 'animals'));
+		if($e['human1']) {
+			incomplete_check_bool($ret, $e, array(
+				'humansurvey1', 'humanfood1', 
+				'humanfood2', 'humanfood6', 'humantest1'));
+
+			if($e['humanfood1'] || $e['humanfood2']) {
+				incomplete_check_bool($ret, $e, array(
+					'humanfood3', 'humanfood4', 'humanfood5', 
+					'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2'));
+			}
+		}
+
+		if($e['animals']) {
+			incomplete_check_bool($ret, $e, array(
+				'animal_vertebrate', 'animal_tissue', 'animal_drug'));
+			if($e['animal_vertebrate']) {
+				incomplete_check_bool($ret, $e, array('animal_ceph'));
+			}
+		}
+		break;
+
 
 	case 's_awards':
 		if(count($u['s_sa_nom']) > 0) {
@@ -230,6 +273,7 @@ function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
 		$c = 0;
 		$c += count(incomplete_fields_check($mysqli, 's_personal', $u, $force));
 		$c += count(incomplete_fields_check($mysqli, 's_reg_options', $u, $force));
+		$c += count(incomplete_fields_check($mysqli, 's_tours', $u, $force));
 		$c += count(incomplete_fields_check($mysqli, 's_emergency', $u, $force));
 		$c += count(incomplete_fields_check($mysqli, 's_project', $u, $force));
 		$c += count(incomplete_fields_check($mysqli, 's_partner', $u, $force));

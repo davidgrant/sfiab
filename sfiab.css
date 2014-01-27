@@ -711,6 +711,8 @@ html head + body .ui-body-r.ui-focus {
 	color: #ff3333 !important;
 }
 
+.ui-li-desc { white-space: normal; !important} 
+
 .ui-checkbox label.ui-btn {
 	font-weight: 400 !important;
 }
@@ -723,4 +725,5 @@ html head + body .ui-body-r.ui-focus {
 .ui-field-contain-wide > fieldset {
 	width: 30% !important;
 }
+
 
