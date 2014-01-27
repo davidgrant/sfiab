@@ -17,9 +17,12 @@ function incomplete_user_fields($mysqli, $required_fields, &$u)
 
 function incomplete_check_bool(&$ret, &$data, $fields)
 {
-	if(!is_array($data)) $ret = array_merge($ret, $fields);
+	if(!is_array($data)) {
+		$ret = array_merge($ret, $fields);
+		return;
+	}
 	foreach($fields as $f) {
-		if(!array_key_exists($f, $data))  {
+		if(!array_key_exists($f, $data)) {
 			$ret[] = $f;
 			continue;
 		}
@@ -33,7 +36,11 @@ function incomplete_check_bool(&$ret, &$data, $fields)
 
 function incomplete_check_gt_zero(&$ret, &$data, $fields)
 {
-	if(!is_array($data)) $ret = array_merge($ret, $fields);
+	if(!is_array($data)) {
+		$ret = array_merge($ret, $fields);
+		return;
+	}
+
 	foreach($fields as $f) {
 		$v = $data[$f];
 		if(!is_int($v) || $v <= 0) {

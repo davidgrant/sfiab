@@ -18,8 +18,6 @@ $sfiab_roles = array(	'student' => array(),
 			'volunteer' => array()
 		);
 
-
-
 function sfiab_db_connect()
 {
 	global $dbhost, $dbuser, $dbpassword, $dbdatabase;
