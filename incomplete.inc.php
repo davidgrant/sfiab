@@ -333,10 +333,10 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 		$student_complete = ($c == 0) ? true : false;
 
 		/* Adjust student status in the user if it changed */
-		if($student_complete && $u['s_status'] != 'complete') {
+		if($student_complete && $u['s_status'] == 'incomplete') {
 			$u['s_status'] = 'complete';
 			user_save($mysqli, $u);
-		} else if($student_complete == false && $u['s_status'] == 'incomplete') {
+		} else if($student_complete == false && $u['s_status'] == 'complete') {
 			$u['s_status'] = 'incomplete';
 			user_save($mysqli, $u);
 		}

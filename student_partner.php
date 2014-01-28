@@ -56,13 +56,6 @@ case 'save':
 
 case 'invite':
 	$un = $mysqli->real_escape_string($_POST['un']);
-	if($un == $u['username']) {
-		/* Can't invite self to project */
-		form_ajax_response_error(0, "Congratulations, you just invited yourself to the project.  I took the liberty of accepting 
-		your invitation from you on your behalf.  Perhaps you should also invite someone else to the project.");
-		exit();
-	}
-
 
 	$invite_error = 'Username not found';
 	if(strlen($un) > 0) {
@@ -77,12 +70,24 @@ case 'invite':
 							AND `state`='active'");
 		$request_ok = true;
 		if($q->num_rows == 1) {
+
+			$r = $q->fetch_assoc();
+			$invite_uid = (int)$r['uid'];
+
+
+			/* Make sure it's not ourself */
+			if($invite_uid == $u['uid']) {
+				/* Can't invite self to project */
+				form_ajax_response_error(0, "Congratulations, you just invited yourself to the project.  I took the liberty of accepting 
+					your invitation from you on your behalf.  Perhaps you should also invite someone else to the project.");
+				exit();
+			}
+
 			/* Found, is there still room in this project (the user isn't reloading the post)? */
 			if(($students_missing - $invites_sent) > 0) {
-				$r = $q->fetch_assoc();
 
 				/* Load the remote user and get the remote project */
-				$u_partner = user_load($mysqli, $r['uid']);
+				$u_partner = user_load($mysqli, $invite_uid);
 				$p_partner = project_load($mysqli, $u_partner['s_pid']);
 
 				if($p_partner['num_students'] == 1) {
