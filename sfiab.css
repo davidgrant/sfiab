@@ -716,6 +716,7 @@ html head + body .ui-body-r.ui-focus {
 }
 .ui-listview > li > a.ui-btn {
 	font-weight: 400 !important;
+	white-space:normal !important;
 }
 
 

@@ -114,12 +114,20 @@ function policy($name, $text, $link = '')
 ?>
 	<form action="student_ethics.php" method="post" data-ajax="false" id="<?=$form_id?>">
 
-<?php 	if(count($fields) == 0) {
-
-
-
-?>
 	<h3>Ethics Information and Forms</h3>
+
+	<p>This page will guide you through several questions to determine the
+	relative National policies regarding ethics and the use of humans and
+	animals in your project.
+
+	<p>It will tell you there are things you should have done before
+	starting your project.  Since you've probably already started, please
+	follow the requirements here as best you can.  
+
+	<p>You can email any questions to ethics@gvrsf.ca
+
+<?php 	if(count($fields) == 0) {
+?>
 
 <?php
 	$e = $p['ethics'];
@@ -198,14 +206,17 @@ function policy($name, $text, $link = '')
 
 	if( ($e['human1'] && !$e['humanfood3'] && !$e['humanfood4'] && !$e['humanfood5'] && !$e['humantest1'] && !$e['humanfooddrug'] && !$e['humanfoodlow1'] && !$e['humanfoodlow2']) 
 			|| ($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1']) ) 
-		policy('Participation of Humans - Low Risk', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 'http://www.basef.ca/sites/default/files/4.1A_Humans_Low_Risk_BASEF.pdf');
+		policy('Participation of Humans - Low Risk', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 
+			'http://main.youthscience.ca/sites/default/files/documents/ysc/forms/4.1A_Humans_Low_Risk_0.pdf');
 
 		
         if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) 
-		policy('Participation of Humans - Significant Risk', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here', 'http://www.basef.ca/sites/default/files/4.1B_Humans_Significant_Risk_BASEF.pdf');
+		policy('Participation of Humans - Significant Risk', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here', 
+			'http://main.youthscience.ca/sites/default/files/documents/ysc/forms/4.1B_Humans_Significant_Risk_0.pdf');
 
 	if ($e['animal_vertebrate'] || $e['animal_ceph'] || $e['animal_tissue'] )
-		policy('Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, the Scientific Supervisor, and approved by the school\'s Ethics Committee. This form can be found here.','http://www.basef.ca/sites/default/files/4.1C_Animals_BASEF.pdf');
+		policy('Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, the Scientific Supervisor, and approved by the school\'s Ethics Committee. This form can be found here.',
+			'http://main.youthscience.ca/sites/default/files/documents/ysc/forms/4.1C_Animals_0.pdf');
 
 		
 //        rules_form_ysc_3: [$e['hazardbio'] or $e['hazardother']] 
