@@ -198,7 +198,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		if($e['animals']) {
 			incomplete_check_bool($ret, $e, array(
 				'animal_vertebrate', 'animal_tissue', 'animal_drug'));
-			if($e['animal_vertebrate']) {
+			if(!$e['animal_vertebrate']) {
 				incomplete_check_bool($ret, $e, array('animal_ceph'));
 			}
 		}
