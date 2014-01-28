@@ -195,8 +195,8 @@ case 'accept_request':
 	$need_missing_reload = true;
 
 	/* Update incomplete status of everything related to the project */
-	incomplete_check($mysqli, $u, false, true);
-
+	$fields = array();
+	incomplete_check($mysqli, $fields, $u, false, true);
 	break;
 
 case 'reject_request':
