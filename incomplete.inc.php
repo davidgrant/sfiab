@@ -132,7 +132,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		/* Check words in summary */
 		$w = str_word_count($p['summary']);
 		if($w < 200 || $w > 1000) {
-			$incomplete_errors[] += array("Project summary must contain between 200 and 1000 words");
+			$incomplete_errors += array("Project summary must contain between 200 and 1000 words");
 			$ret[] = 'summary';
 		}
 
