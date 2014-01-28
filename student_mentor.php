@@ -38,8 +38,10 @@ case 'save':
 		exit();
 	}
 
-	if($mentors == false && $p['num_mentors'] > 0) {
-		$mysqli->real_query("DELETE FROM mentors WHERE pid='{$p['pid']}'");
+	if($mentors == 0) {
+		if($p['num_mentors'] > 0) {
+			$mysqli->real_query("DELETE FROM mentors WHERE pid='{$p['pid']}'");
+		}
 		$p['num_mentors'] = 0;
 		project_save($mysqli, $p);
 		form_ajax_response(array('status'=>0));
