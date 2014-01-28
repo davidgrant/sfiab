@@ -24,7 +24,7 @@ case 'save':
 	post_bool($u['j_mentored'], 'j_mentored');
 	user_save($mysqli, $u);
 
-	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret));
 	exit();
 }
@@ -41,7 +41,7 @@ sfiab_page_begin("Mentorship", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$fields = incomplete_check($mysqli, $u, $page_id);
+	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
 ?>
 	<h3>Mentorship</h3>

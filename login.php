@@ -208,6 +208,7 @@ case 'login':
 	if($u['state'] == 'new') {
 		$u['state'] = 'active';
 
+		/* Create a project on login for students*/
 		if(in_array('student', $u['roles'])) {
 			$pid = project_create($mysqli);
 			$u['s_pid'] = $pid;

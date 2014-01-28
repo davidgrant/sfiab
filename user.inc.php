@@ -1,17 +1,33 @@
 <?php
 require_once('filter.inc.php');
 
-function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
+function user_load_all_for_project($mysqli, $pid)
 {
+	$r = $mysqli->query("SELECT * FROM users WHERE s_pid=$pid");
+	$us = array();
+	while($d = $r->fetch_assoc()) {
+		$u = user_load($mysqli, -1, -1, NULL, $d);
+		$us[] = $u;
+	}
+	return $us;
+}
+
+function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
+{
+	$u = NULL;
 	if((int)$uid > 0) {
 		$id = (int)$uid;
 		$r = $mysqli->query("SELECT * FROM users WHERE uid=$id LIMIT 1");
 	} else if((int)$unique_uid > 0) {
 		$id = (int)$unique_uid;
 		$r = $mysqli->query("SELECT * FROM users WHERE unique_uid=$id ORDER BY `year` DESC LIMIT 1");
-	} else if($username != NULL) {
+	} else if($username !== NULL) {
 		$username = $mysqli->real_escape_string($username);
 		$r = $mysqli->query("SELECT * FROM users WHERE `username`='$username' ORDER BY `year` DESC LIMIT 2");
+	} else if ($data !== NULL) {
+		/* If data is specifed, skip all SQL and the fetch below, and go
+		 * right into filtering the data */
+		$u = $data;
 	} else {
 		if(sfiab_session_is_active()) {
 			if($_SESSION['uid'] > 0) {
@@ -24,22 +40,23 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL)
 		}
 	}
 
-	if($r->num_rows == 0) {
-		return NULL;
-	}
+	if($u === NULL) {
+		if($r->num_rows == 0) {
+			return NULL;
+		}
+		$u = $r->fetch_assoc();
 
-	$u = $r->fetch_assoc();
-
-	/* There can be at most 2 entries for same username in the same year.
-	 * If the entry we just loaded is 'deleted', then grab the next
-	 * one, and see if it's in the same year (results are returned
-	 * sorted by year).  If it is, return the new one since it's
-	 * the valid one */
-	if($r->num_rows == 2 && $u['state'] == 'deleted') {
-		$u2 = $r->fetch_assoc();
-		if($u2['year'] == $u['year']) 
-			$u = $u2;
-		/* If it's not the same year, return the deleted entry */
+		/* There can be at most 2 entries for same username in the same year.
+		 * If the entry we just loaded is 'deleted', then grab the next
+		 * one, and see if it's in the same year (results are returned
+		 * sorted by year).  If it is, return the new one since it's
+		 * the valid one */
+		if($r->num_rows == 2 && $u['state'] == 'deleted') {
+			$u2 = $r->fetch_assoc();
+			if($u2['year'] == $u['year']) 
+				$u = $u2;
+			/* If it's not the same year, return the deleted entry */
+		}
 	}
 
 	/* Sanitize some fields */

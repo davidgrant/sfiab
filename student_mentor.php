@@ -76,7 +76,7 @@ case 'savem':
 
 
 	mentor_save($mysqli, $m);
-	$fields = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $fields, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$fields));
 	exit();
 
@@ -85,7 +85,7 @@ case 'add':
 		$mid = mentor_create($mysqli, $p['pid']);
 		$p['num_mentors'] += 1;
 		project_save($mysqli, $p);
-		$fields = incomplete_check($mysqli, $u, $page_id, true);
+		incomplete_check($mysqli, $fields, $u, $page_id, true);
 		form_ajax_response(array('status'=>0, 'location'=>'student_mentor.php'));
 	} else {
 		form_ajax_response(array('status'=>0, 'error'=>'Limit of 10 mentors reached'));
@@ -99,7 +99,7 @@ case 'del':
 	$p['num_mentors'] = $q->num_rows;
 	project_save($mysqli, $p);
 
-	$fields = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $fields, $u, $page_id, true);
 
 	form_ajax_response(array('status'=>0, 'missing'=>$fields));
 	exit();
@@ -137,7 +137,7 @@ $num_mentors = $p['num_mentors'];
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$fields = incomplete_check($mysqli, $u, $page_id);	
+	incomplete_check($mysqli, $fields, $u, $page_id);	
 	print_r($fields);
 	form_page_begin($page_id, $fields);
 ?>

@@ -37,7 +37,7 @@ case 'save':
 	}
 	user_save($mysqli, $u);
 
-	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$vals));
 	exit();
 }
@@ -56,7 +56,7 @@ sfiab_page_begin("Student Emergency Contact", $page_id, $help);
 <?php
 	$form_id = $page_id.'_form';
 
-	$fields = incomplete_check($mysqli, $u, $page_id);
+	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
 
 	$relations=array('parent'=>"Parent",'legalguardian'=>"Legal Guardian",'grandparent'=>"Grandparent",

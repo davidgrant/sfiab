@@ -55,7 +55,7 @@ case 'save':
 
 	user_save($mysqli, $u);
 
-	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	$response = array('status'=>0, 'missing'=>$ret);
 	if($error != '') $response['error'] =  $error;
 	if(count($vals) > 0) $response['val'] = $vals;
@@ -76,8 +76,21 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$fields = incomplete_check($mysqli, $u, $page_id);
+	incomplete_check($mysqli, $fields, $u, $page_id);
+
+	if($p['cat_id'] <= 0) {
+		/* Category hasn't been selected yet */
+?>
+		<h3>Special Award Selection</h3>
+		<p>Please select your project age category on the <a href="student_project.php" data-ajax="false">Project Info</a> page first.
+		</div></div>
+<?php
+		sfiab_page_end();
+	}
+
+
 	form_page_begin($page_id, $fields, '', '', 'This page is incomplete.  Please choose up to 4 awards or select the first option below to indicate you don\'t want to self-nominate for any awards');
+
 
 	$awards = award_load_special_for_project_select($mysqli, $p);
 

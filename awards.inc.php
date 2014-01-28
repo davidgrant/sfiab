@@ -56,7 +56,8 @@ function award_load_special_for_project_select($mysqli, &$p)
 					AND `self_nominate` = 1
 					AND year='{$config['year']}'
 					ORDER BY `name`");
-	print($mysqli->error);
+//	print($mysqli->error);
+	$awards = array();
 	while($d = $q->fetch_assoc()) {
 		$awards[$d['id']] = award_load($mysqli, 0, $d);
 	}

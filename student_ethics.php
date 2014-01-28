@@ -26,11 +26,15 @@ case 'save':
 		'animals', 'animal_vertebrate', 'animal_ceph', 'animal_tissue', 'animal_drug' );
 
 	foreach($a as $f) {
-		post_bool($p['ethics'][$f], $f);
+		if(!array_key_exists($f, $_POST)) {
+			$p['ethics'][$f] = NULL;
+		} else {
+			post_bool($p['ethics'][$f], $f);
+		}
 	}
 	project_save($mysqli, $p);
 
-	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	break;
 }
 
@@ -101,7 +105,7 @@ function policy($name, $text, $link = '')
 
 <?php
 	$answers = $p['ethics'];
-	$fields = incomplete_check($mysqli, $u, $page_id);
+	incomplete_check($mysqli, $fields, $u, $page_id);
 //	print_r($fields);
 	form_page_begin($page_id, $fields, '', '', 'This page is incomplete.  Please complete all questions.');
 
@@ -129,9 +133,10 @@ function policy($name, $text, $link = '')
 	if(!$e['human1'] && !$e['animals'])
 		policy('None', 'It does not appear that your project is subject to any special ethics requirements.');
 
-	if($e['human1'])
+	if($e['human1']) {
 		policy('YSC Policy 4.1.1.1 - Low Risk', 'Human Participation is governed by YSC Policy 4.1.1.1 (Low Risk) and YSC Policy 4.1.1.2 (Significant Risk).' , 'http://youthscience.ca/policy/participation-humans-research-low-risk');
 		policy('YSC Policy 4.1.1.2 - Significant Risk', '', 'http://youthscience.ca/participation-humans-research-significant-risk');
+	}
 
 	if($e['animals'])
 		policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2, which can be found here:','http://www.youthscience.ca/policy/use-animals-research');
@@ -266,9 +271,31 @@ function policy($name, $text, $link = '')
 		$("#<?=$form_id?>_humanfooddrug_li").hide();
 		$("#<?=$form_id?>_humanfoodlow1_li").hide();
 		$("#<?=$form_id?>_humanfoodlow2_li").hide();
-		update_ethics();
+		ethics_update(0);
 
-		function update_ethics()
+		function ethics_uncheck(ar) 
+		{
+			for(var i=0; i<ar.length; i++) {
+				var e = $("#<?=$form_id?>_"+ar[i]+" input:checked");
+				e.prop("checked", 0);
+				e.checkboxradio("refresh");
+			}
+		}
+		function ethics_hide(ar)
+		{
+			for(var i=0; i<ar.length; i++) {
+				$("#<?=$form_id?>_"+ar[i]+"_li").hide();
+			}
+		}
+
+		function ethics_show(ar)
+		{
+			for(var i=0; i<ar.length; i++) {
+				$("#<?=$form_id?>_"+ar[i]+"_li").show();
+			}
+		}
+
+		function ethics_update(do_uncheck)
 		{
 			var human1 = $("#<?=$form_id?>_human1 input:checked").val();
 			var humanfood1 = $("#<?=$form_id?>_humanfood1 input:checked").val();
@@ -279,57 +306,36 @@ function policy($name, $text, $link = '')
 //			alert(human1);
 
 			if(human1 == 1) {
-				$("#<?=$form_id?>_humansurvey1_li").show();
-				$("#<?=$form_id?>_humanfood_li").show();
-				$("#<?=$form_id?>_humanfood1_li").show();
-				$("#<?=$form_id?>_humanfood2_li").show();
-				$("#<?=$form_id?>_humanfood6_li").show();
-				$("#<?=$form_id?>_humantest1_li").show();
+				ethics_show(["humansurvey1", "humanfood", "humanfood1", "humanfood2", "humanfood6", "humantest1"]);
 			} else {
-				$("#<?=$form_id?>_humansurvey1_li").hide();
-				$("#<?=$form_id?>_humanfood_li").hide();
-				$("#<?=$form_id?>_humanfood1_li").hide();
-				$("#<?=$form_id?>_humanfood2_li").hide();
-				$("#<?=$form_id?>_humanfood6_li").hide();
-				$("#<?=$form_id?>_humantest1_li").hide();
+				if(do_uncheck) ethics_uncheck(["humansurvey1", "humanfood1", "humanfood2", "humanfood6", "humantest1"]);
+				ethics_hide(["humansurvey1", "humanfood", "humanfood1", "humanfood2", "humanfood6", "humantest1"]);
 			}
 
 			if(human1 == 1 && (humanfood1 == 1 || humanfood2 == 1)) {
-				$("#<?=$form_id?>_humanfood3_li").show();
-				$("#<?=$form_id?>_humanfood4_li").show();
-				$("#<?=$form_id?>_humanfood5_li").show();
-				$("#<?=$form_id?>_humanfooddrug_li").show();
-				$("#<?=$form_id?>_humanfoodlow1_li").show();
-				$("#<?=$form_id?>_humanfoodlow2_li").show();
+				ethics_show(['humanfood3', 'humanfood4', 'humanfood5', 'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2']);
 			} else {
-				$("#<?=$form_id?>_humanfood3_li").hide();
-				$("#<?=$form_id?>_humanfood4_li").hide();
-				$("#<?=$form_id?>_humanfood5_li").hide();
-				$("#<?=$form_id?>_humanfooddrug_li").hide();
-				$("#<?=$form_id?>_humanfoodlow1_li").hide();
-				$("#<?=$form_id?>_humanfoodlow2_li").hide();
+				if(do_uncheck) ethics_uncheck(['humanfood3', 'humanfood4', 'humanfood5', 'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2']);
+				ethics_hide(['humanfood3', 'humanfood4', 'humanfood5', 'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2']);
 			}
 
 			if(animals == 1) {
-				$("#<?=$form_id?>_animal_vertebrate_li").show();
+				ethics_show(['animal_vertebrate', 'animal_tissue','animal_drug']);
 				if(animal_vertebrate == 0) {
-					$("#<?=$form_id?>_animal_ceph_li").show();
+					ethics_show(['animal_ceph']);
 				} else {
-					$("#<?=$form_id?>_animal_ceph_li").hide();
+					if(do_uncheck) ethics_uncheck(['animal_ceph']);
+					ethics_hide(['animal_ceph']);
 				}
-				$("#<?=$form_id?>_animal_tissue_li").show();
-				$("#<?=$form_id?>_animal_drug_li").show();
 			} else {
-				$("#<?=$form_id?>_animal_vertebrate_li").hide();
-				$("#<?=$form_id?>_animal_ceph_li").hide();
-				$("#<?=$form_id?>_animal_tissue_li").hide();
-				$("#<?=$form_id?>_animal_drug_li").hide();
+				if(do_uncheck) ethics_uncheck(['animal_vertebrate', 'animal_seph', 'animal_tissue','animal_drug']);
+				ethics_hide(['animal_vertebrate', 'animal_seph', 'animal_tissue','animal_drug']);
 			}
 		}
 
 
 		$( "#<?=$form_id?> :input" ).change(function() {
-			update_ethics();
+			ethics_update(1);
 		});
 
 

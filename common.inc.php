@@ -422,6 +422,105 @@ function categories_load($mysqli, $year = false) {
 	return $cats;
 }
 
+function cms_get($mysqli, $name) {
+	$q = $mysqli->query("SELECT `text`,`use` FROM `cms` WHERE `name`='$name'");
+	print($mysqli->error);
+	$r = $q->fetch_assoc();
+	if($r['use'] == 1) {
+		return $r['text'];
+	}
+	return NULL;
+}
+
+function compute_registration_fee($mysqli, &$p, &$users)
+{
+ 	global $config;
+	$ret = array();
+
+	$regfee_items = array();
+	$n_students = count($users);
+	$regfee = 0;
+
+/*	$regfee_items[] = array('id' => 'funrun',
+				'name' => 'Science Fair Fun Run ',
+				'per' => 'student',
+				'cost' => 50,
+				);
+*/
+	$n_tshirts = 0;
+	$sel = array();
+	foreach($users as $u) {
+		if($u['s_tshirt'] != 'none') $n_tshirts++;
+
+		/* Check their regfee items too */
+/*		if($config['participant_regfee_items_enable'] != 'yes') continue;
+
+		$sel_q = mysql_query("SELECT * FROM regfee_items_link 
+					WHERE students_id={$s->id}");
+		while($info_q = mysql_fetch_assoc($sel_q)) {
+			$sel[] = $info_q['regfee_items_id'];
+		}*/
+	}
+
+	if(true) {  /* Reg per student */
+		$f = $config['regfee'] *  $n_students;
+		$ret[] = array( 'id' => 'regfee',
+				'text' => "Fair Registration (per student)",
+				'base' => $config['regfee'],
+				'num' => $n_students,
+				'ext' => $f );
+ 		$regfee += $f; 
+	} else {
+		$ret[] = array( 'id' => 'regfee',
+				'text' => "Fair Registration (per project)",
+				'base' => $config['regfee'],
+				'num' => 1,
+				'ext' => $config['regfee'] );
+		$regfee += $config['regfee'];
+	}
+
+	if(1) { /* Tshirts enabled */
+		$tsc = floatval($config['tshirt_cost']);
+		if($tsc != 0.0) {
+			$f = $n_tshirts * $tsc;
+			$regfee += $f;
+			if($n_tshirts != 0) {
+				$ret[] = array( 'id' => 'tshirt',
+						'text' => "T-Shirts",
+						'base' => $tsc,
+						'num' => $n_tshirts,
+						'ext' => $f);
+			} 
+		}
+	}
+
+	/* $sel will be empty if regfee_items is disabled */
+	foreach($regfee_items as $rfi) {
+		$cnt = 0;
+		foreach($sel as $s) if($rfi['id'] == $s) $cnt++;
+
+		if($cnt == 0) continue;
+
+		$tsc = floatval($rfi['cost']);
+
+		/* If it's per project, force the count to 1 */
+		if($rfi['per'] == 'project') {
+			$cnt = 1;
+		}
+
+		$f = $tsc * $cnt;
+		$ret[] = array( 'id' => "regfee_item_{$rfi['id']}",
+				'text' => "{$rfi['name']} (per {$rfi['per']})" ,
+				'base' => $tsc,
+				'num' => $cnt,
+				'ext' => $f);
+		$regfee += $f;
+	}
+	return array($regfee, $ret);
+}
+
+
+
 /* It's kinda important that there be no blank lines AFTER this, or they're sent as newlines.  This messes
  * up login.php */
 ?>

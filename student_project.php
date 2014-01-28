@@ -38,7 +38,7 @@ case 'save':
 	post_bool($p['req_electricity'], 'req_electricity');
 	project_save($mysqli, $p);
 
-	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	$response = array('status'=>0, 'missing'=>$ret);
 	if(count($incomplete_errors) > 0) 
 		$response['error'] = join('<br/>', $incomplete_errors);
@@ -63,7 +63,7 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$fields = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $fields, $u, $page_id, true);
 	$e = join('<br/>', $incomplete_errors);
 	form_page_begin($page_id, $fields, $e);
 

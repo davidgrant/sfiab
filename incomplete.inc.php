@@ -72,20 +72,24 @@ function incomplete_check_text(&$ret, &$data, $fields)
 	}
 }
 
-function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
+function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_update=false)
 {
 	global $incomplete_errors;
 
-	if(array_key_exists($section, $_SESSION['incomplete']) && !$force_update) {
-		return $_SESSION['incomplete'][$section];
+	$ret = array();
+
+	if($u['uid'] == $_SESSION['uid'] && array_key_exists($section, $_SESSION['incomplete']) && !$force_update) {
+	   	$ret_list = array_merge($ret_list, $_SESSION['incomplete'][$section]);
+		return count($_SESSION['incomplete'][$section]);
 	}
 		
-	$ret = array();
 	switch($section) {
 	case 'account':
-		if($_SESSION['password_expired']) {
-			$ret[] = 'pw1';
-			$ret[] = 'pw2';
+		if($u['uid'] == $_SESSION['uid']) {
+			if($_SESSION['password_expired']) {
+				$ret[] = 'pw1';
+				$ret[] = 'pw2';
+			}
 		}
 		break;
 
@@ -208,7 +212,13 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 			$ret[] = 'award';
 		}
 		break;
-
+	case 's_signature':
+		$users = user_load_all_for_project($mysqli, $u['s_pid']);
+		/* Each user needs to be complete */
+		foreach($users as $user) {
+			if($user['s_status'] != 'accepted') $ret[] = 'user_'.$user['uid'];
+		}
+		break;
 
 	case 'j_personal':
 		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'phone1',
@@ -244,12 +254,15 @@ function incomplete_fields_check($mysqli, $section, &$u, $force_update=false)
 	}
 
 	/* Save for later */
-	$_SESSION['incomplete'][$section] = $ret;
-	return $ret;
+	if($u['uid'] == $_SESSION['uid']) {
+		$_SESSION['incomplete'][$section] = $ret;
+	}
+   	$ret_list = array_merge($ret_list, $ret);
+	return count($ret);
 }
 
 
-function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
+function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 {
 	global $incomplete_errors;
 
@@ -257,50 +270,72 @@ function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
 	$incomplete_errors = array();
 
 	if($page_id !== false) {
-		$ret = incomplete_fields_check($mysqli, $page_id, $u, $force);
+		incomplete_fields_check($mysqli, $ret, $page_id, $u, $force);
 
-		/* Nothing else to do */
-		if(count($ret) == 0) {
-			/* No missing fields here, and session is already complete? */
-			if($_SESSION['complete'] == true) 
-				return $ret;
-		} else {
-			/* Missing fields and session is already incomplete? */
-			if($_SESSION['complete'] == false) 
-				return $ret;
+		/* If we're checking the current user we can also muck with the
+		 * session and skip the evaluation below in 
+		 * some cases */
+		if($u['uid'] == $_SESSION['uid']) {
+			/* Nothing else to do */
+			if(count($ret) == 0) {
+				/* No missing fields here, and session is already complete? */
+				if($_SESSION['complete'] == true) {
+					return $ret;
+				}
+			} else {
+				/* Missing fields and session is already incomplete? */
+				if($_SESSION['complete'] == false) {
+					return $ret;
+				}
+			}
 		}
 		$force = true;
 		/* Fall through and force-check the whole session */
 	}
 
-	/* Set to true, then back to false below */
-	$_SESSION['complete'] = true;
+	if($u['uid'] == $_SESSION['uid']) {
+		/* Set to true, then back to false below */
+		$_SESSION['complete'] = true;
+	}
 
 	/* Set session to complete.  Each of the checks below will set it to incomplete
 	 *  if they find an incomplete item. */
+	$ret = array();
+	$total_c = 0;
 	if(sfiab_user_is_a('student')) {
 		$c = 0;
-		$c += count(incomplete_fields_check($mysqli, 's_personal', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_reg_options', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_tours', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_emergency', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_project', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_partner', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_mentor', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_ethics', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_safety', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_awards', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 's_signature', $u, $force));
+		$c += incomplete_fields_check($mysqli, $ret, 's_personal', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_reg_options', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_tours', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_emergency', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_project', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_partner', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_mentor', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_ethics', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_safety', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 's_awards', $u, $force);
+		/* Signature page doesn't count against' complete status */
+		$c1 = incomplete_fields_check($mysqli, $ret, 's_signature', $u, $force);
+
 		$student_complete = ($c == 0) ? true : false;
-		if(!$student_complete) $_SESSION['complete'] = false;
+
+		/* Adjust student status in the user if it changed */
+		if($student_complete && $u['s_status'] != 'complete') {
+			$u['s_status'] = 'complete';
+			user_save($mysqli, $u);
+		} else if($student_complete == false && $u['s_status'] == 'incomplete') {
+			$u['s_status'] = 'incomplete';
+			user_save($mysqli, $u);
+		}
+		$total_c += $c + $c1;
 	}
 
 	if(sfiab_user_is_a('judge')) {
 		$c = 0;
-		$c += count(incomplete_fields_check($mysqli, 'j_personal', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 'j_expertise', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 'j_options', $u, $force));
-		$c += count(incomplete_fields_check($mysqli, 'j_mentorship', $u, $force));
+		$c += incomplete_fields_check($mysqli, $ret, 'j_personal', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 'j_expertise', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 'j_options', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret, 'j_mentorship', $u, $force);
 		$judge_complete = ($c == 0) ? true : false;
 		if(!$judge_complete) $_SESSION['complete'] = false;
 
@@ -313,7 +348,8 @@ function incomplete_check($mysqli, &$u, $page_id = false, $force = true)
 			$u['j_status'] = 'incomplete';
 			user_save($mysqli, $u);
 		}
+		$total_c += $c;
 	}
-	return $ret;
+	return $total_c;
 }
 ?>

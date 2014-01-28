@@ -50,7 +50,7 @@ case 'save':
 	}
 	project_save($mysqli, $p);
 
-	$ret = incomplete_check($mysqli, $u, $page_id, true);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'location'=>'student_partner.php'));
 	exit();
 
@@ -220,7 +220,7 @@ $help = '<ul><li><b>Number of Students</b> - Only single and pair projects are e
 ';
 
 /* Recompute incomplete fields for this page before printing the leftnav */
-$fields = incomplete_check($mysqli, $u, $page_id, true);
+incomplete_check($mysqli, $fields, $u, $page_id, true);
 
 sfiab_page_begin("Project Partner", $page_id, $help);
 
