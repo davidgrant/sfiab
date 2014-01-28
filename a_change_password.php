@@ -24,8 +24,9 @@ sfiab_page_begin("Change Password", "a_change_password");
 	if($_SESSION['password_expired']) {
 		$initial_error = "Your password has expired, please enter a new password";
 	}
+	form_page_begin($page_id, array(), $initial_error);
 
-	form_begin($form_id, 'login.php', array(), $initial_error);
+	form_begin($form_id, 'login.php');
 
 ?>
 	<p>Passwords must be at least 8 characters long and contain at least one letter, one number, and one non-alphanumberic character (something other than a letter and a number)
