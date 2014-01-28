@@ -41,6 +41,16 @@ case 'save':
 
 
 sfiab_page_begin("Project Safety", $page_id);
+?>
+
+<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
+<p>We're working on finalizing the questions here
+</div><div>
+<?php
+sfiab_page_end();
+exit();
+
+
 
 function question($name, $text, $help, $v)
 {
