@@ -1,4 +1,5 @@
 <?php
+require_once('filter.inc.php');
 
 function award_load($mysqli, $id , $data = NULL)
 {
@@ -13,6 +14,9 @@ function award_load($mysqli, $id , $data = NULL)
 	}
 
 	$a['categories'] = explode(',',$a['categories']);
+	filter_bool_or_null($a['schedule_judges']);
+	filter_bool_or_null($a['self_nominate']);
+	filter_int_or_null($a['order']);
 
 	$a['prizes'] = array();
 	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `order`");
@@ -73,8 +77,10 @@ function prize_load($mysqli, $pid, $data=NULL)
 		$p = $data;
 		$pid = $p['id'];
 	}
-
 	$p['trophies'] = explode(',', $p['trophies']);
+	filter_bool_or_null($p['include_in_script']);
+
+
 	unset($p['original']);
 	$original = $p;
 	$p['original'] = $original;
