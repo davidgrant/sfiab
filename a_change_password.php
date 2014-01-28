@@ -18,6 +18,7 @@ sfiab_page_begin("Change Password", "a_change_password");
 
 <div data-role="page" id="a_change_password"><div data-role="main" class="sfiab_page" > 
 <?php
+	$page_id = 'a_change_password';
 	$form_id = 'a_change_password_form';
 
 	$initial_error = "";
