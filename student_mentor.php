@@ -138,7 +138,6 @@ $num_mentors = $p['num_mentors'];
 
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);	
-	print_r($fields);
 	form_page_begin($page_id, $fields);
 ?>
 	<h3>Project Mentorship Information</h3>
