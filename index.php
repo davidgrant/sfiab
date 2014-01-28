@@ -18,20 +18,27 @@ sfiab_page_begin('Welcome', 'welcome');
 
 <div data-role="page" id="welcome" class="menu_main">
 	<div data-role="main" class="sfiab_page" > 
-		Welcome Page!
+		<?=cms_get($mysqli, 'main');?>
 	</div>
 </div>
 
 <div data-role="page"  id="important_dates" class="menu_main">
 	<div data-role="main" class="sfiab_page" > 
-		Important Dates
+		<table>
+		<tr><td>Student Registration Opens:</td><td>January 28, 2014</td></tr>
+		<tr><td>Judge Registration Opens:</td><td>January 28, 2014</td></tr>
+		<tr><td>Student Registration Closes:</td><td>March 11, 2014</td></tr>
+		<tr><td>Judge Registration Closes:</td><td>March 31, 2014</td></tr>
+		<tr><td>Days of the Fair:</td><td>April 10-12, 2014</td></tr>
+		<tr><td>Winners Posted on Website:</td><td>April 13, 2014</td></tr>
+		</table>
 	</div>
 </div>
 
 
 <div data-role="page" id="committee">
 	<div data-role="main" class="sfiab_page" > 
-		Committee
+		Under construction, coming soon.  
 	</div>
 
 </div>
@@ -166,7 +173,7 @@ sfiab_page_begin('Welcome', 'welcome');
 
 <div data-role="page" id="contact">
 	<div data-role="main" class="sfiab_page" > 
-	Contact Us
+		Under construction, coming soon.  In the meantime, just email our committee chair.  Brian Le (chair@gvrsf.ca).
 	</div>
 </div>
 
