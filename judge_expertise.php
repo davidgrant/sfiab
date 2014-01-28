@@ -116,9 +116,13 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	<h3>Judging Preferences</h3>
 	Select your top three detailed divisions to judge and an age category
 	preference if you have one.  We use this to match you with projects to
-	judge.  For the divisions, we will also match you with project in the same general area with
-	slightly less priority.  That means if you select "Biochemistry--Medicinal", you will likely also be matched
-	with projects in "Biochemistry--Analytical" and all other Biochemistry divisions as well.
+	judge.  For the divisions, we will also match you with project in the
+	same general division with slightly less priority.  That means if you
+	select "Biochemistry--Medicinal", you will also be matched with
+	projects in "Biochemistry--Analytical" and all other Biochemistry
+	divisions as well.  We will do our best to match you with projects 
+	only in divisions you select, but we cannot guarantee that all projects 
+	you are assigned to judge will be a perfect match.
 <?php
 
 	form_select_optgroup($form_id, 'j_pref_div1', "Detailed Division 1", $isef_data, $u);

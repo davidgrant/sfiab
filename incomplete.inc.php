@@ -228,10 +228,23 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		if($u['j_rounds'][0] !== 0 && $u['j_rounds'][0] !== 1) $ret[] = 'j_round0';
 		if($u['j_rounds'][1] !== 0 && $u['j_rounds'][1] !== 1) $ret[] = 'j_round1';
 		incomplete_check_bool($ret, $u, array('j_willing_lead','j_dinner'));
+
+		$num_enabled = 0;
 		foreach($u['j_languages'] as $l=>$en) {
-			if($en === NULL) $ret[] = "j_lang_$l";
+			if($en === NULL)  
+				$ret[] = "j_lang_$l";
+			if($en == 1) 
+				$num_enabled ++;
 		}
 
+		/* Nothing enabled, turn them all on */
+		if($num_enabled == 0) {
+			foreach($u['j_languages'] as $l=>$en) {
+				$ret[] = "j_lang_$l";
+			}
+			/* Add to array only if it doesn't already exist, that's what += does */
+			$incomplete_errors += array("At least one language must be selected");
+		}
 		break;
 
 	case 'j_expertise':

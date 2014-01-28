@@ -30,7 +30,11 @@ case 'save':
 	user_save($mysqli, $u);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
-	form_ajax_response(array('status'=>0, 'missing'=>$ret));
+	$e = '';
+	if(count($incomplete_errors) > 0) {
+		$e = join('<br/>', $incomplete_errors);
+	}
+	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'error'=>$e));
 	exit();
 }
 
@@ -52,7 +56,11 @@ sfiab_page_begin("Options", $page_id, $help);
 
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
-	form_page_begin($page_id, $fields);
+	$e = '';
+	if(count($incomplete_errors) > 0) {
+		$e = join('<br/>', $incomplete_errors);
+	}
+	form_page_begin($page_id, $fields, $e);
 
 	$form_id=$page_id.'_form';
 	form_begin($form_id,'judge_options.php');

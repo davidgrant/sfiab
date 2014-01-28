@@ -90,7 +90,7 @@ sfiab_page_begin("Student Personal", $page_id);
 	form_text($form_id, 'address', 'Address 1', $u);
 	form_text($form_id, 'address2', 'Address 2', $u);
 	form_text($form_id, 'city', 'City', $u);
-	form_province($form_id, 'province', 'Province', $u);
+	form_province($form_id, 'province', 'Province / Territory', $u);
 	form_text($form_id, 'postalcode', 'Postal Code', $u);
 	form_select($form_id, 'schools_id','School', $schools, $u);
 	form_select($form_id, 'grade', 'Grade', $grades, $u);

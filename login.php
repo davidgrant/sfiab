@@ -233,7 +233,8 @@ case 'login':
 	$_SESSION['complete'] = false;
 
 	/* Force complete check on login */
-	incomplete_check($mysqli, $u, false, true);
+	$reg = array();
+	incomplete_check($mysqli, $reg, $u, false, true);
 	
 	sfiab_log($mysqli, 'login ok', $username);
 	print(0);

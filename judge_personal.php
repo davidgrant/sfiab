@@ -58,6 +58,8 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
+	$degrees = array('bachelor'=>'Bachelor', 'master'=>'Master', 'doctorate'=>'Doctorate');
+
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
 
@@ -72,9 +74,9 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 	form_text($form_id, 'phone2', "Secondary Phone", $u, 'tel');
 	form_text($form_id, 'organization', "Organization", $u);
 	form_text($form_id, 'city', 'City', $u['city']);
-	form_province($form_id, 'province', 'Province', $u);
+	form_province($form_id, 'province', 'Province / Territory', $u);
 	form_lang($form_id, 'language', "Preferred Language", $u);
-	form_text($form_id, 'j_psd', "Highest Post-Secondary Degree", $u);
+	form_select($form_id, 'j_psd', "Highest Post-Secondary Degree (or equivalent)", $degrees, $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>
