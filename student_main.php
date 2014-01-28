@@ -13,7 +13,9 @@ $u = user_load($mysqli);
 /* Check access, but skip the expiry check */
 sfiab_check_access($mysqli, array('student'));
 
-sfiab_page_begin("Student Main", 's_home');
+$help = '<p>This is the main student page.  Use the menu on the left to guide your registration process.  Your registration status will change on this page when your registration is complete.';
+
+sfiab_page_begin("Student Main", 's_home', $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
