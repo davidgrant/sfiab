@@ -28,7 +28,8 @@ case 'save':
 		} else {
 			/* Do  a full check, this will set the user
 			 * status to complete or incomplete and save it */
-			incomplete_check($mysqli, $u, false, true);
+			$fields = array();
+			incomplete_check($mysqli, $fields, $u, false, true);
 		}
 	}
 
