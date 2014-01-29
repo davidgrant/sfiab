@@ -136,6 +136,9 @@ sfiab_page_begin('Welcome', 'welcome');
 	<p>If you need the password sent again, use the password recovery link
 	on the login page and we will mail you a new temporary password.
 
+	<p>If the email doesn't appear in a few minutes, be sure to check your 
+	Junk or Spam mail folder too.  
+
 	<p>If you think your email address is wrong, register again with
 	the same Username and your old registration email address
 	will be replaced with the new one.  A new temporary
