@@ -77,7 +77,7 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false) {
 <?php
 }
 
-function form_check_group($form_id, $name, $label, $data, &$value)
+function form_check_group($form_id, $name, $label, $data, &$value, $wide = false)
 {
 	$id = $form_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
@@ -89,8 +89,9 @@ function form_check_group($form_id, $name, $label, $data, &$value)
 	} else {
 		$v = array($value);
 	}
+	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 ?>
-	<div class="ui-field-contain">
+	<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php

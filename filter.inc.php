@@ -62,4 +62,16 @@ function post_text(&$val, $var)
 	}
 }
 
+function post_array(&$val, $var, &$choices) 
+{
+	$val = array();
+	if(array_key_exists($var, $_POST)) {
+		foreach($_POST[$var] as $i=>$v) {
+			if(array_key_exists($v, $choices)) {
+				$val[] = $v;
+			}
+		}
+	}
+}
+
 ?>

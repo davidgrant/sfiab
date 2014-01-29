@@ -129,12 +129,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 		$u['j_languages'] = array();
 	else 
 		$u['j_languages'] = unserialize($u['j_languages']);
-	foreach(array('en','fr') as $l) {
-		if(!array_key_exists($l, $u['j_languages'])) {
-			$u['j_languages'][$l] = NULL;
-		}
-	}
-
 
 	/* Store an original copy so save() can figure out what (if anything) needs updating */
 	unset($u['original']);

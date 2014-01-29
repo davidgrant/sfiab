@@ -19,14 +19,15 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
+$langs = array('en' => 'English', 'fr' => 'French' );
+
 switch($action) {
 case 'save':
 	post_bool($u['j_willing_lead'], 'j_willing_lead');
 	post_bool($u['j_dinner'], 'j_dinner');
 	post_bool($u['j_rounds'][0], 'j_round0');
 	post_bool($u['j_rounds'][1], 'j_round1');
-	post_bool($u['j_languages']['en'], 'j_lang_en');
-	post_bool($u['j_languages']['fr'], 'j_lang_fr');
+	post_array($u['j_languages'], 'j_languages', $langs);
 	user_save($mysqli, $u);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
@@ -70,8 +71,10 @@ sfiab_page_begin("Options", $page_id, $help);
 	form_yesno($form_id, 'j_dinner', "Will you be attending the Judge's Dinner (5-6pm on judging day)?", $u, true);
 ?>	
 	<h3>Judging Languages</h3>
-<?php	form_yesno($form_id, 'j_lang_en', "Can you judge English projects?", $u['j_languages']['en'], true);
-	form_yesno($form_id, 'j_lang_fr', "Can you judge French projects?", $u['j_languages']['fr'], true);
+	
+<?php	
+	form_check_group($form_id, 'j_languages', "In what language(s) can you judge projects?", $langs, $u['j_languages'], true);
+
 ?>
 	<h3>Time Availability</h3>
 	Note: You will be scheduled to judge in ALL of the judging rounds you answer 'Yes' to, not just one.
