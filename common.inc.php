@@ -189,7 +189,7 @@ function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
 { ?>	
 <?php 	foreach($menu as $id=>$d) {
 			$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-			$e = 'data-ajax="false"';//'rel="external"';
+			$e = 'data-ajax="false rel="external"';
 
 			$count = sfiab_left_nav_incomplete_count($id);
 			$style = ($count == 0) ? 'style="display: none;"' : '';
