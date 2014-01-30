@@ -189,7 +189,7 @@ function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
 { ?>	
 <?php 	foreach($menu as $id=>$d) {
 			$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-			$e = 'data-ajax="false rel="external"';
+			$e = 'data-ajax="false" data-rel="external"';
 
 			$count = sfiab_left_nav_incomplete_count($id);
 			$style = ($count == 0) ? 'style="display: none;"' : '';
@@ -312,22 +312,22 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 <?php
 }
 
-function sfiab_print_header()
+function sfiab_print_header($page_id)
 {
 	global $config;
 ?>
 	<div id="header" data-theme="a" data-role="header"  >
 		<a href="#leftnav" data-icon="bars" data-iconpos="notext" class="leftnav_button ui-nodisc-icon ui-alt-icon">Menu</a>
 		<h3><?=$config['fair_name']?></h3>
-		<a href="#help_panel" data-icon="info" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon">Help</a>
+		<a href="#help_panel_<?=$page_id?>" data-icon="info" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon">Help</a>
 	</div>
 <?php
 }
 
-function sfiab_print_help_panel($text)
+function sfiab_print_help_panel($page_id, $text)
 {
 ?>
-	<div id="help_panel" data-theme="a" data-role="panel" data-position="right" data-display="overlay">
+	<div id="help_panel_<?=$page_id?>" data-theme="a" data-role="panel" data-position="right" data-display="overlay">
 		<h2>Help</h2>
 		<?=$text?>
 	</div>
@@ -377,10 +377,10 @@ function output_end()
 function sfiab_page_begin($title, $page_id="", $help="")
 {
 	output_start();
-	sfiab_print_header();
+	sfiab_print_header($page_id);
 	sfiab_print_left_nav($title, $page_id);
 	if($help != "") {
-		sfiab_print_help_panel($help);
+		sfiab_print_help_panel($page_id, $help);
 	}
 }
 
