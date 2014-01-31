@@ -161,7 +161,7 @@ function policy($name, $text, $link = '')
 
 ?>	
 
-		<h4>Documentation Required</h4>
+		<h4><font color=red>Documentation Required</font></h4>
 		<ul data-role="listview" data-inset="true">
 <?php
 	        if($e['bio1'] || $e['hazmat1']) 
