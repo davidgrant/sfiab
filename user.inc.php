@@ -64,6 +64,9 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	$u['name'] = ($u['firstname'] ? "{$u['firstname']} " : '').$u['lastname'];
 	$u['roles'] = explode(",", $u['roles']);
 	$u['password_expired'] = ((int)$u['password_expired'] == 1) ? true : false;
+	filter_bool($u['not_attending']);
+	filter_bool($u['j_complete']);
+	filter_bool($u['s_complete']);
 
 	/* Student filtering */
 	filter_int_or_null($u['schools_id']);

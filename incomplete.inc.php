@@ -203,6 +203,28 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 			}
 		}
 		break;
+	case 's_safety':
+		$p = project_load($mysqli, $u['s_pid']);
+		$e = $p['safety'];
+
+		incomplete_check_bool($ret, $e, array('electrical1','bio1','hazmat1','animals1','mech1','institution'));
+		
+		if($e['electrical1']) {
+			incomplete_check_bool($ret, $e, array("electrical2", "electrical3", "electrical4"));
+		}
+		if($e['bio1']) {
+			incomplete_check_bool($ret, $e, array("bio2", "bio3", "bio4", "bio5", "bio6"));
+		}
+		if($e['hazmat1']) {
+			incomplete_check_bool($ret, $e, array("hazmat2", "hazmat3", "hazmat4", "hazmat5"));
+		}
+		if($e['mech1']) {
+			incomplete_check_bool($ret, $e, array("mech2", "mech3", "mech4", "mech5" , "mech6", 'mech7'));
+		}
+		if($e['animals1']) {
+			incomplete_check_bool($ret, $e, array("animals2", "animals3"));
+		}
+		break;
 
 
 	case 's_awards':
@@ -216,7 +238,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		$users = user_load_all_for_project($mysqli, $u['s_pid']);
 		/* Each user needs to be complete */
 		foreach($users as $user) {
-			if($user['s_status'] != 'accepted') $ret[] = 'user_'.$user['uid'];
+			if($user['s_accepted'] == 0) $ret[] = 'user_'.$user['uid'];
 		}
 		break;
 
@@ -278,20 +300,16 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 		 * some cases */
 		if($u['uid'] == $_SESSION['uid']) {
 			/* Nothing else to do */
-			if(count($ret) == 0) {
-				/* No missing fields here, and session is already complete? */
-				if($_SESSION['complete'] == true) {
-					return $ret;
-				}
-			} else {
+			if(count($ret) == 0 && $_SESSION['complete'] == true) {
+			/* No missing fields here, and session is already complete? */
+				return 0;
+			} 
+			if(count($ret) > 0 && $_SESSION['complete'] == false) {
 				/* Missing fields and session is already incomplete? */
-				if($_SESSION['complete'] == false) {
-					return $ret;
-				}
+				return count($ret);
 			}
 		}
-		$force = true;
-		/* Fall through and force-check the whole session */
+		/* Else, reevaluate everything */
 	}
 
 	if($u['uid'] == $_SESSION['uid']) {
@@ -301,56 +319,62 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 
 	/* Set session to complete.  Each of the checks below will set it to incomplete
 	 *  if they find an incomplete item. */
-	$ret = array();
-	$total_c = 0;
-	if(sfiab_user_is_a('student')) {
-		$c = 0;
-		$c += incomplete_fields_check($mysqli, $ret, 's_personal', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_reg_options', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_tours', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_emergency', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_project', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_partner', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_mentor', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_ethics', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_safety', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 's_awards', $u, $force);
-		/* Signature page doesn't count against' complete status */
-		$c1 = incomplete_fields_check($mysqli, $ret, 's_signature', $u, $force);
 
-		$student_complete = ($c == 0) ? true : false;
+	$ret_t = array();
+	$total_c = 0;
+	if(in_array('student', $u['roles'])) {
+		$c = 0;
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_personal', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_reg_options', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_tours', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_emergency', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_project', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_partner', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_mentor', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_ethics', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_safety', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 's_awards', $u, $force);
+		/* Signature page doesn't count against' complete status */
+		$c1 = incomplete_fields_check($mysqli, $ret_t, 's_signature', $u, $force);
+
+		$student_complete = ($c == 0) ? 1 : 0;
+
+		if( ($u['uid'] == $_SESSION['uid']) && !$student_complete) 
+			$_SESSION['complete'] = false;
 
 		/* Adjust student status in the user if it changed */
-		if($student_complete && $u['s_status'] == 'incomplete') {
-			$u['s_status'] = 'complete';
-			user_save($mysqli, $u);
-		} else if($student_complete == false && $u['s_status'] == 'complete') {
-			$u['s_status'] = 'incomplete';
+		if($student_complete != $u['s_complete']) {
+			$u['s_complete'] = $student_complete;
 			user_save($mysqli, $u);
 		}
 		$total_c += $c + $c1;
 	}
 
-	if(sfiab_user_is_a('judge')) {
+	if(in_array('judge', $u['roles'])) {
 		$c = 0;
-		$c += incomplete_fields_check($mysqli, $ret, 'j_personal', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 'j_expertise', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 'j_options', $u, $force);
-		$c += incomplete_fields_check($mysqli, $ret, 'j_mentorship', $u, $force);
-		$judge_complete = ($c == 0) ? true : false;
-		if(!$judge_complete) $_SESSION['complete'] = false;
+		$c += incomplete_fields_check($mysqli, $ret_t, 'j_personal', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 'j_expertise', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 'j_options', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 'j_mentorship', $u, $force);
+		$judge_complete = ($c == 0) ? 1 : 0;
 
+		if( ($u['uid'] == $_SESSION['uid']) && !$judge_complete) 
+			$_SESSION['complete'] = false;
+		
 		/* Adjust judge status in the user if it changed */
-		if($judge_complete && $u['j_status'] != 'complete') {
-			$u['j_status'] = 'complete';
-			user_save($mysqli, $u);
-		} else if($judge_complete == false && $u['j_status'] != 'incomplete') {
-			/* CHeck for != incomplete because we could be coming off a notattedning */
-			$u['j_status'] = 'incomplete';
+		if($judge_complete != $u['j_complete']) {
+			$u['j_complete'] = $judge_complete;
 			user_save($mysqli, $u);
 		}
 		$total_c += $c;
 	}
-	return $total_c;
+
+	/* If they didn't ask for a specific page, return all missing fields */
+	if($page_id === false) {
+		$ret = $ret_t;
+		return $total_c;
+	} else {
+		return count($ret);
+	}
 }
 ?>

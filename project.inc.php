@@ -56,11 +56,27 @@ function project_filter(&$p)
 		}
 
 	}
+
 	if(!is_array($p['safety'])) {
 		if($p['safety'] == NULL) {
 			$p['safety'] = array();
 		} else {
 			$p['safety'] = unserialize($p['safety']);
+		}
+		$fields = array(
+			'display1', 'display2', 'display3',
+			'institution',
+			'electrical1', 'electrical2', 'electrical3', 'electrical4',
+			'animals1', 'animals2', 'animals3',
+			'bio1', "bio2", "bio3", "bio4", "bio5", "bio6",
+			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
+			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7',
+			);
+
+		foreach($fields as $f) {
+			if(!array_key_exists($f, $p['safety'])) {
+				$p['safety'][$f] = NULL;
+			}
 		}
 	}
 		

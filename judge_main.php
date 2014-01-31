@@ -20,17 +20,13 @@ if(array_key_exists('action', $_POST)) {
 switch($action) {
 case 'save':
 	$attending = NULL;
-	post_bool($attending, 'j_attending');
-	if($attending !== NULL) {
-		if($attending == 0) {
-			$u['j_status'] = 'notattending';
-			user_save($mysqli, $u);
-		} else {
-			/* Do  a full check, this will set the user
-			 * status to complete or incomplete and save it */
-			$fields = array();
-			incomplete_check($mysqli, $fields, $u, false, true);
-		}
+	post_bool($u['not_attending'], 'j_not_attending');
+	user_save($mysqli, $u);
+	if($u['not_attending'] == 0) {
+		/* Do a full check, this will set the user
+		 * status to complete or incomplete and save it */
+		$fields = array();
+		incomplete_check($mysqli, $fields, $u, false, true);
 	}
 
 	form_ajax_response(array('status'=>0, 'location'=>'judge_main.php'));
@@ -58,20 +54,7 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 	<p>Help for most pages is available by clicking the information icon on the top right of the page.
 
 <?php
-	if($u['j_status'] == 'complete') {
-?>
-		<h3>Registration Status: <font color="green">Complete</font></h3>
-
-		Thank you for completing your registration.  We will send out an email 
-		when judging teams have been created and project abstracts are ready 
-		for judges to view.
-
-		<h3>Judging Team and Schedule</h3>
-		Judging teams have not been assigned yet.  Look for this information
-		approximately one week before the fair.  
-
-<?php
-	} else if($u['j_status'] == 'notattending') {
+	if($u['not_attending'] == 1) {
 ?>
 		<h3>Registration Status: <font color="blue">Not Attending</font></h3>
 
@@ -88,7 +71,19 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 		process.  If the registration deadline has passed, please contact
 		the chief judges (leonard@gvrsf.ca or ceddy@gvrsf.ca)
 		
-		<p>Thank you.
+		<p>Thank you.	
+<?php
+	} else if($u['j_complete'] == 1) {
+?>
+		<h3>Registration Status: <font color="green">Complete</font></h3>
+
+		Thank you for completing your registration.  We will send out an email 
+		when judging teams have been created and project abstracts are ready 
+		for judges to view.
+
+		<h3>Judging Team and Schedule</h3>
+		Judging teams have not been assigned yet.  Look for this information
+		approximately one week before the fair.  
 <?php
 	} else {
 ?>
@@ -111,13 +106,12 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 	judging assignments have already been made.  You can always flip the switch back again.
 	<?php
 
-	$attending = ($u['j_status'] == 'notattending') ? 0 : 1;
-
-	$sel = array('1'=>'Yes, I\'ll be there', '0'=>'No, I can\'t make it');
+	/* This is backwards because it's "not attending" */
+	$sel = array('0'=>'Yes, I\'ll be there', '1'=>'No, I can\'t make it');
 
 	$form_id = 'j_attending_form';
 	form_begin($form_id, 'judge_main.php');	
-	form_radio_h($form_id, 'j_attending', "Judging at the fair", $sel, $attending);
+	form_radio_h($form_id, 'j_not_attending', "Judging at the fair", $sel, $u['not_attending']);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>

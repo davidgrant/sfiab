@@ -33,12 +33,19 @@ sfiab_page_begin("Student Main", 's_home', $help);
 <?php	} ?>
 
 
-<?php	if($u['s_status'] == 'incomplete') { ?>
+<?php	if($u['s_accepted'] == 1) { ?>
+
+		<h3>Registration Status: <font color="green">Forms Received</font></h3>
+		
+		All your registration forms have been received and processed.
+
+<?php	} else if($u['s_complete'] == 0) { ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
 
 		<p>The red boxes in the left hand menu indicate which pages
 		still have information that needs to be filled out.
-<?php	} else if($u['s_status'] == 'complete') { ?>
+
+<?php	} else { ?>
 
 		<h3>Registration Status: <font color="orange">Almost Complete</font></h3>
 
@@ -47,15 +54,9 @@ sfiab_page_begin("Student Main", 's_home', $help);
 
 		<p> We will be processing all registration forms during the two weeks
 		after registration closes 
-
-
-
-<?php	} else if($u['s_status'] == 'accepted') { ?>
-
-		<h3>Registration Status: <font color="green">Forms Received</font></h3>
-		
-		All your registration forms have been received and processed.
-<?php	} ?>
+<?php	
+	}
+?>
 
 	<h3>Forms and Documents</h3>
 	<p>We will be putting forms and documents here.  Most forms can already be found in the student handbook on <a href="http://www.gvrsf.ca">www.gvrsf.ca</a>

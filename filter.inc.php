@@ -16,6 +16,11 @@ function filter_bool_or_null(&$val)
 	$val = (int)$val;
 }
 
+function filter_bool(&$val)
+{
+	$val = ((int)$val == 0) ? 0 : 1;
+}
+
 function filter_phone(&$val)
 {
 	$ret = preg_match('/.*1?[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9][0-9]) *(.*)/', $val, $matches);

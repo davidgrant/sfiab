@@ -22,7 +22,7 @@ $users = user_load_all_for_project($mysqli, $u['s_pid']);
 /* Check for all complete */
 $all_complete = true;
 foreach($users as $user) {
-	if($user['s_status'] != 'complete') {
+	if($user['s_complete'] == 0) {
 		$all_complete = false;
 	}
 }
@@ -62,8 +62,8 @@ if(count($_POST) == 0) {
 		<ul data-role="listview" data-inset="true">
 <?php
 		foreach($users as $user) {
-			$c = ($user['s_status'] == 'complete') ? 'class="happy"' : 'class="error"';
-			$s = ($user['s_status'] == 'complete') ? 'Complete' : 'Incomplete';
+			$c = ($user['s_complete'] == 1) ? 'class="happy"' : 'class="error"';
+			$s = ($user['s_complete'] == 1) ? 'Complete' : 'Incomplete';
 		?>
 			<li><?=$user['name']?>: <span <?=$c?>><?=$s?></span></li>
 <?php		} ?>
