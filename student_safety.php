@@ -141,7 +141,7 @@ function policy($name, $text, $link = '')
 <?php
 	$answers = $p['safety'];
 	incomplete_check($mysqli, $fields, $u, $page_id);
-	print_r($fields);
+//	print_r($fields);
 	form_page_begin($page_id, $fields, '', '', 'This page is incomplete.  Please complete all questions.');
 
 
