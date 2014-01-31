@@ -105,7 +105,7 @@ function questionc($name, $text, $help, $v)
 		<div style="float:right; text-align:center; width:15%"  >
 <?php
 		$sel = ($v === 1) ? 'checked="checked"' : ''; ?>
-	        <input name="<?=$name?>" id="<?=$name.'-'.$x?>" value="1" <?=$sel?> type="checkbox">
+	        <input name="<?=$name?>" id="<?=$name?>" value="1" <?=$sel?> type="checkbox">
 		</div>
 	</li>
 <?php
@@ -284,7 +284,7 @@ function policy($name, $text, $link = '')
 		safety_hide(["electrical2", "electrical3", "electrical4"]);
 		safety_hide(["bio2", "bio3", "bio4", "bio5", "bio6" ]);
 		safety_hide(["hazmat2", "hazmat3", "hazmat4", "hazmat5" ]);
-		safety_hide(["mech2", "mech3", "mech4", "mech5", "mech6" ,'mech7' ]);
+		safety_hide(["mech2", "mech3", "mech4", "mech5", "mech6" ,"mech7" ]);
 		safety_hide(["food2", "food3", 'food4', 'food5' ]);
 		safety_hide(['bio', 'hazmat', 'animals', 'electrical', 'mech']);
 		safety_update(0);
@@ -368,7 +368,7 @@ function policy($name, $text, $link = '')
 				safety_hide(['hazmat']);
 				safety_hide(ar);
 			}
-			var ar = ["mech2", "mech3", "mech4", "mech5" , "mech6", 'mech7' ];
+			var ar = ["mech2", "mech3", "mech4", "mech5" , "mech6", "mech7" ];
 			if(mech1 == 1) {
 				safety_show(ar);
 				safety_show(['mech']);
