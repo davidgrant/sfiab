@@ -153,23 +153,20 @@ function policy($name, $text, $link = '')
 <?php 	if(count($fields) == 0) {
 
 ?>
-	<h3>Safety Information and Forms</h3>
+	<h3>Safety Information Documentation Required at the Fair</h3>
 
-
-<?php
-	$e = $p['safety'];
-
-?>	
-
-		<h4><font color=red>Documentation Required</font></h4>
 		<ul data-role="listview" data-inset="true">
 <?php
-	        if($e['bio1'] || $e['hazmat1']) 
+	        if($answers['bio1'] || $answers['hazmat1']) 
 			policy('Using Hazardous Materials', 'You are required to have a supervisor who is licensed or certified to handle the hazardous materials used in your project.  Documentation of license or certification will be required at the fair (put it in your log book so you don\'t lose or forget it).');
 		else
 			policy('None', 'For project safety, no forms or additional documentation are required for your project.  Note that ethics forms may still be required as indicated in the ethics section.');
 
 ?>		</ul>
+		<br/>
+		<hr/>
+		<br/>
+
 <?php
 	}
 
