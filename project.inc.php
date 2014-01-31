@@ -70,6 +70,7 @@ function project_filter(&$p)
 			'animals1', 'animals2', 'animals3',
 			'bio1', "bio2", "bio3", "bio4", "bio5", "bio6",
 			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
+			'food1', "food2", "food3", "food4", "food5",
 			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7',
 			);
 

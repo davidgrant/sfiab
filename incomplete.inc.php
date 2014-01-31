@@ -207,22 +207,27 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		$p = project_load($mysqli, $u['s_pid']);
 		$e = $p['safety'];
 
-		incomplete_check_bool($ret, $e, array('electrical1','bio1','hazmat1','animals1','mech1','institution'));
+		incomplete_check_bool($ret, $e, array('bio1','hazmat1','mech1','institution','display1','display2','display3'));
+		if($e['mech1'])
+			incomplete_check_bool($ret, $e, array('electrical1','animals1','food1'));
 		
-		if($e['electrical1']) {
+		if($e['electrical1'] && $e['mech1']) {
 			incomplete_check_bool($ret, $e, array("electrical2", "electrical3", "electrical4"));
 		}
-		if($e['bio1']) {
+		if($e['bio1'] && $e['mech1']) {
 			incomplete_check_bool($ret, $e, array("bio2", "bio3", "bio4", "bio5", "bio6"));
 		}
-		if($e['hazmat1']) {
+		if($e['hazmat1'] && $e['mech1']) {
 			incomplete_check_bool($ret, $e, array("hazmat2", "hazmat3", "hazmat4", "hazmat5"));
 		}
-		if($e['mech1']) {
+		if($e['mech1'] && $e['mech1']) {
 			incomplete_check_bool($ret, $e, array("mech2", "mech3", "mech4", "mech5" , "mech6", 'mech7'));
 		}
-		if($e['animals1']) {
+		if($e['animals1'] && $e['mech1']) {
 			incomplete_check_bool($ret, $e, array("animals2", "animals3"));
+		}
+		if($e['food1'] && $e['mech1']) {
+			incomplete_check_bool($ret, $e, array("food2", "food3", 'food4','food5'));
 		}
 		break;
 

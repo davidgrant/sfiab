@@ -26,6 +26,7 @@ case 'save':
 			'animals1', 'animals2', 'animals3',
 			'bio1', "bio2", "bio3", "bio4", "bio5", "bio6",
 			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
+			'food1', "food2", "food3", "food4", "food5",
 			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7');
 
 	foreach($a as $f) {
@@ -140,7 +141,7 @@ function policy($name, $text, $link = '')
 <?php
 	$answers = $p['safety'];
 	incomplete_check($mysqli, $fields, $u, $page_id);
-//	print_r($fields);
+	print_r($fields);
 	form_page_begin($page_id, $fields, '', '', 'This page is incomplete.  Please complete all questions.');
 
 
@@ -153,6 +154,7 @@ function policy($name, $text, $link = '')
 
 ?>
 	<h3>Safety Information and Forms</h3>
+
 
 <?php
 	$e = $p['safety'];
@@ -173,6 +175,8 @@ function policy($name, $text, $link = '')
 
 ?>	<h3>Safety Questions</h3>
 
+	<p>In these questions "the display", or "on display", or "at the display" refers to the entire project area.  That includes the area on the table, under the table, behind the backboard, etc.
+
 	<ul data-role="listview" data-inset="true">
 	
 <?php
@@ -181,13 +185,15 @@ function policy($name, $text, $link = '')
 		array('Potentially Hazardous Biological Agents include micro-organisms, rDNA, fresh/frozen tissue, blood and body fluids, toxins.'), $answers);
 	question('hazmat1',  'Does this project involve hazardous chemicals, explosives, firearms, or other hazardous materials or activities?', 
 		array('Many common chemicals used at home are considered hazardous (i.e., poisonous or dangerous, etc) - look for warning labels.'), $answers);
-	question('electrical1', 'Does this project use something that produces or uses electricity, other than a laptop computer?',
-		array('e.g., a lamp, motor, hand-generator, battery, flashlight, circuit board'), $answers);
+	question('mech1', 'Will any materials or apparatus used in this project be on display at the fair?',
+		array('In other words, will the display have anything at it other than a backboard, logbook, and laptop?',
+			'Remember, "on display" also includes under the table at the fair'), $answers);
+	question('electrical1', 'Will any electrical or electricity-producing device, other than a laptop computer, be at the display?',
+		array('e.g., plug-in devices, battery-operated devices, hand-generators, circuit boards'), $answers);
 	question('animals1', 'Does this project use animals or animal parts?',
 		array('e.g., live animals, micro-organisms, snake skin, feathers, bones, hair samples'), $answers);
-	question('mech1', 'Will any apparatus used in this project be on display at the fair?',
-		array('In other words, will the display have anything at it other than a backboard, logbook, and laptop?'
-		), $answers);
+	question('food1', 'Does this project use any liquids, non-hazardous chemicals, or materials subject to decomposition (including all food)?',
+		array('e.g., pop, rubbing alcohol, toothpaste, cheese, candy, laundry detergent, dish soap, fruits, vegetables'), $answers);
 
 	divider('facilities', 'Facilities');
 	question('institution',  'Will your project be conducted at or assisted by a Research Institution such as a Hospital, University, College, or Commercial Laboratory?', array(), $answers);
@@ -199,13 +205,6 @@ function policy($name, $text, $link = '')
 		array(), $answers);
 	questionc('display3', 'The backboard is free-standing and structurally sound.',array(), $answers);
 
-
-	divider('electrical', 'Project Display -- Electrical Safety');
-	questionc('electrical2', 'All electrical equipment has 3-prong plugs and is CSA approved.',array(), $answers);
-	questionc('electrical3', 'There are no wet cell batteries.',
-		array('Dry cell batteries are permitted, e.g., alkalines, NiCd, lithium-ion'), $answers);
-	questionc('electrical4', 'Any electronic components created or modified for the project conform to the following:',
-		array('They use low voltage and current', 'They are in a non-combustable enclosure','An insulating grommet is used where wires enter the enclosure','A pilot light is present to indicate when the power is on.'), $answers);
 
 	divider('bio', 'Project Display -- Hazardous Biological Agent Safety');
 	questionc('bio2', 'The display has no cell, tissue, or blood samples.',
@@ -219,24 +218,15 @@ function policy($name, $text, $link = '')
 	questionc('bio6', 'The display has no spores or pollen e.g., in a ziploc bag.',
 		array('A photo is a good substitute'), $answers);
 
-
-	divider('animals', 'Project Display -- Animals and Animal Safety');
-	questionc('animals2', 'The display has no living or dead animals or micro-organisms',
-		array(), $answers);
-	questionc('animals3', 'The display has no animal products subject to decomposition.',
-		array('Items shed naturally by an animal are permitted: safely contained quills, shed snake skin, feathers, hair samples',
-			' Items properly prepared and preserved are permitted: tanned pelts and hides, antlers, skeletons or skeletal parts'), $answers);
-	
 	divider('hazmat', 'Project Display -- Firearms, Explosives, and Hazardous Materials Safety');
 	questionc('hazmat2', 'The display has no firearms, ammunition, dangerous goods, or explsovies.',
 		array(), $answers);
 	questionc('hazmat3', 'The display has no flammable, toxic, or dangerous chemicals.',
-		array('e.g., gasoline, kerosene, alcohol, cleaning supplies', 'Water and food colouring is an excellent substitute for any liquid'), $answers);
+		array('e.g., gasoline, kerosene, alcohol, cleaning supplies', 'Water and food colouring MUST be used as a substitute for any liquid.','Even better, leave all liquids at home.  Our judges will not penalize any project for not having materials on-hand.'), $answers);
 	questionc('hazmat4', 'The display has less than 1L of water on display.',
-		array('We highly recommend substituting water and food colouring for any and all liquids. Note the substitution by marking it with "Simulated X" label'), $answers);
+		array('Water and food colouring MUST be used as a substitute for any and all liquids.','You can note the substitution by marking it with a "Simulated X" label'), $answers);
 	questionc('hazmat5', 'The display has no prescription drugs or over-the-counter medications.',
 		array(), $answers);
-
 
 	divider('mech', 'Project Display -- Structural, Mechanical, and Fire Safety');
 	questionc('mech2', 'All fast, large, or dangerous moving parts on display are fitted with a guard.',
@@ -251,42 +241,35 @@ function policy($name, $text, $link = '')
 		array('e.g., corners of prisms, mirrors, glass, metal plates'), $answers);
 	questionc('mech7', 'My display doesn\'t have any open flames or heating devices.',
 		array('Examples: candles, lighters, torches, hot plates.'), $answers);
+		
+	divider('electrical', 'Project Display -- Electrical Safety');
+	questionc('electrical2', 'All electrical equipment has 3-prong plugs and is CSA approved.',array(), $answers);
+	questionc('electrical3', 'There are no wet cell batteries.',
+		array('Dry cell batteries are permitted, e.g., alkalines, NiCd, lithium-ion'), $answers);
+	questionc('electrical4', 'Any electronic components created or modified for the project conform to the following:',
+		array('They use low voltage and current', 'They are in a non-combustable enclosure','An insulating grommet is used where wires enter the enclosure','A pilot light is present to indicate when the power is on.'), $answers);
+
+
+	divider('animals', 'Project Display -- Animals and Animal Safety');
+	questionc('animals2', 'The display has no living or dead animals or micro-organisms',
+		array(), $answers);
+	questionc('animals3', 'The display has no animal products subject to decomposition.',
+		array('Items shed naturally by an animal are permitted: safely contained quills, shed snake skin, feathers, hair samples',
+			' Items properly prepared and preserved are permitted: tanned pelts and hides, antlers, skeletons or skeletal parts'), $answers);
+	
+	divider('food', 'Project Display -- Liquids, Food, and other Chemicals');
+	questionc('food2', 'The display has no liquids other than water (and food colouring) on display.',
+		array('Water and food colouring MUST be used as a substitute for any and all liquids.','You can note the substitution by marking it with a "Simulated X" label','Even better, leave all liquids at home.  Our judges will not penalize any project for not having materials on-hand.'), $answers);
+	questionc('food3', 'Less than one litre of water is at the display.',
+		array(), $answers);
+	questionc('food4', 'No food items or items subject to decomposition are on display.',
+		array('Empty food packages are permitted.'), $answers);
+	questionc('food5', 'No gels or other chemicals are on display.',
+		array('e.g., dish soap, toothpaste'), $answers);
+		
+
 	
 
-/*
-	divider('old', 'Old SFIAB questions... let\'s condense these');
-	question('211', 'Exhibit will not collapse: It is free-standing, well-balanced, and of solid construction, no more than 1.2m wide (at the widest point), by 0.8 metres deep (at the deepest point) by 3.5 metres from the floor.', array(), $answers);
-	question('212', 'All display posters are completely and securely fastened to the exhibit baseboard.', array(), $answers);
-	question('213', 'All moving parts are securely affixed and will not separate from the exhibit (ie: gears, pulleys, etc.).', array(), $answers);
-	question('214', 'All sharp edges or corners (such as those on prisms or mirrors) are covered.', array(), $answers);
-	question('215', 'All hoses and cords required in the exhibit are securely taped and of minimal length.', array(), $answers);
-	question('216', 'All pressurized vessels have safety valves.', array(), $answers);
-	question('217', 'Exhibit does not contain any compressed gases.', array(), $answers);
-	question('218', 'Aisle and area under table will be clear of any debris.', array(), $answers);
-	question('219', 'No combustible material is near a heat source.', array(), $answers);
-	question('220', 'No open flames are present in the exhibit.', array(), $answers);
-	question('221', 'No packing material or any other unnecessary flammable material is present in the exhibit hall.', array(), $answers);
-	question('222', 'No burning or smouldering substances are present in the exhibit hall (including cigarettes).', array(), $answers);
-	question('223', 'No radioisotopes are present in the exhibit.', array(), $answers);
-	question('224', 'No biological toxins, microorganisms, or cultures are displayed in the exhibit. Where such displays are integral to the project content, visual substitutes (ie: photographs) may be used.  (No project will be penalized due to the replacement of hazardous material with innocuous substitutes.) ', array(), $answers);
-	question('225', 'No matter subject to decomposition is present in the exhibit.', array(), $answers);
-	question('226', 'No live animals are present in the display (but properly housed, non-decomposing animal parts may be displayed (ie: a snake skin)).', array(), $answers);
-	question('227', 'If any vertebrate animal is part of an experiment, collection and use thereof must be humane. Such treatment cannot stress the animal or be otherwise deleterious to its health.', array(), $answers);
-	question('228', 'No toxic, noxious, or flammable chemicals (including chemical preservatives) are present in the exhibit.', array(), $answers);
-	question('229', 'No drugs, whether prescription or over-the-counter, are present in the exhibit.', array(), $answers);
-	question('230', 'Where chemicals are required for illustrative purposes, appropriate safe substitutes have been used (ie: water for alcohol), which may be labelled with the intended name followed by \'simulated\' (ie: ether simulated)).  (No project will be penalized due to the replacement of hazardous material with innocuous substitutes.)', array(), $answers);
-	question('231', 'Voltages used represent minimal quantities required to run any electrical components of the exhibit.', array(), $answers);
-	question('232', 'All electrical components are entirely housed by an enclosure insofar as such remains practical.  Such an enclosure is of a non-combustible material.', array(), $answers);
-	question('233', 'All metal parts not intended to carry a current but present in an exhibit that uses electrical components are grounded.', array(), $answers);
-	question('234', 'All cords are CSA approved and in good repair (no exposed wires or breaks in insulation).', array(), $answers);
-	question('235', 'All cords are three pronged.', array(), $answers);
-	question('236', 'An insulating grommet has been installed at the interface of a cord and any electrical component (a grommet keeps the cord from being frayed by the edges of the component housing).', array(), $answers);
-	question('237', 'Wet cells (ie: car batteries) have not been used.', array(), $answers);
-	question('238', 'Exhibit is capable of being turned off at the end of the viewing period.', array(), $answers);
-	question('239', 'No exposed part carries a voltage greater than 36V.', array(), $answers);
-	question('240', 'No radiation-producing component is displayed without proper governmental authorization and adherence to governmental radiation safety protocols (exhibits involving voltages above 10kV are considered to be radiation-producing).', array(), $answers);
-    
-*/
 ?>
 </ul>
 
@@ -305,6 +288,7 @@ function policy($name, $text, $link = '')
 		safety_hide(["bio2", "bio3", "bio4", "bio5", "bio6" ]);
 		safety_hide(["hazmat2", "hazmat3", "hazmat4", "hazmat5" ]);
 		safety_hide(["mech2", "mech3", "mech4", "mech5", "mech6" ,'mech7' ]);
+		safety_hide(["food2", "food3", 'food4', 'food5' ]);
 		safety_hide(['bio', 'hazmat', 'animals', 'electrical', 'mech']);
 		safety_update(0);
 
@@ -337,11 +321,19 @@ function policy($name, $text, $link = '')
 			var haz1 = $("#<?=$form_id?>_hazmat1 input:checked").val();
 			var ani1 = $("#<?=$form_id?>_animals1 input:checked").val();
 			var mech1 = $("#<?=$form_id?>_mech1 input:checked").val();
+			var food1 = $("#<?=$form_id?>_food1 input:checked").val();
 
 //			alert(human1);
 
+			var ar = ['electrical1', 'food1', 'animals1'];
+			if(mech1 == 1) {
+				safety_show(ar);
+			} else {
+				if(do_uncheck) safety_uncheck(ar);
+				safety_hide(ar);
+			}
 			var ar = ["electrical2", "electrical3", "electrical4"];
-			if(el1 == 1) {
+			if(el1 == 1 && mech1 == 1) {
 				safety_show(['electrical']);
 				safety_show(ar);
 			} else {
@@ -351,7 +343,7 @@ function policy($name, $text, $link = '')
 			}
 
 			var ar = ["animals2", "animals3"];
-			if(ani1 == 1) {
+			if(ani1 == 1 && mech1 == 1) {
 				safety_show(['animals']);
 				safety_show(ar);
 			} else {
@@ -361,7 +353,7 @@ function policy($name, $text, $link = '')
 			}
 
 			var ar = ["bio2", "bio3", "bio4", "bio5", "bio6" ];
-			if(bi1 == 1) {
+			if(bi1 == 1 && mech1 == 1) {
 				safety_show(ar);
 				safety_show(['bio']);
 			} else {
@@ -371,7 +363,7 @@ function policy($name, $text, $link = '')
 			}
 
 			var ar = ["hazmat2", "hazmat3", "hazmat4", "hazmat5"  ];
-			if(haz1 == 1) {
+			if(haz1 == 1 && mech1 == 1) {
 				safety_show(ar);
 				safety_show(['hazmat']);
 			} else {
@@ -386,6 +378,15 @@ function policy($name, $text, $link = '')
 			} else {
 				if(do_uncheck) safety_uncheck(ar);
 				safety_hide(['mech']);
+				safety_hide(ar);
+			}
+			var ar = ["food2", "food3", "food4", "food5" ];
+			if(food1 == 1 && mech1 == 1) {
+				safety_show(ar);
+				safety_show(['food']);
+			} else {
+				if(do_uncheck) safety_uncheck(ar);
+				safety_hide(['food']);
 				safety_hide(ar);
 			}
 
