@@ -34,12 +34,29 @@ function filter_hash($hash)
 function check_attempts($mysqli, $uid)
 {
 	$interval = 60 * 30; // 30 minutes;
+	$uid = (int)$uid;
  
-	$q = $mysqli->prepare("SELECT time FROM log WHERE uid = ? AND type = 'login bad pass' AND time > DATE_SUB(NOW(), INTERVAL $interval SECOND)"); 
-	$q->bind_param('i', $uid); 
-	$q->execute();
-	$q->store_result();
-	if($q->num_rows > 5) return true;
+	$q = $mysqli->query("SELECT time FROM log WHERE uid = '$uid'
+						AND type = 'login bad pass' 
+						AND time > DATE_SUB(NOW(), INTERVAL $interval SECOND)
+						ORDER BY time DESC
+						LIMIT 6"); 
+	if($q->num_rows > 5) {
+		/* Seek to the one 6 attempts ago */
+		$q->data_seek(5);
+		$d = $q->fetch_assoc();
+		$t = $d['time'];
+
+		/* Ok, has there been a password reset in there? */
+		$q1 = $mysqli->query("SELECT time FROM log WHERE uid = '$uid' AND type = 'reset pw' AND time >= '$t' LIMIT 1"); 
+		if($q1->num_rows > 0) {
+			/* There is a password reset in the same interval, so account isn't locked */
+			return false;
+		}
+		/* 6 bad login attempts, in the last 30 mins.  Account is locked. */
+		return true;
+	}
+	/* Less than 6 attempts.  Not locked */
 	return false;
 }
 
@@ -163,7 +180,7 @@ case 'login':
 	/* User exists? */
 	if($u == NULL) { 
 		sfiab_log($mysqli, 'login no user', $username);
-		print('Sorry, invalid username or password.1');
+		print('Sorry, invalid username or password');
 		exit();
 	}
 
@@ -172,7 +189,7 @@ case 'login':
 	case 'active': case 'new':
 		break;
 	case 'disabled':
-		print('Sorry, invalid username or password.2');
+		print('Sorry, invalid username or password');
 		exit();
 	default: 
 		print('');
@@ -182,7 +199,7 @@ case 'login':
 	/* Salt must be valid */
 	if(strlen($u['salt']) != 128) {
 		sfiab_log($mysqli, 'login bad salt', $username);
-		print('Sorry, invalid username or password.4');
+		print('Sorry, invalid username or password');
 		exit();
 	}
 
@@ -200,7 +217,7 @@ case 'login':
 	$password_hash = hash('sha512', $u['password'].$u['salt']); // hash the password with the unique salt.
 	if($password_hash != $hash) {
 		sfiab_log($mysqli, 'login bad pass', $username, $u['uid']);
-		print('Sorry, invalid username or password.3');
+		print('Sorry, invalid username or password');
 		exit();
 	}
 

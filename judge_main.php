@@ -36,7 +36,7 @@ case 'save':
 
 $help = '
 <ul><li><b>Attending the Fair</b> - If you are unable to attend the fair,
-indicate that here and we will remove you will not be assigned to any judging
+indicate that here and you will not be assigned to any judging
 team, or we will remove you from any teams you have been assigned to.  
 </ul>';
 
@@ -51,7 +51,7 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 
 	<p> Welcome to the new GVRSF registration system.  
 	
-	<p>Help for most pages is available by clicking the information icon on the top right of the page.
+	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_j_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
 
 <?php
 	if($u['not_attending'] == 1) {

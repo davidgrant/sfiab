@@ -22,11 +22,13 @@ case 'pw':
 	if($u != NULL) {
 		$uid = $u['uid'];
 		$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
-        $password_hash = hash('sha512', $password);
+	        $password_hash = hash('sha512', $password);
 		$mysqli->real_query("UPDATE users SET password='$password_hash',password_expired='1' WHERE uid='{$uid}'");
 		email_send($mysqli, "Forgot Password", $uid, array('PASSWORD'=>$password) );
+		sfiab_log($mysqli, 'reset pw', "", $uid);
+		
 	}
-	/* Always send the user to the page even if nothign was sent.. we dont' want
+	/* Always send the user to the page even if nothing was sent.. we dont' want
 	 * people checking for valid usernames this way */
 	header("Location: ".$config['fair_url'].'/index.php#forgot_password_sent');
 	exit();
