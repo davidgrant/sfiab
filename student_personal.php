@@ -19,6 +19,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	$old_grade = $u['grade'];
 	post_text($u['firstname'],'firstname');
 	post_text($u['lastname'],'lastname');
 	post_text($u['pronounce'],'pronounce');
@@ -35,6 +36,12 @@ case 'save':
 	post_text($u['s_teacher'],'s_teacher');
 	post_text($u['s_teacheremail'],'s_teacheremail');
 	post_text($u['medicalert'],'medicalert');
+
+	if($old_grade !== $u['grade']) {
+		$u['tour_id_pref'][0] = NULL;
+		$u['tour_id_pref'][2] = NULL;
+		$u['tour_id_pref'][1] = NULL;
+	}
 
 	/* Scrub data */
 	$update = array();

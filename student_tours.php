@@ -53,6 +53,16 @@ sfiab_page_begin("Student Tour Selection", $page_id, $help);
 
 ?>
 	<h3>Tour Selection</h3>
+
+<?php	if($u['grade'] === NULL || $u['grade'] == 0) { ?>
+		<p>Please enter your grade on the Personal Info page.  Some tours are only applicable to certain grades.
+		</div></div>
+	
+<?php		sfiab_page_end();
+	}
+?>
+
+
 	<p>Select your top three tour choices.  Most students will get their
 	first or second choice.  We can't guarantee that everyone will, but
 	we'll do our best.  A description of each tour is at the bottom of the
