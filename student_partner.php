@@ -293,7 +293,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 
 	<h3>Number of Students</h3>
 
-<p>Enter the Number of Students who worked on the this project.</p>
+<p>Enter the Number of Students who worked on this project.</p>
 <?php
 	$num_data = array();
 	for($i=$students_in_project; $i<=2; $i++) $num_data[$i] = $i;
