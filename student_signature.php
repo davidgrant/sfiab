@@ -35,23 +35,23 @@ if(count($_POST) == 0) {
 	/* Nothing to get, display the landing page */
 
 	$help='
-	<p>The last step of registration is to print a signature page.  This
+	<p>The last step of registration is to print a signature form.  This
 	can only be done when all your sections are complete, and all your
 	partner(s) sections are complete too.
 	';
 
-	sfiab_page_begin("Student Signature Page", $page_id, $help);
+	sfiab_page_begin("Student Signature Form", $page_id, $help);
 	?>
 
 	<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-	<h3>Print Signature Page</h3>
+	<h3>Print Signature Form</h3>
 	<p>After all sections are complete for all students in this project, a
-	signature page must be printed, signed, and submitted to the Science
+	signature form must be printed, signed, and submitted to the Science
 	Fair Committee.  Instructions for completing the form and how/where to
 	submit it are attached to the form.
 	
-	<p>The signature page must be signed by a teacher, parent/guardian, and each student.
+	<p>The signature form must be signed by a teacher, parent/guardian, and each student.
 
 	<p>For senior students, there is also a marks validation form that should
 	be submitted to qualify for University scholarship awards.
@@ -69,19 +69,19 @@ if(count($_POST) == 0) {
 <?php		} ?>
 		</ul>
 
-	<h4>Download Signature Page</h4>
+	<h4>Download Signature Form</h4>
 
 <?php	if($all_complete) {
 		$d = '';
 	} else {
-?>		<p>The signature page can only be printed when all the students in the project are complete.
+?>		<p>The signature form can only be printed when all the students in the project are complete.
 <?php
 		$d = 'disabled="disabled"';
 	}
 ?>
 	<form action="student_signature.php" method="post" data-ajax="false">
 	<input type="hidden" name="pdf" value="1"/>
-	<button type="submit" data-role="button" <?=$d?> data-theme="g">Print Signature Page</button>
+	<button type="submit" data-role="button" <?=$d?> data-theme="g">Print Signature Form</button>
 	</form>
 	
 	</div></div>
@@ -119,7 +119,7 @@ if(count($_POST) == 0) {
 $cats = categories_load($mysqli);
 $chals = challenges_load($mysqli);
 
-$pdf=new pdf( "Participant Signature Page ({$p['pid']})" );
+$pdf=new pdf( "Participant Signature Form ({$p['pid']})" );
 
 $pdf->setFontSize(11);
 $pdf->SetFont('times');

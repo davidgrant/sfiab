@@ -192,6 +192,9 @@ function policy($name, $text, $link = '')
 		}
 ?>
 		</ul>
+		<button type="submit" data-role="button" id="<?=$form_id?>_submit_save" name="action" value="save" data-inline="true" data-icon="check" data-theme="g" >
+			Save
+		</button>
 		
 		<br/>
 		<hr/>
