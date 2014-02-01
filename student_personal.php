@@ -60,7 +60,13 @@ case 'save':
 	exit();
 }
 
-sfiab_page_begin("Student Personal", $page_id);
+$help = '
+<ul>
+<li><b>Name Pronounciation Key</b> - If your name is often mis-pronounced, describe how to properly pronounce it.
+<li><b>Birthdate</b> - In the format: YYYY-MM-DD.  It\'ll take most values and attempt to convert them.
+</ul>';
+
+sfiab_page_begin("Student Personal", $page_id, $help);
 
 ?>
 

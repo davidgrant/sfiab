@@ -56,7 +56,7 @@ $help = '
 </ul>
 ';
 
-sfiab_page_begin("Student Personal", $page_id, $help);
+sfiab_page_begin("Project Information", $page_id, $help);
 
 ?>
 

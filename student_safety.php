@@ -27,7 +27,8 @@ case 'save':
 			'bio1', "bio2", "bio3", "bio4", "bio5", "bio6",
 			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
 			'food1', "food2", "food3", "food4", "food5",
-			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7');
+			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7',
+			'agree');
 
 	foreach($a as $f) {
 		if(!array_key_exists($f, $_POST)) {
@@ -43,8 +44,11 @@ case 'save':
 }
 
 
+incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
 
-sfiab_page_begin("Project Safety", $page_id);
+$help = '<p>Please complete all the questions on this page about safety';
+
+sfiab_page_begin("Project Safety", $page_id, $help);
 ?>
 
 <?php
@@ -52,15 +56,18 @@ sfiab_page_begin("Project Safety", $page_id);
 function question($name, $text, $help, $v)
 {
 	global $page_id;
+	global $incomplete_fields;
 	$id = $page_id.'_form_'.$name;
 
 	if(is_array($v)) {
 		$v = $v[$name];
 	}
 
+	$err = in_array($name, $incomplete_fields) ? 'border-color:red; border-width:2px;': '';
+
 	$data = array(0=>'No', 1=>'Yes');
 ?>
-	<li id="<?=$id?>_li" style="white-space:normal" >
+	<li id="<?=$id?>_li" style="white-space:normal; <?=$err?>" >
 		<div style="float:left; width:85%">
 		<?=$text?><br/>
 		<ul>
@@ -87,14 +94,17 @@ function question($name, $text, $help, $v)
 function questionc($name, $text, $help, $v)
 {
 	global $page_id;
+	global $incomplete_fields;
 	$id = $page_id.'_form_'.$name;
 
 	if(is_array($v)) {
 		$v = $v[$name];
 	}
 
+	$err = in_array($name, $incomplete_fields) ? 'border-color:red; border-width:2px;': '';
+
 ?>
-	<li id="<?=$id?>_li" style="white-space:normal" >
+	<li id="<?=$id?>_li" style="white-space:normal; <?=$err?> " >
 		<div style="float:left; width:85%">
 		<?=$text?><br/>
 		<ul>
@@ -103,9 +113,12 @@ function questionc($name, $text, $help, $v)
 <?php		} ?>		
 		</ul></div>
 		<div style="float:right; text-align:center; width:15%"  >
+		<fieldset id="<?=$id?>" >
 <?php
 		$sel = ($v === 1) ? 'checked="checked"' : ''; ?>
-	        <input name="<?=$name?>" id="<?=$name?>" value="1" <?=$sel?> type="checkbox">
+	        <input name="<?=$name?>" id="<?=$name?>" value="1" <?=$sel?> type="checkbox"/>
+		</fieldset>
+		
 		</div>
 	</li>
 <?php
@@ -140,9 +153,8 @@ function policy($name, $text, $link = '')
 
 <?php
 	$answers = $p['safety'];
-	incomplete_check($mysqli, $fields, $u, $page_id);
 //	print_r($fields);
-	form_page_begin($page_id, $fields, '', '', 'This page is incomplete.  Please complete all questions.');
+	form_page_begin($page_id, $incomplete_fields, '', '', 'This page is incomplete.  Please complete all questions.');
 
 
 	
@@ -150,19 +162,37 @@ function policy($name, $text, $link = '')
 ?>
 	<form action="student_safety.php" method="post" data-ajax="false" id="<?=$form_id?>">
 
-<?php 	if(count($fields) == 0) {
-
+<?php 	if(count($incomplete_fields) == 0 || (count($incomplete_fields) == 1 && $incomplete_fields[0] == 'agree') ) {
 ?>
-	<h3>Safety Information Documentation Required at the Fair</h3>
+		<h3>Safety Information Documentation Required at the Fair</h3>
 
 		<ul data-role="listview" data-inset="true">
 <?php
-	        if($answers['bio1'] || $answers['hazmat1']) 
+	        if($answers['bio1'] || $answers['hazmat1']) {
 			policy('Using Hazardous Materials', 'You are required to have a supervisor who is licensed or certified to handle the hazardous materials used in your project.  Documentation of license or certification will be required at the fair (put it in your log book so you don\'t lose or forget it).');
-		else
+			$forms = true;
+		} else {
+			$forms = false;
 			policy('None', 'For project safety, no forms or additional documentation are required for your project.  Note that ethics forms may still be required as indicated in the ethics section.');
+		}	
 
 ?>		</ul>
+
+		<h3>Agreement of Safety Check</h3>
+		<ul data-role="listview" data-inset="true">
+<?php
+		if($forms == true) {
+			questionc('agree', 'I have collected the above forms or documentation and will bring them to the fair.',
+					array('Failure to bring the necessary forms could result in disqualification.',
+						'Failure to provide correct information about your project could result in disqualification.'), $answers);
+		} else {
+			questionc('agree', 'I acknowledge the information here is correct and will only bring materials I have agreed to below to the fair.',
+					array('If anything about your project changes, you must adjust your answers here accordingly.',
+						'Failure to provide correct information about your project could result in disqualificaiton.'), $answers);
+		}
+?>
+		</ul>
+		
 		<br/>
 		<hr/>
 		<br/>
@@ -220,15 +250,15 @@ function policy($name, $text, $link = '')
 		array(), $answers);
 	questionc('hazmat3', 'The display has no flammable, toxic, or dangerous chemicals.',
 		array('e.g., gasoline, kerosene, alcohol, cleaning supplies', 'Water and food colouring MUST be used as a substitute for any liquid.','Even better, leave all liquids at home.  Our judges will not penalize any project for not having materials on-hand.'), $answers);
-	questionc('hazmat4', 'The display has less than 1L of water on display.',
+	questionc('hazmat4', 'The display has less than 1L of water at the display.',
 		array('Water and food colouring MUST be used as a substitute for any and all liquids.','You can note the substitution by marking it with a "Simulated X" label'), $answers);
 	questionc('hazmat5', 'The display has no prescription drugs or over-the-counter medications.',
 		array(), $answers);
 
 	divider('mech', 'Project Display -- Structural, Mechanical, and Fire Safety');
-	questionc('mech2', 'All fast, large, or dangerous moving parts on display are fitted with a guard.',
+	questionc('mech2', 'All fast, large, or dangerous moving parts at the display are fitted with a guard.',
 		array('e.g., belts, gears, pulleys, blades'), $answers);
-	questionc('mech3', 'All motors on display have a safety shut-off.',
+	questionc('mech3', 'All motors at the display have a safety shut-off.',
 		array(), $answers);
 	questionc('mech4', 'The display will not have any pressurized vessels or gas cylinders.',
 		array(), $answers);
@@ -255,13 +285,13 @@ function policy($name, $text, $link = '')
 			' Items properly prepared and preserved are permitted: tanned pelts and hides, antlers, skeletons or skeletal parts'), $answers);
 	
 	divider('food', 'Project Display -- Liquids, Food, and other Chemicals');
-	questionc('food2', 'The display has no liquids other than water (and food colouring) on display.',
+	questionc('food2', 'No liquids other than water (and food colouring) are at the display.',
 		array('Water and food colouring MUST be used as a substitute for any and all liquids.','You can note the substitution by marking it with a "Simulated X" label','Even better, leave all liquids at home.  Our judges will not penalize any project for not having materials on-hand.'), $answers);
 	questionc('food3', 'Less than one litre of water is at the display.',
 		array(), $answers);
-	questionc('food4', 'No food items or items subject to decomposition are on display.',
+	questionc('food4', 'No food items or items subject to decomposition are at the display.',
 		array('Empty food packages are permitted.'), $answers);
-	questionc('food5', 'No gels or other chemicals are on display.',
+	questionc('food5', 'No gels or other chemicals are at the display.',
 		array('e.g., dish soap, toothpaste'), $answers);
 		
 
@@ -288,6 +318,8 @@ function policy($name, $text, $link = '')
 		safety_hide(["food2", "food3", 'food4', 'food5' ]);
 		safety_hide(['bio', 'hazmat', 'animals', 'electrical', 'mech']);
 		safety_update(0);
+
+
 
 		function safety_uncheck(ar) 
 		{
@@ -319,8 +351,6 @@ function policy($name, $text, $link = '')
 			var ani1 = $("#<?=$form_id?>_animals1 input:checked").val();
 			var mech1 = $("#<?=$form_id?>_mech1 input:checked").val();
 			var food1 = $("#<?=$form_id?>_food1 input:checked").val();
-
-//			alert(human1);
 
 			var ar = ['electrical1', 'food1', 'animals1'];
 			if(mech1 == 1) {
@@ -390,7 +420,12 @@ function policy($name, $text, $link = '')
 		}
 
 
-		$( "#<?=$form_id?> :input" ).change(function() {
+		$( "#<?=$form_id?> :input" ).change(function(event) {
+			var input_e = $(event.target);
+			var input_name = input_e.attr('name');
+			if(input_name != 'agree') {
+				safety_uncheck(['agree']);
+			}
 			safety_update(1);
 		});
 

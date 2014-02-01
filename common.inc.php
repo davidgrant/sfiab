@@ -334,7 +334,7 @@ function sfiab_print_help_panel($page_id, $text)
 <?php
 }
 
-function output_start()
+function output_start($title = '')
 {
 ?>
 <!DOCTYPE html>
@@ -344,7 +344,7 @@ function output_start()
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <title></title>
+  <title><?=$title?></title>
   <link rel="stylesheet" href="scripts/jquery.mobile-1.4.0.min.css" />
   <script src="scripts/jquery-1.9.1.min.js"></script>
 <?php /* This allows the same page to be reloaded by default... it must be done before jquerymobile is loaded */ ?>
@@ -376,7 +376,7 @@ function output_end()
 
 function sfiab_page_begin($title, $page_id="", $help="")
 {
-	output_start();
+	output_start($title);
 	sfiab_print_header($page_id);
 	sfiab_print_left_nav($title, $page_id);
 	if($help != "") {

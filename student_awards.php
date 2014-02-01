@@ -97,7 +97,7 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'student_awards.php');
 ?>
-	<p>Please choose 4 awards for self-nomination.  If you don't wish to self-nominate for any awards, select the first option below.
+	<p>Please choose up to 4 awards for self-nomination.  If you don't wish to self-nominate for any awards, select the first option below.
 <?php
 
 	$id = $form_id.'_0';

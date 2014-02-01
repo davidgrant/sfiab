@@ -48,7 +48,7 @@ function project_filter(&$p)
 			'humanfood1', 'humanfood2', 'humanfood6', 'humantest1',
 			'humanfood3', 'humanfood4', 'humanfood5', 'animal_vertebrate',
 			'animal_ceph', 'animal_tissue', 'animal_drug', 'humanfooddrug',
-			'humanfoodlow1', 'humanfoodlow2');
+			'humanfoodlow1', 'humanfoodlow2', 'agree');
 		foreach($fields as $f) {
 			if(!array_key_exists($f, $p['ethics'])) {
 				$p['ethics'][$f] = NULL;
@@ -72,6 +72,7 @@ function project_filter(&$p)
 			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
 			'food1', "food2", "food3", "food4", "food5",
 			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7',
+			'agree'
 			);
 
 		foreach($fields as $f) {
