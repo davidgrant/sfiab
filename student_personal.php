@@ -64,6 +64,7 @@ $help = '
 <ul>
 <li><b>Name Pronounciation Key</b> - If your name is often mis-pronounced, describe how to properly pronounce it.
 <li><b>Birthdate</b> - In the format: YYYY-MM-DD.  It\'ll take most values and attempt to convert them.
+<li><b>School</b> - If your school doesn\'t appear in the list, please contact the committee to have it added.
 </ul>';
 
 sfiab_page_begin("Student Personal", $page_id, $help);

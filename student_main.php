@@ -22,7 +22,16 @@ sfiab_page_begin("Student Main", 's_home', $help);
 
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
-	<p>Welcome to the new GVRSF registration system.  Help for most pages is available by clicking the information icon on the top right of the page.
+	<p>Welcome to the new GVRSF registration system.
+	
+	<p>If you get stuck and aren't sure what to do:
+	<ul>
+	<li>First, try the help menu by pressing the information icon <a href="#help_panel_s_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.  All pages have a help menu.
+	<li>Second, please contact the Science Fair Committee.  Registration issues can be sent to: registration@gvrsf.ca.
+	General inquires sent to: chair@gvrsf.ca.  If you're not sure, send an
+	email to both, we're all friendly people.
+	</ul>
+
 
 <?php
 	/* Check for any incoming project requests */
@@ -50,7 +59,7 @@ sfiab_page_begin("Student Main", 's_home', $help);
 		<h3>Registration Status: <font color="orange">Almost Complete</font></h3>
 
 		<p>Thank you for completing your registration.  The final step of
-		registration is to print the signature page and send it in.
+		registration is to print the <a href="student_signature.php" data-rel="external" data-ajax="false">Signature Form</a> and send it in.
 
 		<p> We will be processing all registration forms during the two weeks
 		after registration closes 
@@ -59,7 +68,7 @@ sfiab_page_begin("Student Main", 's_home', $help);
 ?>
 
 	<h3>Forms and Documents</h3>
-	<p>We will be putting forms and documents here.  Most forms can already be found in the student handbook on <a href="http://www.gvrsf.ca">www.gvrsf.ca</a>
+	<p>We will be putting forms and documents here.  Most forms can already be found in the student handbook on <a target="_blank" href="http://www.gvrsf.ca">www.gvrsf.ca</a>
 	
 
 </div></div>

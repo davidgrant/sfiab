@@ -4,6 +4,7 @@ require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('incomplete.inc.php');
+require_once('form.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -45,7 +46,13 @@ if(count($_POST) == 0) {
 
 	<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-	<h3>Print Signature Form</h3>
+<?php
+	if($all_complete) {
+		form_page_begin($page_id, $fields, '','','This page will become complete when the committee receives and processes your signature form.  This will happen approximately three weeks before the fair.');
+	}
+?>
+
+	<h3>Signature Form</h3>
 	<p>After all sections are complete for all students in this project, a
 	signature form must be printed, signed, and submitted to the Science
 	Fair Committee.  Instructions for completing the form and how/where to
@@ -81,7 +88,7 @@ if(count($_POST) == 0) {
 ?>
 	<form action="student_signature.php" method="post" data-ajax="false">
 	<input type="hidden" name="pdf" value="1"/>
-	<button type="submit" data-role="button" <?=$d?> data-theme="g">Print Signature Form</button>
+	<button type="submit" data-role="button" <?=$d?> data-theme="g">Download Signature Form</button>
 	</form>
 	
 	</div></div>
