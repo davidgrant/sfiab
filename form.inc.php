@@ -207,17 +207,36 @@ function form_province($page_id, $name, $label, &$value)
 	form_select($page_id, $name, $label, $data, $value);
 }
 
-function form_textbox($form_id, $name, $label, &$value)
+function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwords=false)
 {
+	/* Enabling word counts depends on having an object with ID= {$id}_count so
+	 * onchange function in the .js can update it */
 	$id = $form_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
+	$cnt = false;
+	$hook = '';
+	if($minwords !== false || $maxwords !== false) {
+		$cnt = true;
+		$hook = 'data-word-count="true"';
+	}
 ?>
 	<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<textarea rows="8" name="<?=$name?>" id="<?=$id?>"><?=$v?></textarea>
+		<textarea rows="8" name="<?=$name?>" id="<?=$id?>" <?=$hook?> ><?=$v?></textarea>
 	</div>
 <?php
+	if($cnt == true) {
+		$w = str_word_count($v);
+		$min = ($minwords > 0) ? "Min: $minwords" : '';
+		$max = ($maxwords > 0) ? "Max: $maxwords" : '';
+?>
+		<div class="ui-field-contain">
+			<label></label>
+			Word Count: <b><span id="<?=$id.'_count'?>"><?=$w?></span></b> (<?=$min?> <?=$max?>)
+		</div>
+<?php
+	}
 }
 
 function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g')

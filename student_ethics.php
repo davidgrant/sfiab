@@ -261,7 +261,7 @@ function policy($name, $text, $link = '')
 //		Projects using potentially hazardous materials or devices must have a Designated Adult Supervisor, and a Designated Supervisor Form must be completed before experimentation starts. You can download the Designated Supervisor Form from here:   http://basef.ca/sites/default/files/DesignatedSupervisorFormYSF3%5Beditable%5D.pdf
 ?>
 		</ul>
-		<h3>Agreement of Safety Check</h3>
+		<h3>Agreement of Ethics Requirements</h3>
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($form1 == true || $forms2 == true) {

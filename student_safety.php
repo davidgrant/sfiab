@@ -178,7 +178,7 @@ function policy($name, $text, $link = '')
 
 ?>		</ul>
 
-		<h3>Agreement of Safety Check</h3>
+		<h3>Agreement of Safety Requirements</h3>
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($forms == true) {

@@ -188,6 +188,7 @@ $( document ).on( "pagecreate", function( event ) {
 			$(this).removeAttr('disabled');
 			$(this).text($(this).attr('data-alt1'));
 		});
+		update_word_count($(this));
 	});
 
 	$( ".sfiab_form :input" ).keyup(function() {
@@ -196,6 +197,16 @@ $( document ).on( "pagecreate", function( event ) {
 			$(this).removeAttr('disabled');
 			$(this).text($(this).attr('data-alt1'));
 		});
+		update_word_count($(this));
 	});
 
 });
+
+function update_word_count(obj) 
+{
+	if(obj.attr('data-word-count') != 'true') 
+		return;
+	var wordarray=obj.val().trim().replace(/\s+/g," ").split(" ");
+	var countbox = $('#'+obj.attr('id')+'_count');
+	countbox.text(wordarray.length);
+}

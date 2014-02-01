@@ -137,7 +137,8 @@ sfiab_page_begin('Welcome', 'welcome');
 	on the login page and we will mail you a new temporary password.
 
 	<p>If the email doesn't appear in a few minutes, be sure to check your 
-	Junk or Spam mail folder too.  
+	Junk or Spam mail folder too.  We have recent reports that quite a few emails
+	to hotmail.com and msn.com email addresses are going to spam folders.
 
 	<p>If you think your email address is wrong, register again with
 	the same Username and your old registration email address
@@ -154,6 +155,11 @@ sfiab_page_begin('Welcome', 'welcome');
 	<div><p>An email with a temporary password was sent to your email
 	address.  Click on the button below to proceed to the login page.
 
+	<p>
+	<p>If the email doesn't appear in a few minutes, be sure to check your 
+	Junk or Spam mail folder too.  We have recent reports that quite a few emails
+	to hotmail.com and msn.com email addresses are going to spam folders.
+	
 	</div>
 	<a href="#login" data-role="button">Proceed to Login</a>
 	</div>
@@ -163,8 +169,12 @@ sfiab_page_begin('Welcome', 'welcome');
 	<div data-role="main" class="sfiab_page" > 
 	<div><p>An email with your username was sent to your email
 	address.  If you have also forgotten your password, you can use the link
-	on the login page again to reset yor password.
-	
+	on the login page again to reset your password.
+
+	<p>If the email doesn't appear in a few minutes, be sure to check your 
+	Junk or Spam mail folder too.  We have recent reports that quite a few emails
+	to hotmail.com and msn.com email addresses are going to spam folders.
+
 	Click on the button below to proceed to the login page.
 
 	</div>

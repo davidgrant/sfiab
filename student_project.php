@@ -36,6 +36,8 @@ case 'save':
 	post_int($p['challenge_id'], 'challenge_id');
 	post_int($p['isef_id'], 'isef_id');
 	post_bool($p['req_electricity'], 'req_electricity');
+
+	$p['summary'] = trim($p['summary']);
 	project_save($mysqli, $p);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
@@ -83,6 +85,7 @@ sfiab_page_begin("Project Information", $page_id, $help);
 ?>
 	<h3>Project Information</h3>
 <?php	
+	
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'student_project.php', $e);
 	form_text($form_id, 'title', "Title", $p);
@@ -91,7 +94,8 @@ sfiab_page_begin("Project Information", $page_id, $help);
 	form_select_optgroup($form_id, 'isef_id', "Detailed Division", $isef_data, $p);
 	form_lang($form_id, 'language', "Judging Language", $p);
 	form_yesno($form_id, 'req_electricity', "Electricity Needed", $p);
-	form_textbox($form_id, 'summary', "Summary", $p);
+	form_textbox($form_id, 'summary', "Summary", $p,
+			200, 1000);
 	form_submit($form_id, 'save', 'Save', 'Project Saved');
 	form_end($form_id);
 ?>
