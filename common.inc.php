@@ -186,16 +186,18 @@ function sfiab_left_nav_incomplete_count($page_id)
 	return $count;
 }
 function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
-{ ?>	
-<?php 	foreach($menu as $id=>$d) {
-			$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-			$e = 'data-rel="external" data-ajax="false"';
+{
+	foreach($menu as $id=>$d) {
 
-			$count = sfiab_left_nav_incomplete_count($id);
-			$style = ($count == 0) ? 'style="display: none;"' : '';
-			$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
+		if($d === NULL) continue;
+		$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
+		$e = 'data-rel="external" data-ajax="false"';
+
+		$count = sfiab_left_nav_incomplete_count($id);
+		$style = ($count == 0) ? 'style="display: none;"' : '';
+		$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
 ?>
-			<li data-icon="false" <?=$sel?>><a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" ><?=$d[0]?><?=$incomplete?></a></li>
+		<li data-icon="false" <?=$sel?>><a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" ><?=$d[0]?><?=$incomplete?></a></li>
 <?php	} 
 }
 
@@ -204,6 +206,7 @@ function sfiab_print_left_nav_menu($menu_id, $text, $current_page_id, $menu)
 	/* Count all incomplete */
 	$count = 0;
 	foreach($menu as $id=>$d) {
+		if($d === NULL) continue;
 		$count += sfiab_left_nav_incomplete_count($id);
 	}
 	$style = ($count == 0) ? 'style="display: none;"' : '';
@@ -260,6 +263,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_awards' => array('Awards', 'c_awards.php'),
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_tours' => array('Tours', 'c_tours.php'),
+			    'c_judging_lst' => NULL,
 		);
 
 	$login_menu = array('register' => array('Registration', 'index.php#register'),
