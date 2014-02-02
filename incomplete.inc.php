@@ -279,6 +279,39 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 	case 'j_mentorship':
 		incomplete_check_bool($ret, $u, array('j_mentored'));
 		break;
+
+
+	case 'v_personal':
+		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'phone1',
+				'city', 'province', 'language','v_relation'));
+		break;
+
+	case 'v_tours':
+		if($u['v_relation'] == 'parent') {
+			incomplete_check_bool($ret, $u, array('v_tour_match_username'));
+		} 
+
+		if($u['v_tour_match_username'] == 1) {
+			incomplete_check_text($ret, $u, array('v_tour_username'));
+		} else {
+			if(count($u['tour_id_pref']) > 0) {
+				$x = 0;
+				foreach($u['tour_id_pref'] as $tid) {
+					if($tid === NULL or $tid == 0) {
+						$ret[] = "tour$x";
+					}
+					/* Only check the first one */
+					break;
+					$x++;
+				}
+			} else {
+				$ret[] = "tour1";
+	//			$ret[] = "tour2";
+	//			$ret[] = "tour3";
+			}
+		}
+		break;
+
 	}
 
 	/* Save for later */
@@ -369,6 +402,23 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 		/* Adjust judge status in the user if it changed */
 		if($judge_complete != $u['j_complete']) {
 			$u['j_complete'] = $judge_complete;
+			user_save($mysqli, $u);
+		}
+		$total_c += $c;
+	}
+
+	if(in_array('volunteer', $u['roles'])) {
+		$c = 0;
+		$c += incomplete_fields_check($mysqli, $ret_t, 'v_personal', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 'v_tours', $u, $force);
+		$v_complete = ($c == 0) ? 1 : 0;
+
+		if( ($u['uid'] == $_SESSION['uid']) && !$v_complete) 
+			$_SESSION['complete'] = false;
+		
+		/* Adjust judge status in the user if it changed */
+		if($v_complete != $u['v_complete']) {
+			$u['v_complete'] = $v_complete;
 			user_save($mysqli, $u);
 		}
 		$total_c += $c;

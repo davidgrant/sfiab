@@ -133,6 +133,10 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	else 
 		$u['j_languages'] = unserialize($u['j_languages']);
 
+	/* Volutneer */
+	filter_bool_or_null($u['v_complete']);
+	filter_bool_or_null($u['v_tour_match_username']);
+
 	/* Store an original copy so save() can figure out what (if anything) needs updating */
 	unset($u['original']);
 	$original = $u;

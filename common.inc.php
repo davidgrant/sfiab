@@ -251,6 +251,11 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'j_mentorship' => array('Mentorship', 'judge_mentorship.php'),
 			    );
 
+	$volunteer_menu = array('v_home' => array('Volutneer Home', 'v_main.php'),
+				'v_personal' => array('Personal Info', 'v_personal.php'),
+				'v_tours' => array('Tours', 'v_tours.php'),
+		);
+
 	$committee_menu = array('c_main' => array('Committee Home', 'c_main.php'),
 			    'c_awards' => array('Edit Awards', 'c_awards.php'),
 			    'c_tours' => array('Edit Tours', 'c_tours.php'),
@@ -281,6 +286,9 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 
 	if(sfiab_user_is_a('committee')) 
 		sfiab_print_left_nav_menu('leftnav_committee', 'Committee Menu', $current_page_id, $committee_menu);
+
+	if(sfiab_user_is_a('volunteer')) 
+		sfiab_print_left_nav_menu('leftnav_committee', 'Volunteer Menu', $current_page_id, $volunteer_menu);
 
 	if(sfiab_logged_in())
 		sfiab_print_left_nav_menu('leftnav_account', 'Account Menu', $current_page_id, $account_menu);

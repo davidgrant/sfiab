@@ -13,6 +13,10 @@ if(sfiab_user_is_a('student')) {
 	$page .= 'judge_main.php';
 } else if (sfiab_user_is_a('committee')) {
 	$page .= 'c_main.php';
+} else if (sfiab_user_is_a('teacher')) {
+	$page .= 't_main.php';
+} else if (sfiab_user_is_a('volunteer')) {
+	$page .= 'v_main.php';
 } else {
 	$page .= 'index.php';
 }
