@@ -66,8 +66,9 @@ sfiab_page_begin('Welcome', 'welcome');
 		    <option value="student">Student</option>
 		    <option value="judge">Judge</option>
 		    <option value="volunteer">Volunteer</option>
-		    <option value="teacher">Teacher</option>
-<?php		 if(sfiab_user_is_a('committee')) { ?>
+<?php		 if(sfiab_user_is_a('committee')) { 
+//		    <option value="teacher">Teacher</option>
+?>
 		    	<option value="committee">Committee Member</option>
 <?php		} ?>
 		

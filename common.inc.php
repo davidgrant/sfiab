@@ -189,7 +189,7 @@ function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
 { ?>	
 <?php 	foreach($menu as $id=>$d) {
 			$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-			$e = 'data-ajax="false" data-rel="external"';
+			$e = 'data-rel="external" data-ajax="false"';
 
 			$count = sfiab_left_nav_incomplete_count($id);
 			$style = ($count == 0) ? 'style="display: none;"' : '';
@@ -257,8 +257,9 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 		);
 
 	$committee_menu = array('c_main' => array('Committee Home', 'c_main.php'),
-			    'c_awards' => array('Edit Awards', 'c_awards.php'),
-			    'c_tours' => array('Edit Tours', 'c_tours.php'),
+			    'c_awards' => array('Awards', 'c_awards.php'),
+			    'c_judging' => array('Judging', 'c_judging.php'),
+			    'c_tours' => array('Tours', 'c_tours.php'),
 		);
 
 	$login_menu = array('register' => array('Registration', 'index.php#register'),

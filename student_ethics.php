@@ -397,8 +397,8 @@ function policy($name, $text, $link = '')
 					ethics_hide(['animal_ceph']);
 				}
 			} else {
-				if(do_uncheck) ethics_uncheck(['animal_vertebrate', 'animal_seph', 'animal_tissue','animal_drug']);
-				ethics_hide(['animal_vertebrate', 'animal_seph', 'animal_tissue','animal_drug']);
+				if(do_uncheck) ethics_uncheck(['animal_vertebrate', 'animal_ceph', 'animal_tissue','animal_drug']);
+				ethics_hide(['animal_vertebrate', 'animal_ceph', 'animal_tissue','animal_drug']);
 			}
 		}
 
