@@ -463,7 +463,7 @@ function compute_registration_fee($mysqli, &$p, &$users)
 	$n_tshirts = 0;
 	$sel = array();
 	foreach($users as $u) {
-		if($u['s_tshirt'] != 'none') $n_tshirts++;
+		if($u['tshirt'] != 'none') $n_tshirts++;
 
 		/* Check their regfee items too */
 /*		if($config['participant_regfee_items_enable'] != 'yes') continue;

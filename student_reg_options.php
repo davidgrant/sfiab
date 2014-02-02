@@ -27,9 +27,9 @@ $tshirt_sizes = array('none' => 'None',
 
 switch($action) {
 case 'save':
-	post_text($u['s_tshirt'], 's_tshirt');
-	if(!array_key_exists($u['s_tshirt'], $tshirt_sizes)) {
-		$u['s_tshirt'] = NULL;
+	post_text($u['tshirt'], 'tshirt');
+	if(!array_key_exists($u['tshirt'], $tshirt_sizes)) {
+		$u['tshirt'] = NULL;
 	}
 	user_save($mysqli, $u);
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
@@ -55,7 +55,7 @@ sfiab_page_begin("Student Registration Options", $page_id, $help);
 <?php
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'student_reg_options.php');
-	form_select($form_id, 's_tshirt', 'T-Shirt', $tshirt_sizes, $u);
+	form_select($form_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>

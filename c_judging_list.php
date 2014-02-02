@@ -10,10 +10,17 @@ require_once('committee/judges.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
-
 sfiab_session_start($mysqli, array('committee'));
 
 $u = user_load($mysqli);
+
+
+if(array_key_exists('switchto' $_GET)) {
+
+
+	header("Location: judge_main.php");
+	exit();
+}
 
 $page_id = 'c_judging_list';
 

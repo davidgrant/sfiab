@@ -104,7 +104,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 				'emerg1_relation','emerg1_email','emerg1_phone1'));
 		break;
 	case 's_reg_options':
-		incomplete_check_text($ret, $u, array('s_tshirt'));
+		incomplete_check_text($ret, $u, array('tshirt'));
 		break;
 
 	case 's_tours':
@@ -284,6 +284,10 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 	case 'v_personal':
 		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'phone1',
 				'city', 'province', 'language','v_relation'));
+		break;
+
+	case 'v_options':
+		incomplete_check_text($ret, $u, array('tshirt', 'v_reason'));
 		break;
 
 	case 'v_tours':
