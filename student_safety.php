@@ -182,11 +182,11 @@ function policy($name, $text, $link = '')
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($forms == true) {
-			questionc('agree', 'I have collected the above forms or documentation and will bring them to the fair.',
+			questionc('agree', 'Please check the box on the right to acknowledge that you have collected the above forms or documentation and will bring them to the fair.',
 					array('Failure to bring the necessary forms could result in disqualification.',
 						'Failure to provide correct information about your project could result in disqualification.'), $answers);
 		} else {
-			questionc('agree', 'I acknowledge the information here is correct and will only bring materials I have agreed to below to the fair.',
+			questionc('agree', 'Please check the box on the right to acknowledge the information here is correct and that you will only bring materials agreed to below to the fair.',
 					array('If anything about your project changes, you must adjust your answers here accordingly.',
 						'Failure to provide correct information about your project could result in disqualificaiton.'), $answers);
 		}

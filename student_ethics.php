@@ -265,11 +265,11 @@ function policy($name, $text, $link = '')
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($form1 == true || $forms2 == true) {
-			questionc('agree', 'I have read the above policies and filled out the above forms and will bring them to the fair.',
+			questionc('agree', 'Please check the box on the right to acknowledge that you have read the above policies and filled out the above forms and will bring them to the fair.',
 					array('Failure to bring the necessary forms could result in disqualification.',
 						'Failure to provide correct information about your project could result in disqualification.'), $e);
 		} else {
-			questionc('agree', 'I acknowledge the information here is correct and that my project has no ethics concerns.',
+			questionc('agree', 'Please check the box on the right to acknowledge that the information here is correct.',
 					array('If anything about your project changes, you must adjust your answers here accordingly.','Failure to provide correct information about your project could result in disqualificaiton.'), $e);
 		}
 ?>
