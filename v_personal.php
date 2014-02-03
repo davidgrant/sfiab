@@ -30,6 +30,7 @@ case 'save':
 	post_text($u['province'], 'province');
 	post_text($u['language'], 'language');
 	post_text($u['v_relation'], 'v_relation');
+	post_text($u['v_reason'], 'v_reason');
 
 	$updates = array();
 	filter_phone($u['phone1']);
@@ -81,6 +82,7 @@ sfiab_page_begin("Volunteer Personal", $page_id, $help);
 	form_province($form_id, 'province', 'Province / Territory', $u);
 	form_lang($form_id, 'language', "Preferred Language", $u);
 	form_select($form_id, 'v_relation', "I Am A", $relation, $u);
+	form_textbox($form_id, 'v_reason', "Why do you want to volunteer?", $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>

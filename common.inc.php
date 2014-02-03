@@ -256,6 +256,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 
 	$volunteer_menu = array('v_home' => array('Volutneer Home', 'v_main.php'),
 				'v_personal' => array('Personal Info', 'v_personal.php'),
+				'v_options' => array('Options', 'v_options.php'),
 				'v_tours' => array('Tours', 'v_tours.php'),
 		);
 

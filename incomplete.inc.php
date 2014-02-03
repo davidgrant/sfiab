@@ -283,11 +283,11 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 
 	case 'v_personal':
 		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'phone1',
-				'city', 'province', 'language','v_relation'));
+				'city', 'province', 'language','v_relation', 'v_reason'));
 		break;
 
 	case 'v_options':
-		incomplete_check_text($ret, $u, array('tshirt', 'v_reason'));
+		incomplete_check_text($ret, $u, array('tshirt'));
 		break;
 
 	case 'v_tours':
