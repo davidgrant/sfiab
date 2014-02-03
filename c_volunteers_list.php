@@ -36,10 +36,17 @@ foreach($volunteers as &$j) {
 
 	$filter_text = "{$j['name']} {$j['organization']}";
 
+	if($j['not_attending']) 
+		$status = '<font color="blue">Not Attending</font>';
+	else if($j['v_complete']) 
+		$status = '<font color="green">Complete</font>';
+	else
+		$status = '<font color="red">Incomplete</font>';
+
 ?>
 	<li data-filtertext="<?=$filter_text?>"><a href="#">
-		<h3><?=$j['name']?></h3>
-		<?=$j['not_attending'] ? 'Not Attending' :($j['v_complete'] ? 'Complete' : 'Incomplete' ) ?>
+		<h3><?=$j['name']?>  -  <?=$status?></h3>
+		fixme, info here
 		
 	</a></li>
 <?php
