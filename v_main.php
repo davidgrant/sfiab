@@ -10,6 +10,7 @@ sfiab_session_start($mysqli, array('volunteer'));
 
 $page_id = "v_home";
 
+/* Load the logged in user or the one being editted */
 $u = user_load($mysqli);
 
 $action = '';
@@ -45,6 +46,10 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 <?php
+	if(array_key_exists('edit_uid', $_SESSION)) {
+		sfiab_error("You are temporarily logged in as {$_SESSION['edit_name']}. <a href=\"c_user_list.php?return=1\">Click Here</a> to stop editing this user and return to your account");
+	}
+
 	form_page_begin($page_id, array());
 ?>
 	<h3>Hello <?=$u['firstname']?>,</h3>

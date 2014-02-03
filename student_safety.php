@@ -217,7 +217,7 @@ function policy($name, $text, $link = '')
 		array('Many common chemicals used at home are considered hazardous (i.e., poisonous or dangerous, etc) - look for warning labels.'), $answers);
 	question('mech1', 'Will any materials or apparatus used in this project be on display at the fair?',
 		array('In other words, will the display have anything at it other than a backboard, logbook, and laptop?',
-			'Remember, "on display" also includes under the table at the fair'), $answers);
+			'Remember, "on display" also includes items under the table'), $answers);
 	question('electrical1', 'Will any electrical or electricity-producing device, other than a laptop computer, be at the display?',
 		array('e.g., plug-in devices, battery-operated devices, hand-generators, circuit boards'), $answers);
 	question('animals1', 'Does this project use animals or animal parts?',

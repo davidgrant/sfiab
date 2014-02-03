@@ -30,7 +30,9 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 		$u = $data;
 	} else {
 		if(sfiab_session_is_active()) {
-			if($_SESSION['uid'] > 0) {
+			if(array_key_exists('edit_uid', $_SESSION)) {
+				$r = $mysqli->query("SELECT * FROM users WHERE uid={$_SESSION['edit_uid']} LIMIT 1");
+			} else if($_SESSION['uid'] > 0) {
 				$r = $mysqli->query("SELECT * FROM users WHERE uid={$_SESSION['uid']} LIMIT 1");
 			} else {
 				return NULL;

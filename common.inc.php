@@ -11,11 +11,11 @@ require_once('config.inc.php');
 
 $config = array();
 
-$sfiab_roles = array(	'student' => array(),
-			'teacher' => array(),
-			'judge' => array(),
-			'committee' => array(),
-			'volunteer' => array()
+$sfiab_roles = array(	'student' => array('name' => 'Student'),
+//			'teacher' => array(),
+			'judge' => array('name' => 'Judge'),
+			'committee' => array('name' => 'Committee'),
+			'volunteer' => array('name' => 'Volunteer')
 		);
 
 function sfiab_db_connect()
@@ -143,7 +143,7 @@ function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = fals
 	$q->execute(); 
 	$q->store_result();
 	if($q->num_rows != 1) {
-		print("Access Denied1<br/>");
+		print("Access Denied<br/>");
 		exit();
 	}
 	$q->bind_result($db_roles, $db_password); // get variables from result.
@@ -158,6 +158,12 @@ function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = fals
 //		exit();
 	}
 
+	/* If editting another user, enforce committee no mater what
+	 * the page asked for */
+	if(array_key_exists('edit_uid', $_SESSION)) {
+		$roles = array('committee');
+	}
+
 	if(count($roles) > 0) {
 		$db_roles = explode(',',$db_roles);
 		$ok = false;
@@ -168,7 +174,7 @@ function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = fals
 			}
 		}
 		if(!$ok) {
-			print("Access Denied3<br/>");
+			print("Access Denied<br/>");
 			exit();
 		}
 	}
@@ -193,11 +199,17 @@ function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
 		$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
 		$e = 'data-rel="external" data-ajax="false"';
 
+		$theme = ($id == 'c_editting') ? 'data-theme="r"' : '';
+
 		$count = sfiab_left_nav_incomplete_count($id);
 		$style = ($count == 0) ? 'style="display: none;"' : '';
 		$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
 ?>
-		<li data-icon="false" <?=$sel?>><a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" ><?=$d[0]?><?=$incomplete?></a></li>
+		<li data-icon="false" <?=$sel?> <?=$theme?> >
+			<a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" >
+				<?=$d[0]?><?=$incomplete?>
+			</a>
+		</li>
 <?php	} 
 }
 
@@ -265,8 +277,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_tours' => array('Tours', 'c_tours.php'),
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
-			    'c_judging_list' => NULL,
-			    'c_volunteers_list' => NULL,
+			    'c_user_list' => NULL,
 		);
 
 	$login_menu = array('register' => array('Registration', 'index.php#register'),
@@ -279,44 +290,67 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	$logout_menu = array( 'logout' => array('Logout', 'login.php?action=logout'),
 		);
 
+	$user_edit_menu = array ('c_editting' => array('Return To Your User', 'c_user_list.php?return=1'),
+		);
+
 ?>
 
 	<div id="leftnav" data-role="panel" class="leftnav_panel" data-position="left" data-display="overlay" data-theme="a">
 	<br/><br/>
 
 <?php
-	sfiab_print_left_nav_menu('leftnav_main', 'Main Menu', $current_page_id, $main_menu);
-	if(sfiab_user_is_a('student'))
+
+	$editing_another_user = 0;
+	if(array_key_exists('edit_uid', $_SESSION)) {
+		$editing_another_user = $_SESSION['edit_uid'];
+?>
+		<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
+		<?=sfiab_print_left_nav_menu_entries($current_page_id, $user_edit_menu, true);?>
+		</ul>
+<?php
+		$roles = $_SESSION['edit_roles'];
+	} else  {
+		sfiab_print_left_nav_menu('leftnav_main', 'Main Menu', $current_page_id, $main_menu);
+		if(!sfiab_logged_in()) 
+			$roles = array();
+		else 
+			$roles = $_SESSION['roles'];
+	}
+
+	if(in_array('student', $roles)) 
 		sfiab_print_left_nav_menu('leftnav_student', 'Student Menu', $current_page_id, $student_menu);
 
-	if(sfiab_user_is_a('judge'))
+	if(in_array('judge', $roles)) 
 		sfiab_print_left_nav_menu('leftnav_judge', 'Judge Menu', $current_page_id, $judge_menu);
 
-	if(sfiab_user_is_a('committee')) 
+	if(in_array('committee', $roles)) 
 		sfiab_print_left_nav_menu('leftnav_committee', 'Committee Menu', $current_page_id, $committee_menu);
 
-	if(sfiab_user_is_a('volunteer')) 
+	if(in_array('volunteer', $roles)) 
 		sfiab_print_left_nav_menu('leftnav_committee', 'Volunteer Menu', $current_page_id, $volunteer_menu);
 
-	if(sfiab_logged_in())
-		sfiab_print_left_nav_menu('leftnav_account', 'Account Menu', $current_page_id, $account_menu);
+	if($editing_another_user == 0) {
+
+		if(sfiab_logged_in())
+			sfiab_print_left_nav_menu('leftnav_account', 'Account Menu', $current_page_id, $account_menu);
 ?>
-	<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
+		<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
 <?php
-	if(sfiab_logged_in()) {
-		sfiab_print_left_nav_menu_entries($current_page_id, $logout_menu, true);
+		if(sfiab_logged_in()) {
+			sfiab_print_left_nav_menu_entries($current_page_id, $logout_menu, true);
 ?>
-		<script>
-			$("#left_nav_logout").on("click", function(event, ui) {
-				$.post( "login.php", { action: "logout" }, function( data ) {
-					window.location = "<?=$config['fair_url']?>/index.php";
+			<script>
+				$("#left_nav_logout").on("click", function(event, ui) {
+					$.post( "login.php", { action: "logout" }, function( data ) {
+						window.location = "<?=$config['fair_url']?>/index.php";
+					});
+					return false;
 				});
-				return false;
-			});
-		</script>
+			</script>
 <?php		
-	} else {
-		sfiab_print_left_nav_menu_entries($current_page_id, $login_menu, true);
+		} else {
+			sfiab_print_left_nav_menu_entries($current_page_id, $login_menu, true);
+		}
 	}
 ?>
 	</ul>

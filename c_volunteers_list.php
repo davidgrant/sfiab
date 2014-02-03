@@ -45,7 +45,7 @@ foreach($volunteers as &$j) {
 
 ?>
 	<li data-filtertext="<?=$filter_text?>"><a href="#">
-		<h3><?=$j['name']?>  -  <?=$status?></h3>
+		<h3><?=$j['name']?></h3><span class="ui-li-aside"><?=$status?></span>
 		fixme, info here
 		
 	</a></li>

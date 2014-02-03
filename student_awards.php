@@ -86,6 +86,7 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 		</div></div>
 <?php
 		sfiab_page_end();
+		exit();
 	}
 
 

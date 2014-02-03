@@ -63,7 +63,7 @@ sfiab_page_begin("Judging", $page_id);
 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_judging_invite.php" data-rel="external" data-ajax="false">X Invite a Judge</a></li>
-	<li><a href="c_judging_list.php" data-rel="external" data-ajax="false">Judge List / Editor</a></li>
+	<li><a href="c_user_list.php?roles=judge" data-rel="external" data-ajax="false">Judge List / Editor</a></li>
 	</ul>
 
 
