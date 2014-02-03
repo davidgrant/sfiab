@@ -6,7 +6,7 @@ require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('awards.inc.php');
-require_once('committee/judges.inc.php');
+require_once('committee/volunteers.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -15,16 +15,9 @@ sfiab_session_start($mysqli, array('committee'));
 $u = user_load($mysqli);
 
 
-if(array_key_exists('switchto', $_GET)) {
+$page_id = 'c_volunteers_list';
 
-
-	header("Location: judge_main.php");
-	exit();
-}
-
-$page_id = 'c_judging_list';
-
-sfiab_page_begin("Judge List", $page_id);
+sfiab_page_begin("Volunteer List", $page_id);
 
 ?>
 
@@ -37,16 +30,16 @@ Work in progress...
 
 <?php
 
-$judges = judges_load_all($mysqli, $config['year']);
+$volunteers = volunteers_load_all($mysqli, $config['year']);
 
-foreach($judges as &$j) {
+foreach($volunteers as &$j) {
 
 	$filter_text = "{$j['name']} {$j['organization']}";
 
 ?>
 	<li data-filtertext="<?=$filter_text?>"><a href="#">
 		<h3><?=$j['name']?></h3>
-		Text about the judge
+		<?=$j['not_attending'] ? 'Not Attending' :($j['v_complete'] ? 'Complete' : 'Incomplete' ) ?>
 		
 	</a></li>
 <?php
