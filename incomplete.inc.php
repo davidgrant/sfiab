@@ -414,6 +414,7 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 	if(in_array('volunteer', $u['roles'])) {
 		$c = 0;
 		$c += incomplete_fields_check($mysqli, $ret_t, 'v_personal', $u, $force);
+		$c += incomplete_fields_check($mysqli, $ret_t, 'v_options', $u, $force);
 		$c += incomplete_fields_check($mysqli, $ret_t, 'v_tours', $u, $force);
 		$v_complete = ($c == 0) ? 1 : 0;
 
