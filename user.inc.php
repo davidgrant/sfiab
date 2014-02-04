@@ -236,4 +236,25 @@ function user_save($mysqli, &$u)
 	}
 }
 
+function user_homepage(&$u) 
+{
+	global $config;
+	$page = $config['fair_url'] . '/';
+
+	/* In order of priority */
+	if(in_array('student', $u['roles']))
+		$page .= 'student_main.php';
+	else if(in_array('committee', $u['roles']))
+		$page .= 'c_main.php';
+	else if(in_array('judge', $u['roles']))
+		$page .= 'judge_main.php';
+	else if(in_array('teacher', $u['roles']))
+		$page .= 't_main.php';
+	else if(in_array('volunteer', $u['roles']))
+		$page .= 'v_main.php';
+	else
+		$page .= 'index.php';
+	return $page;
+}
+
 ?>

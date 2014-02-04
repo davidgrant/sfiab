@@ -224,18 +224,18 @@ sfiab_page_begin('Welcome', 'welcome');
 
 				// Send the data using post
 				$.post( "login.php", { username: u, password: hash, action: "login" }, function( data ) {
-					if(data == '0') {
+					if(data.s == '0') {
 						/* Success */
-						window.location.replace('<?=$config['fair_url']?>/main.php');
-					} else if(data == '1') {
+						window.location.replace(data.m);
+					} else if(data.s == '3') {
 						/* Account hasn't been activated yet */
 						$.mobile.changePage('#register_send');
 					} else {
-						$('#login_msg').text(data);
+						$('#login_msg').text(data.m);
 						$('#login_msg').removeClass("error_hidden");
 						$.mobile.changePage('#login', { allowSamePageTransition: true } );
 					}
-				});
+				}, 'json');
 			});
 			return false;
 		});

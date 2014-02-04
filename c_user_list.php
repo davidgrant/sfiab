@@ -29,7 +29,8 @@ foreach($_GET as $k=>$v) {
 		$_SESSION['edit_uid'] = $uid;
 		$_SESSION['edit_roles'] = $new_u['roles'];
 		$_SESSION['edit_name'] = $new_u['name'];
-		header("Location: v_main.php");
+		if('judge' 
+		header("Location: ".user_homepage($new_u));
 		exit();
 
 	case 'return':

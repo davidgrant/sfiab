@@ -31,6 +31,11 @@ function filter_hash($hash)
 	return preg_replace("/[^a-fA-F0-9]+/","", $hash);
 }
 
+function ajax($status, $msg)
+{
+	return json_encode(array('s'=>$status, 'm'=>$msg));
+}
+
 function check_attempts($mysqli, $uid)
 {
 	$interval = 60 * 30; // 30 minutes;
@@ -171,7 +176,7 @@ case 'login':
 	$hash = $mysqli->real_escape_string(filter_hash($_POST['password']));
 
 	if(!check_username($username)) {
-		print("");
+		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
@@ -180,7 +185,7 @@ case 'login':
 	/* User exists? */
 	if($u == NULL) { 
 		sfiab_log($mysqli, 'login no user', $username);
-		print('Sorry, invalid username or password');
+		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
@@ -189,17 +194,17 @@ case 'login':
 	case 'active': case 'new':
 		break;
 	case 'disabled':
-		print('Sorry, invalid username or password');
+		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	default: 
-		print('');
+		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
 	/* Salt must be valid */
 	if(strlen($u['salt']) != 128) {
 		sfiab_log($mysqli, 'login bad salt', $username);
-		print('Sorry, invalid username or password');
+		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
@@ -209,7 +214,7 @@ case 'login':
 	/* Check for too many login attempts */
 	if(check_attempts($mysqli, $u['uid']) == true) { 
 		sfiab_log($mysqli, 'login locked', $username, $u['uid']);
-		print('This account has been locked due to too many failed login attempts.  It will be unlocked in 30 minutes, or use the password recovery link below to unlock it immediately');
+		print(ajax(2, 'This account has been locked due to too many failed login attempts.  It will be unlocked in 30 minutes, or use the password recovery link below to unlock it immediately'));
 		exit();
 	}
 
@@ -217,7 +222,7 @@ case 'login':
 	$password_hash = hash('sha512', $u['password'].$u['salt']); // hash the password with the unique salt.
 	if($password_hash != $hash) {
 		sfiab_log($mysqli, 'login bad pass', $username, $u['uid']);
-		print('Sorry, invalid username or password');
+		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
@@ -254,7 +259,7 @@ case 'login':
 	incomplete_check($mysqli, $reg, $u, false, true);
 	
 	sfiab_log($mysqli, 'login ok', $username);
-	print(0);
+	print(ajax(0, user_homepage($u)));
 	exit();
 
 case 'change_pw':
@@ -280,7 +285,8 @@ case 'change_pw':
 
 	if($_SESSION['password_expired']) {
 		$_SESSION['password_expired'] = false;
-		form_ajax_response(array('status'=>0, 'location'=>'main.php'));
+		$u = user_load($uid);
+		form_ajax_response(array('status'=>0, 'location'=> user_homepage($u)));
 	} else {
 		form_ajax_response(array('status'=>0,'happy'=>'Password changed'));
 	}
