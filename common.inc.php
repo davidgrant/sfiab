@@ -275,6 +275,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	$committee_menu = array('c_main' => array('Committee Home', 'c_main.php'),
 			    'c_awards' => array('Awards', 'c_awards.php'),
 			    'c_judging' => array('Judging', 'c_judging.php'),
+			    'c_students' => array('Students', 'c_students.php'),
 			    'c_tours' => array('Tours', 'c_tours.php'),
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
 			    'c_user_list' => NULL,
