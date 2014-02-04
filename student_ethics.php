@@ -129,7 +129,7 @@ function policy($name, $text, $link = '')
 <?php
 	} else { ?>
 		<li style="white-space:normal">
-			<a href="<?=$link?>">
+			<a href="<?=$link?>" data-ajax="false" data-rel="external" >
 				<b><?=$name?></b><br/><?=$text?>
 			</a>
 		</li>
@@ -153,18 +153,18 @@ function policy($name, $text, $link = '')
 	<h3>Ethics Information and Forms</h3>
 
 	<p>This page will guide you through several questions to determine the
-	relative National policies regarding ethics and the use of humans and
-	animals in your project.
+	relevant Youth Science Canada policies regarding ethics and
+	the use of humans and animals in your project.
 
-	<p>It will tell you there are things you should have done before
-	starting your project.  Since you've probably already started, please
-	follow the requirements here as best you can.  
-
-	<p>You can email any questions to ethics@gvrsf.ca
-
+	<p>It may tell you there are forms you should have submitted before
+	starting your project. In future years, you may be required to obtain
+	approval ahead of time (for significant-risk projects only). For this year,
+	please bring any required forms with you to the fair and keep a copy at
+	your project.  You can email any questions to ethics@gvrsf.ca.
+	
 <?php 	if(count($incomplete_fields) == 0 || (count($incomplete_fields) == 1 && $incomplete_fields[0] == 'agree') ) {
 ?>
-		<h4>Before You Start: Policies</h4> 
+		<h4>Before You Start Your Project: Policies</h4> 
 
 		<p>Here is a list of the Youth Science Canada policies you should be aware of for your project:
 		<ul data-role="listview" data-inset="true">
@@ -177,42 +177,51 @@ function policy($name, $text, $link = '')
 		}
 
 		if($e['human1']) {
-			policy('YSC Policy 4.1.1.1 - Low Risk', 'Human Participation is governed by YSC Policy 4.1.1.1 (Low Risk) and YSC Policy 4.1.1.2 (Significant Risk).' , 'http://youthscience.ca/policy/participation-humans-research-low-risk');
-			policy('YSC Policy 4.1.1.2 - Significant Risk', '', 'http://youthscience.ca/participation-humans-research-significant-risk');
+			policy('YSC Policy 4.1.1.1 - Low Risk', 'Human Participation is governed by YSC Policy 4.1.1.1 (Low Risk) and YSC Policy 4.1.1.2 (Significant Risk).  You should review both policies.' , 
+					'http://youthscience.ca/policy/participation-humans-research-low-risk');
+			policy('YSC Policy 4.1.1.2 - Significant Risk', 'Human Participation is governed by YSC Policy 4.1.1.1 (Low Risk) and YSC Policy 4.1.1.2 (Significant Risk).  You should review both policies.' , 
+					'http://youthscience.ca/participation-humans-research-significant-risk');
 		}
 
 		if($e['animals'])
-			policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2, which can be found here:','http://www.youthscience.ca/policy/use-animals-research');
+			policy('YSC Policy 4.1.2', 'Use of Animals in a project is governed by YSC Policy 4.1.2','http://www.youthscience.ca/policy/use-animals-research');
 
 		if($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] ) 
 			policy('Survey Low Risk', 'Most Surveys, Skill Tests, and Observations of Behaviour are considered Low Risk (See YSC Policy 4.1.1.1 Section 3.1).');
 
 		if($e['humanfooddrug'])
-			policy('Food and Drug Significant Risk', 'This Drug related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.2). Significant Risk Drug must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.2b).');
+			policy('Food and Drug Significant Risk', 'This Drug related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.2). Significant Risk Drug must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.2b). <i>If your project was not carried out under professional supervision, it may not be eligible for the GVRSF. Please email ethics@gvrsf.ca.</i>');
 
 		if($e['humanfood4'] || $e['humanfoodlow1'] || $e['humanfoodlow2']) 
-			policy('Food or Drink Significant Risk', 'This Food or Drink related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.4). Significant Risk Ingestion Projects must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.4e).');
+			policy('Food or Drink Significant Risk', 'This Food or Drink related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.4). Significant Risk Ingestion Projects must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.4e). <i>If your project was not carried out under professional supervision, it may not be eligible for the GVRSF. Please email ethics@gvrsf.ca.</i>');
 
 		if($e['humanfood1'] && !$e['humanfood3']  && !$e['humanfood4'] && !$e['humanfood5'] && !$e['humanfooddrug'] && !$e['humanfoodlow1'] && !$e['humanfoodlow2']) 
 			policy('Food and Drink Low Risk', 'This Food or Drink related project may meet the requirements for a Low Risk project (See YSC Policy 4.1.1.1 Section 3.2).');
 
 		if($e['humanfood3']) 
-			policy('Caffeinated Drinks', 'Caffeinated Drinks are subject to Special Rules Caffeinated Drinks are only permitted in Science Fair Projects within strict limits based on caffeine content and the age of the participants (see Caffeine Guidelines and also YSC Policy 4.1.1.1 section 3.3).');
+			policy('Caffeinated Drinks', 'Caffeinated Drinks are subject to Special Rules.  Caffeinated Drinks are only permitted in Science Fair Projects within strict limits based on caffeine content and the age of the participants (see Caffeine Guidelines and also YSC Policy 4.1.1.1 section 3.3). <i>If caffeinated drinks were used outside these limits, your project may not be eligible for the GVRSF; in this case, please email ethics@gvrsf.ca.</i>');
 		
 		if($e['human1'])
-			policy('Letter of Information', 'Your Participants must be provided with a Letter of Information that provides details on your Project (See YSC Policy 4.1.1.1 Section 4.4). Click on this item for a blank Letter of Information template', 'http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/letter_of_information_blank_en.doc');
+			policy('Letter of Information', 'Your Participants must be provided with a Letter of Information that provides details on your Project (See YSC Policy 4.1.1.1 Section 4.4). <i>If your project did not include a letter of information or equivalent, it may not be eligible for the GVRSF. Please email ethics@gvrsf.ca</i>.  Click on this item for a blank Letter of Information template.', 
+			'http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/letter_of_information_blank_en.doc');
 
 
 		if($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] ) 
 			policy('Informed Consent for Surveys', 'Participants must give informed consent, but for Surveys this can be assumed by completion of the Survey itself (See YSC Policy 4.1.1.1 Section 4.3).');
 
 		if($e['humanfood1'] || $e['humanfood2'] || $e['humantest1']) {
-			policy('Informed Consent', 'Participants must give informed consent and complete a written Permission Form (See YSC Policy 4.1.1.1 Section 4.5). A blank Informed Consent Permission Form template can be downloaded here.','http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/informed_consent_blank_en.doc');
+			policy('Informed Consent', 'Participants must give informed consent and complete a written Permission Form (See YSC Policy 4.1.1.1 Section 4.5). <i>If documentation of informed consent was not obtained, your project may not be eligible for the GVRSF. Please email ethics@gvrsf.ca</i>.  A blank Informed Consent Permission Form template can be downloaded here.  Please remember that your project may not reveal the identity of any of your subjects (i.e. no names or photos). ',
+					'http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/informed_consent_blank_en.doc');
 			policy('Informed Consent Under 18', 'The Parents or Guardians of Participants under 18 must also provide their written consent (See YSC Policy 4.1.1.1 Section 4.2).');
-			policy('Participants on Medications', 'Participants must not be taking prescription medications, to minimize the risk of drug-food interactions (See YSC Policy 4.1.1.1 Section 3.2b).');
+			policy('Participants on Medications', 'For projects involving food testing, participants must not be taking prescription medications, to minimize the risk of drug-food interactions (See YSC Policy 4.1.1.1 Section 3.2b).');
 		}
+
+		if($e['human1'] && $e['animals']) {
+			policy('Mad Scientist', 'Experimenting on Humans and Animals, eh?  I like your style.  Note: Younger siblings count as humans, not animals.');
+		}
+
 		if($e['animal_drug'])
-			policy('Animal Drugs', 'Drugs may only be used in an experiment if carried out at a Hospital, University, Medical or similar Laboratory under the direction of a Scientific Supervisor.  See YSC Policy 4.1.2 "Use of Animals in Research" Section 10.');
+			policy('Animal Drugs', 'Drugs may only be used in an experiment if carried out at a Hospital, University, Medical or similar Laboratory under the direction of a Scientific Supervisor.  See YSC Policy 4.1.2 "Use of Animals in Research" Section 10. <i>If your project was completed without scientific supervision, it may not be eligible for the GVRSF. Please email ethics@gvrsf.ca.</i>');
 		
 		if($e['animal_tissue']) 
 			policy('Animal Tissues', 'Animal tissues and parts may only be obtained and used in a project under very specific rules.  Make sure you comply with YSC Policy 4.1.2 "Use of Animals in Research"  Sections 8.2 and 8.3.');
@@ -225,43 +234,71 @@ function policy($name, $text, $link = '')
 
 		if($e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) {
 			policy('Adult Supervisor Review', 'Your Adult Supervisor will need to review your experiment before you start, confirm that you meet the above requirements, ensure that it does not put the participants at risk either physically or emotionally, and then sign Form 4.1B to confirm.');
-			policy('Scientific Supervisor', 'You may need a Scientific Supervisor to review and approve your project, and sign Form 4.1B.');
-			policy('Ethics Committee Review', 'Your School or Regional Science Fair Ethics Committee must review and confirm that the project meets the requirements of YSC Policy 4.1.1.2, and sign Form 4.1B.');
+			policy('Scientific Supervisor', 'You will need a Scientific Supervisor to review and approve your project, and sign Form 4.1B.');
+			policy('Ethics Committee Review', 'The GVRSF Ethics Committee must review and confirm that the project meets the requirements of YSC Policy 4.1.1.2 and sign Form 4.1B before you present your project at the fair. <i>Please email Form 4.1B to ethics@gvrsf.ca as soon as you complete your registration</i>.');
 		}
+
 
 ?>
 		</ul>
 
-		<h4>Before You Start: Forms</h4>		
+		<h4>Before You Start Your Project: Forms</h4>
+		<ul data-role="listview" data-inset="true">
+<?php
+		$forms2 = false;	
+		/* Same as high-risk below */
+		if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2'])  {
+			$forms2 = true;
+			policy('Significant-Risk Projects Involving Humans', 'Youth Science Canada requires that all significant-risk projects involving humans be approved before any research starts. <b>In future years, you must complete this research plan and submit it to the GVRSF ethics committee (ethics@gvrsf.ca) BEFORE you start your research. For 2014, you are only required to complete Form 4.1B. </b>',
+				'data/research_proposal_en.doc');
+		}
+		/* Only living animals */
+		if ($e['animal_vertebrate'] || $e['animal_ceph']) {
+			$forms2 = true;
+			policy('Animal Projects', 'Youth Science Canada requires that all projects involving vertebrate animals and cephalopods be approved before any research starts. <b>In future years, you must complete this research plan and submit it to the GVRSF ethics committee (ethics@gvrsf.ca)  BEFORE you start your research. For 2014, you are only required to complete Form 4.1C. </b>',
+				'data/research_plan_animals_en.doc');
+		}
+		if(!$forms2) {
+			policy('None', 'It does not appear that you require any ethics approval before starting your project.');
+		}
+?>
+		</ul>
+
+		<h4>After You Complete Your Project, but Before the Fair: Forms</h4>		
 
 		<ul data-role="listview" data-inset="true">
 <?php
-		$forms2 = true;
-		if(!$e['human1'] && !$e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] && !$e['animal_vertebrate'] && !$e['animal_ceph'] && !$e['animal_tissue'] && !$e['animal_drug']) {
-			policy('None', 'It does not appear that you require any ethics or scientific review forms for your project.');
-			$forms2 = false;
-		}
+//		if(!$e['human1'] && !$e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] && !$e['animal_vertebrate'] && !$e['animal_ceph'] && !$e['animal_tissue'] && !$e['animal_drug']) {
+//			policy('None', 'It does not appear that you require any ethics or scientific review forms for your project.');
+//			$forms2 = false;
+//		}
 
 		if( ($e['human1'] && !$e['humanfood3'] && !$e['humanfood4'] && !$e['humanfood5'] && !$e['humantest1'] && !$e['humanfooddrug'] && !$e['humanfoodlow1'] && !$e['humanfoodlow2']) 
-				|| ($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1']) ) 
-			policy('Participation of Humans - Low Risk', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 
-				'http://main.youthscience.ca/sites/default/files/documents/ysc/forms/4.1A_Humans_Low_Risk_0.pdf');
+				|| ($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1']) ) {
+			$forms2 = true;
+			policy('Form 4.1A - Participation of Humans (Low Risk)', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 
+				'data/4.1A_Humans_Low_Risk_0-2.pdf');
+		}
+		if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) {
+			$forms2 = true;
+			policy('Form 4.1B - Participation of Humans (Significant Risk)', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here.  <i>A complete version of Form 4.1B should be emailed to ethics@gvrsf.ca as soon as you complete your registration, so that it can be reviewed by the GVRSF ethics committee before you present at the fair.</i>', 
+				'data/4.1B_Humans_Significant_Risk_0.pdf');
+		}
+		if ($e['animal_vertebrate'] || $e['animal_ceph'] || $e['animal_tissue'] ) {
+			$forms2 = true;
+			policy('Form 4.1C - Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, and the Scientific Supervisor. This form can be found here. <i>A complete version of Form 4.1C should be emailed to ethics@gvrsf.ca as soon as you complete your registration, so that it can be reviewed by the GVRSF ethics committee before you present at the fair</i>.',
+				'data/4.1C_Animals_0-2.pdf');
+		}
+		if(!$forms2) {
+			policy('None', 'It does not appear that you require any ethics or scientific review forms for your project.');
+		}
 
-			
-		if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) 
-			policy('Participation of Humans - Significant Risk', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here', 
-				'http://main.youthscience.ca/sites/default/files/documents/ysc/forms/4.1B_Humans_Significant_Risk_0.pdf');
-
-		if ($e['animal_vertebrate'] || $e['animal_ceph'] || $e['animal_tissue'] )
-			policy('Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, the Scientific Supervisor, and approved by the school\'s Ethics Committee. This form can be found here.',
-				'http://main.youthscience.ca/sites/default/files/documents/ysc/forms/4.1C_Animals_0.pdf');
-
-		
 //        rules_form_ysc_3: [$e['hazardbio'] or $e['hazardother']] 
 //		Projects using potentially hazardous materials or devices must have a Designated Adult Supervisor, and a Designated Supervisor Form must be completed before experimentation starts. You can download the Designated Supervisor Form from here:   http://basef.ca/sites/default/files/DesignatedSupervisorFormYSF3%5Beditable%5D.pdf
+
 ?>
 		</ul>
-		<h3>Agreement of Ethics Requirements</h3>
+		<h3>Agreement on Ethics Eligibility</h3>
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($form1 == true || $forms2 == true) {
