@@ -22,6 +22,7 @@ foreach($_GET as $k=>$v) {
 			if(!array_key_exists($r, $sfiab_roles)) exit();
 			$roles[] = $r;
 		}
+		$_SESSION['edit_return'] = $roles;
 		break;
 	case 'edit':
 		$uid = (int)$v;
@@ -29,7 +30,6 @@ foreach($_GET as $k=>$v) {
 		$_SESSION['edit_uid'] = $uid;
 		$_SESSION['edit_roles'] = $new_u['roles'];
 		$_SESSION['edit_name'] = $new_u['name'];
-		if('judge' 
 		header("Location: ".user_homepage($new_u));
 		exit();
 
@@ -37,12 +37,15 @@ foreach($_GET as $k=>$v) {
 		unset($_SESSION['edit_uid']);
 		unset($_SESSION['edit_roles']);
 		unset($_SESSION['edit_name']);
+		$roles = $_SESSION['edit_return'];
 		break;
 	}
 }
 
 if(count($roles) == 0) {
 	$roles = array('committee');
+	$_SESSION['edit_return'] = $roles;
+	
 }
 
 

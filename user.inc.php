@@ -239,7 +239,7 @@ function user_save($mysqli, &$u)
 function user_homepage(&$u) 
 {
 	global $config;
-	$page = $config['fair_url'] . '/';
+	$page = ''; //$config['fair_url'] . '/';
 
 	/* In order of priority */
 	if(in_array('student', $u['roles']))

@@ -199,7 +199,7 @@ function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
 		$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
 		$e = 'data-rel="external" data-ajax="false"';
 
-		$theme = ($id == 'c_editting') ? 'data-theme="r"' : '';
+		$theme = ($id == 'c_editing') ? 'data-theme="l"' : '';
 
 		$count = sfiab_left_nav_incomplete_count($id);
 		$style = ($count == 0) ? 'style="display: none;"' : '';
@@ -290,7 +290,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	$logout_menu = array( 'logout' => array('Logout', 'login.php?action=logout'),
 		);
 
-	$user_edit_menu = array ('c_editting' => array('Return To Your User', 'c_user_list.php?return=1'),
+	$user_edit_menu = array ('c_editing' => array('Return To Your User', 'c_user_list.php?return=1'),
 		);
 
 ?>
@@ -368,8 +368,13 @@ function sfiab_print_header($page_id)
 ?>
 	<div id="header" data-theme="a" data-role="header"  >
 		<a href="#leftnav" data-icon="bars" data-iconpos="notext" class="leftnav_button ui-nodisc-icon ui-alt-icon">Menu</a>
-		<h3><?=$config['fair_name']?></h3>
+<?php		if(sfiab_logged_in() && isset($_SESSION['edit_uid'])) { ?>
+			<h3 style="white-space:normal"><?=sfiab_info("Temporarily logged in as {$_SESSION['edit_name']}. <a href=\"c_user_list.php?return=1\" data-ajax=\"false\" >Click Here</a> to return.")?></h3>
+<?php		} else { ?>
+			<h3><?=$config['fair_name']?></h3>
+<?php		} ?>
 		<a href="#help_panel_<?=$page_id?>" data-icon="info" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon">Help</a>
+
 	</div>
 <?php
 }
@@ -453,6 +458,12 @@ function sfiab_happy($text)
 <?php
 }
 
+function sfiab_info($text)
+{
+?>
+	<div class="info"><?=$text?></div>
+<?php
+}
 
 function challenges_load($mysqli, $year = false) {
 	global $config;
