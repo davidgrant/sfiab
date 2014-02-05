@@ -139,7 +139,7 @@ sfiab_page_begin('Welcome', 'welcome');
 
 	<p>If the email doesn't appear in a few minutes, be sure to check your 
 	Junk or Spam mail folder too.  We have recent reports that quite a few emails
-	to hotmail.com and msn.com email addresses are going to spam folders.
+	to Hotmail MSN  email addresses are going to spam folders.
 
 	<p>If you think your email address is wrong, register again with
 	the same Username and your old registration email address
