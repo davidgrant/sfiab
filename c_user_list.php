@@ -157,21 +157,23 @@ foreach($users as &$v) {
 	$link = "c_user_list.php?edit={$v['uid']}";
 
 ?>
-	<li id="user_list_<?=$v['uid']?>" data-filtertext="<?=$filter_text?>"><a href="#" class="user_list_item">
+	<li id="user_list_<?=$v['uid']?>" data-filtertext="<?=$filter_text?>"><a href="#" class="user_list_item" onclick="user_list_info_toggle(<?=$v['uid']?>)" >
 		<h3><?=$v['name']?></h3><span class="ui-li-aside"><?=$status?></span>
 		<?=$v['email']?>
 		</a>
-		<a href="<?=$link?>" data-external="true" data-ajax="false">Edit</a>
-		 <div class="user_list_info" style='display:none'>
+		<a href="<?=$link?>" data-external="true" data-ajax="false" data-icon="gear" >Edit</a>
+		 <div id="user_list_info_<?=$v['uid']?>" class="user_list_info" style='display:none'>
 			<div class="ui-grid-a" data-role="fieldcontain">
 				<div class="ui-block-a" style="width:80%">
-					More Info
+					<table>
+					<tr><td>Username:</td><td><?=$v['username']?></td></tr>
+					</table>
 				</div>
 				<div class="ui-block-b" style="width:20%;padding-bottom: 5px">
 					<div data-role="controlgroup" data-type="vertical">
 					 	<a href="<?=$link?>" data-role="button" data-theme="l" >Edit</a>
-					 	<a href="#" data-role="button" data-theme="r" onclick="return user_delete(<?=$v['uid']?>);" >Delete</a>
-					 	<a href="#" data-role="button" data-theme="r" onclick="return user_purge(<?=$v['uid']?>);" >Complete Purge</a>
+					 	<a href="#" data-role="button" data-theme="r" onclick="return user_list_info_delete(<?=$v['uid']?>);" >Delete</a>
+					 	<a href="#" data-role="button" data-theme="r" onclick="return user_list_info_purge(<?=$v['uid']?>);" >Purge</a>
 					</div>
 				</div>
 			</div>
@@ -180,24 +182,7 @@ foreach($users as &$v) {
 	</li>
 <?php
 }
-
 /*
- <div class="ui-grid-a" data-role="fieldcontain">
-    <div class="ui-block-a" style="width: 13%;padding-left: 5px;padding-top:10px">
-      <div data-role="controlgroup" data-type="horizontal">
-        <a data-role="button" href="#">hi</a>
-        <a data-role="button" href="#">hi </a>
-      </div>
-    </div>
-    <div class="ui-block-b" style="width:85%">
-      <a href="#" class="ui-link-inherit"></a>
-    </div>
-  </div><!-- /grid-a -->    
-*/
-?>
-</ul>
-
-<script>
 	$( document ).on( "pagecreate", function( event ) {
 		$('.user_list_item').click(function(event) {
 			var a_e = $(event.target);
@@ -206,8 +191,17 @@ foreach($users as &$v) {
 			return false;
 		});
 	});
+*/
 
-	function user_delete(id) {
+?>
+</ul>
+
+<script>
+	function user_list_info_toggle(id) {
+		$('#user_list_info_'+id).toggle();
+		return false;
+	}
+	function user_list_info_delete(id) {
 		if(confirm('Really delete this user?') == false) return false;
 		$.post('c_user_list.php', { action: "del", id: id }, function(data) {
 			if(data.status == 0) {
@@ -216,7 +210,7 @@ foreach($users as &$v) {
 		}, "json");
 		return false;
 	}
-	function user_purge(id) {
+	function user_list_info_purge(id) {
 		if(confirm('Really purge this user?\nPurging user deletes all record of them, their project, their juding info, everything.') == false) return false;
 		$.post('c_user_list.php', { action: "purge", id: id }, function(data) {
 			if(data.status == 0) {
