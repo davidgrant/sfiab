@@ -543,5 +543,18 @@ class pdf extends TCPDF {
 		parent::Output($filename, $dest);
 	}
 
-	
+	function barcode_2d($x,$y,$w,$h,$text)
+	{
+		$style = array( 'border' => 1,
+				'vpadding' => 'auto',
+				'hpadding' => 'auto',
+				'fgcolor' => array(0,0,0),
+				'bgcolor' => false, //array(255,255,255)
+				'module_width' => 1, // width of a single module in points
+				'module_height' => 1 // height of a single module in points
+			);
+
+//		$this->SetXY($x, $y);
+		$this->write2DBarcode($text, 'QRCODE,H', $x, $y, $w, $h, $style, 'N');
+	}
 }

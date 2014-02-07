@@ -140,6 +140,13 @@ function i18n($text) { return $text;}
 
  $plural = (count($users)>1) ? 's' : '';
 
+$x = $pdf->GetX();
+$y = $pdf->GetY();
+
+$pdf->barcode_2d(175, $y, 30, 30, $p['pid']);
+$pdf->SetXY($x, $y);
+
+
  $pdf->WriteHTML("<h3>".i18n('Registration Summary')."</h3>
 	<p>
 	".i18n('Registration Number').": {$p['pid']} <br/>
@@ -161,6 +168,7 @@ $e = i18n("Exhibitor$plural").":";
 $w = $pdf->GetStringWidth($e) + 2;
 $pdf->WriteHTML("<table><tr><td width=\"{$w}mm\">$e</td><td>$students</td></tr></table>");
 $pdf->WriteHTML("<hr>");
+
 
 function sig($pdf, $text)
 {
