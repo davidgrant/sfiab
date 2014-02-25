@@ -4,6 +4,7 @@ require_once('common.inc.php');
 require_once('email.inc.php');
 require_once('incomplete.inc.php');
 require_once('form.inc.php');
+require_once('login.inc.php');
 
 if(!array_key_exists('action', $_POST)) { 
 	$action = "logout";
@@ -293,16 +294,7 @@ case 'change_pw':
 	exit();
 
 case 'logout':
-	sfiab_session_start();
-	sfiab_log($mysqli, 'logout', $_SESSION['username']);
-	// Unset all session values
-	$_SESSION = array();
-	// get session parameters 
-	$params = session_get_cookie_params();
-	// Delete the actual cookie.
-	setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-	// Destroy session
-	session_destroy();
+	login_logout($mysqli, $u);
 	print(0);
 	exit();
 }

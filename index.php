@@ -243,6 +243,12 @@ sfiab_page_begin('Welcome', 'welcome');
 	</div>
 </div>
 
+<div data-role="page" id="account_deleted">
+	<div data-role="main" class="sfiab_page" > 
+	<div><p>Your account has been deleted.
+	</div>
+</div>
+
 
 
 <?php
