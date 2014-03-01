@@ -22,11 +22,20 @@ switch($action) {
 case 'purge':
 	$uid = (int)$_POST['id'];
 	if($uid > 0) {
-		/* Delete prizes and awards */
-		$mysqli->real_query("DELETE FROM users uid='$uid'");
 
-		/* Check for only one student in a project, delete the project */
-
+		$u = user_load($mysqli, $uid);
+		if(in_array('student', $u['roles'])) {
+			/* If only one student in project, delete project too */
+			$q_in_project = $mysqli->query("SELECT uid FROM users WHERE `s_pid`='{$u['s_pid']}'");
+			if($q_in_project->num_rows == 1) {
+				$mysqli->real_query("DELETE FROM projects WHERE pid='{$u['s_pid']}'");
+				$mysqli->real_query("DELETE FROM mentors WHERE pid='{$u['s_pid']}'");
+			}
+		}
+		/* Do this for all users, doesn't matter if it's a student or not */
+		$mysqli->real_query("DELETE FROM partner_requests WHERE to_uid='$uid' OR from_uid='$uid'");
+		/* Purge the user */
+		$mysqli->real_query("DELETE FROM users WHERE uid='$uid'");
 		form_ajax_response(0);
 		exit();
 	}
