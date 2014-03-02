@@ -36,8 +36,6 @@ case 'download':
 	$year = (int)$_GET['year'];
 	$r['year'] = $year;
 
-
-
 	report_gen($mysqli, $r);
 	exit();
 }

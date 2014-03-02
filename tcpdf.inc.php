@@ -467,6 +467,7 @@ class pdf extends TCPDF {
 		$last_projectnumber = '';
 		foreach($table['data'] as $row) {
 
+			/* Hack to alternate rows for students in the same project */
 			if(in_array('pn', $table['fields']) && $row['pn'] != '') {
 				if($last_projectnumber == $row['pn']) 
 					$row_alternator = !$row_alternator;

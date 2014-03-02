@@ -283,6 +283,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_tours' => array('Tours', 'c_tours.php'),
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
 			    'c_user_list' => NULL,
+			    'c_input_signature_forms' => NULL,
 		);
 
 	$login_menu = array('register' => array('Registration', 'index.php#register'),

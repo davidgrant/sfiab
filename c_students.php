@@ -51,7 +51,10 @@ sfiab_page_begin("Students", $page_id);
 	<h3>Projects</h3> 
 	<p>FIXME: coming soon.
 
-
+	<h3>Projects</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_input_signature_forms.php" data-rel="external" data-ajax="false">Input Received Signature Forms</a></li>
+	</ul>
 <?php
 /*        $form_id = 'j_attending_form';
         form_begin($form_id, 'c_student.php');

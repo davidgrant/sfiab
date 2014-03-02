@@ -1,16 +1,19 @@
 <?php
 require_once('filter.inc.php');
 
-function project_load($mysqli, $pid)
+function project_load($mysqli, $pid, $pdata = false)
 {
 	if($pid == NULL) return NULL;
-	$r = $mysqli->query("SELECT * FROM projects WHERE pid=$pid LIMIT 1");
 
-	if($r->num_rows == 0) {
-		return NULL;
+	if($pdata == false) {
+		$r = $mysqli->query("SELECT * FROM projects WHERE pid=$pid LIMIT 1");
+		if($r->num_rows == 0) {
+			return NULL;
+		}
+		$p = $r->fetch_assoc();
+	} else {
+		$p = $pdata;
 	}
-
-	$p = $r->fetch_assoc();
 
 	/* Set all fields to sane values */
 	project_filter($p);
@@ -22,6 +25,8 @@ function project_load($mysqli, $pid)
 
 	return $p;
 }
+
+
 
 function project_filter(&$p) 
 {
@@ -84,6 +89,15 @@ function project_filter(&$p)
 		
 }
 
+function project_load_students($mysqli, &$p) 
+{
+	$users = array();
+	$r = $mysqli->query("SELECT * FROM users WHERE s_pid={$p['pid']}");
+	while($u = $r->fetch_assoc()) {
+		$users[] = user_load($mysqli, -1, -1, NULL, $u);
+	}
+	return $users;
+}
 
 function project_create($mysqli) 
 {
