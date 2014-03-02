@@ -330,7 +330,7 @@ $report_students_fields = array(
 		'header' => 'Paid',
 		'width' => '0.4',
 		'table' => 'users.s_paid',
-		'value_map' => array ('1' => '', '0' => 'No')),
+		'value_map' => array (1 => '', 0 => 'No')),
 
 /* Project Information */
 	'title' => array(

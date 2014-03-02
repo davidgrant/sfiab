@@ -842,7 +842,10 @@ function report_save_field($mysqli, $report, $type)
 		foreach($report['col'] as $o=>$d) {
 			$f = $d['field'];
 			if(array_key_exists('value_map', $fields[$f])) {
-				$v = $fields[$f]['value_map'][$i["C$o"]];
+				if(array_key_exists($i["C$o"], $fields[$f]['value_map']))
+					$v = $fields[$f]['value_map'][$i["C$o"]];
+				else
+					$v = 'n/a';
 			} else if(array_key_exists('exec_function', $fields[$f])) {
 				$v = call_user_func_array($fields[$f]['exec_function'], array($report, $f, $i["C$o"]));
 //			} else if(isset($fields[$f]['exec_code'])) {
