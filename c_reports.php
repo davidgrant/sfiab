@@ -28,9 +28,15 @@ case 'download':
 	$rid = (int)$_GET['rid'];
 	$r = report_load($mysqli, $rid);
 	/* Add report overrides */
-	$year = (int)$_GET['year'];
+	$include_registrations = $_GET['include_registrations'];
+	if(array_key_exists($include_registrations, $report_options['include_registrations'])) {
+		$r['option']['include_registration'] = $include_registration;
+	}
 
+	$year = (int)$_GET['year'];
 	$r['year'] = $year;
+
+
 
 	report_gen($mysqli, $r);
 	exit();
@@ -81,6 +87,7 @@ $min_year = $u['M'];
 		}
 	        form_select($form_id, 'year', "Year", $years, $options);
 	        form_select($form_id, 'type', "Report Format", $report_options['type']['values'], $options);
+	        form_select($form_id, 'include_registrations', "Include Registrations", $report_options['include_registrations']['values'], $options);
 ?>
 	</div>
 <?php	

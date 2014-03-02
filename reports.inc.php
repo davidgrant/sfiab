@@ -87,9 +87,11 @@ require_once("reports_students.inc.php");  /* $report_students_fields */
 					'20'=>'20', '22'=>'22', '24'=>'24'),
 					'default' => '11'
 		);
-$report_options['include_incomplete_registrations'] = array('desc' => 'Include incomplete registrations in results',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'no'
+$report_options['include_registrations'] = array('desc' => 'Include data from complete registrations',
+ 					'values' => array('all'=>'All registered users, regardless of status', 
+							'almost'=>'(Students only) that are complete or almost complete (pending sig form)', 
+							'complete'=>'Only complete registrations'),
+					'default' => 'complete'
 		);
 //$report_options['total'] = array('desc' => 'Sum the value of table items at te bottom of each table',
  //					'values' => array('no'=>'No', 'yes'=>'Yes'),

@@ -1030,11 +1030,16 @@ $report_students_fields = array(
 	}
 
 
-	if($report['option']['include_incomplete_registrations'] == 'yes') 
-		$reg_where = '';
-	else 
+	switch($report['option']['include_registrations']) {
+	case 'complete':
 		$reg_where = "AND users.s_accepted='1'";
-
+		break;
+	case 'almost':
+		$reg_where = "AND ( users.s_accepted='1' OR users.s_complete='1')";
+		break;
+	default:		
+		$reg_where = '';
+	}
 
 	$q = "	FROM  users 
 			LEFT JOIN schools ON schools.id=users.schools_id
