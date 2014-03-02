@@ -467,7 +467,7 @@ class pdf extends TCPDF {
 		$last_projectnumber = '';
 		foreach($table['data'] as $row) {
 
-			if(in_array('pn', $table['fields'])) {
+			if(in_array('pn', $table['fields']) && $row['pn'] != '') {
 				if($last_projectnumber == $row['pn']) 
 					$row_alternator = !$row_alternator;
 				$last_projectnumber = $row['pn'];
