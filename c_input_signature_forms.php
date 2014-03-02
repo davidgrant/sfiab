@@ -188,8 +188,12 @@ function l_projects_load_all($mysqli, $year)
 		if(!in_array($pid, $projects)) {
 			$projects[$pid] = $projects_tmp[$pid];
 			$projects[$pid]['students'] = array();
+			$projects[$pid]['s_complete'] = true;
 		}
 		$projects[$pid]['students'][] = $p_user;
+		if($p_user['s_complete'] == 0) {
+			$projects[$pid]['s_complete'] = false;
+		}
 	}
 	return $projects;
 }
@@ -204,7 +208,18 @@ sfiab_page_begin("User List", $page_id);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search..." data-inset="true">
+	<p>Use the list below to mark registrations as complete.  There are
+	three buttons that may appear: <font color=red>Mark as Complete</font>,
+	<font color=blue>Mark as Complete without payment</font>, and <font
+	color=green>Mark as Incomplete</font>.  The <font color=red>Mark as
+	Complete</font> button is red so you can scan through the list quickly
+	and find all incomplete (red) applications.  Similarly the <font
+	color=green>Mark as Incomplete</font> button is green 
+	so you can find all the complete ones.  When the green <font
+	color=green>Mark as Incomplete</font> button is showing, it means the
+	project has been marked as complete.
+
+	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search by project number, project title, student name, school name..." data-inset="true">
 
 <?php
 
@@ -214,6 +229,8 @@ $projects = l_projects_load_all($mysqli, $config['year']);
 
 foreach($projects as &$p) {
 	$pid = $p['pid'];
+	if($p['s_complete'] == false) continue;
+
 	$filter_text = "{$p['pid']} {$p['title']}";
 	$accepted = $p['students'][0]['s_accepted'] ? true : false;
 	$paid = $p['students'][0]['s_paid'] ? true : false;
