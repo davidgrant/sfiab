@@ -29,8 +29,8 @@ case 'download':
 	$r = report_load($mysqli, $rid);
 	/* Add report overrides */
 	$include_registrations = $_GET['include_registrations'];
-	if(array_key_exists($include_registrations, $report_options['include_registrations'])) {
-		$r['option']['include_registration'] = $include_registration;
+	if(array_key_exists($include_registrations, $report_options['include_registrations']['values'])) {
+		$r['option']['include_registrations'] = $include_registrations;
 	}
 
 	$year = (int)$_GET['year'];

@@ -762,6 +762,7 @@ function report_save_field($mysqli, $report, $type)
 	$q = "SELECT $sel  $q  $filter_query $group_query ORDER BY $order";
 	$r = $mysqli->query($q);
 
+//	print("<pre>");
 //	print_r($report);
 //	print_r($report['filter']);
 //	echo "$q";
@@ -787,6 +788,8 @@ function report_save_field($mysqli, $report, $type)
 //	echo "<pre>";print_r($rep);
 
 	while($i = $r->fetch_assoc()) {
+
+//		echo "<pre>"; print_r($i);
 
 		if($n_groups > 0) {
 			$group_change = false;
