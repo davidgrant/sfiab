@@ -414,11 +414,6 @@ class pdf extends TCPDF {
 		$this->Cell(0, 1, '', '', 1, '');
 	}
 
- 	function br()
-	{
-		$this->writeHTML("<br/><br/>", false, false, false, false, 0);
-	}
-
 	function vspace($space)
 	{
 		$this->SetY($this->GetY() + $space);
@@ -455,35 +450,49 @@ class pdf extends TCPDF {
 	/* Generates the HTML for a table */
 	function get_table_html($table)
 	{
-//		echo "Add Table\n<pre>";
-//		print_r($table);
+		//echo "Add Table\n<pre>";
+		//print_r($table);
 		/* Compute the lines in height of each row for pagination */
-
-		$html = '<table border="1" cellpadding="2"><thead><tr>';
+		$html = '<table cellpadding="0"><thead><tr>';
 		foreach($table['fields'] as $f) {
 			$col = $table['col'][$f];
-			$html .= "<td width=\"{$table['widths'][$f]}mm\" align=\"center\"><b>{$table['header'][$f]}</b></td>";
+			$html .= "<td style=\"border-bottom:1px solid black; border-top:1px solid black\" width=\"{$table['widths'][$f]}mm\" align=\"center\"><b>{$table['header'][$f]}</b></td>";
 		}
 		$html .= '</tr></thead>';
-
-//		echo "<pre>";
 
 		/* Width of "..." */
 		$e_width = $this->getStringWidth('...', '', '', '', false);
 
+		$row_alternator = 0;
+		$last_projectnumber = '';
 		foreach($table['data'] as $row) {
-			$html .= '<tr>';
+
+			if(in_array('pn', $table['fields'])) {
+				if($last_projectnumber == $row['pn']) 
+					$row_alternator = !$row_alternator;
+				$last_projectnumber = $row['pn'];
+			}
+
+			if($row_alternator == 0) 
+				$style = "";
+			else 
+				$style='style="background-color:#DDDDDD"';
+
+			$row_alternator = !$row_alternator;
+
+			$html .= "<tr $style >";
 			foreach($table['fields'] as $f) {
 				$col = $table['col'][$f];
 				$d = $row[$f];
+
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell
 				 * and truncate the text if needed */
-				if($table['col'][$f]['on_overflow'] == '...') {
+				if($table['col'][$f]['on_overflow'] == '...' || $table['col'][$f]['on_overflow'] == 'truncate' ) {
 //					echo "check for overflow... $d";
 					/* See if $d fits in the allowed width */
 					$width = $this->getStringWidth($d, '', '', '', true);
-					$target_w = $table['width'][$f];
+					$target_w = $table['widths'][$f];
 					/* FIXME, this doesn't work all the time
 					 * there must be some cellpadding that HTML is doing */
 					$target_w -= 1.4111111111;  /* 2 points * 2*/
@@ -513,7 +522,17 @@ class pdf extends TCPDF {
 			}
 			$html .= '</tr>';
 		}
+
+		$cols = count($table['fields']);
+		if($table['total'] != 0) {
+			$txt = "(Total: {$table['total']})";
+		} else {
+			$t = count($table['data']);
+			$txt = "(Rows: $t)";
+		}
+		$html .= "<tr><td colspan=\"$cols\" style=\"border-top:1px solid black\" align=\"right\">$txt</td></tr>";
 		$html .= '</table>';
+
 		return $html;
 	}
 
@@ -530,20 +549,16 @@ class pdf extends TCPDF {
 
 		$lpad = (($this->getPageWidth() - $this->lMargin - $this->rMargin) - $total_width)/2;
 
-//		print("lpad=$lpad");
-//		print("pagewidth={$this->getPageWidth()} - lmargin={$this->lMargin} - rmargin={$this->rMargin} - table_width=$total_width");
+/*		print("<pre>");
+		print("lpad=$lpad");
+		print("pagewidth={$this->getPageWidth()} - lmargin={$this->lMargin} - rmargin={$this->rMargin} - table_width=$total_width");
 
-
+		print("set lmargin to {($orig_lmargin + $lpad)}");
+*/
 		$this->SetLeftMargin($orig_lmargin + $lpad);
 		$this->writeHTML($html, false, false, false, false, '');
 		$this->SetLeftMargin($orig_lmargin);
 
-		if($table['total'] != 0) {
-			$this->Cell($total_width, 0, "(Total: {$table['total']})", 0, 1, 'R');
-		} else {
-			$t = count($table['data']);
-			$this->Cell($total_width, 0, "(Rows: $t)", 0, 1, 'R');
-		}
 	}
 
 	function output($filename='', $dest='I') 

@@ -35,6 +35,8 @@ foreach ($tcpdf_include_dirs as $tcpdf_include_path) {
 	}
 }
 
+date_default_timezone_set('UTC') ;
+
 //============================================================+
 // END OF FILE
 //============================================================+

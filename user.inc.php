@@ -227,11 +227,11 @@ function user_save($mysqli, &$u)
 		}
 	}
 
-	print_r($u);
+//	print_r($u);
 
 	if($set != '') {
 		$query = "UPDATE users SET $set WHERE uid='{$u['uid']}'";
-		print($query);
+//		print($query);
 		$mysqli->query($query);
 		print($mysqli->error);
 	}

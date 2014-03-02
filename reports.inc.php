@@ -360,7 +360,6 @@ function report_save_field($mysqli, $report, $type)
 	global $report_committees_fields, $report_awards_fields;
 	global $report_schools_fields, $report_volunteers_fields;
 	global $report_tours_fields, $report_fairs_fields;
-	global $report_fundraisings_fields;
 
 	$report = array();
 
@@ -543,7 +542,9 @@ function report_save_field($mysqli, $report, $type)
 	global $report_fundraisings_fields;
 	global $filter_ops;
 
-	//print_r($report);
+//	print("<pre>");
+//	print_r($report);
+
 	$fieldvar = "report_{$report['type']}s_fields";
 	$fields = $$fieldvar;
 
@@ -807,14 +808,13 @@ function report_save_field($mysqli, $report, $type)
 				if(count($table['data'])) {
 				//	print_r($table);
 					$rep->add_table($table);
-					$rep->br();
 					$table['data'] = array();
 					$table['total'] = 0;
 					/* Start a new page AFTER a table is
 					* dumped, so the first page doesn't
 					* end up blank */
 					if($report['option']['group_new_page'] == 'yes') {
-						$rep->br();
+//						$rep->br();
 					} else {
 						$rep->hr();
 						$rep->vspace(-0.1);
@@ -824,7 +824,6 @@ function report_save_field($mysqli, $report, $type)
 				/* Construct a new header */
 				$h = implode(" -- ", $last_group_data);
 				$rep->heading($h);
-				$rep->br();
 			}
 			
 		}

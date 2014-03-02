@@ -126,7 +126,7 @@ if(count($_POST) == 0) {
 $cats = categories_load($mysqli);
 $chals = challenges_load($mysqli);
 
-$pdf=new pdf( "Participant Signature Form ({$p['pid']})" );
+$pdf=new pdf( "Participant Signature Form ({$p['pid']})", $config['year'] );
 
 $pdf->setFontSize(11);
 $pdf->SetFont('times');
@@ -136,9 +136,7 @@ $height_sigfont = $pdf->GetFontSize(); //mm
 
 $pdf->AddPage();
 
-function i18n($text) { return $text;}
-
- $plural = (count($users)>1) ? 's' : '';
+$plural = (count($users)>1) ? 's' : '';
 
 $x = $pdf->GetX();
 $y = $pdf->GetY();
