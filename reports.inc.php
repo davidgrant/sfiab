@@ -722,7 +722,7 @@ function report_save_field($mysqli, $report, $type)
 		$group_by[] = $fieldname[$f];
 	}
 
-	$filter = [];
+	$filter = array();
 	foreach($report['filter'] as $o=>$d) {
 		$f = $d['field'];
 		if(!isset($fieldname[$f])) {
