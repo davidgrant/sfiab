@@ -145,15 +145,15 @@ $report_students_fields = array(
 		'name' => 'Project Number',
 		'header' => '#',
 		'width' => 0.6,
-		'table' => 'projects.projectnumber',
-		'table_sort' => 'projects.projectsort, projects.projectnumber'),
+		'table' => 'projects.number',
+		'table_sort' => 'projects.number_sort, projects.number'),
 
 	'projectbarcode' => array(
 		'name' => 'Project Barcode',
 		'header' => 'Barcode',
 		'width' => 1,
-		'table' => 'projects.projectnumber',
-		'table_sort' => 'projects.projectsort, projects.projectnumber',
+		'table' => 'projects.number',
+		'table_sort' => 'projects.number_sort, projects.number',
 		),
 
 	'last_name' =>  array(
@@ -222,7 +222,7 @@ $report_students_fields = array(
 		'name' => 'Student -- Name Pronunciation',
 		'header' => 'Pronunciation',
 		'width' => 2.0,
-		'table' => 'users.pronunciation'),
+		'table' => 'users.pronounce'),
 
 	'email' => array(
 		'start_option_group' => 'Student Contact Information',
@@ -354,59 +354,59 @@ $report_students_fields = array(
 		'width' => 2,
 		'table' => 'projects.shorttitle' ),
 
-	'challenge' =>  array(
+	'division' =>  array(
 		'name' => 'Project -- Challenge',
-		'header' => 'Division',
+		'header' => 'Challenge',
 		'width' => 3.0,
-		'table' => 'projectdivisions.division' ),
+		'table' => 'challenges.name' ),
 
 	'div' => array(
-		'name' => 'Project -- Division Short Form' ,
-		'header' => 'Div',
+		'name' => 'Project -- Challenge Short Form' ,
+		'header' => 'Chal',
 		'width' => 0.4,
-		'table' => 'projectdivisions.division_shortform' ),
+		'table' => 'challenges.shortform' ),
 
 	'fr_division' =>  array(
-		'name' => 'Project -- Division (French)',
-		'header' => 'Division',
+		'name' => 'Project -- Challenge (French)',
+		'header' => 'Challenge',
 		'width' => 3.0,
-		'table' => 'projectdivisions.division',
+		'table' => 'challenges.name',
 		'exec_function' => 'report_students_i18n_fr'),
 
 	'category' => array(
 		'name' => 'Project -- Category',
 		'header' => 'Category',
 		'width' => 1,
-		'table_sort' => 'projectcategories.id',
-		'table' => 'projectcategories.category' ),
+		'table_sort' => 'categories.id',
+		'table' => 'categories.name' ),
 
 	'cat' => array(
 		'name' => 'Project -- Category Short Form' ,
 		'header' => 'cat',
 		'width' => 0.4,
-		'table' => 'projectcategories.category_shortform' ),
+		'table' => 'categories.name_shortform' ),
 
 	'fr_category' => array(
 		'name' => 'Project -- Category (French)',
 		'header' => 'Category',
 		'width' => 1,
-		'table_sort' => 'projectcategories.id',
-		'table' => 'projectcategories.category',
+		'table_sort' => 'categories.id',
+		'table' => 'categories.name',
 		'exec_function' => 'report_students_i18n_fr'),
 
 	'categorydivision' => array(
-		'name' => 'Project -- Category and Division',
-		'header' => 'Category/Division',
+		'name' => 'Project -- Category and Challenge',
+		'header' => 'Category/Challenge',
 		'width' => 3.5,
-		'table_sort' => 'projectcategories.id',
-		'table' => "CONCAT(projectcategories.category,' - ', projectdivisions.division)"),
+		'table_sort' => 'categories.id',
+		'table' => "CONCAT(categories.name,' - ', challenges.name)"),
 
 	'divisioncategory' => array(
-		'name' => 'Project -- Division and Category',
-		'header' => 'Division/Category',
+		'name' => 'Project -- Challenge and Category',
+		'header' => 'Challenge/Category',
 		'width' => 3.5,
-		'table_sort' => 'projectdivisions.id',
-		'table' => "CONCAT(projectdivisions.division,' - ',projectcategories.category)"),
+		'table_sort' => 'challenges.id',
+		'table' => "CONCAT(challenges.name,' - ',categories.name)"),
 
 	'summary' => array(
 		'name' => 'Project -- Summary',
@@ -576,7 +576,7 @@ $report_students_fields = array(
 		'components' => array('awards')),
 
 	'award_type' => array(
-		'name' => 'Award -- Type (Divisional, Special, etc.)',
+		'name' => 'Award -- Type (Challengeal, Special, etc.)',
 		'header' => 'Award Type',
 		'width' => 1,
 		'table' => 'award_types.type',
@@ -594,7 +594,7 @@ $report_students_fields = array(
 		'name' => 'Award -- Project Num + Award Name (will be unique for each award)',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => "CONCAT(projects.projectnumber,' ', award_awards.name)",
+		'table' => "CONCAT(projects.number,' ', award_awards.name)",
 		'table_sort' => 'award_awards.order',
 		'components' => array('awards')),
 
@@ -643,10 +643,10 @@ $report_students_fields = array(
 		'components' => array('awards')),
 
 	'award_prize_fullname' => array(
-		'name' => 'Award -- Prize Name, Category, Division',
+		'name' => 'Award -- Prize Name, Category, Challenge',
 		'header' => 'Prize Name',
 		'width' => 4,
-		'table' => "CONCAT(award_prizes.prize,' in ',projectcategories.category,' ', projectdivisions.division)",
+		'table' => "CONCAT(award_prizes.prize,' in ',categories.name,' ', challenges.name)",
 		'table_sort' => 'award_prizes.order',
 		'components' => array('awards')),
 
@@ -695,7 +695,7 @@ $report_students_fields = array(
 		'name' => 'Award Nominations -- Project Num + Award Name(will be unique)',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => "CONCAT(projects.projectnumber,' ', award_awards.name)",
+		'table' => "CONCAT(projects.number,' ', award_awards.name)",
 		'table_sort' => 'award_awards.name',
 		'components' => array('awards_nominations')),
 
@@ -802,7 +802,7 @@ $report_students_fields = array(
 		'header' => 'Mentor Name',
 		'width' => 1.75,
 		'scalable' => true,
-		'table' => "CONCAT('projects.projectnumber', ' - ', mentors.firstname, ', ', mentors.lastname)",
+		'table' => "CONCAT('projects.number', ' - ', mentors.firstname, ', ', mentors.lastname)",
 		'table_sort'=> 'mentors.lastname',
 		'components' => array('mentors')),
 
@@ -1055,7 +1055,8 @@ $report_students_fields = array(
 			$fairs_join
 			$tour_join
 		WHERE
-			users.year='$year'
+			FIND_IN_SET('student',`users`.`roles`)>0
+			AND users.year='$year'
 			AND projects.year='$year'
 			AND categories.year='$year'
 			AND challenges.year='$year'

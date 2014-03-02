@@ -15,7 +15,7 @@ class pdf extends TCPDF {
 
 	var $footer_string;
 
-	function __construct($report_name='', $format='LETTER', $orientation='P')
+	function __construct($report_name='', $report_year, $format='LETTER', $orientation='P')
 	{
 		global $config;
 		/* Start an output PDF */
@@ -58,7 +58,7 @@ class pdf extends TCPDF {
 		 * convert it to a jpg anyway, and that takes FOREVER if there's lots of 
 		 * pages/labels.*/
 		$this->SetHeaderData('logo-500.jpg', 16 /* mm */, 
-				i18n($config['fair_name']),	i18n($report_name));
+				i18n($config['fair_name']).'  '.$report_year,	i18n($report_name));
 
 		// set header and footer fonts
 		$this->setHeaderFont(Array('helvetica', '', 14));
@@ -412,6 +412,11 @@ class pdf extends TCPDF {
 	{
 		$this->Cell(0, 1, '', 'B', 1, '');
 		$this->Cell(0, 1, '', '', 1, '');
+	}
+
+ 	function br()
+	{
+		$this->writeHTML("<br/><br/>", false, false, false, false, 0);
 	}
 
 	function vspace($space)

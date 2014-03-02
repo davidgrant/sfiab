@@ -554,6 +554,7 @@ function report_save_field($mysqli, $report, $type)
 	$table['col']=array();
 	$table['widths']=array();
 	$table['fields'] = array();
+	$table['data'] = array();
 	$table['total']=0;
 
 	/* Validate the stock */
@@ -577,7 +578,7 @@ function report_save_field($mysqli, $report, $type)
 	case 'pdf': case '':
 		/* FIXME: handle landscape pages in here */
 		$label_stock = $report_stock[$report['option']['stock']];
-		$rep=new pdf("{$report['section']} -- {$report['name']}", $label_stock['page_format'], $label_stock['page_orientation']);
+		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'], $label_stock['page_format'], $label_stock['page_orientation']);
 		$rep->setup_for_tables($show_box, $show_fair, $show_logo, 
 				$label_stock['label_width'] * 25.4, $label_stock['label_height'] * 25.4,
 				$label_stock['x_spacing'] * 25.4, $label_stock['y_spacing'] * 25.4,
@@ -602,7 +603,7 @@ function report_save_field($mysqli, $report, $type)
 		$show_fair = ($report['option']['label_fairname'] == 'yes') ? true : false;
 		$show_logo = ($report['option']['label_logo'] == 'yes') ? true : false;
 
-		$rep=new pdf("{$report['section']} -- {$report['name']}", $label_stock['page_format'], $label_stock['page_orientation']);
+		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'],$label_stock['page_format'], $label_stock['page_orientation']);
 		$rep->setup_for_labels($show_box, $show_fair, $show_logo, 
 				$label_stock['label_width'] * 25.4, $label_stock['label_height'] * 25.4,
 				$label_stock['x_spacing'] * 25.4, $label_stock['y_spacing'] * 25.4,
@@ -686,7 +687,7 @@ function report_save_field($mysqli, $report, $type)
 		else
 			$order[] = $fieldname[$f];
 
-		if(is_array($fields[$f]['components'])) { 
+		if(array_key_exists('components', $fields[$f])) { 
 			$components = array_merge($components, 
 					$fields[$f]['components']);
 		}
@@ -732,11 +733,12 @@ function report_save_field($mysqli, $report, $type)
 					$fields[$f]['components']);
 		}
 	}
+
 	$sel = implode(",", $sel);
 	$order = implode(",", $order);
 		
 	
-	if(!isset($report['year'])) {
+	if(!array_key_exists('year', $report)) {
 		$report['year'] = $config['year'];
 	}
 	
@@ -787,14 +789,14 @@ function report_save_field($mysqli, $report, $type)
 			$group_change = false;
 			/* See if any of the "group" fields have changed */
 			foreach($report['group'] as $x=>$g) {
-				$c = $fieldname[$g['field']];				
+				$c = $fieldname[$g['field']];
 
-				if($fields[$g['field']]['exec_function'])
+				if(array_key_exists('exce_function', $fields[$g['field']]))
 					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($report,$f,$i[$c]));
 				else
 					$i_c=$i[$c];
 
-				if($last_group_data[$c] != $i_c)
+				if(!array_key_exists($c, $last_group_data) || $last_group_data[$c] != $i_c)
 					$group_change = true;
 
 				$last_group_data[$c] = $i_c;
@@ -804,8 +806,8 @@ function report_save_field($mysqli, $report, $type)
 				/* Dump the last table */
 				if(count($table['data'])) {
 				//	print_r($table);
-					$rep->add_table($report, $table);
-					$rep->nextLine();
+					$rep->add_table($table);
+//					$rep->nextLine();
 					$table['data'] = array();
 					$table['total'] = 0;
 					/* Start a new page AFTER a table is
@@ -822,7 +824,7 @@ function report_save_field($mysqli, $report, $type)
 				/* Construct a new header */
 				$h = implode(" -- ", $last_group_data);
 				$rep->heading($h);
-				$rep->nextLine();
+				$rep->writeHtml("<br/>", false, false, false, false, '');
 			}
 			
 		}
@@ -891,7 +893,7 @@ function report_save_field($mysqli, $report, $type)
 			if(array_key_exists('total', $fields[$f])  && $fields[$f]['total'] == true) 
 				$table['total'] += $v;
 		}
-		if(count($data)) $table['data'][$f] = $data;
+		if(count($data)) $table['data'][] = $data;
 	}
 	if(count($table['data'])) {
 		$rep->add_table($table);
