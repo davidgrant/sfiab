@@ -38,6 +38,10 @@ case 'download':
 
 sfiab_page_begin("Download Reports", $page_id, $help);
 
+$q = $mysqli->query("SELECT MIN(year) AS M FROM users");
+$u = $q->fetch_assoc();
+$min_year = $u['M'];
+
 
 ?>
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -65,13 +69,17 @@ sfiab_page_begin("Download Reports", $page_id, $help);
 	foreach($report_options as $o=>$v) {
 		$options[$o] = $v['default'];
 	}
-	$options['year'] = $config['year'];
+	$options['year'] = (int)$config['year'];
 
 ?>
 	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
 		<h3>Report Options</h3>
 <?php
-	        form_text($form_id, 'year', "Year", $options);
+		$years = array();
+		for($x=$config['year']; $x >= $min_year; $x--) {
+			$years[(int)$x] = $x;
+		}
+	        form_select($form_id, 'year', "Year", $years, $options);
 	        form_select($form_id, 'type', "Report Format", $report_options['type']['values'], $options);
 ?>
 	</div>

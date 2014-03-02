@@ -190,7 +190,7 @@ $report_students_fields = array(
 		'header' => 'Partner',
 		'width' => 1.5,
 		'scalable' => true,
-		'table' => "CONCAT(students2.lastname, ', ', students2.firstname)",
+		'table' => "CONCAT(student2.lastname, ', ', student2.firstname)",
 		'components' => array('partner') ),
 
 	'partnerfl' =>  array(
@@ -198,7 +198,7 @@ $report_students_fields = array(
 		'header' => 'Partner',
 		'width' => 1.5,
 		'scalable' => true,
-		'table' => "CONCAT(students2.firstname, ' ', students2.lastname)",
+		'table' => "CONCAT(student2.firstname, ' ', student2.lastname)",
 		'components' => array('partner') ),
 
 	'bothnames' =>  array(
@@ -206,7 +206,7 @@ $report_students_fields = array(
 		'header' => 'Student(s)',
 		'width' => 3.0,
 		'scalable' => true,
-		'table' => "CONCAT(users.firstname, ' ', users.lastname, IF(students2.lastname IS NULL,'', CONCAT(', ', students2.firstname, ' ', students2.lastname)))",
+		'table' => "CONCAT(users.firstname, ' ', users.lastname, IF(student2.lastname IS NULL,'', CONCAT(', ', student2.firstname, ' ', student2.lastname)))",
 		'table_sort' => 'users.lastname',
 		'components' => array('partner') ),
 
@@ -216,7 +216,7 @@ $report_students_fields = array(
 		'width' => 3.0,
 		'scalable' => true,
 		'table' => "GROUP_CONCAT(users.firstname, ' ', users.lastname ORDER BY users.lastname SEPARATOR ', ')",
-		'group_by' => array('users.registrations_id')),
+		'group_by' => array('users.s_pid')),
 
 	'pronunciation'  =>  array(
 		'name' => 'Student -- Name Pronunciation',
@@ -325,19 +325,12 @@ $report_students_fields = array(
 		'width' => 2.0,
 		'table' => 'users.foodreq'),
 
-	'registrations_num' => array(
-		'start_option_group' => 'Student Registration Information',
-		'name' => 'Student -- Registration Number',
-		'header' => 'RegNum',
-		'width' => 1,
-		'table' => 'registrations.num' ),
-
 	'paid' => array(
 		'name' => 'Paid',
 		'header' => 'Paid',
 		'width' => '0.4',
-		'table' => 'registrations.status',
-		'value_map' => array ('complete' => '', 'paymentpending' => 'No')),
+		'table' => 'users.s_paid',
+		'value_map' => array ('1' => '', '0' => 'No')),
 
 /* Project Information */
 	'title' => array(
@@ -432,8 +425,7 @@ $report_students_fields = array(
 		'name' => 'Project -- Number of Students',
 		'header' => 'Stu.',
 		'width' => 0.5,
-		'table' => 'users.registrations_id',
-		'exec_function' => 'reports_students_numstudents'),
+		'table' => 'projects.num_students'),
 		
 	'rank' => array(
 		'name' => 'Project -- Rank (left blank for judges to fill out)',
@@ -938,7 +930,7 @@ $report_students_fields = array(
 		'header' => 'Student(s)',
 		'width' => 3.0,
 		'table' => "GROUP_CONCAT(users.lastname, ',', users.firstname ORDER BY users.lastname SEPARATOR ':')",
-		'group_by' => array('users.registrations_id')),
+		'group_by' => array('users.s_pid')),
 
 	'special_tshirt_count' =>  array(
 		'name' => 'Special -- T-Shirt Size Count',
@@ -1008,8 +1000,8 @@ $report_students_fields = array(
 	$partner_join = '';
 	if(in_array('partner', $components)) {
 		$partner_join = "LEFT JOIN users AS student2
-					ON(student2.s_pid=users.s_pid)
-					AND students2.id != users.id)";
+					ON(student2.s_pid=users.s_pid 
+					AND student2.uid != users.uid)";
 	} 
 
 	$tour_join = '';
@@ -1062,6 +1054,7 @@ $report_students_fields = array(
 			AND challenges.year='$year'
 			$mentor_where
 			$awards_where
+			$reg_where
 		";
 
 	return $q;

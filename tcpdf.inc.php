@@ -1,7 +1,7 @@
 <?php
 
-require_once('tcpdf_config.php');
-require_once('tcpdf/tcpdf.php');
+require_once('tcpdf_6/tcpdf_config_sfiab.php');
+require_once('tcpdf_6/tcpdf.php');
 
 class pdf extends TCPDF {
 
