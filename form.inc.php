@@ -184,6 +184,7 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 <?php		foreach($data as $name=>$group) { ?>
 			<optgroup label="<?=$name?>">
 <?php			foreach($group as $key=>$val) { 
+				if(is_array($val)) $val = $val['name'];
 				$sel = ($v == $key) ? 'selected="selected"' : ''; ?>
 			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php			} ?>

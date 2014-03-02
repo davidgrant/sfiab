@@ -18,7 +18,6 @@ class pdf extends TCPDF {
 	function __construct($report_name='', $format='LETTER', $orientation='P')
 	{
 		global $config;
-
 		/* Start an output PDF */
 
 		/* Orientation - Page orientation:
@@ -456,8 +455,9 @@ class pdf extends TCPDF {
 		/* Compute the lines in height of each row for pagination */
 
 		$html = '<table border="1" cellpadding="2"><thead><tr>';
-		foreach($table['col'] as $c=>$col) {
-			$html .= "<td width=\"{$col['width']}mm\" align=\"center\"><b>{$col['header']}</b></td>";
+		foreach($table['fields'] as $f) {
+			$col = $table['col'][$f];
+			$html .= "<td width=\"{$table['widths'][$f]}mm\" align=\"center\"><b>{$table['header'][$f]}</b></td>";
 		}
 		$html .= '</tr></thead>';
 
@@ -468,15 +468,17 @@ class pdf extends TCPDF {
 
 		foreach($table['data'] as $row) {
 			$html .= '<tr>';
-			foreach($row as $c => $d) {
+			foreach($table['fields'] as $f) {
+				$col = $table['col'][$f];
+				$d = $row[$f];
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell
 				 * and truncate the text if needed */
-				if($table['col'][$c]['on_overflow'] == '...') {
+				if($table['col'][$f]['on_overflow'] == '...') {
 //					echo "check for overflow... $d";
 					/* See if $d fits in the allowed width */
 					$width = $this->getStringWidth($d, '', '', '', true);
-					$target_w = $table['col'][$c]['width'];
+					$target_w = $table['width'][$f];
 					/* FIXME, this doesn't work all the time
 					 * there must be some cellpadding that HTML is doing */
 					$target_w -= 1.4111111111;  /* 2 points * 2*/
@@ -502,7 +504,7 @@ class pdf extends TCPDF {
 					}
 				}
 
-				$html .= "<td width=\"{$table['col'][$c]['width']}mm\" align=\"{$table['col'][$c]['align']}\">$d</td>";
+				$html .= "<td width=\"{$table['widths'][$f]}mm\" align=\"{$table['col'][$f]['align']}\">$d</td>";
 			}
 			$html .= '</tr>';
 		}
@@ -517,10 +519,15 @@ class pdf extends TCPDF {
 
 		$html = $this->get_table_html($table);
 		$total_width = 0;
-		foreach($table['col'] as $c=>$col)
-			$total_width += $col['width'];
+		foreach($table['fields'] as $f) {
+			$total_width += $table['widths'][$f];
+		}
 
 		$lpad = (($this->getPageWidth() - $this->lMargin - $this->rMargin) - $total_width)/2;
+
+//		print("lpad=$lpad");
+//		print("pagewidth={$this->getPageWidth()} - lmargin={$this->lMargin} - rmargin={$this->rMargin} - table_width=$total_width");
+
 
 		$this->SetLeftMargin($orig_lmargin + $lpad);
 		$this->writeHTML($html, false, false, false, false, '');

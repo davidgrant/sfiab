@@ -21,6 +21,18 @@ function filter_bool(&$val)
 	$val = ((int)$val == 0) ? 0 : 1;
 }
 
+function filter_float(&$val)
+{
+	$val = (float)$val;
+}
+function filter_float_or_null(&$val)
+{
+	if(is_null($val)) return;
+	$val = (float)$val;
+}
+
+
+
 function filter_phone(&$val)
 {
 	$ret = preg_match('/.*1?[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9][0-9]) *(.*)/', $val, $matches);

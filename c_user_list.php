@@ -22,7 +22,6 @@ switch($action) {
 case 'purge':
 	$uid = (int)$_POST['id'];
 	if($uid > 0) {
-
 		$u = user_load($mysqli, $uid);
 		if(in_array('student', $u['roles'])) {
 			/* If only one student in project, delete project too */

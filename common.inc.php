@@ -62,6 +62,9 @@ function sfiab_load_config($mysqli)
 		$proto = 'http://';
 */	
 	$config['fair_url'] = $config['fair_host'].$config['document_root'];
+
+	$config['provincestate'] = 'Province';
+	$config['postalzip'] = 'Postal Code';
 }
 
 function sfiab_log($mysqli, $type, $data, $uid=-1)
@@ -276,7 +279,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_awards' => array('Awards', 'c_awards.php'),
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_reports' => array('Reports', 'c_reports.php'),
-			    'c_students' => array('Students', 'c_students.php'),
+			    'c_students' => array('Students / Projects', 'c_students.php'),
 			    'c_tours' => array('Tours', 'c_tours.php'),
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
 			    'c_user_list' => NULL,
@@ -581,6 +584,12 @@ function compute_registration_fee($mysqli, &$p, &$users)
 	}
 	return array($regfee, $ret);
 }
+
+function i18n($text)
+{
+	return $text;
+}
+
 
 
 
