@@ -200,13 +200,26 @@ function l_projects_load_all($mysqli, $year)
 
 
 $page_id = 'c_input_signature_forms';
+$help = '<p>There are
+	three buttons that may appear: <font color=red>Mark as Complete</font>,
+	<font color=blue>Mark as Complete without payment</font>, and <font
+	color=green>Mark as Incomplete</font>.  The <font color=red>Mark as
+	Complete</font> button is red so you can scan through the list quickly
+	and find all incomplete (red) applications.  Similarly the <font
+	color=green>Mark as Incomplete</font> button is green 
+	so you can find all the complete ones.  When the green <font
+	color=green>Mark as Incomplete</font> button is showing, it means the
+	project has been marked as complete.';
 
-sfiab_page_begin("User List", $page_id);
+
+sfiab_page_begin("Input Signature Forms", $page_id, $help);
 
 ?>
 
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
+
+	<h3>Input Signature Forms</h3>
 
 	<p>Use the list below to mark registrations as complete.  There are
 	three buttons that may appear: <font color=red>Mark as Complete</font>,
