@@ -177,7 +177,7 @@ function l_projects_load_all($mysqli, $year)
 	$q = $mysqli->query("SELECT users.*,schools.school FROM users 
 					LEFT JOIN schools ON users.schools_id=schools.id
 				WHERE users.year='$year'
-				AND users.state != 'deleted'
+				AND users.state = 'active'
 				AND FIND_IN_SET('student', users.`roles`)>0
 				");
 	$users = array();
@@ -185,7 +185,7 @@ function l_projects_load_all($mysqli, $year)
 		$p_user = user_load($mysqli, -1, -1, NULL, $j);
 		$pid = $p_user['s_pid'];
 
-		if(!in_array($pid, $projects)) {
+		if(!array_key_exists($pid, $projects)) {
 			$projects[$pid] = $projects_tmp[$pid];
 			$projects[$pid]['students'] = array();
 			$projects[$pid]['s_complete'] = true;
