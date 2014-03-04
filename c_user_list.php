@@ -179,7 +179,7 @@ foreach($users as &$v) {
 				</div>
 				<div class="ui-block-b" style="width:20%;padding-bottom: 5px">
 					<div data-role="controlgroup" data-type="vertical">
-					 	<a href="<?=$link?>" data-role="button" data-theme="l" >Edit</a>
+					 	<a href="<?=$link?>" data-role="button" data-theme="l" data-ajax="false">Edit</a>
 					 	<a href="#" data-role="button" data-theme="r" onclick="return user_list_info_delete(<?=$v['uid']?>);" >Delete</a>
 					 	<a href="#" data-role="button" data-theme="r" onclick="return user_list_info_purge(<?=$v['uid']?>);" >Purge</a>
 					</div>
