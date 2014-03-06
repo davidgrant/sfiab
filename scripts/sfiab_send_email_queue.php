@@ -129,7 +129,7 @@ while(true) {
 //	$mail->addAttachment('images/phpmailer_mini.gif');
 
 	//send the message, check for errors
-	if (1/*!$mail->send()*/) {
+	if (!$mail->send()) {
 		$mysqli->real_query("UPDATE email_queue SET `result`='failed' WHERE id=$db_id");
 		sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id}: {$mail->ErrorInfo}");
 	} else {
