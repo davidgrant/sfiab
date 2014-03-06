@@ -79,7 +79,7 @@ function prize_load($mysqli, $pid, $data=NULL)
 	}
 	$p['trophies'] = explode(',', $p['trophies']);
 	filter_bool_or_null($p['include_in_script']);
-
+	filter_bool($p['external_register_winners']);
 
 	unset($p['original']);
 	$original = $p;

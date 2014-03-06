@@ -12,6 +12,25 @@ function user_load_all_for_project($mysqli, $pid)
 	return $us;
 }
 
+
+function user_create($mysqli, $username, $email, $role, $year, &$password)
+{
+	if($password == '' or $password === NULL) {
+		/* Create new 9 character scrambled password */
+		$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
+	}
+	$password_hash = hash('sha512', $password);
+
+	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`password`,`salt`,`password_expired`) 
+				VALUES('$username', 'new','$email','$year','$role','$password_hash', '', '1')");
+	$uid = $mysqli->insert_id;
+	print($mysqli->error);
+	/* Since this is a new user, set the unique id == uid */
+	$mysqli->query("UPDATE users SET unique_uid=$uid WHERE uid=$uid");
+	print($mysqli->error);
+	return $uid;
+}
+
 function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 {
 	$u = NULL;

@@ -153,15 +153,12 @@ case 'register':
 	$q = $mysqli->real_query("DELETE FROM users WHERE `username`='$username' AND `state`='new'");
 	print($mysqli->error);
 
-	/* Create new 9 character scrambled password */
-	$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
-	$password_hash = hash('sha512', $password);
-	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`firstname`,`lastname`,`password`,`salt`,`password_expired`) 
-				VALUES('$username', 'new','$email',{$config['year']},'$as','$fn','$ln','$password_hash','','1')");
-	$uid = $mysqli->insert_id;
-
-	/* Since this is a new user, set the unique id == uid */
-	$mysqli->query("UPDATE users SET unique_uid=$uid WHERE uid=$uid");
+	$password = NULL;
+	$uid = user_create($mysqli, $username, $email, $as, $config['year'], $password);
+	$u = user_load($mysqli, $uid);
+	$u['firstname'] = $fn;
+	$u['lastname'] = $ln;
+	user_save($mysqli, $u);
 
 	/* Send an email */
 	$result = email_send($mysqli, "New Registration", $uid, array('PASSWORD'=>$password) );

@@ -63,10 +63,13 @@ case 'psave':
 	post_float($p['value'],'value');
 	post_bool($p['include_in_script'],'include_in_script');
 	post_bool($p['self_nominate'],'self_nominate');
+	post_bool($p['external_register_winners'],'external_register_winners');
 	post_int($p['order'],'order');
 	$p['trophies'] = array();
-	foreach($_POST['trophies'] as $index=>$val) {
-		$p['trophies'][] = $val;
+	if(array_key_exists('trophies', $_POST)) {
+		foreach($_POST['trophies'] as $index=>$val) {
+			$p['trophies'][] = $val;
+		}
 	}
 	generic_save($mysqli, $p, "award_prizes", "id");
 	form_ajax_response(0);
@@ -163,6 +166,7 @@ sfiab_page_begin("Edit Awards", $page_id);
 				form_text($form_id, "value", 'Prize Value', $p);
 				form_check_group($form_id, "trophies", "Trophies", $trophies, $p);
 				form_yesno($form_id, "include_in_script", 'Include in Ceremony Script', $p);
+				form_yesno($form_id, 'external_register_winners', "(External) Register Winners at this fair", $p);
 				form_int($form_id, "order", "Order", $p);
 	
 ?>	
