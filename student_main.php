@@ -32,6 +32,12 @@ sfiab_page_begin("Student Main", 's_home', $help);
 	email to both, we're all friendly people.
 	</ul>
 
+	<p>A few things have changed in the registration system.  Most significantly:
+	<ul>
+	<li>You no longer need a registration ID.  You just need a username and a password.  Parents/Teachers: Multiple students can share the same email address now.
+	<li>For partner projects, each student needs a separate account now.  One student then invites the other to the project.  
+	</ul>
+
 
 <?php
 	/* Check for any incoming project requests */
