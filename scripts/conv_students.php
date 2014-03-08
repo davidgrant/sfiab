@@ -95,6 +95,20 @@ while($u = $q->fetch_assoc()) {
 	}
 	print("Loaded {$u['firstname']} {$u['lastname']}\n");
 
+	/* Attach tour selections */
+	$u['tour_id_pref'] = array();
+	$q1 = $mysqli_old->query("SELECT * FROM tours_choice WHERE year={$u['year']} AND students_id=$sid AND rank>0 ORDER BY rank");
+	while($t = $q1->fetch_assoc()) {
+		$tid = $t['tour_id'];
+		$u['tour_id_pref'][] = (int)$tid;
+	}
+	print("      Tour pref: (".count($u['tour_id_pref']).") ");
+	foreach($u['tour_id_pref'] as $tid) {
+		print(" $tid ");
+	}
+	print("\n");
+
+
 	/* Load project if not loaded */
 	if(array_key_exists($rid, $projects)) {
 		$u['s_pid'] = $projects[$rid]['pid'];
