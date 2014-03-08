@@ -162,7 +162,11 @@ $( document ).on( "pagecreate", function( event ) {
 			}
 
 			if(data.location != '') {
-				window.location = data.location;
+				if(data.location == 'back') {
+					window.history.back();
+				} else {
+					window.location = data.location;
+				}
 			}
 
 			return false;

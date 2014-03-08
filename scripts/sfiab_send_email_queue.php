@@ -133,7 +133,7 @@ while(true) {
 		$mysqli->real_query("UPDATE email_queue SET `result`='failed' WHERE id=$db_id");
 		sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id}: {$mail->ErrorInfo}");
 	} else {
-		$mysqli->real_query("UPDATE email_queue SET `result`='sent', `sent`=NOW() WHERE id=$db_id");
+		$mysqli->real_query("UPDATE email_queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 	}
 
 /*

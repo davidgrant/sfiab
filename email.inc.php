@@ -1,6 +1,30 @@
 <?php
 require_once('common.inc.php');
 require_once('user.inc.php');
+require_once('project.inc.php');
+
+function email_load($mysqli, $email_name, $eid=-1, $data=NULL)
+{
+	if($email_name != '') {
+		$n = $mysqli->real_escape_string($email_name);
+		$q = $mysqli->query("SELECT * FROM emails WHERE name='$n'");
+		$e = $q->fetch_assoc();
+	} else if($eid > 0) {
+		$q = $mysqli->query("SELECT * FROM emails WHERE id='$eid'");
+		$e = $q->fetch_assoc();
+	} else {
+		$e = $data;
+	}
+
+	$original = $e;
+	$e['original'] = $original;
+	return $e;
+}
+
+function email_save($mysqli, &$e)
+{
+	generic_save($mysqli, $e, 'emails', 'id');
+}
 
 
 function email_send($mysqli, $email_name, $uid, $additional_replace = array()) 
