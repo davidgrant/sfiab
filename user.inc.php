@@ -171,6 +171,12 @@ function user_load_by_username($mysqli, $username)
 	return user_load($mysqli, -1, -1, $username);
 }
 
+function user_load_from_data($mysqli, $data)
+{
+	return user_load($mysqli, -1, -1, NULL, $data);
+}
+
+
 
 function user_save($mysqli, &$u) 
 {

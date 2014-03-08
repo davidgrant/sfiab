@@ -10,6 +10,18 @@ function form_inc($name)
 		return "class=\"error\"";
 	return "";
 }
+
+function form_label($page_id, $name, $label, $data)
+{ 
+	$id = $page_id.'_'.$name;
+?>
+	<div class="ui-field-contain">
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+		<?=$data?>
+	</div>
+<?php
+}
+
 		
 
 function form_text($page_id, $name, $label, &$value = '', $type='text') 

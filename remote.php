@@ -118,8 +118,8 @@ function handle_getawards($mysqli, &$u, $fair, &$data, &$response)
 
 function award_upload_update_school($mysqli, &$mysql_query, &$school, $school_id = -1)
 {
-	if($school_id != -1) {
-		$s = $q->fetch_assoc();
+	if($mysql_query !== NULL) {
+		$s = $mysql_query->fetch_assoc();
 		return $s['id'];
 	}
 
@@ -189,8 +189,20 @@ function award_upload_school($mysqli, &$student, &$school, $year, &$response)
 
 function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project, $year, &$response)
 {
-	/* See if this project already exists */
 	$pn = $mysqli->real_escape_string($remote_project['projectnumber']);
+
+	/* Sanity check a few things */
+	if(count($remote_project['students']) > 2) {
+		$c = count($remote_project['students']);
+		$response['notice'][] = "   - ERROR uploading project : $pn, {$remote_project['title']}";
+		$response['notice'][] = "      - too many students: $c";
+		foreach($remote_project['students'] as &$remote_student) {
+			$response['notice'][] = "         - {$remote_student['firstname']} {$remote_student['lastname']}";
+		}
+		return;
+	}
+
+	/* See if this project already exists */
 	$q = $mysqli->query("SELECT * FROM projects WHERE number='$pn' AND fairs_id='{$fair['id']}' AND year='$year'");
 	if($q->num_rows == 1) {
 		/* Project with this number+fairid+year already exists */
@@ -242,7 +254,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 		/* If the student isn't matched, delete them from the project */
 		if($match == false) {
 			/* Delete the students attached to this project */
-			$response['notice'][] = "      - Deleted student {$remote_student['firstname']} {$remote_student['lastname']} ";
+			$response['notice'][] = "      - Deleted student {$ps['firstname']} {$ps['lastname']} ";
 			$mysqli->real_query("DELETE FROM users WHERE uid='{$ps['uid']}'");
 		}
 	}
@@ -293,7 +305,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 		$s['birthdate'] = $remote_student['birthdate'];
 		$s['address'] = $remote_student['address'];
 		$s['city'] = $remote_student['city'];
-		$s['province'] = $remote_student['province'];
+		$s['province'] = strtolower($remote_student['province']);
 		$s['postalcode'] = $remote_student['postalcode'];
 		$s['phone1'] = $remote_student['phone'];
 		$s['s_teacher'] = $remote_student['teachername'];
@@ -467,7 +479,7 @@ if($fair['password'] != $password) {
  if(array_key_exists('award_additional_materials', $data)) handle_award_additional_materials($u,$fair,$data, $response);
 
  $response['hi'] = 'hi';
-print(urlencode(json_encode($response)));
+print(json_encode($response));
 // echo "Success!<br />";
 
 
