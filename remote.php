@@ -225,7 +225,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 	$project['title'] = $remote_project['title'];
 	$project['summary'] = $remote_project['abstract'];
 	$project['cat_id'] = $remote_project['projectcategories_id'];
-	$project['chal_id'] = $remote_project['projectdivisions_id'];
+	$project['challenge_id'] = $remote_project['projectdivisions_id'];
 	$project['num_students'] = count($remote_project['students']);
 	project_save($mysqli, $project);
 
@@ -441,7 +441,7 @@ $data = json_decode($_POST['json'], true);
  
 $username = $data['auth']['username'];
 $password = $data['auth']['password'];
-$response['query'] = $data;
+#$response['query'] = $data;
 
 $u = user_load_by_username($mysqli, $username);
 $fair = fair_load($mysqli, $username);
