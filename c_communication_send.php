@@ -39,9 +39,12 @@ case 'send':
 
 	/* Query all users */
 	$query = "SELECT * FROM users WHERE year={$config['year']} AND {$elist['where']}";
+//	print($query);
 	$r = $mysqli->query($query);
 	print($mysqli->error);
+
 	while($ua = $r->fetch_assoc()) {
+//		print_r($ua);
 		$u = user_load_from_data($mysqli, $ua);
 		email_send($mysqli, $e['name'], $u['uid']);
 	}

@@ -10,7 +10,7 @@ $email_lists=array(
 					  	  'where' => "`s_complete`='0' AND `state`='active'",
 						),
 	'students_dave' => array(  'name' => 'Send to all users called  "dave_student", for testing',
-					  	  'where' => "`s_complete`='0' AND `state`='active' AND `username`='dave_student'",
+					  	  'where' => " `state`='active' AND `username`='dave_student'",
 						),
 	);
 
