@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
+require_once('email.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -47,6 +48,21 @@ case 'del':
 		$this_u = user_load($mysqli, $uid);
 		$this_u['state'] = 'deleted';
 		user_save($mysqli, $this_u);
+		form_ajax_response(0);
+		exit();
+	}
+	form_ajax_response(1);
+	exit();
+case 'resend':
+	$uid = (int)$_POST['id'];
+	if($uid > 0) {
+		$this_u = user_load($mysqli, $uid);
+		$password = user_new_password();
+		$this_u['password'] = hash('sha512', $password);
+		$this_u['password_expired'] = 1;
+		user_save($mysqli, $this_u);
+
+		$result = email_send($mysqli, "New Registration", $uid, array('PASSWORD'=>$password) );
 		form_ajax_response(0);
 		exit();
 	}
@@ -176,6 +192,8 @@ foreach($users as &$v) {
 					<table>
 					<tr><td>Username:</td><td><?=$v['username']?></td></tr>
 					</table>
+				 	<a href="#" onclick="return user_list_info_resend_welcome(<?=$v['uid']?>);" data-role="button" data-inline="true" data-ajax="false">Re-send welcome email</a>
+					
 				</div>
 				<div class="ui-block-b" style="width:20%;padding-bottom: 5px">
 					<div data-role="controlgroup" data-type="vertical">
@@ -224,6 +242,12 @@ foreach($users as &$v) {
 			if(data.status == 0) {
 				$("#user_list_"+id).hide();
 			}
+		}, "json");
+		return false;
+	}
+	function user_list_info_resend_welcome(id) {
+		if(confirm('Really re-send the welcome email to this user?\nThis will also reset their password.') == false) return false;
+		$.post('c_user_list.php', { action: "resend", id: id }, function(data) {
 		}, "json");
 		return false;
 	}

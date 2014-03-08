@@ -12,12 +12,19 @@ function user_load_all_for_project($mysqli, $pid)
 	return $us;
 }
 
+function user_new_password()
+{
+	/* Create new 9 character scrambled password */
+	$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
+	return $password;
+}
+
 
 function user_create($mysqli, $username, $email, $role, $year, &$password)
 {
 	if($password == '' or $password === NULL) {
-		/* Create new 9 character scrambled password */
-		$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
+		
+		$password = user_new_password();
 	}
 	$password_hash = hash('sha512', $password);
 
