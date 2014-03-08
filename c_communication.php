@@ -27,9 +27,17 @@ if(array_key_exists('action', $_POST)) {
 }
 
 switch($action) {
+
+case 'new': 
+	$eid = email_create($mysqli);
+
 case 'edit':
-	$eid = (int)$_GET['eid'];
-	if($eid == 0) exit();
+	if($action == 'new') {
+		/* Fell through from above, leave eid alone */
+	} else {
+		$eid = (int)$_GET['eid'];
+		if($eid == 0) exit();
+	}
 
 	/* load available categories */
 	$sections = array();
@@ -126,7 +134,7 @@ while($e = $q->fetch_assoc()) {
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 	<h3>Actions</h3>
 	<ul data-role="listview" data-inset="true" >
-		<li><a data-ajax="false" href="#c_communication_queue">View email send queue and history</a></li>
+		<li><a data-ajax="false" href="c_communication_queue.php">View email send queue and history</a></li>
 		<li><a href="#">EMERGENCY pause the queue NOW</a></li>
 	</ul>
 	<h3>Send / Edit Emails</h3>
@@ -153,6 +161,7 @@ while($e = $q->fetch_assoc()) {
 			<a href="c_communication.php?action=edit&eid=<?=$e['id']?>" title="Edit Email" data-icon="gear" data-ajax="false">Edit</a>
 		</li>
 <?php	} ?>
+	<a href="c_communication.php?action=new" data-role="button" data-inline="true" data-icon="plus"  data-theme="l">Create a New Email</a>
 	
 
 </div></div>

@@ -26,6 +26,13 @@ function email_save($mysqli, &$e)
 	generic_save($mysqli, $e, 'emails', 'id');
 }
 
+function email_create($mysqli)
+{
+	global $config;
+	$r = $mysqli->real_query("INSERT INTO emails(`section`) VALUES('Uncategorized')");
+	$eid = $mysqli->insert_id;
+	return $eid;
+}
 
 function email_send($mysqli, $email_name, $uid, $additional_replace = array()) 
 {
