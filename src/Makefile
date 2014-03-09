@@ -1,10 +1,5 @@
 # Generated automatically from Makefile.in by configure.
 
-TOPSRCDIR	= .
-SUBDIRS		= tracer parser server inject 
-BUILD		= lightboxd2 lightboxd_inject
-C_SRCS		=
-
 
 all: sfiab_annealer
 
@@ -16,13 +11,6 @@ LD_R	= ld -r
 LD	= ld
 RM	= rm -f
 INSTALL = ginstall
-
-prefix          = /usr/local
-exec_prefix     = ${prefix}
-bindir          = ${exec_prefix}/bin
-libdir          = ${exec_prefix}/lib
-infodir         = ${prefix}/info
-mandir          = ${prefix}/man
 
 INCLUDE  = 
  
@@ -54,11 +42,23 @@ distclean-default:
 
 force: ;
 
+C_SRCS= anneal.c\
+	db.c \
+	judges.c \
+	main.c\
+	students.c\
+	tours.c
 
-sfiab_annealer: main.c db.c db.h anneal.c anneal.h
-	gcc -o sfiab_annealer main.c anneal.c db.c $(CFLAGS) $(LIBS)
+H_FILES=anneal.h\
+	db.h\
+	judges.h\
+	students.h\
+	tours.h
+
+
+
+sfiab_annealer: $(C_SRCS) $(H_FILES)
+	gcc -o sfiab_annealer $(C_SRCS) $(CFLAGS) $(LIBS)
 	
-
-
 distclean:
-	$(RM) config.log config.cache configure Makefile.rules config.h
+	$(RM) sfiab_annealer

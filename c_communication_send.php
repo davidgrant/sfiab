@@ -128,6 +128,9 @@ sfiab_page_begin("Send Email", $page_id, $help);
 	<?=nl2br(htmlspecialchars($e['body']))?>
 	<hr/>
 
+	<div class="error"><p>Note: It may take a few minutes (literally minutes) of seemingly doing nothing to inject mail to lots of recipients.  
+	When it's done the page will change to the email send queue page.</div>
+
 <?php	form_button($form_id, 'send', 'Yes, Send Email', 'g', 'mail'); ?>
 	<a href="#" data-role="button" data-inline="true" data-icon="delete" data-rel="back" data-theme="r">Cancel, Don't Send</a>
 <?php	form_end($form_id); ?>
@@ -135,6 +138,10 @@ sfiab_page_begin("Send Email", $page_id, $help);
 </div></div>
 
 	<script>
+		function <?=$form_id?>_pre_submit(form) {
+			$('#<?=$form_id?>_submit_send').addClass('ui-disabled');
+		}
+
 		$( "#<?=$form_id?>_list" ).change(function() {
 			var val = $("#<?=$form_id?>_list option:selected").val();
 			if(val == 'one_user') {
