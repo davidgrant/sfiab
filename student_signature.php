@@ -357,14 +357,15 @@ Pursuant to the freedom of information and protection of privacy, I, as the pare
 	<td ><b>{$user['name']}</b></td>
 </tr>
 </table><br>
-do hereby grant my permission to publish $h photograph and written
+do hereby grant my permission to take, retain, and publish $h photograph and written
 materials about $m and $h {$config['year']} Greater Vancouver
 Regional Science Fair project to be displayed on print materials and on
 the Internet through the Greater Vancouver Regional Science Fair,
-Science Fair Foundation of British Columbia and award sponsor websites.
+Science Fair Foundation of British Columbia, and award sponsor websites.
 I hereby give permission to use the materials to promote the Science
-Fair Program. This would include media, award sponsors, potential
-sponsors, etc...
+Fair Program. This would include media, various social media sites, award sponsors, potential
+sponsors.  I understand that materials on social media sites are in the public
+domain and these online services may be located outside of Canada.
 
 ";
 

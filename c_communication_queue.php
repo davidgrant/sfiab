@@ -52,6 +52,7 @@ sfiab_page_begin("Email Queue", $page_id, $help);
 	<h3>Current Email Queue</h3>
 <?php
 	$qstopped = email_queue_stopped($mysqli);
+	$q = $mysqli->query("SELECT * FROM email_queue WHERE result='queued'");
 ?>
 	<p>Current Email Queue Status is: <b>
 <?php	if($qstopped) { ?>	
@@ -59,6 +60,8 @@ sfiab_page_begin("Email Queue", $page_id, $help);
 <?php	} else { ?>
 		<font color="green">Active</font> 
 <?php	} ?>
+	</b><br/>
+	<p>Queued Emails: <b><?=$q->num_rows?></b>
 
 	<div data-role="controlgroup" data-type="horizontal" data-mini="true">
 <?php		if($qstopped) { ?>	
@@ -69,11 +72,10 @@ sfiab_page_begin("Email Queue", $page_id, $help);
 
 		<a href="c_communication_queue.php?action=qdelall" data-role="button" data-icon="delete" data-theme='r' data-inline="true" data-ajax="false">Delete Emails in Queue</a>
 	</div>
-	
+
 	<table>
 	<tr><td>Email</td><td>To Name (uid)</td><td>To Email</td><td>Status</td></tr>
 <?php
-	$q = $mysqli->query("SELECT * FROM email_queue WHERE result='queued'");
 	while($eq = $q->fetch_assoc()) {
 ?>		<tr><td><?=$emails[$eq['emails_id']]['name']?></td>
 			<td><?=$eq['to_name']?> (<?=$eq['to_uid']?>)</td>

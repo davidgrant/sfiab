@@ -27,7 +27,7 @@ require_once('user.inc.php');
 require_once('PHPMailer/PHPMailerAutoload.php');
 
 
-$sleepmin=500000;  // 0.5 seconds
+$sleepmin=0.5;  // 0.5 seconds
 $sleepmax=2000000; // 2.0 second
 
 print("Starting SFIAB Email Queue\n");
@@ -140,6 +140,8 @@ while(true) {
 	} else {
 		$mysqli->real_query("UPDATE email_queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 	}
+
+	sleep($sleepmin);
 
 /*
 			if($result) {

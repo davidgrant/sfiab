@@ -196,6 +196,12 @@ sfiab_page_begin('Welcome', 'welcome');
 	<div id="login_msg" class="error error_hidden">
 	</div>
 
+	<div class="info"><p>Note: We have had reports of users using Safari on
+	MacOS being unable to login.  If your password suddenly stops working,
+	you're not going crazy.  Try using Google Chrome or Firefox on MacOS.  We
+	have our best trained monkeys trying to resolve the problem.
+	</div>
+
 	<form action="/" id="login_form">
 		<div data-role="fieldcontain">
 			<label for="un" >Username:</label>
