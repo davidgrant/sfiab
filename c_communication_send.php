@@ -37,16 +37,26 @@ case 'send':
 
 	$elist = &$email_lists[$to];
 
-	/* Query all users */
-	$query = "SELECT * FROM users WHERE year={$config['year']} AND {$elist['where']}";
-//	print($query);
-	$r = $mysqli->query($query);
-	print($mysqli->error);
-
-	while($ua = $r->fetch_assoc()) {
-//		print_r($ua);
-		$u = user_load_from_data($mysqli, $ua);
+	if($to == 'one_user') {
+		$username = $_POST['username'];
+		$username = $mysqli->real_escape_string($username);
+		$u = user_load_by_username($mysqli, $username);
+		if($u === NULL) {
+			form_ajax_response(array('status'=>1, 'error'=>'Unknown username'));
+		}
 		email_send($mysqli, $e['name'], $u['uid']);
+	} else {
+		/* Query all users */
+		$query = "SELECT * FROM users WHERE year={$config['year']} AND {$elist['where']}";
+	//	print($query);
+		$r = $mysqli->query($query);
+		print($mysqli->error);
+
+		while($ua = $r->fetch_assoc()) {
+	//		print_r($ua);
+			$u = user_load_from_data($mysqli, $ua);
+			email_send($mysqli, $e['name'], $u['uid']);
+		}
 	}
 	form_ajax_response(array('status'=>0, 'location'=>'c_communication_queue.php'));
 	exit();
@@ -67,6 +77,7 @@ sfiab_page_begin("Send Email", $page_id, $help);
 	$e = $q->fetch_assoc();
 	form_page_begin($page_id, array());
 	$current_list = '';
+	$username = '';
 
 ?>
 	<h3>Send Email</h3>
@@ -78,7 +89,10 @@ sfiab_page_begin("Send Email", $page_id, $help);
 	form_hidden($form_id, 'eid', $e['id']);
 	form_label($form_id, 'from', 'From', "{$e['from_name']} &lt;{$e['from_email']}&gt;");
 	form_select($form_id, 'list', 'To', $email_lists, $current_list);
-	form_label($form_id, 'subject', 'Subject', $e['subject']);
+?>	<div id='to_single_user' style='display:none'>
+<?php		form_text($form_id, 'username', 'Username', $username);
+?>	</div>
+<?php	form_label($form_id, 'subject', 'Subject', $e['subject']);
 ?>
 	<hr/>
 	<?=nl2br(htmlspecialchars($e['body']))?>
@@ -89,6 +103,18 @@ sfiab_page_begin("Send Email", $page_id, $help);
 <?php	form_end($form_id); ?>
 
 </div></div>
+
+	<script>
+		$( "#<?=$form_id?>_list" ).change(function() {
+			var val = $("#<?=$form_id?>_list option:selected").val();
+			if(val == 'one_user') {
+				$('#to_single_user').show();
+			} else {
+				$('#to_single_user').hide();
+			}
+		});
+	</script>
+
 
 <?php
 

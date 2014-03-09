@@ -9,8 +9,8 @@ $email_lists=array(
 	'students_incomplete' => array(  'name' => 'Students Incomplete',
 					  	  'where' => "`s_complete`='0' AND `state`='active'",
 						),
-	'students_dave' => array(  'name' => 'Send to all users called  "dave_student", for testing',
-					  	  'where' => " `state`='active' AND `username`='dave_student'",
+	'one_user' => array(  'name' => 'Send to a single (active or complete) user',
+					  	  'where' => " `state`='active'",
 						),
 	);
 
