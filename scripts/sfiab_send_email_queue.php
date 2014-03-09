@@ -56,6 +56,11 @@ $q = $mysqli->prepare("SELECT `id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`ad
 $q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body`,`bodyhtml` FROM emails WHERE id = ?");
 //loop forever, but not really, it'll get break'd as soon as there's nothing left to send
 while(true) {
+
+	/* Check for stop/start queue */
+	$qstop = email_queue_stopped($mysqli);
+	if($qstop) break;
+
    	/* Get an entry from the queue, exit if there are no more */
 	$q->execute(); 
 	$q->store_result();

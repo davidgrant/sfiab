@@ -56,21 +56,16 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	if($u['state'] == 'deleted') return false;
 
 	$ad = $mysqli->real_escape_string(serialize($additional_replace));
+	$n = $mysqli->real_escape_string($u['name']);
+	$em = $mysqli->real_escape_string($u['email']);
 
 	$mysqli->query("INSERT INTO email_queue(`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
-			($db_id,$uid,'{$u['email']}','{$u['name']}','$ad','queued')");
+			($db_id,$uid,'$em','$n','$ad','queued')");
 
 	print($mysqli->error);
 
-	/* Start the queue processing */
-	 if(!file_exists("logs")) {
-		 mkdir("logs");
-	 }
+	email_queue_start($mysqli);
 
-	 exec("php -q scripts/sfiab_send_email_queue.php >> logs/emailqueue.log 2>&1 &");
-
-	 
-	
 	return true;
 }
 
@@ -114,6 +109,32 @@ function email_replace_vars($text, &$u, $otherrep=array()) {
 	}
 	$text=preg_replace($pats, $reps,$text);
 	return $text;
+}
+
+function email_queue_stopped($mysqli) 
+{
+	$qstop = $mysqli->query("SELECT val FROM config WHERE var='email_queue_stop'");
+	$vstop = $qstop->fetch_assoc();
+	if((int)$vstop['val'] == 1) {
+		return true;
+	}
+	return false;
+}
+
+function email_queue_stop($mysqli) 
+{
+	$mysqli->query("UPDATE config SET val='1' WHERE var='email_queue_stop'");
+}
+
+function email_queue_start($mysqli) 
+{
+	$mysqli->query("UPDATE config SET val='0' WHERE var='email_queue_stop'");
+
+ 	/* Start the queue processing */
+	if(!file_exists("logs")) {
+		mkdir("logs");
+	}
+	exec("php -q scripts/sfiab_send_email_queue.php >> logs/emailqueue.log 2>&1 &");
 }
 
 

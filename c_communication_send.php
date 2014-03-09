@@ -28,6 +28,20 @@ switch($action) {
 case 'send':
 	$eid = (int)$_POST['eid'];
 	$to = $_POST['list'];
+	$year = $_POST['year'];
+
+	if($year != 'all') {
+		$year = (int)$year;
+		if($year == 0) {
+			form_ajax_response(array('status'=>1, 'error'=>'Please select a year'));
+			exit();
+		}
+		$year_q = "year='$year'";
+	} else {
+		$year_q = '1';
+	}
+
+
 	if(!array_key_exists($to, $email_lists)) {
 		exit();
 	}
@@ -47,13 +61,13 @@ case 'send':
 		email_send($mysqli, $e['name'], $u['uid']);
 	} else {
 		/* Query all users */
-		$query = "SELECT * FROM users WHERE year={$config['year']} AND {$elist['where']}";
-	//	print($query);
+		$query = "SELECT * FROM users WHERE $year_q AND {$elist['where']}";
+//		print($query);
 		$r = $mysqli->query($query);
 		print($mysqli->error);
 
 		while($ua = $r->fetch_assoc()) {
-	//		print_r($ua);
+//			print_r($ua);
 			$u = user_load_from_data($mysqli, $ua);
 			email_send($mysqli, $e['name'], $u['uid']);
 		}
@@ -73,11 +87,23 @@ sfiab_page_begin("Send Email", $page_id, $help);
 	$eid = (int)$_GET['eid'];
 	if($eid == 0) exit();
 
+	$q = $mysqli->query("SELECT MIN(year) AS M FROM users");
+	$u = $q->fetch_assoc();
+	$min_year = (int)$u['M'];
+	$year_list = array();
+	for($y=$config['year']; $y>=$min_year; $y--) {
+		$year_list[$y] = $y;
+	}
+	$year_list['all'] = "All Years";
+
 	$q = $mysqli->query("SELECT * FROM emails WHERE id=$eid");
 	$e = $q->fetch_assoc();
 	form_page_begin($page_id, array());
 	$current_list = '';
 	$username = '';
+
+
+		
 
 ?>
 	<h3>Send Email</h3>
@@ -92,7 +118,11 @@ sfiab_page_begin("Send Email", $page_id, $help);
 ?>	<div id='to_single_user' style='display:none'>
 <?php		form_text($form_id, 'username', 'Username', $username);
 ?>	</div>
-<?php	form_label($form_id, 'subject', 'Subject', $e['subject']);
+	
+<?php	
+	$y = (int)$config['year'];
+	form_select($form_id, 'year', 'Year', $year_list, $y);
+	form_label($form_id, 'subject', 'Subject', $e['subject']);
 ?>
 	<hr/>
 	<?=nl2br(htmlspecialchars($e['body']))?>

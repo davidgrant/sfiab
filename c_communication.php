@@ -68,6 +68,8 @@ case 'edit':
 	<tr><td>[LOGIN_LINK]</td><td>http://reg.gvrsf.ca/#login</td><td>A URL pointing to the login page on the registration site.</td></tr>
 	<tr><td>[NAME]</td><td><?=$u['name']?></td><td>The full name (first + last) of the email recipient.</td></tr>
 	<tr><td>[PASSWORD]</td><td>35db324fc</td><td>The plain-text password of the mail recipient.  This only works for the "New Registration" and "Forgot Password" emails because the password is generated at the time the email is sent.  At all other times, the user's password is encoded in the database using a one-way hash.  It cannot be unencoded. </td></tr>
+	<tr><td>[SALUTATION]</td><td>Dr. </td><td>Salutation to be used for the mail recipient. </td></tr>
+
 	<tr><td>[USERNAME]</td><td><?=$u['username']?></td><td>The username of the email recipient.</td></tr>
 	<tr><td>[USERNAME_LIST]</td><td><?=$u['username']?></td><td>A list of ALL usernames associated with the email of the recipient.</td></tr>
 	<tr><td>[YEAR]</td><td><?=$config['year']?></td><td>The current fair year.</td></tr>
@@ -154,7 +156,7 @@ while($e = $q->fetch_assoc()) {
 	<h3>Actions</h3>
 	<ul data-role="listview" data-inset="true" >
 		<li><a data-ajax="false" href="c_communication_queue.php">View email send queue and history</a></li>
-		<li><a href="#">EMERGENCY pause the queue NOW</a></li>
+		<li><a data-ajax="false" href="c_communication_queue.php?action=qstop">EMERGENCY pause the queue NOW</a></li>
 	</ul>
 	<h3>Send / Edit Emails</h3>
 	<p>Click on an email below to send it.  You'll be shown the full email text and have to confirm who to send it to before it actually sends.  Click on the gear icon on the right of each email to edit or delete it.
