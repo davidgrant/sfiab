@@ -24,7 +24,7 @@ function form_label($page_id, $name, $label, $data)
 
 		
 
-function form_text($page_id, $name, $label, &$value = '', $type='text') 
+function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='') 
 { 
 	if(!in_array($type, array('text', 'tel','date','email','password'))) {
 		print("Error 1001: $type\n");
@@ -43,7 +43,7 @@ function form_text($page_id, $name, $label, &$value = '', $type='text')
 	?>
 	<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>">
+		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>" <?=$extra?> >
 	</div>
 <?php
 }
@@ -261,6 +261,7 @@ function form_submit($form_id, $action, $text = "Save", $saved_text = "Informati
 <?php
 }
 function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check")
+
 {
 ?>
 	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" >

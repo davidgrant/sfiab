@@ -80,8 +80,9 @@ case 'edit':
 
 	form_begin($form_id, 'c_communication.php');
 	form_hidden($form_id, 'eid', $eid);
-	form_text($form_id, 'section', 'Section', $e);
-	form_text($form_id, 'name', 'Name', $e);
+	$d = ($e['section'] == 'System') ? 'disabled="disabled"' : '';
+	form_text($form_id, 'section', 'Section', $e, 'text', $d);
+	form_text($form_id, 'name', 'Name', $e, 'text', $d);
 	form_textbox($form_id, 'description', 'Description', $e);
 	form_text($form_id, 'from_name', 'From Name', $e);
 	form_text($form_id, 'from_email', 'From Email', $e, 'email');
@@ -89,8 +90,14 @@ case 'edit':
 	form_textbox($form_id, 'body', 'Body', $e);
 	form_submit($form_id, 'save', 'Save', 'Email Saved');
 ?>
-	<a href="#" data-role="button" data-inline="true" data-icon="delete" data-rel="back" data-theme="r">Cancel</a>
+	<a href="#" data-role="button" data-inline="true" data-icon="back" data-rel="back" data-theme="r">Cancel</a>
+	<hr/>
 <?php
+	if($e['section'] == 'System') {
+?>		<button type="submit" data-role="button" data-inline="true" data-icon="delete" data-theme="r" disabled="disabled">System Emails cannot be Deleted</button>
+<?php	} else {
+		form_button($form_id, 'delete', 'Delete this Email', 'r', 'delete');
+	}
 	form_end($form_id);
 	sfiab_page_end();
 ?>
@@ -105,9 +112,10 @@ case 'save':
 
 	$e = email_load($mysqli, '', $eid);
 
-	if($e['section'] != 'System') 
+	if($e['section'] != 'System') { 
 		post_text($e['section'], 'section');
-	post_text($e['name'], 'name');
+		post_text($e['name'], 'name');
+	}
 	post_text($e['description'], 'description');
 	post_text($e['from_name'], 'from_name');
 	post_text($e['from_email'], 'from_email');
@@ -115,6 +123,17 @@ case 'save':
 	post_text($e['body'], 'body');
 
 	email_save($mysqli, $e);
+	form_ajax_response(array('status'=>0, 'location'=>'back'));
+	exit();
+
+case 'delete':
+	$eid = (int)$_POST['eid'];
+	if($eid == 0) exit();
+
+	$e = email_load($mysqli, '', $eid);
+	if($e['section'] == 'System') exit();
+
+	$q = $mysqli->real_query("DELETE FROM emails WHERE id='$eid'");
 	form_ajax_response(array('status'=>0, 'location'=>'back'));
 	exit();
 
