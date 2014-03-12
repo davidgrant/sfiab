@@ -51,7 +51,7 @@ if(count($_POST) == 0) {
 <?php
 	form_disable_message($page_id, $closed, $u['s_accepted']);
 
-	if($all_complete && !$closed) {
+	if($all_complete) {
 		form_page_begin($page_id, $fields, '','','This page will become complete when the committee receives and processes your signature form.  This will happen approximately three weeks before the fair.');
 	}
 ?>

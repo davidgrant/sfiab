@@ -54,10 +54,6 @@ sfiab_page_begin("Student Main", 's_home', $help);
 
 		<p>No further changes to registration data are allowed.  If something in your registration needs changing, please contact the committee.  
 
-<?php	} else if($closed) { ?>
-		<h3>Registration Status: <font color="red">Closed</font></h3>
-		<p>Registration is now Closed.  No further applications will be accepted..
-
 <?php	} else if($u['s_complete'] == 0) { ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
 
@@ -71,7 +67,17 @@ sfiab_page_begin("Student Main", 's_home', $help);
 		<h3>Registration Status: <font color="orange">Almost Complete</font></h3>
 
 <?php		if($closed) { ?>
-			<p>Registration is now closed.
+			<p>Thank you for completing your registration.
+			Registration is now closed and no further changes are
+			allowed to your registration.
+
+			<p> We will be processing all registration forms during
+			the two weeks after registration closes.
+
+			<p> Your status will change to "Forms Received" when we have processed your signature form.
+
+			<p> Approximately one week before the fair your project number and tour selection will be posted.
+		
 <?php		} else { ?>
 			<p>Thank you for completing your registration.  The final step of
 			registration is to print the <a href="student_signature.php" data-rel="external" data-ajax="false">Signature Form</a> and send it in.

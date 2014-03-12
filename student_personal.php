@@ -21,7 +21,6 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
-
 	if($closed) exit();
 
 	$old_grade = $u['grade'];
