@@ -9,6 +9,7 @@ sfiab_session_start();
 $page_id = "s_home";
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 /* Check access, but skip the expiry check */
 sfiab_check_access($mysqli, array('student'));
@@ -38,38 +39,48 @@ sfiab_page_begin("Student Main", 's_home', $help);
 	<li>For partner projects, each student needs a separate account now.  One student then invites the other to the project at which point the projects are linked (but the student information, emergency contact, and tour selection remains separate for each student).
 	</ul>
 
+<?php	if(!$closed) {
+		/* Check for any incoming project requests */
+		$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
+		if($q->num_rows > 0) { ?>
+			<h3>Partner Request</h3>
+			<p>You have a partner request waiting, go to the <a href="student_partner.php">Project Partner</a> page to accept or reject it.
+<?php		}
+	}
 
-<?php
-	/* Check for any incoming project requests */
-	$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
-	if($q->num_rows > 0) { ?>
-		<h3>Partner Request</h3>
-		<p>You have a partner request waiting, go to the <a href="student_partner.php">Project Partner</a> page to accept or reject it.
-<?php	} ?>
-
-
-<?php	if($u['s_accepted'] == 1) { ?>
-
+	if($u['s_accepted'] == 1) { ?>
 		<h3>Registration Status: <font color="green">Forms Received</font></h3>
-		
-		All your registration forms have been received and processed.
+		<p>All your registration forms have been received and processed.  Your project number and tour selection will be posted here approximately one week before the fair.
+
+		<p>No further changes to registration data are allowed.  If something in your registration needs changing, please contact the committee.  
+
+<?php	} else if($closed) { ?>
+		<h3>Registration Status: <font color="red">Closed</font></h3>
+		<p>Registration is now Closed.  No further applications will be accepted..
 
 <?php	} else if($u['s_complete'] == 0) { ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
 
-		<p>The red boxes in the left hand menu indicate which pages
-		still have information that needs to be filled out.
-
-<?php	} else { ?>
-
+<?php		if($closed) { ?>
+			<p>Registration is now closed.
+<?php		} else { ?>
+			<p>The red boxes in the left hand menu indicate which pages
+			still have information that needs to be filled out.
+<?php		}
+	} else { ?>
 		<h3>Registration Status: <font color="orange">Almost Complete</font></h3>
 
-		<p>Thank you for completing your registration.  The final step of
-		registration is to print the <a href="student_signature.php" data-rel="external" data-ajax="false">Signature Form</a> and send it in.
+<?php		if($closed) { ?>
+			<p>Registration is now closed.
+<?php		} else { ?>
+			<p>Thank you for completing your registration.  The final step of
+			registration is to print the <a href="student_signature.php" data-rel="external" data-ajax="false">Signature Form</a> and send it in.
 
-		<p> We will be processing all registration forms during the two weeks
-		after registration closes 
-<?php	
+			<p> We will be processing all registration forms during
+			the two weeks after registration closes.
+
+			<p>Note: After we process your signature form, no further changes to your registration account will be allowed.
+<?php		}
 	}
 ?>
 

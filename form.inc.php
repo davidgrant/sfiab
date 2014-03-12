@@ -2,6 +2,7 @@
 $form_incomplete_fields = array();
 $form_page_id = NULL;
 $form_form_id = NULL;
+$form_disabled = false;
 
 function form_inc($name)
 {
@@ -26,6 +27,8 @@ function form_label($page_id, $name, $label, $data)
 
 function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='') 
 { 
+	global $form_disabled;
+
 	if(!in_array($type, array('text', 'tel','date','email','password'))) {
 		print("Error 1001: $type\n");
 		exit();
@@ -39,6 +42,8 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='
 	if($type == 'date') $placeholder.= ' (YYYY-MM-DD)';
 	if($type == 'tel') $placeholder .= ' (NNN-NNN-NNNN)';
 
+	$extra .= $form_disabled ? ' disabled="disabled"': '';
+
 	
 	?>
 	<div class="ui-field-contain">
@@ -50,6 +55,8 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='
 
 function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL) 
 { 
+	global $form_disabled;
+	$d = $form_disabled ? ' disabled="disabled"': '';
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
 
@@ -57,20 +64,25 @@ function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL)
 	$placeholder = $label;
 	$minv = ($min === NULL) ? '' : "min=\"$min\"";
 	$maxv = ($max === NULL) ? '' : "max=\"$max\"";
+	$d = $form_disabled ? ' disabled="disabled"': '';
 ?>
 	<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> >
+		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> <?=$d?> >
 	</div>
 <?php
 }
 
 
-function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false) { 
+function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false)
+{ 
+	global $form_disabled;
+
 	$id = $form_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
+	$d = $form_disabled ? ' disabled="disabled"': '';
 
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
@@ -80,7 +92,7 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false) {
 			$x=0;
 			foreach($data as $key=>$val) {
 				$sel = ($v === $key) ? 'checked="checked"' : ''; ?>
-			        <input name="<?=$name?>" id="<?=$id.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio">
+			        <input name="<?=$name?>" id="<?=$id.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio" <?=$d?> >
 			        <label for="<?=$id.'-'.$x?>"><?=$val?></label>
 <?php				$x++;
 			} ?>
@@ -91,6 +103,7 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false) {
 
 function form_check_group($form_id, $name, $label, $data, &$value, $wide = false)
 {
+	global $form_disabled;
 	$id = $form_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	if(is_array($value)) {
@@ -102,6 +115,7 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 		$v = array($value);
 	}
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
+	$d = $form_disabled ? ' disabled="disabled"': '';
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
@@ -123,6 +137,7 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 
 function form_checkbox($form_id, $name, $label, $data_value, &$value) 
 {
+	global $form_disabled;
 	$id = $form_id.'_'.$name.'_'.$data_value;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	if(is_array($value)) {
@@ -133,13 +148,16 @@ function form_checkbox($form_id, $name, $label, $data_value, &$value)
 	} else {
 		$v = array($value);
 	}
-	$sel = (in_array($data_value,$v)) ? 'checked="checked"' : ''; ?>
-        <input name="<?=$name?>[]" id="<?=$id?>" value="<?=$data_value?>" <?=$sel?> type="checkbox">
+	$sel = (in_array($data_value,$v)) ? 'checked="checked"' : ''; 
+	$d = $form_disabled ? ' disabled="disabled"': ''; ?>
+
+        <input name="<?=$name?>[]" id="<?=$id?>" value="<?=$data_value?>" <?=$sel?> type="checkbox" <?=$d?> >
         <label for="<?=$id?>"><?=$label?></label>
 <?php
 }
 
-function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false) { 
+function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false) 
+{ 
 	$data = array(0 => 'No', 1 => 'Yes');
 	if(!$slider ) {
 		form_radio_h($form_id, $name, $label, $data, $value, $wide);
@@ -150,6 +168,7 @@ function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false
 
 function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false)
 { 
+	global $form_disabled;
 	$id = $page_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
@@ -158,12 +177,13 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 		$data_role = "data-role=\"$data_role\"";
 
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
-
 	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
+	$d = $form_disabled ? ' disabled="disabled"': '';
+
 ?>
 	<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> >
+		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> <?=$d?>>
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
 <?php			}
@@ -184,14 +204,16 @@ function form_multiselect($form_id, $name, $label, $data, &$value)
 
 function form_select_optgroup($page_id, $name, $label, $data, &$value)
 {
+	global $form_disabled;
 	$id = $page_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
+	$d = $form_disabled ? ' disabled="disabled"': '';
 
 ?>
 	<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<select name="<?=$name?>" id="<?=$id?>" >
+		<select name="<?=$name?>" id="<?=$id?>" <?=$d?> >
 		<option value="">Choose...</option>
 <?php		foreach($data as $name=>$group) { ?>
 			<optgroup label="<?=$name?>">
@@ -222,6 +244,7 @@ function form_province($page_id, $name, $label, &$value)
 
 function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwords=false)
 {
+	global $form_disabled;
 	/* Enabling word counts depends on having an object with ID= {$id}_count so
 	 * onchange function in the .js can update it */
 	$id = $form_id.'_'.$name;
@@ -233,10 +256,11 @@ function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwor
 		$cnt = true;
 		$hook = 'data-word-count="true"';
 	}
+	$d = $form_disabled ? ' disabled="disabled"': '';
 ?>
 	<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<textarea rows="8" name="<?=$name?>" id="<?=$id?>" <?=$hook?> ><?=$v?></textarea>
+		<textarea rows="8" name="<?=$name?>" id="<?=$id?>" <?=$hook?>  <?=$d?>><?=$v?> </textarea>
 	</div>
 <?php
 	if($cnt == true) {
@@ -254,17 +278,20 @@ function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwor
 
 function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g')
 {
+	global $form_disabled;
+	$d = $form_disabled ? ' disabled="disabled"': '';
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-icon="check" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-icon="check" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" <?=$d?> >
 		<?=$text?>
 	</button>
 <?php
 }
 function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check")
-
 {
+	global $form_disabled;
+	$d = $form_disabled ? ' disabled="disabled"': '';
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" <?=$d?> >
 		<?=$text?>
 	</button>
 <?php
@@ -277,12 +304,16 @@ function form_hidden($form_id, $name, $txt)
 <?php
 }
 
-function form_begin($form_id, $action)
+function form_begin($form_id, $action, $disable_form=false)
 {
-	global $form_form_id;
+	global $form_form_id, $form_disabled;
 	$form_form_id = $form_id;
+	$form_disabled = $disable_form;
+
+	/* remove sfiab class from disabled forms so the buttons don't work */
+	$cl = $form_disabled ? '' : 'sfiab_form';
 ?>
-	<form action="<?=$action?>" id="<?=$form_id?>" class="sfiab_form">
+	<form action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>">
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php
 }
@@ -316,6 +347,21 @@ function form_page_begin($page_id, $fields, $error_msg = '', $happy_msg = '', $m
 	<?=$happy_msg?>
 	</div>
 <?php
+}
+
+function form_disable_message($page_id, $closed, $accepted=false)
+{
+	if($accepted) {
+?>		<div class="happy">
+		Your signature form has been received.  Information on this page cannot be changed.
+		</div>
+<?php		return;
+	} 
+	if($closed) {
+?>		<div class="info">
+		Registration is closed.  Information on this page cannot be changed.
+		</div>
+<?php	} 
 }
 
 function form_scripts_no_ajax($action, $page_id, $fields)

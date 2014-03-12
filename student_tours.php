@@ -9,6 +9,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_tours';
 
@@ -19,6 +20,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_int($u['tour_id_pref'][0], 'tour0');
 	post_int($u['tour_id_pref'][1], 'tour1');
 	post_int($u['tour_id_pref'][2], 'tour2');
@@ -50,6 +52,7 @@ sfiab_page_begin("Student Tour Selection", $page_id, $help);
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
 ?>
 	<h3>Tour Selection</h3>
@@ -72,7 +75,7 @@ sfiab_page_begin("Student Tour Selection", $page_id, $help);
 	$tours = tour_get_for_student_select($mysqli, $u);
 	
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_tours.php');
+	form_begin($form_id, 'student_tours.php', $closed);
 	form_select($form_id, 'tour0', 'First Choice', $tours, $u['tour_id_pref'][0]);
 	form_select($form_id, 'tour1', 'Second Choice', $tours, $u['tour_id_pref'][1]);
 	form_select($form_id, 'tour2', 'Third Choice', $tours, $u['tour_id_pref'][2]);

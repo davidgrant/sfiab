@@ -12,6 +12,7 @@ sfiab_session_start($mysqli, array('student'));
 header("Cache-Control: no-cache");
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 if($u['s_pid'] == NULL || $u['s_pid'] == 0) {
 	print("Error 1010: no project.\n");
@@ -29,8 +30,8 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	/* Num mentors */
-
 	post_bool($mentors, 'num_mentors');
 
 	if($mentors === NULL) {
@@ -60,6 +61,7 @@ case 'save':
 	exit();
 
 case 'savem':
+	if($closed) exit();
 	post_text($mid, 'id');
 	$m = mentor_load($mysqli, $mid);
 
@@ -83,6 +85,7 @@ case 'savem':
 	exit();
 
 case 'add':
+	if($closed) exit();
 	if($p['num_mentors'] < 10) {
 		$mid = mentor_create($mysqli, $p['pid']);
 		$p['num_mentors'] += 1;
@@ -95,6 +98,7 @@ case 'add':
 	exit();
 
 case 'del':
+	if($closed) exit();
 	post_int($mid, 'mid');
 	$mysqli->real_query("DELETE FROM mentors WHERE pid='{$p['pid']}' AND id='$mid'");
 	$q = $mysqli->query("SELECT * FROM mentors WHERE pid='{$p['pid']}'");
@@ -141,6 +145,9 @@ $num_mentors = $p['num_mentors'];
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);	
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
+
+	$d = $closed ? 'disabled="disabled"' : '';
 ?>
 	<h3>Project Mentorship Information</h3>
 
@@ -155,7 +162,7 @@ $num_mentors = $p['num_mentors'];
 		$mentors = 1;
 	}
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_mentor.php');
+	form_begin($form_id, 'student_mentor.php', $closed);
 	form_yesno($form_id, 'num_mentors', "Were you assisted by mentors in doing this project?", $mentors, true);
 	form_submit($form_id, 'save', 'Save', 'Mentor Info Saved');
 	form_end($form_id);
@@ -166,7 +173,7 @@ $num_mentors = $p['num_mentors'];
 		$x++;
 		$form_id = $page_id.'_form_'.$mid;
 		print("<div id=\"mentor_div_$mid\"><h3>Mentor $x</h3>");
-		form_begin($form_id, 'student_mentor.php');
+		form_begin($form_id, 'student_mentor.php', $closed);
 		form_text($form_id, "firstname$mid", "First Name", $u['firstname']);
 		form_text($form_id, "lastname$mid", "Last Name", $u['lastname']);
 		form_text($form_id, "email$mid", "Email", $u['email'], 'email');
@@ -181,7 +188,7 @@ $num_mentors = $p['num_mentors'];
 			<?=form_submit($form_id, 'savem', 'Save Mentor', 'Mentor Info Saved');?>
 			</div>
 			<div class="ui-block-b"> 
-			<a href="#" onclick="return mentor_delete(<?=$mid?>);" data-role="button" data-icon="delete" data-theme="r">Delete Mentor</a>
+			<a href="#" onclick="return mentor_delete(<?=$mid?>);" data-role="button" data-icon="delete" data-theme="r" <?=$d?>>Delete Mentor</a>
 			</div>
 		</div>
 		<?=form_end($form_id);?>
@@ -190,7 +197,7 @@ $num_mentors = $p['num_mentors'];
 	}
 
 	$form_id = $page_id.'_add_form';
-	form_begin($form_id, 'student_mentor.php');
+	form_begin($form_id, 'student_mentor.php', $closed);
 	form_button($form_id, 'add', 'Add A Mentor', 'Add A Mentor');
 	form_end($form_id);
 ?>

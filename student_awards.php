@@ -12,6 +12,7 @@ sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
 $p = project_load($mysqli, $u['s_pid']);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_awards';
 
@@ -22,6 +23,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	$awards = array();
 	$vals = array();
 	$error = '';
@@ -91,12 +93,12 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 
 
 	form_page_begin($page_id, $fields, '', '', 'This page is incomplete.  Please choose up to 4 awards or select the first option below to indicate you don\'t want to self-nominate for any awards');
-
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
 	$awards = award_load_special_for_project_select($mysqli, $p);
 
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_awards.php');
+	form_begin($form_id, 'student_awards.php', $closed);
 ?>
 	<p>Please choose up to 4 awards for self-nomination.  If you don't wish to self-nominate for any awards, select the first option below.
 <?php

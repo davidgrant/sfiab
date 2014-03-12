@@ -14,6 +14,8 @@ header("Cache-Control: no-cache");
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
+
 if( $u['s_pid'] == 0) {
 	print("Error 1011: pid {$u['username']}");
 	exit();
@@ -41,7 +43,7 @@ $need_missing_reload = false;
 
 switch($action) {
 case 'save':
-
+	if($closed) exit();
 	post_int($p['num_students'], 'num_students');
 
 	/* How many students are actually attached to the project? */
@@ -55,6 +57,7 @@ case 'save':
 	exit();
 
 case 'invite':
+	if($closed) exit();
 	$un = $mysqli->real_escape_string($_POST['un']);
 
 	$invite_error = 'Username not found';
@@ -134,6 +137,7 @@ case 'invite':
 	exit();
 
 case 'cancel':
+	if($closed) exit();
 	$id = (int)$_POST['id'];
 	print("Cancel id $id");
 	/* Add the from_uid to the reqest so users can't delete any ID */
@@ -143,6 +147,7 @@ case 'cancel':
 	break;
 
 case 'remove':
+	if($closed) exit();
 	$uid = (int)$_POST['uid'];
 	if($uid == $u['uid']) {
 		/* Remove us from the project - create a new project and link that to us */
@@ -166,6 +171,7 @@ case 'remove':
 	break;
 
 case 'accept_request':
+	if($closed) exit();
 	$id = (int)$_POST['id'];
 	$q = $mysqli->query("SELECT from_uid,to_uid FROM partner_requests WHERE `id`='$id' AND `to_uid`='{$u['uid']}'");
 	if($q->num_rows != 1) {
@@ -200,6 +206,7 @@ case 'accept_request':
 	break;
 
 case 'reject_request':
+	if($closed) exit();
 	$id = (int)$_POST['id'];
 	$mysqli->real_query("DELETE FROM partner_requests WHERE id='$id' AND to_uid='{$u['uid']}'");
 	break;
@@ -235,6 +242,9 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 
 <?php
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
+
+	$d = $closed ? 'disabled="disabled"' : '';
 
 	/* Check for an incoming request first */
 	$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
@@ -263,10 +273,10 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			<form action="student_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
 				
 			<div class="ui-field-contain">
-				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="accept_request" type="submit" data-inline="true" data-theme="g">
+				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="accept_request" type="submit" data-inline="true" data-theme="g" <?=$d?>>
 					Accept Request
 				</button>
-				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="reject_request" type="submit" data-inline="true" data-theme="r">
+				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="reject_request" type="submit" data-inline="true" data-theme="r" <?=$d?>>
 					Reject Request
 				</button>
 			</div>
@@ -287,7 +297,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 	/* Put this way up here so we can use it's error div for the entire
 	 * page */
 	$form_id = $page_id.'_num_students_form';
-	form_begin($form_id, 'student_partner.php');
+	form_begin($form_id, 'student_partner.php', $closed);
 	?>
 
 
@@ -323,7 +333,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			$v = '';
 
 			$form_incomplete_fields[] = 'un';
-			form_begin($this_form_id, 'student_partner.php');
+			form_begin($this_form_id, 'student_partner.php', $closed);
 			form_text($this_form_id, 'un', 'Username', $v);
 			form_submit($this_form_id, 'invite', 'Invite', 'Invite');
 			form_end($this_form_id);
@@ -351,7 +361,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 				
 			<div class="ui-field-contain-wide ui-field-contain">
 				<label class="error" for="<?$page_id?>_cancel_<?=$i?>"><?=$v?></label>
-				<button id="<?$page_id?>_cancel_<?=$i?>" type="submit" data-inline="true" data-theme="b">
+				<button id="<?$page_id?>_cancel_<?=$i?>" type="submit" data-inline="true" data-theme="b" <?=$d?>>
 					Cancel Invitation
 				</button>
 			</div>
@@ -387,11 +397,11 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 		<form action="student_partner.php" method="post" data-ajax="false">
 			<div class="ui-field-contain ui-field-contain-wide">
 				<label for="<?$page_id?>_remove_<?=$i?>"><?=$name?></label>
-				<button id="<?=$form_id?>_form_submit_<?=$i?>" type="submit" data-inline="true" data-theme="r" <?=$button_disabled?>>
+				<button id="<?=$form_id?>_form_submit_<?=$i?>" type="submit" data-inline="true" data-theme="r" <?=$button_disabled?> <?=$d?>>
 					<?=$button_text?>
 				</button>
 			</div>
-			<input type="hidden" name="action" value="remove"/>
+			<input type="hidden" name="action" value="remove" />
 			<input type="hidden" name="uid" value="<?=$uid?>"/>
 		</form>
 <?php	}?>

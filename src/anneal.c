@@ -197,7 +197,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 				if(ret == -1) 
 					anneal_propose_move(&annealer, &move);
 			} else {
-				anneal_propose_move(&annealer, &move);
+				anneal_propose_move(&annealer, &move)
 			}
 //			printf("Move: %d @[%d] <--> %d @[%d]\n", move.b1, move.i1, move.b2, move.i2);
 

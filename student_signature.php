@@ -17,6 +17,7 @@ $page_id = 's_signature';
 
 $u = user_load($mysqli);
 $p = project_load($mysqli, $u['s_pid']);
+$closed = sfiab_registration_is_closed($u);
 
 /* Get all users associated with this project */
 $users = user_load_all_for_project($mysqli, $u['s_pid']);
@@ -42,12 +43,15 @@ if(count($_POST) == 0) {
 	';
 
 	sfiab_page_begin("Student Signature Form", $page_id, $help);
+
 	?>
 
 	<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	if($all_complete) {
+	form_disable_message($page_id, $closed, $u['s_accepted']);
+
+	if($all_complete && !$closed) {
 		form_page_begin($page_id, $fields, '','','This page will become complete when the committee receives and processes your signature form.  This will happen approximately three weeks before the fair.');
 	}
 ?>
@@ -78,7 +82,9 @@ if(count($_POST) == 0) {
 
 	<h4>Download Signature Form</h4>
 
-<?php	if($all_complete) {
+<?php	if($closed) {
+		$d = 'disabled="disabled"';
+	} else if($all_complete) {
 		$d = '';
 	} else {
 ?>		<p>The signature form can only be printed when all the students in the project are complete.
@@ -88,7 +94,7 @@ if(count($_POST) == 0) {
 ?>
 	<form action="student_signature.php" method="post" data-ajax="false">
 	<input type="hidden" name="pdf" value="1"/>
-	<button type="submit" data-role="button" <?=$d?> data-theme="g">Download Signature Form</button>
+	<button type="submit" data-role="button" <?=$d?> data-theme="g" <?=$d?>>Download Signature Form</button>
 	</form>
 	
 	</div></div>
@@ -122,6 +128,7 @@ if(count($_POST) == 0) {
  	/* Project and students already loaded */
  }
 
+if($closed) exit();
 
 $cats = categories_load($mysqli);
 $chals = challenges_load($mysqli);

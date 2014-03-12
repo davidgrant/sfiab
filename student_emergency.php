@@ -9,6 +9,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_emergency';
 
@@ -19,6 +20,8 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
+
 	$vals = array();
 	for($i=1; $i<=2; $i++) {
 		post_text($u["emerg{$i}_firstname"], "emerg{$i}_firstname");
@@ -58,11 +61,12 @@ sfiab_page_begin("Student Emergency Contact", $page_id, $help);
 
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
 	$relations=array('parent'=>"Parent",'legalguardian'=>"Legal Guardian",'grandparent'=>"Grandparent",
 			'familyfriend'=>"Family Friend", 'other'=>"Other");
 
-	form_begin($form_id, 'student_emergency.php');
+	form_begin($form_id, 'student_emergency.php', $closed);
 
 ?>	<h3>Emergency Contact 1</h3>
 <?php

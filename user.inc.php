@@ -101,6 +101,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_int_or_null($u['grade']);
 	/* Clear out invalid input so the placeholder is shown again */
 	if($u['birthdate'] == '0000-00-00') $u['birthdate'] = NULL;
+	if($u['reg_close_override'] == '0000-00-00') $u['reg_close_override'] = NULL;
 
 	if($u['s_sa_nom'] === NULL || $u['s_sa_nom'] === '') 
 		$u['s_sa_nom'] = array();

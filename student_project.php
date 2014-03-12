@@ -11,6 +11,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 if($u['s_pid'] == NULL || $u['s_pid'] == 0) {
 	print("Error 1010: no project.\n");
@@ -29,6 +30,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_text($p['title'], 'title');
 	post_text($p['language'], 'language');
 	post_text($p['summary'], 'summary');
@@ -68,6 +70,7 @@ sfiab_page_begin("Project Information", $page_id, $help);
 	incomplete_check($mysqli, $fields, $u, $page_id, true);
 	$e = join('<br/>', $incomplete_errors);
 	form_page_begin($page_id, $fields, $e);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
 	$chals = challenges_load($mysqli);
 	$cats = categories_load($mysqli);
@@ -87,7 +90,7 @@ sfiab_page_begin("Project Information", $page_id, $help);
 <?php	
 	
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_project.php', $e);
+	form_begin($form_id, 'student_project.php', $closed);
 	form_text($form_id, 'title', "Title", $p);
 	form_select($form_id, 'cat_id', "Category", $cats_data, $p);
 	form_select($form_id, 'challenge_id', "Challenge", $chals_data, $p);

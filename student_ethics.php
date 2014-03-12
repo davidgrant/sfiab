@@ -10,6 +10,7 @@ sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
 $p = project_load($mysqli, $u['s_pid']);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_ethics';
 
@@ -20,6 +21,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	$a = array('human1', 'humansurvey1', 'humantest1', 
 		'humanfood1', 'humanfood2', 'humanfood6', 'humanfood5', 'humanfood4', 'humanfood3', 
 	        'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2', 
@@ -49,12 +51,14 @@ function question($name, $text, $help, $v)
 {
 	global $page_id;
 	global $incomplete_fields;
+	global $closed;
 	$id = $page_id.'_form_'.$name;
 
 	if(is_array($v)) {
 		$v = $v[$name];
 	}
 	$err = in_array($name, $incomplete_fields) ? 'border-color:red; border-width:2px;': '';
+	$d = $closed ? 'disabled="disabled"' : '';
 
 	$data = array(0=>'No', 1=>'Yes');
 ?>
@@ -71,7 +75,7 @@ function question($name, $text, $help, $v)
 <?php			$x=0;
 			foreach($data as $key=>$val) {
 				$sel = ($v === $key) ? 'checked="checked"' : ''; ?>
-			        <input name="<?=$name?>" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio">
+			        <input name="<?=$name?>" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio" <?=$d?>>
 			        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
 <?php				$x++;
 			} ?>
@@ -85,6 +89,8 @@ function questionc($name, $text, $help, $v)
 {
 	global $page_id;
 	global $incomplete_fields;
+	global $closed;
+
 	$id = $page_id.'_form_'.$name;
 
 	if(is_array($v)) {
@@ -92,6 +98,7 @@ function questionc($name, $text, $help, $v)
 	}
 
 	$err = in_array($name, $incomplete_fields) ? 'border-color:red; border-width:2px;': '';
+	$d = $closed ? 'disabled="disabled"' : '';
 
 ?>
 	<li id="<?=$id?>_li" style="white-space:normal; <?=$err?> " >
@@ -106,7 +113,7 @@ function questionc($name, $text, $help, $v)
 		<fieldset id="<?=$id?>" >
 <?php
 		$sel = ($v === 1) ? 'checked="checked"' : ''; ?>
-	        <input name="<?=$name?>" id="<?=$name?>" value="1" <?=$sel?> type="checkbox"/>
+	        <input name="<?=$name?>" id="<?=$name?>" value="1" <?=$sel?> type="checkbox" <?=$d?> />
 		</fieldset>
 		
 		</div>
@@ -144,7 +151,9 @@ function policy($name, $text, $link = '')
 <?php
 	$e = $p['ethics'];
 	form_page_begin($page_id, $incomplete_fields, '', '', 'This page is incomplete.  Please complete all questions.');
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
+	$d = $closed ? 'disabled="disabled"' : '';
 
 	$form_id = $page_id.'_form';
 ?>
@@ -311,7 +320,7 @@ function policy($name, $text, $link = '')
 		}
 ?>
 		</ul>
-		<button type="submit" data-role="button" id="<?=$form_id?>_submit_save" name="action" value="save" data-inline="true" data-icon="check" data-theme="g" >
+		<button type="submit" data-role="button" id="<?=$form_id?>_submit_save" name="action" value="save" data-inline="true" data-icon="check" data-theme="g" <?=$d?>>
 			Save
 		</button>
 		<br/>
@@ -354,7 +363,7 @@ function policy($name, $text, $link = '')
 
 	
 	<input type="hidden" name="action" value="save"/>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_save" name="action" value="save" data-inline="true" data-icon="check" data-theme="g" >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_save" name="action" value="save" data-inline="true" data-icon="check" data-theme="g" <?=$d?>>
 		Save
 	</button>
 	

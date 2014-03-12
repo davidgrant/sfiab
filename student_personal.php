@@ -9,6 +9,8 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
+
 
 $page_id = 's_personal';
 
@@ -19,6 +21,9 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+
+	if($closed) exit();
+
 	$old_grade = $u['grade'];
 	post_text($u['firstname'],'firstname');
 	post_text($u['lastname'],'lastname');
@@ -85,6 +90,7 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 	$form_id = $page_id.'_form';
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
 	$q=$mysqli->query("SELECT id,school,city FROM schools WHERE year='{$config['year']}' ORDER by city,school");
 	while($r=$q->fetch_assoc()) {
@@ -94,7 +100,7 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 	$grades = array();
 	for($x=7;$x<=12;$x++) $grades[$x] = $x;
 
-	form_begin($form_id, 'student_personal.php');
+	form_begin($form_id, 'student_personal.php', $closed);
 	form_text($form_id, 'firstname', "First Name", $u);
 	form_text($form_id, 'lastname', "Last Name", $u);
 	form_text($form_id, 'pronounce', "Name Pronunciation Key", $u);

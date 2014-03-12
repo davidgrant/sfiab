@@ -9,6 +9,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('student'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_reg_options';
 
@@ -27,6 +28,7 @@ $tshirt_sizes = array('none' => 'None',
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_text($u['tshirt'], 'tshirt');
 	if(!array_key_exists($u['tshirt'], $tshirt_sizes)) {
 		$u['tshirt'] = NULL;
@@ -48,13 +50,14 @@ sfiab_page_begin("Student Registration Options", $page_id, $help);
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed, $u['s_accepted']);
 
 ?>
 	<h3>T-Shirt</h3>
 	<p>The cost of each T-Shirt is $<?=$config['tshirt_cost']?>, sizes are Adult sizes.
 <?php
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_reg_options.php');
+	form_begin($form_id, 'student_reg_options.php', $closed);
 	form_select($form_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);

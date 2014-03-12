@@ -6,6 +6,8 @@ error_reporting(-1);
 
 require_once('config.inc.php');
 
+date_default_timezone_set('PST8PDT');
+
 /* It's kinda important that there be no blank lines BEFORE this, or they're sent as newlines.  This messes
  * up login.php */
 
@@ -594,6 +596,45 @@ function i18n($text)
 	return $text;
 }
 
+
+/* Is registration open for this user? reads the customer user override first
+ * then uses the global date */
+function sfiab_registration_is_closed($u)
+{
+	global $config;
+
+	/* Registratoin is never closed for a committee editting a user */
+	if(sfiab_session_is_active()) {
+		if(array_key_exists('edit_uid', $_SESSION)) {
+			return false;
+		}
+	}
+	
+	$now = date( 'Y-m-d H:i:s' );
+	if($u['reg_close_override'] !== NULL) {
+		if($now < $u['reg_close_override'])
+			return false;
+		else
+			return true;
+	} 
+
+	if(in_array('student', $u['roles'])) {
+		$reg_close_date = $config['date_student_registration_closes'];
+
+		/* Accetped students are cannot make changes */
+		if($u['s_accepted']) {
+			return true;
+		}
+
+	} else {
+		return false;
+	}
+
+	if($now < $reg_close_date)
+		return false;
+	else 
+		return true;
+}
 
 
 
