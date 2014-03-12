@@ -100,6 +100,11 @@ case 'register':
 	$fn = $mysqli->real_escape_string($_POST['firstname']);
 	$ln = $mysqli->real_escape_string($_POST['lastname']);
 
+	if(sfiab_registration_is_closed(NULL, $as)) {
+		/* Should never get here */
+		exit();
+	}
+
 	if(!check_username($username) || !check_email($email) || !array_key_exists($as, $sfiab_roles) || array_key_exists($as, $not_allowed_roles)) {
 		/* Validation form isn't doing it's job */
 		print('');

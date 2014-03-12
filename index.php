@@ -60,11 +60,22 @@ sfiab_page_begin('Welcome', 'welcome');
 		<label for="register_lastname">Last Name:</label>
 		<input data-clear-btn="true" name="lastname" id="register_lastname" value="" type="text">
 	</div>
+<?php
+	$s_disabled = '';
+	$s_text = '';
+	$j_disabled = '';
+	$j_text = '';
+	if(sfiab_registration_is_closed(NULL, 'student')) {
+		$s_disabled = 'disabled="disabled"';
+		$s_text = ' (registration closed)';
+	}
+?>
+
 	<div data-role="fieldcontain">
 		<label for="register_as" class="select">Register as a:</label>
 		<select name="register_as" id="register_as" <?php/*<!--data-native-menu="false"*/?> >
-		    <option value="student">Student</option>
-		    <option value="judge">Judge</option>
+		    <option value="student" <?=$s_disabled?> >Student<?=$s_text?></option>
+		    <option value="judge" <?=$j_disabled?> >Judge<?=$j_text?></option>
 		    <option value="volunteer">Volunteer</option>
 <?php		 if(sfiab_user_is_a('committee')) { 
 //		    <option value="teacher">Teacher</option>

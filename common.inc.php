@@ -599,35 +599,45 @@ function i18n($text)
 
 /* Is registration open for this user? reads the customer user override first
  * then uses the global date */
-function sfiab_registration_is_closed($u)
+function sfiab_registration_is_closed($u, $role=NULL)
 {
 	global $config;
+	$reg_close_date = '';
 
-	/* Registratoin is never closed for a committee editting a user */
-	if(sfiab_session_is_active()) {
-		if(array_key_exists('edit_uid', $_SESSION)) {
-			return false;
-		}
-	}
-	
 	$now = date( 'Y-m-d H:i:s' );
-	if($u['reg_close_override'] !== NULL) {
-		if($now < $u['reg_close_override'])
+
+	if($role !== NULL) {
+		if($role == 'student') {
+			$reg_close_date = $config['date_student_registration_closes'];
+		} else {
 			return false;
-		else
-			return true;
-	} 
-
-	if(in_array('student', $u['roles'])) {
-		$reg_close_date = $config['date_student_registration_closes'];
-
-		/* Accetped students are cannot make changes */
-		if($u['s_accepted']) {
-			return true;
 		}
-
 	} else {
-		return false;
+		/* Registration is never closed for a committee editting a user */
+		if(sfiab_session_is_active()) {
+			if(array_key_exists('edit_uid', $_SESSION)) {
+				return false;
+			}
+		}
+	
+		if($u['reg_close_override'] !== NULL) {
+			if($now < $u['reg_close_override'])
+				return false;
+			else
+				return true;
+		} 
+
+		if(in_array('student', $u['roles'])) {
+			$reg_close_date = $config['date_student_registration_closes'];
+
+			/* Accetped students are cannot make changes */
+			if($u['s_accepted']) {
+				return true;
+			}
+
+		} else {
+			return false;
+		}
 	}
 
 	if($now < $reg_close_date)
