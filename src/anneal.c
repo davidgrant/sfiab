@@ -76,8 +76,8 @@ int anneal_compute_delta_cost(struct _annealer *annealer, struct _anneal_move *m
 	annealer->item_bucket[move->i1] = move->b2;
 	if(move->p2) annealer->item_bucket[move->i2] = move->b1;
 
-	move->new_cost1 = annealer->cost_function(move->b1, bucket1->items);
-	move->new_cost2 = annealer->cost_function(move->b2, bucket2->items);
+	move->new_cost1 = annealer->cost_function(annealer, move->b1, bucket1->items);
+	move->new_cost2 = annealer->cost_function(annealer, move->b2, bucket2->items);
 
 	/* Put the buckets back */
 	if(move->p2) g_ptr_array_remove_index_fast(bucket1->items, bucket1->items->len-1);
@@ -123,8 +123,8 @@ int anneal_commit_move(struct _annealer *annealer, struct _anneal_move *move)
 }
 
 
-int anneal( GPtrArray ***output_buckets, int num_buckets, GPtrArray *items, 
-			float (*cost_function)(int bucket_id, GPtrArray *bucket),
+int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrArray *items, 
+			float (*cost_function)(struct _annealer *annealer, int bucket_id, GPtrArray *bucket),
 			int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move) 
 		)
 {
@@ -148,33 +148,38 @@ int anneal( GPtrArray ***output_buckets, int num_buckets, GPtrArray *items,
 	annealer.item_bucket = malloc(sizeof(int) * items->len);
 	annealer.cost_function = cost_function;
 	annealer.propose_move = propose_move;
+	annealer.data_ptr = data_ptr;
 
 	index = 0;
-	printf("Setting initial buckets\n");
+	printf("   => %d initial buckets\n", num_buckets);
 	for(x=0;x<num_buckets;x++) {
 		struct _anneal_bucket *b = &annealer.buckets[x];
 		b->cost = 0;
 		b->items = g_ptr_array_new();
-
-		for(i=0;i<items_per_bucket; i++) {
-			g_ptr_array_add(b->items, g_ptr_array_index(items, index));
-			annealer.item_bucket[index] = x;
-			index++;
-			if(index == items->len) break;
-		}
 	}
 
-	printf("Compute initial costs\n");
+	x=0;
+	for(i=0; i<items->len; i++) {
+		void *item = g_ptr_array_index(items, i);
+		struct _anneal_bucket *b = &annealer.buckets[x];
+		g_ptr_array_add(b->items, item);
+		annealer.item_bucket[i] = x;
+		x++;
+		if(x==num_buckets) x=0;
+	}
+	printf("   => %d total items to anneal\n", i);
+
 	/* Compute initial costs */
 	cost = 0;
 	for(x=0; x<num_buckets; x++) {
 		struct _anneal_bucket *b = &annealer.buckets[x];
-		b->cost = cost_function(x, b->items);
+		b->cost = cost_function(&annealer, x, b->items);
 		cost += b->cost;
 	}
+	printf("   => initial cost is %f\n", cost);
 
-	temperature = 10000000000;
-	inner_num = 5 * pow(items->len, 4/3);
+	temperature = 100000000000.0;
+	inner_num = 20 * pow(items->len, 4/3);
 
 //	estimated_iterations = ceil(log(0.1 / $this->start_temp, $this->rate));
 	num_moves = 0;

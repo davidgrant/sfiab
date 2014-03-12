@@ -1,5 +1,61 @@
 <?php
 
+/*
+$isef_divs = array(
+	array('id'=> 1, 'parent'=>false, 'div'=>'AS', 'name'=>'ANIMAL SCIENCES', 'desc'=>'Study of animals and animal life, including their structure, function, life history, interactions, classification, and evolution.'),
+		=> 94, 17, 23, 
+
+	array('id'=>11, 'parent'=>false, 'div'=>'BE', 'name'=>'BEHAVIORAL AND SOCIAL SCIENCES', 'desc'=>'The science or study of the thought processes and behavior of humans and other animals in their interactions with the environment studied through observational and experimental methods.'),
+		=> 94
+
+	array('id'=>17, 'parent'=>false, 'div'=>'BI', 'name'=>'BIOCHEMISTRY', 'desc'=>'The study of chemical substances, interactions, and processes relevant to living organisms.'),
+	 	=> 23, 94, 101
+
+	array('id'=>23, 'parent'=>false, 'div'=>'CB', 'name'=>'CELLULAR AND MOLECULAR BIOLOGY', 'desc'=>'The study of the structure and formation of cells.'),
+		=> 17, 94, 101
+
+	array('id'=>29, 'parent'=>false, 'div'=>'CH', 'name'=>'CHEMISTRY', 'desc'=>'The science of the composition, structure, properties, and reactions of matter.'),
+		=> 17, 80, 121
+
+	array('id'=>37, 'parent'=>false, 'div'=>'CS', 'name'=>'COMPUTER SCIENCE', 'desc'=>'The study of information processes, the structures and procedures that represent processes, and their implementation in information processing systems. It includes systems analysis and design, application and system software design, programming, and datacenter operations.'),
+		=> 85, 53, 
+
+	array('id'=>45, 'parent'=>false, 'div'=>'EA', 'name'=>'EARTH AND PLANETARY SCIENCE', 'desc'=>'The study of sciences related to the planet Earth (Geology, minerology, physiography, oceanography, meteorology, climatology, speleology, sesismology, geography, atmospheric sciences, etc.)'),
+		=> 66, 73, 82 
+
+	array('id'=>53, 'parent'=>false, 'div'=>'EE', 'name'=>'ENGINEERING: Electrical and Mechanical', 'desc'=>'The application of scientific and mathematical principles to practical ends such as the design, manufacture, and operation of efficient and economical structures, processes, and systems.'),
+		=> 59, 66, 37
+
+	array('id'=>59, 'parent'=>false, 'div'=>'EN', 'name'=>'ENGINEERING: Materials and Bioengineering', 'desc'=>'The application of scientific and mathematical principles to practical ends such as the design, manufacture, and operation of efficient and economical machines and systems.'),
+
+	array('id'=>66, 'parent'=>false, 'div'=>'ET', 'name'=>'ENERGY & TRANSPORTATION', 'desc'=>'The study of renewable energy sources, energy efficiency, clean transport, and alternative fuels.'),
+		-> 53, 59, 45
+
+	array('id'=>73, 'parent'=>false, 'div'=>'EM', 'name'=>'ENVIRONMENTAL MANAGEMENT', 'desc'=>'The application of engineering principals to solve practical problems of managing mans\' interaction with the environment with the goal to maintain and improve the state of an environmental resource affected by human activities.'),
+		=> 80, 66, 59
+
+	array('id'=>80, 'parent'=>false, 'div'=>'EV', 'name'=>'ENVIRONMENTAL SCIENCES', 'desc'=>'The analysis of existing conditions of the environment.'),
+		=> 17, 29, 45
+
+	array('id'=>85, 'parent'=>false, 'div'=>'MA', 'name'=>'MATHEMATICAL SCIENCES', 'desc'=>'The study of the measurement, properties, and relationships of quantities and sets, using numbers and symbols. The deductive study of numbers, geometry, and various abstract constructs, or structures.'),
+		=> 109, 
+
+	array('id'=>94, 'parent'=>false, 'div'=>'ME', 'name'=>'HEALTH SCIENCES', 'desc'=>'The science of diagnosing, treating, or preventing disease and other damage to the body or mind.'),
+		=> 11, 17, 23, 101
+
+	array('id'=>101, 'parent'=>false, 'div'=>'MI', 'name'=>'MICROBIOLOGY', 'desc'=>'The study of microorganisms, including bacteria, viruses, fungi, and pathogens.'),
+		=> 23, 94, 17, 
+
+	array('id'=>109, 'parent'=>false, 'div'=>'PH', 'name'=>'PHYSICS AND ASTRONOMY', 'desc'=>'Physics is the science of matter and energy and of interactions between the two. Astronomy is the study of anything in the universe beyond the Earth.'),
+		=> 45, 
+
+	array('id'=>121, 'parent'=>false, 'div'=>'PS', 'name'=>'PLANT SCIENCES', 'desc'=>'Study of plant life, including their structure and function, life history, growth, interactions with other plants and animals, classification, and evolution.'),
+		=> 17, 80, 29
+
+	);
+
+*/
+
 $isef_divs = array(
 	array('id'=> 1, 'parent'=>false, 'div'=>'AS', 'name'=>'ANIMAL SCIENCES', 'desc'=>'Study of animals and animal life, including their structure, function, life history, interactions, classification, and evolution.'),
 

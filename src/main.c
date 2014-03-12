@@ -10,10 +10,11 @@
 #include "db.h"
 #include "tours.h"
 #include "students.h"
+#include "judges.h"
 
 int main(int argc, char **argv) 
 {
-	int year = 2013;
+	int year = 2014;
 	struct _db_data *db;
 
 	db = db_connect();
@@ -23,7 +24,8 @@ int main(int argc, char **argv)
 		printf("Tours\n");
 		tours_anneal(db, year);
 	} else if(strcmp(argv[1], "judges") == 0) {
-
+		printf("Judges\n");
+		judges_anneal(db, year);
 	}
 
 	db_close(db);

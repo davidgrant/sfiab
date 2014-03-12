@@ -18,8 +18,9 @@ struct _anneal_move {
 struct _annealer {
 	int num_buckets;
 	GPtrArray *items;
+	void *data_ptr;
 
-	float (*cost_function)(int bucket_id, GPtrArray *bucket);
+	float (*cost_function)(struct _annealer *annealer, int bucket_id, GPtrArray *bucket);
 	int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move);
 
 
@@ -33,9 +34,9 @@ struct _annealer {
 
 int anneal_propose_move(struct _annealer *annealer, struct _anneal_move *move);
 
-int anneal( GPtrArray ***output_buckets, int num_buckets, 
+int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, 
 		GPtrArray *items, 
-		float (*cost_function)(int bucket_id, GPtrArray *bucket), 
+		float (*cost_function)(struct _annealer *annealer, int bucket_id, GPtrArray *bucket), 
 		int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move)
 	);
 

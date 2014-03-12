@@ -5,7 +5,7 @@ all: sfiab_annealer
 
 # Generated automatically from Makefile.rules.in by configure.
 CC	= gcc
-CFLAGS	= -Wall -g -O2 `pkg-config --cflags glib-2.0`  -I/usr/include/mysql
+CFLAGS	= -Wall -g  `pkg-config --cflags glib-2.0`  -I/usr/include/mysql
 LIBS	= -lpthread  -L/usr/lib `pkg-config --libs glib-2.0`  -L/usr/lib64/mysql -lmysqlclient -lcrypt -lm
 LD_R	= ld -r
 LD	= ld
@@ -46,12 +46,14 @@ C_SRCS= anneal.c\
 	db.c \
 	judges.c \
 	main.c\
+	sfiab.c\
 	students.c\
 	tours.c
 
 H_FILES=anneal.h\
 	db.h\
 	judges.h\
+	sfiab.h\
 	students.h\
 	tours.h
 
