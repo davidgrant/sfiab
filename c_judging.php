@@ -46,20 +46,29 @@ sfiab_page_begin("Judging", $page_id);
 	$j_complete = 0;
 	$j_not_attending = 0;
 	$j_incomplete = 0;
+	$j_round1 = 0;
+	$j_round2 = 0;
+	$j_round_both = 0;
 	foreach($judges as &$j) {
 		if($j['not_attending']) {
 			$j_not_attending++;
 		} else {
-			if($j['j_complete']) 
+			if($j['j_complete']) {
+				if($j['j_rounds'][0] == 1) $j_round1++;
+				if($j['j_rounds'][1] == 1) $j_round2++;
+				if($j['j_rounds'][0] == 1 && $j['j_rounds'][1] == 1) $j_round_both++;
 				$j_complete++;
-			else
+			} else {
 				$j_incomplete++;
+			}
 		}
 	}
 
 
 ?>	<h3>Judges</h3> 
 	<p>Complete: <b><?=$j_complete?></b> / <b><?=$j_complete+$j_incomplete?></b>,  plus not attending: <b><?=$j_not_attending?></b>.
+	Complete for Round 1: <b><?=$j_round1?></b>, Round 2: <b><?=$j_round2?></b> (both: <b><?=$j_round_both?></b>).
+	
 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_judging_invite.php" data-rel="external" data-ajax="false">X Invite a Judge</a></li>

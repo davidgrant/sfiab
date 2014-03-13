@@ -128,8 +128,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 			int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move) 
 		)
 {
-	int x, i, index, num_moves, num_accepted;
-	int items_per_bucket = (items->len / num_buckets) + 1;
+	int x, i, num_moves, num_accepted;
 	struct _annealer annealer;
 	float temperature, cost, last_cost, success_rate, success_rate_this_temp;
 	int last_cost_count, quench_count = 0;
@@ -150,7 +149,6 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	annealer.propose_move = propose_move;
 	annealer.data_ptr = data_ptr;
 
-	index = 0;
 	printf("   => %d initial buckets\n", num_buckets);
 	for(x=0;x<num_buckets;x++) {
 		struct _anneal_bucket *b = &annealer.buckets[x];
@@ -197,7 +195,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 				if(ret == -1) 
 					anneal_propose_move(&annealer, &move);
 			} else {
-				anneal_propose_move(&annealer, &move)
+				anneal_propose_move(&annealer, &move);
 			}
 //			printf("Move: %d @[%d] <--> %d @[%d]\n", move.b1, move.i1, move.b2, move.i2);
 

@@ -214,3 +214,27 @@ function update_word_count(obj)
 	var countbox = $('#'+obj.attr('id')+'_count');
 	countbox.text(wordarray.length);
 }
+
+
+	function user_list_info_delete(id) {
+		if(confirm('Really delete this user? ' + id) == false) return false;
+		$.post('c_user_edit.php', { action: "del", uid: id }, function(data) {
+			window.history.back();
+		}, "json");
+		return false;
+	}
+	function user_list_info_purge(id) {
+		if(confirm('Really purge this user?\nPurging user deletes all record of them, their project, their juding info, everything.') == false) return false;
+		$.post('c_user_edit.php', { action: "purge", uid: id }, function(data) {
+			window.history.back();
+		}, "json");
+		return false;
+	}
+	function user_list_info_resend_welcome(id) {
+		if(confirm('Really re-send the welcome email to this user?\nThis will also reset their password.') == false) return false;
+		$.post('c_user_edit.php', { action: "resend", uid: id }, function(data) {
+			$("#resend_reg").html("Email Sent");
+		}, "json");
+		return false;
+	}
+

@@ -267,9 +267,9 @@ case 'login':
 
 case 'change_pw':
 	sfiab_session_start();
-	$pw1 = $mysqli->real_escape_string($_POST['pw1']);
-	$pw2 = $mysqli->real_escape_string($_POST['pw2']);
-	$letters = 'abcdefgjijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	$pw1 = $_POST['pw1'];
+	$pw2 = $_POST['pw2'];
+	$letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	$numbers = '1234567890';
 	if(strlen($pw1) < 8 || !strpbrk($pw1, $letters) || !strpbrk($pw1, $numbers) || strspn($pw1, $letters.$numbers) == strlen($pw1) ) {
 		form_ajax_response_error(1, 'Passwords must be at least 8 characters long and contain at least one letter, one number, and one non-alphanumberic character (something other than a letter and a number)');
