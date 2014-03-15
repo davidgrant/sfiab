@@ -765,7 +765,7 @@ function report_save_field($mysqli, $report, $type)
 //	print("<pre>");
 //	print_r($report);
 //	print_r($report['filter']);
-//	echo "$q";
+//<F2>	echo "$q";
 
 	if($r == false) {
 		echo "The report database query has failed.  This is
