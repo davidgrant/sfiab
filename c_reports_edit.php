@@ -194,6 +194,12 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 			}
 		}
 
+		for($i = 0; $i < 3; $i++) {
+			$index = count($r['col']) + $i;
+			$v = '';
+			form_select_optgroup($form_id, "col[$index]", 'Column '.($index+1), $report_fields, $v);
+		}
+
 
 ?>		<h4>Sort By</h4>
 <?php		for($x=0; $x<3; $x++) {
