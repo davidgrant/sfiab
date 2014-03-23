@@ -775,8 +775,7 @@ function report_save_field($mysqli, $report, $type)
 
 //	print("<pre>");
 //	print_r($report);
-//	print_r($report['filter']);
-//<F2>	echo "$q";
+//	echo "$q";
 
 	if($r == false) {
 		echo "The report database query has failed.  This is
@@ -929,11 +928,10 @@ function report_save_field($mysqli, $report, $type)
 		}
 		if(count($data)) $table['data'][] = $data;
 	}
+
 	if(count($table['data'])) {
 		$rep->add_table($table);
 	}
-
-
 	$rep->output();
 }
 

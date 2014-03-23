@@ -484,7 +484,10 @@ class pdf extends TCPDF {
 			$html .= "<tr $style >";
 			foreach($table['fields'] as $f) {
 				$col = $table['col'][$f];
-				$d = $row[$f];
+
+				/* Convert all entities to HTML, even UTF characters.  Without this
+				 * TCPDF won't add a table if it has a UTF char */
+				$d = htmlentities($row[$f]);
 
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell
@@ -537,6 +540,7 @@ class pdf extends TCPDF {
 			}
 			$txt .= " (Total: $total)";
 		}
+		$txt = htmlspecialchars($txt);
 		$html .= "<tr><td colspan=\"$cols\" style=\"border-top:1px solid black\" align=\"right\">$txt</td></tr>";
 		$html .= '</table>';
 
@@ -565,7 +569,6 @@ class pdf extends TCPDF {
 		$this->SetLeftMargin($orig_lmargin + $lpad);
 		$this->writeHTML($html, false, false, false, false, '');
 		$this->SetLeftMargin($orig_lmargin);
-
 	}
 
 	function output($filename='', $dest='I') 
