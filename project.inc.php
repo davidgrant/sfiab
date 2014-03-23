@@ -1,6 +1,18 @@
 <?php
 require_once('filter.inc.php');
 
+function projects_load_all($mysqli)
+{
+	global $config;
+	$q = $mysqli->query("SELECT * FROM projects WHERE year={$config['year']}");
+	$projects = array();
+	while($p = $q->fetch_assoc()) {
+		$pr = project_load($mysqli, $p['pid'], $p);
+		$projects[(int)$p['pid']] = $pr;
+	}
+	return $projects;
+}
+
 function project_load($mysqli, $pid, $pdata = false)
 {
 	if($pid == NULL) return NULL;

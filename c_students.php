@@ -24,24 +24,58 @@ sfiab_page_begin("Students", $page_id);
 	form_page_begin($page_id, array());
 	/* Count students */
 	$students = students_load_all($mysqli, $config['year']);
+	$cats = categories_load($mysqli);
+	$projects = projects_load_all($mysqli);
 
 	$j_complete = 0;
 	$j_not_attending = 0;
 	$j_incomplete = 0;
-	foreach($students as &$j) {
-		if($j['not_attending']) {
-			$j_not_attending++;
-		} else {
-			if($j['s_complete']) 
-				$j_complete++;
-			else
-				$j_incomplete++;
+
+	$stats_line = array('accepted' => 0);
+
+	$stats = array();
+	foreach($cats as $c)
+		$stats[$c['id']] = array('students'=>$stats_line, 'projects'=>$stats_line);
+	$stats['total'] = array('students'=>$stats_line, 'projects'=>$stats_line);
+	
+	foreach($students as &$s) {
+		if($s['s_accepted'] == 1) {
+			$p =& $projects[$s['s_pid']];
+			$stats['total']['students']['accepted']+=1;
+			$stats[$p['cat_id']]['students']['accepted']+=1;
+
+			if(!array_key_exists('counted_for_s_accepted', $p)) {
+				$p['counted_for_s_accepted'] = true;
+				$stats['total']['projects']['accepted']+=1;
+				$stats[$p['cat_id']]['projects']['accepted']+=1;
+			}
 		}
 	}
 
 
-?>	<h3>Students</h3> 
-	<p>Complete: <b><?=$j_complete?></b> / <b><?=$j_complete+$j_incomplete?></b>,  plus not attending: <b><?=$j_not_attending?></b>.
+
+
+
+?>	
+	<h3>Stats</h3> 
+	<table>
+	<tr><td></td><td colspan="2" align="center">Accepted</td></tr>
+	<tr><td></td><td align="center">Students</td><td align="center">Projects</td></tr>
+<?php	foreach($cats as $cat_id=>$c) { ?>
+		<tr><td align="center"><?=$c['name']?></td>
+		    <td align="center"><?=$stats[$cat_id]['students']['accepted']?></td>
+		    <td align="center"><?=$stats[$cat_id]['projects']['accepted']?></td>
+		</tr>
+<?php	} ?>
+	<tr><td align="center"><b>Total</b></td>
+	    <td align="center"><b><?=$stats['total']['students']['accepted']?></b></td>
+	    <td align="center"><b><?=$stats['total']['projects']['accepted']?></b></td>
+	</tr>
+	</table>
+		
+
+	<h3>Students</h3> 
+
 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_student_invite.php" data-rel="external" data-ajax="false">X Invite a Student</a></li>
