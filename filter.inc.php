@@ -59,31 +59,36 @@ function post_int(&$val, $var)
 			$val = (int)$_POST[$var];
 	}
 }
-function post_float(&$val, $var)
+
+function post_float(&$val, $var, $arr=NULL)
 {
-	if(array_key_exists($var, $_POST)) {
-		if($_POST[$var] == '') 
+	if($arr === NULL) $arr = &$_POST;
+	if(array_key_exists($var, $arr)) {
+		if($arr[$var] == '') 
 			$val = NULL;
 		else 
-			$val = (float)$_POST[$var];
+			$val = (float)$arr[$var];
 	}
 }
 
-function post_text(&$val, $var)
+function post_text(&$val, $var, $arr = NULL)
 {
-	if(array_key_exists($var, $_POST)) {
-		if($_POST[$var] == '') 
+	if($arr === NULL) $arr = &$_POST;
+	if(array_key_exists($var, $arr)) {
+		if($arr[$var] == '') 
 			$val = NULL;
 		else 
-			$val = $_POST[$var];
+			$val = $arr[$var];
 	}
 }
 
-function post_array(&$val, $var, &$choices) 
+function post_array(&$val, $var, &$choices, $arr = NULL) 
 {
+	if($arr === NULL) $arr = &$_POST;
+
 	$val = array();
-	if(array_key_exists($var, $_POST)) {
-		foreach($_POST[$var] as $i=>$v) {
+	if(array_key_exists($var, $arr)) {
+		foreach($arr[$var] as $i=>$v) {
 			if(array_key_exists($v, $choices)) {
 				$val[] = $v;
 			}

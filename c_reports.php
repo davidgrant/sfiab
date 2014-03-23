@@ -2,7 +2,6 @@
 require_once('common.inc.php');
 require_once('form.inc.php');
 require_once('user.inc.php');
-require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 
@@ -92,6 +91,13 @@ $min_year = $u['M'];
 	form_button($form_id, 'download', 'Download');
 	form_end($form_id);
 ?>
+
+	<hr/>
+	<h3>Edit Reports</h3>
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_reports_edit.php" data-rel="external" data-ajax="false">Edit Reports</a></li>
+	</ul>
+	
 	</div></div>
 
 <?php

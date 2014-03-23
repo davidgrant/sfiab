@@ -34,7 +34,7 @@ require_once("reports_students.inc.php");  /* $report_students_fields */
 # require_once('../lcsv.php');
  require_once('tcpdf.inc.php');
 
- $filter_ops = array(	0 => '=',
+ $report_filter_ops = array(	0 => '=',
  			1 => '<=',
 			2 => '>=',
 			3 => '<',
@@ -45,6 +45,8 @@ require_once("reports_students.inc.php");  /* $report_students_fields */
 			8 => 'LIKE',
 			9 => 'NOT LIKE ',
 		);
+
+ $report_font_styles = array('bold','italic','underline','strikethrough');
  
  $report_options = array();
  $report_options['type'] = array('desc' => 'Report Format',
@@ -89,8 +91,8 @@ require_once("reports_students.inc.php");  /* $report_students_fields */
 		);
 $report_options['include_registrations'] = array('desc' => 'Include data from complete registrations',
  					'values' => array('all'=>'All registered users, regardless of status', 
-							'almost'=>'(Students only) that are complete or almost complete (pending sig form)', 
-							'complete'=>'Only complete registrations'),
+							'almost'=>'(Students only) that are accepted or complete (pending sig form, but not accepted)', 
+							'complete'=>'Only accepted registrations'),
 					'default' => 'complete'
 		);
 //$report_options['total'] = array('desc' => 'Sum the value of table items at te bottom of each table',
@@ -294,20 +296,16 @@ foreach($report_stock as $n=>$v) {
 	$report_options['stock']['values'][$n] = $v['name'];
 }
 
-$allow_options = array_keys($report_options);
-
 function report_save_field($mysqli, $report, $type)
 {
- 	global $allow_options;
-	
-/*	global $report_students_fields, $report_judges_fields, $report_awards_fields;
+	global $report_students_fields; /*$report_judges_fields, $report_awards_fields;
 	global $report_committees_fields, $report_schools_fields;
 	global $report_volunteers_fields, $report_fairs_fields;
 	global $report_tours_fields, $report_fundraisings_fields;
 */	
 
 	$fieldvar = "report_{$report['type']}s_fields";
-//	$allow_fields = array_keys($$fieldvar);
+	$allow_fields = array_keys($$fieldvar);
 
 	/* First delete all existing fields */
 	$mysqli->real_query("DELETE FROM reports_items 
@@ -325,22 +323,34 @@ function report_save_field($mysqli, $report, $type)
 			/* field, value, x, y, w, min_w, h, h_rows, align, valign, fn, fs, fsize, overflow */
 			$vals = "'$k','$v','0','0','0',NULL,'0','0','','','','','0','truncate'";
 		} else {
-			if($v['h_rows'] == 0) $v['h_rows'] =1;
-			if(!array_key_exists('min_w', $v)) {
-				$min_w = "NULL";
-			} else if ($v['min_w'] === NULL) {
-				$min_w = "NULL";
+			$f_field = array_key_exists('field', $v) ? "'".$mysqli->real_escape_string($v['field'])."'" : "''";
+			$f_value = array_key_exists('value', $v) ? "'".$mysqli->real_escape_string($v['value'])."'" : "''";
+			$f_x = array_key_exists('x', $v) ? "'".((float)$v['x'])."'" : "'0'";
+			$f_y = array_key_exists('y', $v) ? "'".((float)$v['y'])."'" : "'0'";
+			$f_w = array_key_exists('w', $v) ? "'".((float)$v['w'])."'" : "'0'";
+			$f_h = array_key_exists('h', $v) ? "'".((float)$v['h'])."'" : "'0'";
+			if(array_key_exists('h_rows', $v)) {
+				$f_h_rows = (int)$v['h_rows'];
+				if($f_h_rows == 0) $f_h_rows = 1;
 			} else {
-				$min_w = "'{$v['min_w']}'";
+				$f_h_rows = 1;
 			}
-
-			$fs = is_array($v['fontstyle']) ? implode(',',$v['fontstyle']) : '';
-			$vals = "'{$v['field']}','{$v['value']}',
-				'{$v['x']}','{$v['y']}','{$v['w']}',$min_w,
-				'{$v['h']}','{$v['h_rows']}',
-				'{$v['align']}','{$v['valign']}',
-				'{$v['fontname']}','$fs','{$v['fontsize']}',
-				'{$v['on_overflow']}'";
+			$f_min_w = (array_key_exists('min_w', $v) && $v['min_w'] != NULL) ? "'".((float)$v['min_w'])."'" : "NULL";
+			$f_align = array_key_exists('align', $v) ? "'".$mysqli->real_escape_string($v['align'])."'" : "''";
+			$f_valign = array_key_exists('valign', $v) ? "'".$mysqli->real_escape_string($v['valign'])."'" : "''";
+			$f_fontname = array_key_exists('fontname', $v) ? "'".$mysqli->real_escape_string($v['fontname'])."'" : "''";
+			$f_fontsize = array_key_exists('fontsize', $v) ? "'".((float)$v['fontsize'])."'" : "'0'";
+			$f_on_overflow = array_key_exists('on_overflow', $v) ? "'".$mysqli->real_escape_string($v['on_overflow'])."'" : "''";
+			if(array_key_exists('fontstyle', $v)) {
+				$a = array();
+				foreach($v['fontstyle'] as $s) {
+					$a[] = "'".$mysqli->real_escape_string($s)."'";
+				}
+				$f_fontstyle = implode(',', $a);
+			} else {
+				$f_fontstyle = "''";
+			}
+			$vals = "$f_field, $f_value, $f_x, $f_y, $f_w, $f_min_w, $f_h, $f_h_rows, $f_align, $f_valign, $f_fontname, $f_fontstyle, $f_fontsize, $f_on_overflow";
 		}
 		if($q != '') $q .= ',';
 		$q .= "({$report['id']},'$type','$x',$vals)";
@@ -358,7 +368,7 @@ function report_save_field($mysqli, $report, $type)
  function report_load($mysqli, $report_id)
  {
  	global $report_options;
- 	global $allow_options, $report_students_fields, $report_judges_fields;
+ 	global $report_students_fields, $report_judges_fields;
 	global $report_committees_fields, $report_awards_fields;
 	global $report_schools_fields, $report_volunteers_fields;
 	global $report_tours_fields, $report_fairs_fields;
@@ -395,7 +405,7 @@ function report_save_field($mysqli, $report, $type)
 		case 'option':
 			/* We dont' care about order, just construct
 			 * ['option'][name] = value; */
-//			if(!in_array($f, $allow_options)) {
+//			if(!array_key_exists($f, $report_options)) {
 //				print("Type[$type] Field[$f] not allowed.\n");
 //				continue;
 //			}
@@ -448,6 +458,11 @@ function report_save_field($mysqli, $report, $type)
 			$report['option'][$o] = $d['default'];
 		}
 	}
+
+	unset($report['original']);
+	$original = $report;
+	$report['original'] = $original;
+
 	return $report;
  }
 
@@ -731,7 +746,7 @@ function report_save_field($mysqli, $report, $type)
 		}
 		$t = $filter_ops[$d['x']];
 		$filter[] = "{$fields[$f]['table']} $t '{$d['value']}'";
-		if(is_array($fields[$f]['components'])) { 
+		if(array_key_exists('components', $fields[$f])) { 
 			$components = array_merge($components, 
 					$fields[$f]['components']);
 		}
@@ -798,7 +813,7 @@ function report_save_field($mysqli, $report, $type)
 				$c = $fieldname[$g['field']];
 
 				if(array_key_exists('exce_function', $fields[$g['field']]))
-					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($report,$f,$i[$c]));
+					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($mysqli,$report,$f,$i[$c]));
 				else
 					$i_c=$i[$c];
 
@@ -841,19 +856,37 @@ function report_save_field($mysqli, $report, $type)
 
 		foreach($report['col'] as $o=>$d) {
 			$f = $d['field'];
+
+			/* Get the final value through a value map, funciton, or directly
+			 * from the SQL query */
 			if(array_key_exists('value_map', $fields[$f])) {
 				if(array_key_exists($i["C$o"], $fields[$f]['value_map']))
 					$v = $fields[$f]['value_map'][$i["C$o"]];
 				else
 					$v = 'n/a';
 			} else if(array_key_exists('exec_function', $fields[$f])) {
-				$v = call_user_func_array($fields[$f]['exec_function'], array($report, $f, $i["C$o"]));
+				$v = call_user_func_array($fields[$f]['exec_function'], array($mysqli, &$report, $f, $i["C$o"]));
 //			} else if(isset($fields[$f]['exec_code'])) {
 //				Somethign like this, how do we pass $i["C$o"] in?
 //				$v = exec($fields[$f]['exec_code']);
 			} else {
 				$v =  $i["C$o"];
 			}
+
+			/* Before reformatting (i.e., while the value might still be a number), 
+			 * add to total */
+			if(array_key_exists('total', $fields[$f])  && $fields[$f]['total'] == true) {
+				if(array_key_exists('format', $fields[$f])) 
+					$table['total_format'] = $fields[$f]['format'];
+				$table['total'] += $v;
+			}
+
+			/* Reformat if requested after we have the value */
+			if(array_key_exists('format', $fields[$f])) {
+				$v = sprintf($fields[$f]['format'], $v);
+			}
+
+			/* Format as apporpriate for the report type */
 			if($gen_mode == 'table') {
 				$data[$f] = $v;
 			} else if($gen_mode == 'label') {
@@ -897,8 +930,6 @@ function report_save_field($mysqli, $report, $type)
 				}
 			}
 
-			if(array_key_exists('total', $fields[$f])  && $fields[$f]['total'] == true) 
-				$table['total'] += $v;
 		}
 		if(count($data)) $table['data'][] = $data;
 	}

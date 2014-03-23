@@ -525,11 +525,17 @@ class pdf extends TCPDF {
 		}
 
 		$cols = count($table['fields']);
+
+		$t = count($table['data']);
+		$txt = "(Rows: $t)";
+
 		if($table['total'] != 0) {
-			$txt = "(Total: {$table['total']})";
-		} else {
-			$t = count($table['data']);
-			$txt = "(Rows: $t)";
+			if(array_key_exists('total_format', $table)) {
+				$total = sprintf($table['total_format'], $table['total']);
+			} else {
+				$total =  $table['total'];
+			}
+			$txt .= " (Total: $total)";
 		}
 		$html .= "<tr><td colspan=\"$cols\" style=\"border-top:1px solid black\" align=\"right\">$txt</td></tr>";
 		$html .= '</table>';

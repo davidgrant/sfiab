@@ -20,25 +20,28 @@
    the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.
 */
+require_once('common.inc.php');
+require_once('project.inc.php');
+require_once('user.inc.php');
 
-function report_students_i18n_fr(&$report, $field, $text)
+function report_students_i18n_fr($mysqli, &$report, $field, $text)
 {
 	return i18n($text, array(), array(), 'fr');
 }
 
-function report_student_cash_words(&$report, $field, $text) {
+function report_student_cash_words($mysqli, &$report, $field, $text) {
 	return wordify($text, true);
 }
 
-function report_student_cash_cheque(&$report, $field, $text) {
+function report_student_cash_cheque($mysqli, &$report, $field, $text) {
 	return sprintf("\$***%0.2f", $text);
 }
 
-function report_student_get_date_today(&$report, $field, $text) {
+function report_student_get_date_today($mysqli, &$report, $field, $text) {
 	return format_date(time());
 }
 
-function report_student_get_date_today_for_cheques(&$report, $field, $text) {
+function report_student_get_date_today_for_cheques($mysqli, &$report, $field, $text) {
 	global $config;
 	$format = $config['cheque_date_format'];
 	$format = str_replace(array('YYYY', 'MM', 'DD'), array('Y', 'm', 'd'), $format);
@@ -48,12 +51,12 @@ function report_student_get_date_today_for_cheques(&$report, $field, $text) {
 	return implode(' ', preg_split('//', date($format), -1));
 }
 
-function report_student_get_cheque_date_format(&$report, $field, $text){
+function report_student_get_cheque_date_format($mysqli, &$report, $field, $text){
 	global $config;
 	return implode('  ', preg_split('//', $config['cheque_date_format'], -1));
 }
 
-function reports_students_numstudents(&$report, $field, $text)
+function reports_students_numstudents($mysqli, &$report, $field, $text)
 {
 	$year = $report['year'];
 	$q = mysql_query("SELECT users.id FROM students 
@@ -62,7 +65,7 @@ function reports_students_numstudents(&$report, $field, $text)
 	return mysql_num_rows($q);
 }
 
-function reports_students_award_selfnom_num(&$report, $field, $text, $n)
+function reports_students_award_selfnom_num($mysqli, &$report, $field, $text, $n)
 {
 	$year = $report['year'];
 	$q = mysql_query("SELECT award_awards.name FROM 
@@ -77,27 +80,27 @@ function reports_students_award_selfnom_num(&$report, $field, $text, $n)
 	$i = mysql_fetch_assoc($q);
 	return $i['name'];
 }
-function reports_students_award_selfnom_1(&$report, $field, $text)
+function reports_students_award_selfnom_1($mysqli, &$report, $field, $text)
 {
 	return reports_students_award_selfnom_num($report, $field, $text, 0);
 }
-function reports_students_award_selfnom_2(&$report, $field, $text)
+function reports_students_award_selfnom_2($mysqli, &$report, $field, $text)
 {
 	return reports_students_award_selfnom_num($report, $field, $text, 1);
 }
-function reports_students_award_selfnom_3(&$report, $field, $text)
+function reports_students_award_selfnom_3($mysqli, &$report, $field, $text)
 {
 	return reports_students_award_selfnom_num($report, $field, $text, 2);
 }
-function reports_students_award_selfnom_4(&$report, $field, $text)
+function reports_students_award_selfnom_4($mysqli, &$report, $field, $text)
 {
 	return reports_students_award_selfnom_num($report, $field, $text, 3);
 }
-function reports_students_award_selfnom_5(&$report, $field, $text)
+function reports_students_award_selfnom_5($mysqli, &$report, $field, $text)
 {
 	return reports_students_award_selfnom_num($report, $field, $text, 4);
 }
-function reports_students_school_principal(&$report, $field, $text)
+function reports_students_school_principal($mysqli, &$report, $field, $text)
 {
 	$year = $report['year'];
 	if($text > 0) { /* text is the uid */
@@ -107,7 +110,8 @@ function reports_students_school_principal(&$report, $field, $text)
 	return '';
 }
 
-function report_student_regfee_item(&$report, $field, $text) {
+function report_student_regfee_item($mysqli, &$report, $field, $text)
+{
 	$year = $report['year'];
 	$id=intval(substr($field,12));
 	$q=mysql_query("SELECT regfee_items_id FROM regfee_items_link WHERE students_id='$text' AND regfee_items_id='$id'");
@@ -139,6 +143,15 @@ function report_student_regfee_item(&$report, $field, $text) {
  }
 
 */
+
+function reports_students_registration_fee($mysqli, &$report, $field, $text)
+{
+	$p = project_load($mysqli, $text);
+	$users = user_load_all_for_project($mysqli, $p['pid']);
+	
+	list($regfee, $regfee_data) = compute_registration_fee($mysqli, $p, $users);
+	return (float)$regfee;
+}
 
 $report_students_fields = array(
 	'pn' => array(
@@ -452,6 +465,15 @@ $report_students_fields = array(
 		'header' => 'Special Requirements',
 		'width' => 3,
 		'table' => "projects.req_special"),
+
+	'regfee' => array(
+		'name' => 'Project -- Registration Fee (for the project, incl. all students)',
+		'header' => 'RegFee',
+		'width' => 1,
+		'total' => true,
+		'table' => 'users.s_pid',
+		'format' => '$%.02f',
+		'exec_function' => 'reports_students_registration_fee'),
 
 	'school' =>  array(
 		'start_option_group' => 'School Information',
