@@ -141,9 +141,9 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 <?php
 	form_select_optgroup($form_id, 'rid', 'Report', $report_sec, $rid);
 	form_button($form_id, 'load', 'Load');
-	form_button($form_id, 'dupe', 'Duplicate');
-	form_button($form_id, 'try', 'Try');
-	form_button($form_id, 'delete', 'Delete');
+//	form_button($form_id, 'dupe', 'Duplicate');
+//	form_button($form_id, 'try', 'Try');
+//	form_button($form_id, 'delete', 'Delete');
 
 	form_end($form_id);
 
@@ -152,11 +152,10 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 		$r = report_load($mysqli, $rid);
 		$fieldvar = "report_{$r['type']}s_fields";
 		$fields = $$fieldvar;
-/*
+
 		print("<div data-role=collapsible data-collapsed=true><h3>debug</h3><pre>");
 		print_r($r);
 		print("</pre></div>");
-		*/
 ?>
 		<hr/>
 
@@ -218,14 +217,14 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 <?php		for($x=0; $x<3; $x++) {
 			if(array_key_exists($x, $r['filter'])) {
 				$f = $r['filter'][$x]['field'];
-				$op = $r['filter'][$x]['x'];
+				$op = (int)$r['filter'][$x]['x'];
 				$v = $r['filter'][$x]['value'];
 			} else {
 				$f = ''; $op = ''; $v = '';
 			}
 			form_select_optgroup($form_id, "filter[$x][field]", 'Filter '.($x+1).' Column', $report_fields, $f);
 			form_select($form_id, "filter[$x][x]", 'Filter '.($x+1).' Op', $report_filter_ops, $op);
-			form_text($form_id, "filter[$x][value]", 'Filter '.($x+1).' Value', $val);
+			form_text($form_id, "filter[$x][value]", 'Filter '.($x+1).' Value', $v);
 		}
 
 ?>		<h4>Options</h4>

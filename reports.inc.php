@@ -342,11 +342,7 @@ function report_save_field($mysqli, $report, $type)
 			$f_fontsize = array_key_exists('fontsize', $v) ? "'".((float)$v['fontsize'])."'" : "'0'";
 			$f_on_overflow = array_key_exists('on_overflow', $v) ? "'".$mysqli->real_escape_string($v['on_overflow'])."'" : "''";
 			if(array_key_exists('fontstyle', $v)) {
-				$a = array();
-				foreach($v['fontstyle'] as $s) {
-					$a[] = "'".$mysqli->real_escape_string($s)."'";
-				}
-				$f_fontstyle = implode(',', $a);
+				$f_fontstyle = "'".$mysqli->real_escape_string(implode(',', $v['fontstyle']))."'";
 			} else {
 				$f_fontstyle = "''";
 			}
@@ -483,8 +479,8 @@ function report_save_field($mysqli, $report, $type)
 			 * cannot save this report.  The only way to get here
 			 * is by directly modifying the POST variables.. so..
 			 * we don't have to worry about being user friendly. */
-			echo "ERROR: attempt to save a system report (reports.id={$report['id']})";
-			exit;
+//			echo "ERROR: attempt to save a system report (reports.id={$report['id']})";
+//			exit;
 		}
 	}
 
