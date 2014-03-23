@@ -553,7 +553,7 @@ function report_save_field($mysqli, $report, $type)
 	global $report_stock, $report_committees_fields, $report_volunteers_fields;
 	global $report_tours_fields, $report_fairs_fields;
 	global $report_fundraisings_fields;
-	global $filter_ops;
+	global $report_filter_ops;
 
 //	print("<pre>");
 //	print_r($report);
@@ -740,7 +740,7 @@ function report_save_field($mysqli, $report, $type)
 			$sel[] =  "{$fields[$f]['table']} AS F$o";
 			$fieldname[$f] = "F$o";
 		}
-		$t = $filter_ops[$d['x']];
+		$t = $report_filter_ops[$d['x']];
 		$filter[] = "{$fields[$f]['table']} $t '{$d['value']}'";
 		if(array_key_exists('components', $fields[$f])) { 
 			$components = array_merge($components, 
