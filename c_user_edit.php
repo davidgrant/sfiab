@@ -38,6 +38,16 @@ case 'save':
 	post_text($edit_u['email'], 'email');
 	post_text($edit_u['username'], 'username');
 	post_bool($edit_u['not_attending'], 'not_attending');
+	post_text($edit_u['reg_close_override'], 'reg_close_override');
+
+	if($edit_u['reg_close_override'] !== NULL) {
+		$d = date_parse($edit_u['reg_close_override']);
+		if($d['year'] > 1900 && $d['month'] > 0 && $d['day'] > 0) {
+			$edit_u['reg_close_override'] = sprintf("%04d-%02d-%02d 23:59:59", $d['year'], $d['month'], $d['day']);
+		} else {
+			$edit_u['reg_close_override'] = NULL;
+		}
+	}
 	user_save($mysqli, $edit_u);
 	form_ajax_response(array('status'=>0, 'location'=>'back'));
 	exit();
@@ -114,6 +124,7 @@ form_page_begin($page_id, array());
 	form_text($form_id, 'username', 'Username', $edit_u);
 	$sel = array('0'=>'Yes, I\'ll be there', '1'=>'No, I can\'t make it');
 	form_radio_h($form_id, 'not_attending', "At the fair", $sel, $edit_u['not_attending']);
+	form_text($form_id, 'reg_close_override', "Registration Close Override", $edit_u, 'date');
 	form_submit($form_id, 'save', 'Save and Go Back', 'User Saved');
 ?>
 	<a href="#" data-role="button" data-inline="true" data-icon="back" data-rel="back" data-theme="r">Cancel</a>
