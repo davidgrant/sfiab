@@ -487,7 +487,7 @@ class pdf extends TCPDF {
 
 				/* Convert all entities to HTML, even UTF characters.  Without this
 				 * TCPDF won't add a table if it has a UTF char */
-				$d = htmlentities($row[$f]);
+				$d = htmlentities(utf8_decode($row[$f]));
 
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell
