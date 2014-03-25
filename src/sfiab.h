@@ -31,4 +31,6 @@ struct _category *category_find(int cat_id);
 
 void isef_divisions_load(struct _db_data *db, int year);
 
+int split_int_list(int *list, char *str);
+
 #endif

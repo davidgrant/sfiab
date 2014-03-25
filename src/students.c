@@ -17,25 +17,6 @@ GPtrArray *projects = NULL;
 GPtrArray *judges = NULL;
 GPtrArray *awards = NULL;
 
-int l_split_int_list(int *list, char *str)
-{
-	int i = 0;
-	char *p;
-	while(1) {
-		/* Find a comma and null it out */
-		p = strchr(str, ',');
-		if(p) *p = 0;
-		/* Convert everythign up to the comma(or everything if comma not found */
-		list[i] = atoi(str);
-		i++;
-
-		/* Set str forward to where the comma was */
-		if(!p) break;
-		str = p+1;
-	}
-	return i;
-}
-
 void students_load(struct _db_data *db, int year)
 {
 	struct _db_result *result;
@@ -62,7 +43,7 @@ void students_load(struct _db_data *db, int year)
 		prefs = db_fetch_row_field(result, x, "tour_id_pref");
 		for(i=0;i<3;i++) 
 			s->tour_id_pref[i] = -1;
-		i = l_split_int_list(s->tour_id_pref, prefs);
+		i = split_int_list(s->tour_id_pref, prefs);
 		if(i > 3) {
 			printf("ERROR: Student \"%s\" managed to select more than 3 tour prefs\n", s->name);
 			assert(0);
@@ -176,7 +157,7 @@ void judges_load(struct _db_data *db, int year)
 		j->index = x;
 		j->sa_only = atoi(db_fetch_row_field(result, x, "j_sa_only"));
 		if(j->sa_only) {
-			j->num_sa = l_split_int_list(j->sa, db_fetch_row_field(result, x, "j_sa"));
+			j->num_sa = split_int_list(j->sa, db_fetch_row_field(result, x, "j_sa"));
 			if(i > 16) {
 				printf("ERROR: judge %s managed to select more than 16 (=%d) j_sa awards\n", j->name, i);
 				assert(0);
@@ -202,7 +183,7 @@ void judges_load(struct _db_data *db, int year)
 
 		/* Turn the list of available rounds into a mask */
 		memset(j->available_in_round, 0, sizeof(int) * 8);
-		i = l_split_int_list(jround, db_fetch_row_field(result, x, "j_rounds"));
+		i = split_int_list(jround, db_fetch_row_field(result, x, "j_rounds"));
 		for(y=0; y<i; y++) {
 			j->available_in_round[jround[y]] = 1;
 		}
@@ -279,7 +260,7 @@ void awards_load(struct _db_data *db, int year)
 			a->is_special = 1;
 
 		p = db_fetch_row_field(result, x, "categories");
-		a->num_cats = l_split_int_list(a->cats, p);
+		a->num_cats = split_int_list(a->cats, p);
 
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", j->name, j->grade, j->schools_id, j->tour_id_pref[0], j->tour_id_pref[1], j->tour_id_pref[2], j->id);
 		g_ptr_array_add(awards, a);

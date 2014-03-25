@@ -11,6 +11,7 @@
 #include "tours.h"
 #include "students.h"
 #include "judges.h"
+#include "exhibithall.h"
 
 int main(int argc, char **argv) 
 {
@@ -26,6 +27,9 @@ int main(int argc, char **argv)
 	} else if(strcmp(argv[1], "judges") == 0) {
 		printf("Judges\n");
 		judges_anneal(db, year);
+	} else if(strcmp(argv[1], "eh") == 0) {
+		printf("Exhibit Hall\n");
+		exhibithall_anneal(db, year);
 	}
 
 	db_close(db);

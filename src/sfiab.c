@@ -15,6 +15,27 @@
 GPtrArray *categories = NULL;
 GPtrArray *isef_divisions = NULL;
 
+
+int split_int_list(int *list, char *str)
+{
+	int i = 0;
+	char *p;
+	while(1) {
+		/* Find a comma and null it out */
+		p = strchr(str, ',');
+		if(p) *p = 0;
+		/* Convert everythign up to the comma(or everything if comma not found */
+		list[i] = atoi(str);
+		i++;
+
+		/* Set str forward to where the comma was */
+		if(!p) break;
+		str = p+1;
+	}
+	return i;
+}
+
+
 void categories_load(struct _db_data *db, int year)
 {
 	int x;

@@ -30,9 +30,6 @@ function filter_float_or_null(&$val)
 	if(is_null($val)) return;
 	$val = (float)$val;
 }
-
-
-
 function filter_phone(&$val)
 {
 	$ret = preg_match('/.*1?[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9])[^0-9]*([0-9][0-9][0-9][0-9]) *(.*)/', $val, $matches);
@@ -40,6 +37,16 @@ function filter_phone(&$val)
 		$val = "{$matches[1]}-{$matches[2]}-{$matches[3]} {$matches[4]}";
 	} else {
 		$val = NULL;
+	}
+}
+function filter_int_list(&$val)
+{
+	if(is_array($val)) return;
+	if($val === NULL or $val == '') {
+		$val = array();
+	} else {
+		$v = $val;
+		$val = explode(',', $v);
 	}
 }
 

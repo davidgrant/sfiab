@@ -19,13 +19,13 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
+$awards = award_load_special_for_select($mysqli);
+
 switch($action) {
 case 'save':
 	post_bool($u['j_sa_only'], 'j_sa_only');
 	if($u['j_sa_only']) {
-		post_int($u['j_sa'][0], 'j_sa');
-		post_int($u['j_sa'][1], 'j_sa2');
-		post_int($u['j_sa'][2], 'j_sa3');
+		post_array($u['j_sa'], 'j_sa', $awards);
 		$u['j_pref_div1'] = NULL;
 		$u['j_pref_div2'] = NULL;
 		$u['j_pref_div3'] = NULL;
@@ -34,7 +34,7 @@ case 'save':
 		$u['j_years_regional'] = NULL;
 		$u['j_years_national'] = NULL;
 	} else {
-		$u['j_sa'] = array(NULL, NULL, NULL);
+		$u['j_sa'] = array();
 		post_int($u['j_pref_div1'], 'j_pref_div1');
 		post_int($u['j_pref_div2'], 'j_pref_div2');
 		post_int($u['j_pref_div3'], 'j_pref_div3');
@@ -97,10 +97,11 @@ sfiab_page_begin("Expertise", $page_id, $help);
 		Note: Our chief judge will double-check with anyone who selects 'Yes' here to ensure they
 		are a sponsor for a special award.  If you are not sure then you are probably not a Sponsor judge.
 <?php
-		$awards = award_load_special_for_select($mysqli);
-		form_select($form_id, 'j_sa', "Special Award", $awards, $u['j_sa'][0]);
-		form_select($form_id, 'j_sa2', "Special Award", $awards, $u['j_sa'][1]);
-		form_select($form_id, 'j_sa3', "Special Award", $awards, $u['j_sa'][2]);
+
+		for($x=0;$x<3;$x++) {
+			$sa = ($x < count($u['j_sa'])) ? (int)$u['j_sa'][$x] : -1;
+			form_select($form_id, 'j_sa[]', "Special Award", $awards, $sa);
+		}
 ?>		
 	</div>
 

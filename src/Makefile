@@ -44,6 +44,7 @@ force: ;
 
 C_SRCS= anneal.c\
 	db.c \
+	exhibithall.c \
 	judges.c \
 	main.c\
 	sfiab.c\
@@ -52,6 +53,7 @@ C_SRCS= anneal.c\
 
 H_FILES=anneal.h\
 	db.h\
+	exhibithall.h\
 	judges.h\
 	sfiab.h\
 	students.h\

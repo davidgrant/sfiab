@@ -145,17 +145,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 		}
 	}
 
-	if($u['j_sa'] === NULL)
-		$u['j_sa'] = array(NULL,NULL,NULL);
-	else {
-		$a = explode(',',$u['j_sa']);
-		$u['j_sa'] = array(NULL, NULL, NULL);
-		$i = 0;
-		foreach($a as $id) {
-			$u['j_sa'][$i] = $id;
-			$i++;
-		}
-	}
+	filter_int_list($u['j_sa']);
 
 	if($u['j_languages'] === NULL)
 		$u['j_languages'] = array();
