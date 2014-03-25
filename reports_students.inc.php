@@ -494,13 +494,13 @@ $report_students_fields = array(
 		'name' => 'School -- Teacher Name (as entered by the student)',
 		'header' => 'Teacher',
 		'width' => 1.5,
-		'table' => 'users.teachername' ),
+		'table' => 'users.s_teacher' ),
 
 	'teacheremail' => array(
 		'name' => 'School -- Teacher Email (as entered by the student)',
 		'header' => 'Teacher Email',
 		'width' => 2.0,
-		'table' => 'users.teacheremail' ),
+		'table' => 'users.s_teacheremail' ),
 
 	'school_phone' => array(
 		'name' => 'School -- Phone',
