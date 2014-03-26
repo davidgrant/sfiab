@@ -29,15 +29,18 @@ struct _point {
 
 struct _exhibithall_object {
 	int id;
+	int index;
 	char *name;
 	char has_electricity;
+	int floor_number;
 	struct _point p, gfront;
 	int w, h;
 	int orientation;
 	struct _exhibithall *eh;
 
-	struct _exhibithall_objects *closest_proejcts[MAX_CLOSEST];
+	struct _exhibithall_object *closest_projects[MAX_CLOSEST];
 	int closest_projects_distance[MAX_CLOSEST];
+	int closest_projects_count;
 };
 
 struct _exhibithall {
@@ -50,7 +53,7 @@ struct _exhibithall {
 	int w,h;
 	int grid_w, grid_h;
 	GPtrArray **objects_at;
-	struct _exhibithall_object **project_front;
+	struct _exhibithall_object **project_front_at;
 
 	GPtrArray *project_objects;
 
@@ -106,116 +109,158 @@ int l_distance(struct _point p1, struct _point p2)
 {
 	return sqrt( (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) );
 }
-int l_grid_distance(struct _point p1, struct _point p2)
+
+int exhibithall_propose_move(struct _annealer *annealer, struct _anneal_move *move)
 {
-	return sqrt( ((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) )*grid_size );
+	/* Permit 2 move types:
+	 * 1. move to empty
+	 * 2. swap
+	 * Don't allow multiple items in the same bucket */
+	struct _project *p1, *p2;
+	struct _anneal_bucket *bucket;
+
+	/* Find a bucket with something in it */
+	while(1) {
+		move->b1 = rand() % (annealer->num_buckets);
+		bucket = &annealer->buckets[move->b1];
+		if(bucket->items->len == 1) break;
+	}
+	p1 = g_ptr_array_index(bucket->items, 0);
+	move->i1 = p1->index;
+	move->p1 = p1;
+
+	/* Choose any second bucket */
+	move->b2 = rand() % (annealer->num_buckets - 1);
+	if(move->b1 == move->b2) move->b2++;
+
+	/* Either swap of do a one-sided move */
+	bucket = &annealer->buckets[move->b2];
+	if(bucket->items->len == 0) {
+		move->i2 = -1;
+		move->p2 = NULL;
+	} else {
+		p2 = g_ptr_array_index(bucket->items, 0);
+		move->i2 = p2->index;
+		move->p2 = p2;
+	}
+
+	assert(move->i1 < (int)projects->len);
+	assert(move->i2 < (int)projects->len);
+
+
+	return 0;
 }
 
-int l_grid_manhat_distance(struct _point p1, struct _point p2)
-{
-	return (labs(p1.x - p2.x) + labs(p1.y - p2.y))*grid_size;
-}
-
-int l_manhat_distance(struct _point p1, struct _point p2)
-{
-	return labs(p1.x - p2.x) + labs(p1.y - p2.y);
-}
-
-
-#if 0
 float exhibithalls_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bucket)
 {
-/* The cost function is:
-	- Foreach student in a exhibithall
-		+15 - Above the grade level
-		+25 - Below the grade level
-		+2 - Noone from the same school
-		If ranked (rank=1,2,3,4,...):
-		+(rank*rank*5 - 5) = +0, +15, +40, +75
-		If not ranked and max choices specified
-		+(max_choices*max_choices*5) (always greater than ranked)
-		else max choices not specified 
-		+((max_choices-1)*(max_choices-1)*5)
-	- Foreach exhibithall
-		+100 for each student above the capacity
-		+200 for each student below 1/4 the capacity,but
-			zero if the exhibithall is empty
-
-Notes:
-	- If a student doesn't fill in all their choices, we don't want to give
-	  them an unfair scheduling advantage.  They'll significantly increase
-	  the cost if they don't get their chosen exhibithall, whereas someone who
-	  specifies all the choices will gradually increase the cost.  So, we
-	  want to make it "more ok" for the annealer to place someone who
-	  hasn't ranked their max number of exhibithalls in any exhibithall, and make it
-	  "less ok" for someone who has specified all the rankings to be placed
-	  anywhere. 
-*/
-
-
-	int x;
+	int x, i, j;
 	float cost = 0;
+	int school_matches, chal_matches;
+	int grade_min, grade_max;
 
-	/* Each bucket is a exhibithall that maps 1:1 to the exhibithalls list */
-	struct _exhibithall *t = g_ptr_array_index(exhibithalls, bucket_id);
+	/* Each bucket is a floor location that maps 1:1 to the exhibithall_objects list, there
+	 * should only be one object in each floor location */
+	struct _exhibithall_object *o = g_ptr_array_index(exhibithall_objects, bucket_id);
+	struct _exhibithall *eh = o->eh;
+	struct _project *p;
 
-	if(bucket->len < t->capacity_min) {
-		/* Under capacity */
-		int under_by = t->capacity_min - bucket->len;
-		cost += 200 * under_by;
-	}
 
-	if(bucket->len > t->capacity_max) {
-		/* Over capacity */
-		int over_by = bucket->len - t->capacity_max;
-		cost += 100 * over_by;
-	}
+	if(bucket->len == 0) 
+		return 0;
 
-//	TRACE("Under min=$min, over max=$max\n");
-//	TRACE("($bucket_id) {$t['id']} #{$t['num']} {$t['name']}  (cap:{$t['capacity']} grade:{$t['grade_min']}-{$t['grade_max']})\n");
-//
-	/* Buckets are students, compute the cost of this bucket */
-	for(x=0;x<bucket->len;x++) {
-		struct _student *s = g_ptr_array_index(bucket, x);
-		int i, match;
-		int rank_cost = -1;
+	if(bucket->len > 1) 
+		return 10000;
 
-		/* See if this student has ranked this exhibithall */
-		for(i=0;i<3;i++) {
-			if(s->exhibithall_id_pref[i] == t->id || s->exhibithall_id_pref[i] == -1) {
-				/* Yes (or unranked slot found) */
-				rank_cost = i * i * 5;
-				break;
+	school_matches = 0;
+	chal_matches = 0;
+	grade_min = 100;
+	grade_max = 0;
+
+
+	p = g_ptr_array_index(bucket, 0);
+
+//	printf("Cost for bucket %d, len=%d, p->index=%d\n", bucket_id, bucket->len, p->index);
+
+	for(x=0;x<o->closest_projects_count;x++) {
+		struct _exhibithall_object *nearby_o = o->closest_projects[x];
+//		int nearby_d = o->closest_projects_distance[x];
+
+		GPtrArray *nearby_bucket = annealer->buckets[nearby_o->index].items;
+		struct _project *nearby_p;
+
+		if(nearby_bucket->len != 1) continue;
+
+		nearby_p = g_ptr_array_index(nearby_bucket, 0);
+
+		for(i = 0; i<p->num_students; i++) {
+			for(j=0;j<nearby_p->num_students;j++) {
+				if(p->students[i]->schools_id == nearby_p->students[j]->schools_id) {
+					if(x < 5) {
+						school_matches++;
+						i = p->num_students;
+						break;
+					}
+
+				}
 			}
 		}
 
-		if(rank_cost == -1) {
-			/* No match and no empty slots, this student really shoudln't be here */
-			rank_cost = 3 * 3 * 5;
+		if(p->challenge_id == nearby_p->challenge_id) {
+			if(x<5) chal_matches++;
 		}
 
-		cost += rank_cost;
-
-		if(s->grade < t->grade_min) cost += 15;
-		if(s->grade > t->grade_max) cost += 25;
-
-		/* Find another student from the same school */
-		match = 0;
-		for(i=0;i<bucket->len;i++) {
-			struct _student *s2 = g_ptr_array_index(bucket, i);
-			if(x==i) continue;
-			if(s->schools_id == s2->schools_id) {
-				match = 1;
-				break;
-			}
+		for(i = 0; i<p->num_students; i++) {
+			if(p->students[i]->grade < grade_min) grade_min = p->students[i]->grade;
+			if(p->students[i]->grade > grade_max) grade_max = p->students[i]->grade;
 		}
-		if(!match) {
-			cost += 2;
+		for(j=0;j<nearby_p->num_students;j++) {
+			if(nearby_p->students[j]->grade < grade_min) grade_min = nearby_p->students[j]->grade;
+			if(nearby_p->students[j]->grade > grade_max) grade_max = nearby_p->students[j]->grade;
 		}
 	}
+
+	if(school_matches == 0) {
+		cost += 5;
+	}
+
+	if(school_matches > 2)
+		cost += 2 * (school_matches - 1);
+	
+	if(chal_matches < 2) 
+		cost += 20;
+
+	if(chal_matches > 2)
+		cost += 10 * (chal_matches - 2);
+	
+	if(grade_max - grade_min > 0)
+		cost += 50 * (grade_max - grade_min);
+
+	if(p->req_electricity && !o->has_electricity) {
+//		printf("   electricity mismatch\n");
+		cost += 1000;
+	}
+
+
+	for(i=0;i<eh->num_cats;i++) {
+		if(eh->cats[i] == p->cat_id) break;
+	}
+	if(i == eh->num_cats) {
+/*		printf("   cats mismatch (i=%d, numcats=%d, p cat=%d, %s cats: ", i, eh->num_cats, p->cat_id, eh->name);
+		for(i=0;i<eh->num_cats;i++) {
+			printf("%d ", eh->cats[i]);
+		}
+		printf(")\n");
+*/			
+		cost += 1000;
+	}
+
+	if(cost >= 1000) {
+//		printf("cost=%f\n", cost);
+	}
+
 	return cost;
+
 }
-#endif
 
 void exhibithalls_load(struct _db_data *db, int year)
 {
@@ -252,6 +297,8 @@ void exhibithalls_load(struct _db_data *db, int year)
 	result = db_query(db, "SELECT * FROM exhibithall WHERE `type`='project'");
 	for(x=0;x<result->rows; x++) {
 		struct _exhibithall_object *t = malloc(sizeof(struct _exhibithall_object));
+		t->index = x;
+		t->floor_number = db_fetch_row_field_int(result, x, "floornumber");
 		t->id = atoi(db_fetch_row_field(result, x, "id"));
 		t->name = strdup(db_fetch_row_field(result, x, "name"));
 		t->has_electricity = atoi(db_fetch_row_field(result, x, "has_electricity"));
@@ -261,6 +308,7 @@ void exhibithalls_load(struct _db_data *db, int year)
 		t->w = atof(db_fetch_row_field(result, x, "w")) * 1000.0;
 		t->h = atof(db_fetch_row_field(result, x, "h")) * 1000.0;
 		t->orientation = atof(db_fetch_row_field(result, x, "orientation"));
+		t->closest_projects_count = 0;
 		printf("%d: %s:%s, (%d,%d) %dx%d @ %d, has_elec=%d\n", t->id, t->eh->name, t->name, 
 				t->p.x, t->p.y, t->w, t->h, t->orientation, t->has_electricity);
 		g_ptr_array_add(exhibithall_objects, t);
@@ -348,7 +396,7 @@ void l_compute_project_front_grid_locations(void)
 				if(x==o->eh->grid_w || y==o->eh->grid_h) continue;
 
 				if(o->eh->objects_at[gi]->len > 0) continue;
-				if(o->eh->project_front[gi] != NULL) continue;
+				if(o->eh->project_front_at[gi] != NULL) continue;
 
 				d = l_distance(front, grid_loc);
 
@@ -369,7 +417,7 @@ void l_compute_project_front_grid_locations(void)
 		o->gfront.y = smallest_gy;
 
 		gi = grid_index(o->eh, o->gfront);
-		o->eh->project_front[gi] = o;
+		o->eh->project_front_at[gi] = o;
 	}
 }
 
@@ -377,8 +425,8 @@ struct _grid_data {
 	int g_score;
 	int f_score;
 	int visited;
+	int queued;
 	struct _point gp;
-	struct _point p;
 };
 
 gint l_compute_path_grid_date_compare_func(gconstpointer a, gconstpointer b, gpointer user)
@@ -387,46 +435,60 @@ gint l_compute_path_grid_date_compare_func(gconstpointer a, gconstpointer b, gpo
 	return ga->f_score - gb->f_score;
 }
 
-int l_compute_path(struct _exhibithall_object *src_o)
+int l_compute_closest_projects(struct _exhibithall_object *src_o, int n)
 {
 	struct _exhibithall *eh = src_o->eh;
-	struct _point gsrc = src_o->gfront;
-	struct _point gdst = dst_o->gfront;
 	GQueue *queue;
 	int gi, i;
 	int ret;
 
-	struct _grid_data *grid_data, *dst_grid_data, *gd;
+	struct _grid_data *grid_data, *gd, *gd_src;
 	grid_data = malloc(sizeof(struct _grid_data) * eh->grid_w * eh->grid_h);
 	memset(grid_data, 0, sizeof(struct _grid_data) * eh->grid_w * eh->grid_h);
 
-//	printf("Compute path from (%d,%d) to (%d,%d) with object avoidance\n", gsrc.x, gsrc.y, gdst.x, gdst.y);
+//	printf("Compute path from (%d,%d) to %d closest objects with object avoidance\n", src_o->gfront.x, src_o->gfront.y, n);
 
 	queue = g_queue_new();
 
-	gi = grid_index(eh, dst_o->gfront);
-	dst_grid_data = &grid_data[gi];
-
 	gi = grid_index(eh, src_o->gfront);
 	gd = &grid_data[gi];
-	gd->visited = 1;
-	gd->f_score = l_manhat_distance(src_o->front, dst_o->front);
-	gd->gp = gsrc;
+	gd->f_score = 0;
+	gd->g_score = 0;
+	gd->gp = src_o->gfront;
+	gd_src = gd;
 
+	/* Setup a queue with just the first grid_data pointer */
 	g_queue_push_tail(queue, gd);
 
+	ret = 0;
 	while(queue->length > 0) {
 		int dx, dy;
 		gd = g_queue_pop_head(queue);
 
+		if(gd->visited) continue;
+		gd->visited = 1;
+
+		gi = grid_index(eh, gd->gp);
+
 //		printf("Dequeue (%d,%d), f=%d, g=%d\n", gd->gp.x, gd->gp.y, gd->f_score, gd->g_score);
 
-		if(gd == dst_grid_data) {
-			ret = gd->g_score;
-			break;
-		}
+	
+		if(gd != gd_src && eh->project_front_at[gi] != NULL) {
+			/* Found one */
+			struct _exhibithall_object *dst_o = eh->project_front_at[gi];
+			src_o->closest_projects[src_o->closest_projects_count] = dst_o;
+			src_o->closest_projects_distance[src_o->closest_projects_count] = gd->g_score;
+			src_o->closest_projects_count++;
 
-		gd->visited = 1;
+//			printf("   Closest project[%d] = %s at distance %d\n", 
+//					src_o->closest_projects_count - 1, dst_o->name, gd->g_score);
+
+			/* Smallest distance */
+			if(ret == -1) ret = gd->g_score;
+
+			if(src_o->closest_projects_count == n) break;
+		}
+	
 
 		for(i=0;i<4;i++) {
 			struct _point neighbour_gp;
@@ -455,12 +517,10 @@ int l_compute_path(struct _exhibithall_object *src_o)
 			if(ngd->visited) continue;
 
 			ngd->gp = neighbour_gp;
-			ngd->p.x = neighbour_gp.x * grid_size;
-			ngd->p.y = neighbour_gp.y * grid_size;
 			ngd->g_score = gd->g_score + grid_size;
-			ngd->f_score = l_manhat_distance(ngd->p, dst_o->front);
-
-			g_queue_insert_sorted(queue, ngd, &l_compute_path_grid_date_compare_func, NULL);
+			ngd->f_score = 0;
+			g_queue_push_tail(queue, ngd);
+//			g_queue_insert_sorted(queue, ngd, &l_compute_path_grid_date_compare_func, NULL);
 		}
 	}
 	g_queue_free(queue);
@@ -471,42 +531,22 @@ int l_compute_path(struct _exhibithall_object *src_o)
 	return ret;
 }
 
-
-int l_compute_closest_projects(struct _exhibithall_object *o)
-{
-	struct _exhibithall *eh;
-	int x;
-	int shortest_distance = 10000;
-//	printf("Computing paths for %s:%s...\n", o->eh->name, o->name);
-
-	eh = o->eh;
-	for(x=0;x<eh->project_objects->len;x++) {
-		struct _exhibithall_object *dst_o = g_ptr_array_index(eh->project_objects, x);
-
-		int distance = l_compute_path(o, dst_o);
-
-
-
-		if(distance < shortest_distance) shortest_distance = distance;
-
-
-	}
-
-	return shortest_distance;
-}
-
-
-
 void exhibithall_anneal(struct _db_data *db, int year)
 {
 	int x, i;
 	GPtrArray **exhibithall_assignments;
+
+	categories_load(db, year);
+	challenges_load(db, year);
 
 	printf("Loading Exhibit Halls and Objects...\n");
 	exhibithalls_load(db, year);
 	printf("Loading Students and Projects...\n");
 	students_load(db, year);
 	projects_load(db, year);
+	projects_crosslink_students();
+
+
 
 	grid_size = 1000; /* 1 meter, hopefully smaller */
 	for(i=0;i<exhibithall_objects->len;i++) {
@@ -524,10 +564,10 @@ void exhibithall_anneal(struct _db_data *db, int year)
 		printf("%s: grid is %dx%d (%d)\n", eh->name, eh->grid_w, eh->grid_h, eh->grid_w * eh->grid_h);
 
 		eh->objects_at = malloc(sizeof(GPtrArray *) * eh->grid_w * eh->grid_h);
-		eh->project_front = malloc(sizeof(struct _exhibithall_object *) * eh->grid_w * eh->grid_h);
+		eh->project_front_at = malloc(sizeof(struct _exhibithall_object *) * eh->grid_w * eh->grid_h);
 		for(i = 0; i<eh->grid_w * eh->grid_h; i++) {
 			eh->objects_at[i] = g_ptr_array_new();
-			eh->project_front[i] = NULL;
+			eh->project_front_at[i] = NULL;
 		}
 	}
 
@@ -541,60 +581,53 @@ void exhibithall_anneal(struct _db_data *db, int year)
 	printf("Computing closest projects for all projects...\n");
 	for(x=0;x<exhibithall_objects->len;x++) {
 		struct _exhibithall_object *o = g_ptr_array_index(exhibithall_objects, x);
-		l_compute_closest_projects(o);
+		l_compute_closest_projects(o, MAX_CLOSEST );
 	}
 
-/*	for(x=0;x<exhibithall_objects->len;x++) {
-		struct _exhibithall_object *o = g_ptr_array_index(exhibithall_objects, x);
-		printf("%d: %s:%s, (%d,%d)@%d front(%d,%d) grid(%d,%d)\n", o->id, o->eh->name,o->name, 
-				o->p.x, o->p.y, o->orientation, o->front.x, o->front.y, o->gfront.x, o->gfront.y);
-	}
-*/		
-
-
-#if 0	
 
 	/* Assign students to exhibithalls */
 	exhibithall_assignments = NULL;
-	anneal(NULL, &exhibithall_assignments, exhibithalls->len, students, 
-			&exhibithalls_cost, &exhibithalls_propose_move);
+	anneal(NULL, &exhibithall_assignments, exhibithall_objects->len, projects, 
+			&exhibithalls_cost, &exhibithall_propose_move);
 
-	for(x=0;x<exhibithalls->len;x++) {
-		GPtrArray *ta = exhibithall_assignments[x];
-		struct _exhibithall *t = g_ptr_array_index(exhibithalls, x);
-		printf("%d: grade %d-%d, students %d, capacity %d-%d, %s\n", 
-			t->id, t->grade_min, t->grade_max, ta->len, t->capacity_min, t->capacity_max, t->name);
-		for(i=0; i<ta->len; i++) {
-			struct _student *s = g_ptr_array_index(ta, i);
-			int j, r;
-			printf("    %s: grade %d, school %d,  ", s->name, s->grade, s->schools_id);
-			r = -1;
-			for(j=0;j<3;j++) {
-				if(s->exhibithall_id_pref[j] == t->id) {
-					r = j;
-					break;
-				}
-			}
-			rank_count[r == -1 ? 3 : r] += 1;
-			printf(" ranked %d,   (%d %d %d) id=%d\n",r, s->exhibithall_id_pref[0], s->exhibithall_id_pref[1], s->exhibithall_id_pref[2], s->id);
-		}
-	}
-	printf("Students who got their first, second, third, no choice: %d, %d, %d, %d = %d\n", 
-			rank_count[0], rank_count[1], rank_count[2], rank_count[3], 
-			rank_count[0] + rank_count[1] + rank_count[2] + rank_count[3]);
-
-
-	/* Write results back to db */
+	/* Construct GVRSF style project numbers and write it back to the db */
 	printf("Writing exhibithalls back to students\n");
-	for(x=0;x<exhibithalls->len;x++) {
-		GPtrArray *ta = exhibithall_assignments[x];
-		struct _exhibithall *t = g_ptr_array_index(exhibithalls, x);
-		for(i=0; i<ta->len; i++) {
-			struct _student *s = g_ptr_array_index(ta, i);
-			db_query(db, "UPDATE users SET exhibithall_id='%d' WHERE uid='%d'", t->id, s->id);
+	for(x=0;x<exhibithall_objects->len;x++) {
+		GPtrArray *a = exhibithall_assignments[x];
+		struct _exhibithall_object *o = g_ptr_array_index(exhibithall_objects, x);
+		struct _project *p;
+		char pn[32];
+		int floor_number = 0;
+		int number_sort = 0;
+		int i;
+		struct _challenge *ch;
+		struct _category *ca;
+		if(a->len == 0) continue;
+		p = g_ptr_array_index(a, 0);
+
+		floor_number = o->floor_number;
+		number_sort = o->floor_number;
+		ch = challenge_find(p->challenge_id);
+		ca = category_find(p->cat_id);
+		sprintf(pn, "%s %03d %s", ca->shortform, o->floor_number, ch->shortform);
+			
+
+		db_query(db, "UPDATE projects SET number='%s',number_sort='%d',floor_number='%d' WHERE pid='%d'",
+					pn, number_sort, floor_number, p->pid);
+
+		printf("%s:%s: ", o->eh->name, o->name);
+		if(a->len == 0) {
+			printf("\n");
+			continue;
 		}
+		p = g_ptr_array_index(a, 0);
+		printf("pid %d: %s: cat=%d, gr=", p->pid, pn, p->cat_id );
+		for(i = 0; i<p->num_students; i++)
+			printf("%d,", p->students[i]->grade);
+		printf(" %s\n", p->title);
+		
 	}
-#endif
+
 	printf("All done!\n");
 }
 

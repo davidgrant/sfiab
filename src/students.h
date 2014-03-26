@@ -17,11 +17,14 @@ struct _student {
 
 
 struct _project {
+	int index;
 	int pid;
 	char *title;
 	int num_students;
 	int cat_id;
+	int challenge_id;
 	int isef_id;
+	int req_electricity;
 	char *language;
 	int language_id;
 	struct _student **students; /* Malloced array of num_students */

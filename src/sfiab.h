@@ -12,6 +12,15 @@ struct _category
 	char *shortform;
 };
 
+
+struct _challenge
+{
+	int id;
+	char *name;
+	char *shortform;
+};
+
+
 struct _isef_division
 {
 	int id;
@@ -23,11 +32,13 @@ struct _isef_division
 	char *div;
 };
 
-extern GPtrArray *categories;
+extern GPtrArray *categories, *challenges;
 extern GPtrArray *isef_divisions;
 
 void categories_load(struct _db_data *db, int year);
 struct _category *category_find(int cat_id);
+void challenges_load(struct _db_data *db, int year);
+struct _challenge *challenge_find(int challenge_id);
 
 void isef_divisions_load(struct _db_data *db, int year);
 

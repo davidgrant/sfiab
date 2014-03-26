@@ -12,7 +12,7 @@
 #include "sfiab.h"
 
 
-GPtrArray *categories = NULL;
+GPtrArray *categories = NULL, *challenges = NULL;
 GPtrArray *isef_divisions = NULL;
 
 
@@ -60,6 +60,34 @@ struct _category *category_find(int cat_id)
 {
 	if(cat_id <= 0 || cat_id > categories->len) return NULL;
 	return g_ptr_array_index(categories, cat_id - 1);
+}
+
+
+
+void challenges_load(struct _db_data *db, int year)
+{
+	int x;
+	struct _db_result *result;
+	challenges = g_ptr_array_new();
+	/* Load judges  */
+	result = db_query(db, "SELECT * FROM challenges WHERE year='%d'", year);
+	for(x=0;x<result->rows; x++) {
+		struct _challenge *c = malloc(sizeof(struct _challenge));
+		c->name = strdup(db_fetch_row_field(result, x, "name"));
+		c->id = atoi(db_fetch_row_field(result, x, "id"));
+		c->shortform = strdup(db_fetch_row_field(result, x, "shortform"));
+		printf("%d: %s %s\n", 
+			c->id, c->shortform, c->name);
+		g_ptr_array_add(challenges, c);
+	}
+	db_free_result(result);
+}
+
+/* chal ids always start at 1, the index array starts at 0 */
+struct _challenge *challenge_find(int challenge_id)
+{
+	if(challenge_id <= 0 || challenge_id > challenges->len) return NULL;
+	return g_ptr_array_index(challenges, challenge_id - 1);
 /*
 	int x;
 	for(x=0;x<categories->len;x++) {

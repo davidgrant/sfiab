@@ -72,7 +72,7 @@ void projects_load(struct _db_data *db, int year)
 	/* Load students and tour choices */
 	result = db_query(db, "SELECT * FROM projects WHERE year='%d' AND num_students IS NOT NULL", year);
 	for(x=0;x<result->rows; x++) {
-		struct _project *p = malloc(sizeof(struct _student));
+		struct _project *p = malloc(sizeof(struct _project));
 		int pid, count;
 		int num_students;
 
@@ -95,8 +95,10 @@ void projects_load(struct _db_data *db, int year)
 		p->pid = pid;
 		p->num_students = num_students;
 		p->title = strdup(db_fetch_row_field(result, x, "title"));
-		p->cat_id = atoi(db_fetch_row_field(result, x, "cat_id"));
-		p->isef_id = atoi(db_fetch_row_field(result, x, "isef_id"));
+		p->cat_id = db_fetch_row_field_int(result, x, "cat_id");
+		p->challenge_id = db_fetch_row_field_int(result, x, "challenge_id");
+		p->req_electricity = db_fetch_row_field_int(result, x, "req_electricity");
+		p->isef_id = db_fetch_row_field_int(result, x, "isef_id");
 		p->language = strdup(db_fetch_row_field(result, x, "language"));
 		if(strcmp(p->language, "fr") == 0) {
 			p->language_id = 2;
@@ -105,6 +107,7 @@ void projects_load(struct _db_data *db, int year)
 		}
 		p->students = NULL;
 
+		p->index = projects->len;
 		g_ptr_array_add(projects, p);
 
 	}

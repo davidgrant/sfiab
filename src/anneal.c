@@ -176,8 +176,8 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	}
 	printf("   => initial cost is %f\n", cost);
 
-	temperature = 100000000000.0;
-	inner_num = 20 * pow(items->len, 4/3);
+	temperature = 1000000000000.0;
+	inner_num = 1 * pow(items->len * num_buckets, 4/3);
 
 //	estimated_iterations = ceil(log(0.1 / $this->start_temp, $this->rate));
 	num_moves = 0;
@@ -252,18 +252,18 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 		success_rate_this_temp = (float)num_accepted_this_temp / (float)num_moves_this_temp;
 
 		if(temperature_count %5 == 0 || temperature == 0) {
-			printf("%g\t%.0f\t%.2f\t%2f\n", temperature, cost, success_rate, success_rate_this_temp);
+			printf("%0.4g\t\t%.0f\t%.2f\t%2f\n", temperature, cost, success_rate, success_rate_this_temp);
 	//		anneal_print_buckets(&annealer);
 		}
 		
 		if(success_rate > 0.96 )
 			temperature *= 0.5;
 		else if( success_rate > 0.8 )
-			temperature *= 0.9;
+			temperature *= 0.95;  // 0.9
 		else if( success_rate > 0.15 )
-			temperature *= 0.95;
+			temperature *= 0.99;  // 0.95
 		else
-			temperature *= 0.8;
+			temperature *= 0.9; // 0.8
 	}
 	anneal_print_buckets(&annealer);
 

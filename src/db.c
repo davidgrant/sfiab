@@ -116,6 +116,17 @@ char *db_fetch_row_field(struct _db_result *result, int row_num, char *field)
 	return NULL;
 }
 
+int db_fetch_row_field_int(struct _db_result *result, int row_num, char *field)
+{
+	char *p = db_fetch_row_field(result, row_num, field);
+	if(p == NULL) {
+		printf("db_fetch_row_field_int retrieved a NULL pointer\n");
+		return 0;
+	} 
+	return atoi(p);
+
+}
+
 char *db_fetch_row_field_index(struct _db_result *result, int row_num, int field_index)
 {
 	return (char *)result->row[row_num].row[field_index];
