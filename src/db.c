@@ -94,6 +94,11 @@ struct _db_result *db_query(struct _db_data *db, char *msg, ...)
 	return result;
 }
 
+int db_insert_id(struct _db_data *db)
+{
+	return mysql_insert_id(&db->mysql);
+}
+
 
 int db_field_index(struct _db_result *result, char *field)
 {

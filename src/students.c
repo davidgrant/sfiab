@@ -182,7 +182,14 @@ void judges_load(struct _db_data *db, int year)
 			j->isef_id_pref[0] = atoi(db_fetch_row_field(result, x, "j_pref_div1"));
 			j->isef_id_pref[1] = atoi(db_fetch_row_field(result, x, "j_pref_div2"));
 			j->isef_id_pref[2] = atoi(db_fetch_row_field(result, x, "j_pref_div3"));
+
+			/* Some judges have been writing the year, 2013,  for the years of experience */
+			if(j->years_school > 100) j->years_school = 1;
+			if(j->years_regional > 100) j->years_regional = 1;
+			if(j->years_national > 100) j->years_national = 1;
+
 		}
+		j->round1_divisional_jteam = NULL;
 
 		/* Turn the list of available rounds into a mask */
 		memset(j->available_in_round, 0, sizeof(int) * 8);
@@ -241,12 +248,13 @@ void judge_print(struct _judge *j)
 
 void awards_load(struct _db_data *db, int year)
 {
-	struct _db_result *result;
-	int x;
+	struct _db_result *result, *result2;
+	int x, y;
+	int n_div = 0, n_spec = 0;
 
 	awards = g_ptr_array_new();
 	/* Load awards and tour choices */
-	result = db_query(db, "SELECT * FROM awards WHERE year='%d' AND schedule_judges='1'", year);
+	result = db_query(db, "SELECT * FROM awards WHERE year='%d' AND schedule_judges='1' ORDER BY `type`", year);
 	for(x=0;x<result->rows; x++) {
 		struct _award *a = malloc(sizeof(struct _award));
 		char *p;
@@ -257,20 +265,37 @@ void awards_load(struct _db_data *db, int year)
 		p = db_fetch_row_field(result, x, "type");
 		a->is_divisional = 0;
 		a->is_special = 0;
-		if(strcmp(p, "divisional") == 0) 
+		if(strcmp(p, "divisional") == 0) {
 			a->is_divisional = 1;
-		else
+			n_div++;
+		} else {
 			a->is_special = 1;
+			n_spec++;
+		}
 
 		p = db_fetch_row_field(result, x, "categories");
 		a->num_cats = split_int_list(a->cats, p);
+		a->prizes = g_ptr_array_new();
+
+		a->projects = g_ptr_array_new();
+		a->jteams = g_ptr_array_new();
+		a->cusp_jteams = NULL;
 
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", j->name, j->grade, j->schools_id, j->tour_id_pref[0], j->tour_id_pref[1], j->tour_id_pref[2], j->id);
 		g_ptr_array_add(awards, a);
 
+		result2 = db_query(db, "SELECT * FROM award_prizes WHERE award_id='%d' ORDER BY `order` DESC", a->id);
+		for(y=0;y<result2->rows;y++) {
+			struct _prize *prize = malloc(sizeof(struct _prize));
+			prize->name = strdup(db_fetch_row_field(result2, y, "name")); 
+			prize->id = db_fetch_row_field_int(result2, y, "id");
+			g_ptr_array_add(a->prizes, prize);
+		}
+		db_free_result(result2);
+
 	}
 
-	printf("Loaded %d awards\n", awards->len);
+	printf("Loaded %d awards.  %d Divisional and %d Special/Other\n", awards->len, n_div, n_spec);
 	db_free_result(result);
 }
 

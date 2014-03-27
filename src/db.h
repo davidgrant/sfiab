@@ -33,6 +33,7 @@ void db_free_result(struct _db_result *result);
 char *db_str(char *str, char free_old);
 char *db_fetch_row_field_index(struct _db_result *result, int row_num, int field_index);
 int db_field_index(struct _db_result *result, char *field);
+int db_insert_id(struct _db_data *db);
 
 
 #define dbize db_str

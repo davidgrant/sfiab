@@ -3,6 +3,8 @@
 
 #include <glib.h>
 
+struct _award;
+
 struct _student {
 	int id;
 	char *name;
@@ -43,6 +45,13 @@ struct _judge {
 	int num_sa;
 	int available_in_round[8];
 	int lang[3];
+
+	void *round1_divisional_jteam;
+};
+
+struct _prize {
+	int id;
+	char *name;
 };
 
 struct _award {
@@ -55,8 +64,11 @@ struct _award {
 	int self_nominate;
 	GPtrArray *projects;
 	GPtrArray *jteams;
+	GPtrArray *cusp_jteams;
 	int cats[16];
 	int num_cats;
+
+	GPtrArray *prizes;
 };
 
 extern GPtrArray *students;

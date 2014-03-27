@@ -243,7 +243,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 			quench_count++;
 		}
 
-		if(last_cost_count > 25) 
+		if(last_cost_count > 50) 
 			temperature = 0;
 
 		if(temperature < 0.0000001) temperature = 0;
@@ -251,7 +251,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 		success_rate = (float)num_accepted / (float)num_moves;
 		success_rate_this_temp = (float)num_accepted_this_temp / (float)num_moves_this_temp;
 
-		if(temperature_count %5 == 0 || temperature == 0) {
+		if(temperature_count %20 == 0 || temperature == 0) {
 			printf("%0.4g\t\t%.0f\t%.2f\t%2f\n", temperature, cost, success_rate, success_rate_this_temp);
 	//		anneal_print_buckets(&annealer);
 		}
