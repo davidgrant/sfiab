@@ -627,6 +627,7 @@ function report_save_field($mysqli, $report, $type)
 				$label_stock['label_width'] * 25.4, $label_stock['label_height'] * 25.4,
 				$label_stock['x_spacing'] * 25.4, $label_stock['y_spacing'] * 25.4,
 				$label_stock['rows'], $label_stock['cols']);
+		$rep->set_use_abs_coords($report['use_abs_coords']);
 		$gen_mode = 'label';
 		break;
 
@@ -906,16 +907,7 @@ function report_save_field($mysqli, $report, $type)
 					$rep->label_fair_logo($d['x'], $d['y'], $d['w'], $d['h'], $show_box);
 					break;
 				case "projectbarcode":
-					$style = array(
-					'border' => 2,
-					'vpadding' => 'auto',
-					'hpadding' => 'auto',
-					'fgcolor' => array(0,0,0),
-					'bgcolor' => false, //array(255,255,255)
-					'module_width' => 2, // width of a single module in points
-					'module_height' => 2 // height of a single module in points
-					);
-					$rep->label_barcode($v, 'QRCODE,H', $d['x'], $d['y'], $d['w'], $d['h'], $style, 'N');
+					$rep->label_barcode($d['x'], $d['y'], $d['w'], $d['h'], $v);
 					break;
 					
 				default:

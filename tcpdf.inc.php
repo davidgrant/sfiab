@@ -307,6 +307,11 @@ class pdf extends TCPDF {
 		$this->Cell(0, 0, $this->footer_string, 0, 0, 'C');
 	}
 
+	function set_use_abs_coords($use_abs_coords) 
+	{
+		$this->label_use_abs_coords = $use_abs_coords;
+	}
+
 	function setup_for_labels($show_box, $show_fair, $show_logo, $width, $height, $xspacer, $yspacer, $rows, $cols)
 	{
 		/* No headers and footers */
@@ -498,6 +503,23 @@ class pdf extends TCPDF {
 				'', '', '', true,
 				300, '', false, false, $show_box ? 1 : 0, true);
 	}
+
+	function label_barcode($x, $y, $w, $h, $val) 
+	{
+		$style = array(
+			'border' => 2,
+			'vpadding' => 'auto',
+			'hpadding' => 'auto',
+			'fgcolor' => array(0,0,0),
+			'bgcolor' => false, //array(255,255,255)
+			'module_width' => 2, // width of a single module in points
+			'module_height' => 2 // height of a single module in points
+		);
+		$this->write2DBarcode($val, 'QRCODE,H', $this->x($x), $this->y($y), 
+					$this->w($w), $this->h($h), $style, 'N');
+	}
+		
+	
 
 /****************************************************************************
  * Table handling */
