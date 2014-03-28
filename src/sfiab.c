@@ -166,6 +166,7 @@ void define_isef_similar(char *div, char *r1, char *r2, char *r3, char *r4)
 		d->similar_mask[isef_id] = 1;
 	}
 
+	/* Add the 1,2,3,4th arg to the mask */
 	define_isef_similar_one(div, r1);
 	define_isef_similar_one(div, r2);
 	define_isef_similar_one(div, r3);

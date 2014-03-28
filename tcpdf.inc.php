@@ -86,11 +86,22 @@ class pdf extends TCPDF {
 		date_default_timezone_set('UTC');
 		$this->footer_string = date("Y-m-d h:ia").' - '.$report_name;
 
+		$this->enable_debug = false;
+//		$this->enable_debug = true;
+
+		if($this->enable_debug) print("<pre>");
 
 		//set some language-dependent strings
 		//$this->setLanguageArray($l); 
 //print_r($this->fontlist);
 		
+	}
+
+	function debug($text)
+	{
+		if(!$this->enable_debug) return;
+
+		print(nl2br($text));
 	}
 
 	/* Given a cell of width $w, format  $txt so it fits into that
@@ -105,14 +116,20 @@ class pdf extends TCPDF {
 		$index = 0;
 		$lines  = array();
 
+		$this->debug("width=$w, text=\"$txt\", font=$fontname, $fontstyle, $fontsize\n");
+
 		/* Get an array of widths */
 		$width = $this->getStringWidth($txt,$fontname, $fontstyle,$fontsize,true);
-		$chars = $this->UTF8StringToArray($txt);
+		$chars = TCPDF_FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont);
 		$count = count($width); // strlen(utf8_decode($txt));
 
-		$curr_width = $this->cMargin * 2;
+//		$this->debug("Widths ($count): " . print_r($width, true));
+
+		$curr_width = 0; //$this->clMargin + $this->crMargin;
 		$last_space_index = -1;
 		$start_index = 0;
+
+		$this->debug("Current widht: $curr_width\n");
 
 		for($index=0; $index<$count;$index++) {
 			$newline = false;
@@ -154,16 +171,18 @@ class pdf extends TCPDF {
 					/* No, use the whole line then */
 					$end_index = $index;
 				}
-				$lines[] = $this->UTF8ArrSubString($chars,$start_index,$end_index);
+				$this->debug("Fit line from $start_index to $end_index\n");
+				$lines[] = TCPDF_FONTS::UTF8ArrSubString($chars,$start_index,$end_index, $this->isunicode);
 				/* Reset width, set start index */
-				$curr_width = $this->cMargin * 2;
+				$curr_width = 0;
 				$last_space_index = -1;
 				$start_index = $index+1;
 			}
 
 		}
 		
-		$lines[] = $this->UTF8ArrSubString($chars,$start_index,$index);
+		$lines[] = TCPDF_FONTS::UTF8ArrSubString($chars,$start_index,$index,$this->isunicode);
+		$this->debug("Returning lines[] = ".print_r($lines, true));
 		return $lines;
 	}
 	/* Cell( float $w, [float $h = 0], [string $txt = ''], [mixed $border = 0],
@@ -171,23 +190,34 @@ class pdf extends TCPDF {
 		[int $stretch = 0], [boolean $ignore_min_height = false]) */
 
 
-	function FitCell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$valign='',$on_overflow='scale')
+	function FitCell($w,$h,$txt='',$border=0,$ln=1,$align='',$valign='',$on_overflow='scale')
 	{
 		$x = $this->getX();
 		$y = $this->getY();
 		$orig_fs = $this->getFontSizePt();
 		$add_ellipses = false;
 
-		$fontsize = $orig_fs;
+		$fontsize = ($h/$ln) * $this->k;
+		$this->debug("Calculate starting font size($h/$ln) * $this->k: $fontsize\n");
 		while(1) {
+			$this->debug("=> Trying font size $fontsize\n");
+			$this->setFontSize($fontsize);
 			$lines = $this->_cell_lines($w, $txt, '', '', $fontsize);
+
 
 			/* this->FontSize is always correct, we change $fontisze
 			 * below, but then use that to set the internal fontsize */
-			$cell_height = $this->cMargin * 2 + $this->FontSize;
+			$cell_height = $this->getCellHeight($this->FontSize, false);
 			$total_height = $cell_height * count($lines);
 
-			if($total_height <= $h) {
+			$this->debug("=> Cell height=$cell_height, lines=".count($lines).", total_height=$total_height, fit_to_height=$h\n");
+			$this->debug("=> fontsize=$fontsize, this->fontsize={$this->FontSize}, k={$this->k}, cell_height_ratio={$this->cell_height_ratio}\n");
+			$this->debug("=> fontsize*ratio=".($this->FontSize * $this->cell_height_ratio));
+
+			if(count($lines) > $ln) {
+				$this->debug("=> too many lines, max is $ln\n");
+				/* continue into resize code below */
+			} else if($total_height <= $h) {
 				/* It fits! */
 				break;
 			}
@@ -195,8 +225,8 @@ class pdf extends TCPDF {
 			/* else, it doesn't fit */
 			if($on_overflow == 'scale') {	
 				/* reduce the font size and try again */
+				$this->debug("=> Reduce fontsize to $fontsize\n");
 				$fontsize -= 0.5;
-				$this->setFontSize($fontsize);
 				continue;
 			} 
 
@@ -204,11 +234,11 @@ class pdf extends TCPDF {
 			 * be a truncate.  Compute the number of lines that 
 			 * can be displayed */
 			$display_lines = floor($h / $cell_height);
-			/* Adjust height */
-			$label_h -= (count($lines) - $display_lines) * $cell_height;
 
 			/* truncate */
 			$lines = array_slice($lines, 0, $display_lines);
+
+			$this->debug("=> Display lines=$display_lines, truncate array to: ".print_r($lines, true));
 
 			if($on_overflow == '...') $add_ellipses = true;
 			break;
@@ -217,13 +247,13 @@ class pdf extends TCPDF {
 		/* SetX, find Y based on alignment */
 		switch($valign) {
 		case 'M': /* Middle */
-			$this->SetXY($x, $y + ($h - $total_height) / 2); 
+			$this->SetXY($x, $y + ($h - $total_height) / 2);
 			break;
 		case 'B': /* Bottom */
 			$this->SetXY($x, $y + ($h - $total_height));
 			break;
 		case 'T': default: /* Top */
-			$this->SetXY($x, $y); 
+//			$this->SetXY($x, $y); 
 			break;
 		}
 
@@ -232,6 +262,7 @@ class pdf extends TCPDF {
 			[int $ln = 0], [string $align = ''], [int $fill = 0], [mixed $link = ''], 
 			[int $stretch = 0], [boolean $ignore_min_height = false]) */
 		foreach($lines as $l) {
+			$this->debug("Cell output line: \"$l\"\n");
 			$this->Cell($w, 0, $l, 0, 2, $align, 0, 0, 0, false);
 		}
 
@@ -285,6 +316,11 @@ class pdf extends TCPDF {
 		/* No auto-pagebreaks */
 		$this->SetAutoPageBreak(false);
 
+		/* Cells exactly the size to fit text, default is 1.25 height ratio
+		 * set all-round padding to zero too 
+		 * cell height = FontSize * cell_height_ratio + top padding + bottom padding */
+		$this->setCellHeightRatio(1.0);
+		$this->setCellPaddings(0, 0, 0, 0);
 
 		/* the page size/orientation is already set */
 		$pw = $this->getPageWidth();
@@ -303,6 +339,8 @@ class pdf extends TCPDF {
 		$this->label_cols=$cols;
 		$this->labels_per_page=$rows * $cols;
 
+		$this->label_use_abs_coords = false;
+
 		/* labels are always centered in the page */
 		
 		$this->label_page_lmargin=( $pw - ($cols*$width) - ($xspacer*($cols-1)) )/2;
@@ -311,6 +349,8 @@ class pdf extends TCPDF {
 		/* Setup so that the first call to label_new also creates
 		 * a new page */
 		$this->current_label_index = $this->labels_per_page - 1;
+
+		$this->debug("Label is {$this->label_width}x{$this->label_height}\n");
 	}
 
 	function label_new()
@@ -339,10 +379,55 @@ class pdf extends TCPDF {
 		$this->SetMargins($lmargin, $tmargin, $lmargin + $this->label_width);
 
 		if($this->label_show_box)
-			$this->label_rect(0,0,$this->label_width, $this->label_height);
+			$this->Rect($this->lMargin, $this->tMargin, $this->label_width, $this->label_height);
+
+		$logo_width = 0;
+		$header_height = $this->label_height * 0.1;
+
+		if($this->label_show_logo) {
+			/* Logo at 10% label height */
+			$logo_width = $this->label_height * 0.1;
+			$this->Image("data/logo.jpg", $this->lMargin + 0.5, $this->tMargin + 0.5, 
+				$logo_width, $logo_width, '', '', '', true, 300, '', false, false, 0, true);
+			$logo_width += 1;
+		}
+
+		if($this->label_show_fair) {
+//			/* Text beside the logo */
+			$this->SetXY($this->lMargin + $logo_width, $this->tMargin);
+			$this->FitCell($this->label_width - $logo_width, $header_height+1, 
+					"{$config['fair_name']} {$config['year']}",
+					0, 1, 'L', 'M', 'scale');
+			$this->Line(0 + $this->lMargin, $header_height+1 + $this->tMargin, 
+					$this->label_width +  $this->lMargin, $header_height + 1 + $this->tMargin);
+			/* Bring down the top margin */
+			$this->SetTopMargin($tmargin + $this->label_height * 0.1);
+		}
 
 	}
 
+	function x($x) 
+	{
+		$factor = $this->label_use_abs_coords ? 1.0 : ($this->label_width / 100.0);
+		return ($x * $factor) + $this->lMargin;
+	}
+	function y($y) 
+	{
+		$lh = $this->label_height - ( $this->label_show_fair ? $this->label_height * 0.1 : 0.0);
+		$factor = $this->label_use_abs_coords ? 1.0 : ($lh / 100.0);
+		return ($y * $factor) + $this->tMargin;
+	}
+	function w($w) 
+	{
+		$factor = $this->label_use_abs_coords ? 1.0 : ($this->label_width / 100.0);
+		return ($w * $factor);
+	}
+	function h($h) 
+	{
+		$lh = $this->label_height - ( $this->label_show_fair ? $this->label_height * 0.1 : 0.0);
+		$factor = $this->label_use_abs_coords ? 1.0 : ($lh / 100.0);
+		return ($h * $factor);
+	}
 
 	/* 	align = left, center, right
 		valign = top, middle, bottom,
@@ -352,9 +437,12 @@ class pdf extends TCPDF {
 		border = true/false
 		on_overflow = truncate, ..., scale */
 
-	function label_text($x,$y,$w,$h,$text,$border,$align,$valign,$fontname,$fontstyle,$fontsize,
-				$on_overflow)
+	function label_text($x,$y,$w,$h,$text,$border,$align='center',$valign='middle',
+				$max_lines=1, 
+				$fontname='helvetica',$fontstyle='',$fontsize='6',
+				$on_overflow='scale')
 	{
+		$this->debug("Label ($x,$y) $w x $h \"$text\" ($fontname, $fontsize)\n");
 		$orig_name = $this->getFontFamily();
 		$orig_style = $this->getFontStyle();
 		$orig_size = $this->getFontSizePt();
@@ -376,14 +464,15 @@ class pdf extends TCPDF {
 
 		if($fontsize == 0) $fontsize = 10; /* FIXME: getdefaultfontsize? */
 
-		$this->SetXY($this->lMargin + $x,$this->tMargin + $y);
+		$this->SetXY($this->x($x), $this->y($y));
+		$this->debug("=> Actual pos (".$this->x($x).",".$this->y($y)."\n");
 //		echo "position (x,y)=($x,$y)\n";
 //		echo "margin (l,t)=({$this->lMargin},{$this->tMargin})\n";
 //		echo "(x,y)=(".($this->lMargin + $x).",".($this->tMargin + $y).")\n";
 		$this->SetFont($fontname, $fs, $fontsize);
 
 		/* Print text */
-		$this->FitCell($w,$h, $text,  $border ? 1 : 0, 2, 
+		$this->FitCell($this->w($w),$this->h($h), $text,  $border ? 1 : 0, $max_lines, 
 				$align, $valign, $on_overflow);
 
 		/* Restore position and font */
@@ -393,16 +482,20 @@ class pdf extends TCPDF {
 
 	function label_rect($x,$y,$w,$h) 
 	{
-		$this->Rect($this->lMargin + $x, $this->tMargin + $y, $w, $h);
+		$this->Rect($this->x($x), $this->y($y), $this->w($w), $this->h($h));
+	}
+
+	function label_line($x,$y,$x2,$y2) 
+	{
+		$this->Line($this->x($x), $this->y($y), $this->x($x2), $this->x($y2));
 	}
 
 	function label_fair_logo($x, $y, $w, $h, $show_box)
 	{
 		global $config;
-		$img_dir = $_SERVER['DOCUMENT_ROOT'].$config['SFIABDIRECTORY'].'/data';
 		/* Scale image to proportinally fit in w x h */
-		$this->Image("$img_dir/logo.jpg", $this->lMargin + $x, $this->tMargin + $y,
-				$w, $h, '', '', '', true,
+		$this->Image("data/logo.jpg", $this->x($x), $this->y($y), $this->w($w), $this->h($h),
+				'', '', '', true,
 				300, '', false, false, $show_box ? 1 : 0, true);
 	}
 
@@ -419,9 +512,10 @@ class pdf extends TCPDF {
 		$this->SetY($this->GetY() + $space);
 	}
 
-	function setup_for_tables($show_box, $show_fair, $show_logo, $width, $height, $xspacer, $yspacer, $rows, $cols)
+	function setup_for_tables($fontname='times', $fontsize=10)
 	{
-		$this->SetFont('times', '', 10);
+		$fontstyle = '';
+		$this->SetFont($fontname, $fontstyle, $fontsize);
 
 		/* Need to start with a page if autopagebreak is on */
 		$this->addPage();

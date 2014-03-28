@@ -23,7 +23,7 @@
 
 require_once("reports_students.inc.php");  /* $report_students_fields */
 // require_once("reports_judges.inc.php");  /* $report_students_fields */
-// require_once("reports_awards.inc.php");  /* $report_students_fields */
+require_once("reports_awards.inc.php");  /* $report_students_fields */
 // require_once("reports_committees.inc.php");  /* $report_students_fields */
 // require_once("reports_volunteers.inc.php"); /* $report_volunteers_fields */
 // require_once("reports_schools.inc.php");
@@ -31,8 +31,8 @@ require_once("reports_students.inc.php");  /* $report_students_fields */
 // require_once("reports_fairs.inc.php");
 // require_once("reports_fundraising.inc.php");
 
-# require_once('../lcsv.php');
- require_once('tcpdf.inc.php');
+require_once('csv.inc.php');
+require_once('tcpdf.inc.php');
 
  $report_filter_ops = array(	0 => '=',
  			1 => '<=',
@@ -381,6 +381,8 @@ function report_save_field($mysqli, $report, $type)
 	$report['option'] = array();
 	$report['filter'] = array();
 
+	filter_bool($report['use_abs_coords']);
+
 	$fieldvar = "report_{$report['type']}s_fields";
 /*	if(is_array($$fieldvar)) 
 		$allow_fields = array_keys($$fieldvar);
@@ -585,7 +587,7 @@ function report_save_field($mysqli, $report, $type)
 
 	switch($report['option']['type']) {
 	case 'csv':
-		$rep=new lcsv(i18n($report['name']));
+		$rep=new csv(i18n($report['name']));
 		$gen_mode = 'table';
 		break;
 
@@ -593,10 +595,7 @@ function report_save_field($mysqli, $report, $type)
 		/* FIXME: handle landscape pages in here */
 		$label_stock = $report_stock[$report['option']['stock']];
 		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'], $label_stock['page_format'], $label_stock['page_orientation']);
-		$rep->setup_for_tables($show_box, $show_fair, $show_logo, 
-				$label_stock['label_width'] * 25.4, $label_stock['label_height'] * 25.4,
-				$label_stock['x_spacing'] * 25.4, $label_stock['y_spacing'] * 25.4,
-				$label_stock['rows'], $label_stock['cols']);
+		$rep->setup_for_tables(); /* fontname, fontsize */
 		$gen_mode = 'label';
 /*
 		if($report['option']['default_font_size']) {
@@ -612,10 +611,16 @@ function report_save_field($mysqli, $report, $type)
 		break;
 
 	case 'label':
+
+//		$report['option']['field_box'] = 'yes';
+
 		$label_stock = $report_stock[$report['option']['stock']];
 		$show_box = ($report['option']['label_box'] == 'yes') ? true : false;
 		$show_fair = ($report['option']['label_fairname'] == 'yes') ? true : false;
 		$show_logo = ($report['option']['label_logo'] == 'yes') ? true : false;
+
+//		print("<pre>");
+//		print_r($report);
 
 		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'],$label_stock['page_format'], $label_stock['page_orientation']);
 		$rep->setup_for_labels($show_box, $show_fair, $show_logo, 
@@ -797,7 +802,10 @@ function report_save_field($mysqli, $report, $type)
 
 //	echo "<pre>";print_r($rep);
 
+	$x = 0;
 	while($i = $r->fetch_assoc()) {
+		$x++;
+//		if($x == 10) break;
 
 //		echo "<pre>"; print_r($i);
 
@@ -888,7 +896,7 @@ function report_save_field($mysqli, $report, $type)
 				/* Setup additional options */
 				$show_box = ($report['option']['field_box'] == 'yes') ? true : false;
 
-//				echo "<pre>"; print_r($d);
+//				echo "<pre>"; print_r($d); print($v);
 
 				switch($f) {
 				case 'static_box':
@@ -916,8 +924,10 @@ function report_save_field($mysqli, $report, $type)
 
 					$v = iconv("ISO-8859-1","UTF-8",$v);
 
+
 					$rep->label_text($d['x'], $d['y'], $d['w'], $d['h'],
 							$v, $show_box, $d['align'], $d['valign'],
+							$d['h_rows'],
 							$d['fontname'],$d['fontstyle'],$d['fontsize'],
 							$d['on_overflow']);
 
