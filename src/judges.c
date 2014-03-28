@@ -523,9 +523,10 @@ void judges_anneal(struct _db_data *db, int year)
 			struct _jteam *jteam;
 			
 			jteam = jteam_create(db, jteams, a->name, a);
+			jteam->round = 0;
 			printf("JTeam %d: Special Award: %s\n", jteam->num, a->name);
 
-			jteam->round = 0;
+			g_ptr_array_add(a->jteams, jteam);
 
 		} else {
 			printf("ERROR: award %s is not divisional or special\n", a->name);
@@ -621,6 +622,40 @@ void judges_anneal(struct _db_data *db, int year)
 
 	free(judge_jteam_assignments);
 	judge_jteam_assignments = NULL;
+
+
+	/* ====================================================================*/
+	/* Assign special-award-only judges to their jteams, and figure out
+	 * which round they go in */
+	printf("Assigning special-awards-only judges...\n");
+	for(x=0;x<judges->len;x++) {
+		struct _judge *j = g_ptr_array_index(judges, x);
+		if(!j->sa_only) continue;
+
+		printf("   sa-only judge: ");
+		judge_print(j);
+
+		for(i=0;i<j->num_sa;i++) {
+			struct _award *a = award_find(j->sa[i]);
+			struct _jteam *jteam = g_ptr_array_index(a->jteams, 0);
+			printf("      %d: %s\n", a->id, a->name);  
+			assert(a->jteams->len == 1);
+		}
+	}
+	
+
+
+	/* ====================================================================*/
+	/* Assign special awards to rounds based on available judges
+	 * and special-awards-only judges */
+	printf("Assigning special awards to rounds...\n");
+
+
+
+
+	/* ====================================================================*/
+	/* Assign judges to special awards in all rounds */
+	printf("Assigning judges to special awards...\n");
 
 
 #if 0

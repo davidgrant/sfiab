@@ -85,6 +85,7 @@ void judges_load(struct _db_data *db, int year);
 void judge_print(struct _judge *j);
 
 void awards_load(struct _db_data *db, int year);
+struct _award *award_find(int id);
 
 #endif
 

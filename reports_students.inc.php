@@ -153,6 +153,16 @@ function reports_students_registration_fee($mysqli, &$report, $field, $text)
 	return (float)$regfee;
 }
 
+function reporst_students_ethics_forms_required($mysqli, &$report, $field, $text)
+{
+	$p = project_load($mysqli, $text);
+	$e &= $p['ethics'];
+	$ret = '';
+	if($e['human1']) $ret .= 'Human';
+	if($e['animals']) $ret .= 'Animal';
+	return $ret;
+}
+
 $report_students_fields = array(
 	'pn' => array(
 		'name' => 'Project Number',
@@ -557,6 +567,19 @@ $report_students_fields = array(
 		'header' => 'Board',
 		'width' => 0.75,
 		'table' => 'schools.board' ),
+
+
+	/* Ethics ===========================================================*/
+
+	'ethics_forms_required' => array(
+		'start_option_group' => 'Ethics',
+		'name' => 'Ethics -- Which forms required (human, animal, none)',
+		'header' => 'Forms',
+		'width' => 1,
+		'table' => 'users.s_pid',
+		'exec_function' => 'reporst_students_ethics_forms_required'),
+		
+	/* Awards ============================================================*/
 
 	'awards' =>  array(
 		'start_option_group' => 'Awards assigned to student (warning: duplicates student entries for multiple awards won!)',

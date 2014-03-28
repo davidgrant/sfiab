@@ -299,3 +299,13 @@ void awards_load(struct _db_data *db, int year)
 	db_free_result(result);
 }
 
+struct _award *award_find(int id)
+{
+	int x;
+	for(x=0;x<awards->len;x++) {
+		struct _award *a = g_ptr_array_index(awards, x);
+		if(a->id == id) return a;
+	}
+	return NULL;
+}
+
