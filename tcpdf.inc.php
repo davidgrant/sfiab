@@ -121,9 +121,11 @@ class pdf extends TCPDF {
 
 		$this->debug("width=$w, text=\"$txt\", font=$fontname, $fontstyle, $fontsize\n");
 
-		/* Get an array of widths */
-		$width = $this->getStringWidth($txt,$fontname, $fontstyle,$fontsize,true);
+		/* Get an array of widths (getStringWidth does both these, but
+		 * we also need the chars array, so no point calling StringToArray twice */
+//		$width = $this->getStringWidth($txt,$fontname, $fontstyle,$fontsize,true);
 		$chars = TCPDF_FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont);
+		$width = $this->GetArrStringWidth($chars, $fontname, $fontstyle,$fontsize,true);
 		$count = count($width); // strlen(utf8_decode($txt));
 
 //		$this->debug("Widths ($count): " . print_r($width, true));
@@ -199,6 +201,8 @@ class pdf extends TCPDF {
 		$y = $this->getY();
 		$orig_fs = $this->getFontSizePt();
 		$add_ellipses = false;
+		$columns = 1;
+		$effective_width = $w;
 
 		if($ln > 0) {
 			$fontsize = ($h/$ln) * $this->k;
@@ -211,7 +215,7 @@ class pdf extends TCPDF {
 		while(1) {
 			$this->debug("=> Trying font size $fontsize\n");
 			$this->setFontSize($fontsize);
-			$lines = $this->_cell_lines($w, $txt, '', '', $fontsize);
+			$lines = $this->_cell_lines($effective_width, $txt, '', '', $fontsize);
 
 			/* this->FontSize is always correct, we change $fontisze
 			 * below, but then use that to set the internal fontsize */
@@ -225,7 +229,7 @@ class pdf extends TCPDF {
 			if($ln > 0 && count($lines) > $ln) {
 				$this->debug("=> too many lines, max is $ln\n");
 				/* continue into resize code below */
-			} else if($total_height <= $h) {
+			} else if($total_height <= $h * $columns) {
 				/* It fits! */
 				break;
 			}
@@ -241,6 +245,13 @@ class pdf extends TCPDF {
 					$fontsize *= $h / $total_height;
 				}
 				$fontsize -= 0.5;
+
+				if($fontsize < 6 && $columns == 1) {
+					/* Switch to columns */
+					$columns = 2;
+					$fontsize = 8;
+					$effective_width = ($w / $columns) - (5*($columns-1));
+				}
 				continue;
 			} 
 
@@ -261,23 +272,33 @@ class pdf extends TCPDF {
 		/* SetX, find Y based on alignment */
 		switch($valign) {
 		case 'M': /* Middle */
-			$this->SetXY($x, $y + ($h - $total_height) / 2);
+			$top_y = $y + ($h - $total_height) / 2;
 			break;
 		case 'B': /* Bottom */
-			$this->SetXY($x, $y + ($h - $total_height));
+			$top_y = $y + ($h - $total_height);
 			break;
 		case 'T': default: /* Top */
-//			$this->SetXY($x, $y); 
+			$top_y = $y;
 			break;
 		}
+		$this->SetXY($x, $top_y);
 
 		/* Fontsize will be correctly set here */
 		/* Cell( float $w, [float $h = 0], [string $txt = ''], [mixed $border = 0],
 			[int $ln = 0], [string $align = ''], [int $fill = 0], [mixed $link = ''], 
 			[int $stretch = 0], [boolean $ignore_min_height = false]) */
+		$c = 0;
+		$lines_per_column = intval(count($lines) / $columns + 1);
+		$current_column = 0;
 		foreach($lines as $l) {
 			$this->debug("Cell output line: \"$l\"\n");
-			$this->Cell($w, 0, $l, 0, 2, $align, 0, 0, 0, false);
+			$this->Cell($effective_width, 0, $l, 0, 2, $align, 0, 0, 0, false);
+			$c++;
+			if($c == $lines_per_column) {
+				/* Move to the next column */
+				$current_column += 1;
+				$this->SetXY($x + (($effective_width+5) * $current_column), $top_y);
+			}
 		}
 
 		if($add_ellipses) {
@@ -285,6 +306,8 @@ class pdf extends TCPDF {
 			$this->SetXY($x, $y + $h - $cell_height);
 			$this->Cell($w, 0, '...', 0, 0, 'R');
 		}
+
+		$this->last_cell_font_size = $fontsize;
 
 		/* Restore original location */
 		$this->SetXY($x,$y);
@@ -369,6 +392,8 @@ class pdf extends TCPDF {
 		 * a new page */
 		$this->current_label_index = $this->labels_per_page - 1;
 
+		$this->label_header_font_size = 0;
+
 		$this->debug("Label is {$this->label_width}x{$this->label_height}\n");
 	}
 
@@ -407,17 +432,29 @@ class pdf extends TCPDF {
 		if($this->label_show_logo) {
 			/* Logo at 10% label height */
 			$logo_width = $header_height;
-			$this->Image("data/logo.jpg", $this->lMargin + 0.5, $this->tMargin + 0.5, 
+			$this->Image("data/logo.png", $this->lMargin + 0.5, $this->tMargin + 0.5, 
 				$logo_width, $logo_width, '', '', '', true, 300, '', false, false, 0, true);
 			$logo_width += 1;
 		}
 
 		if($this->label_show_fair) {
-//			/* Text beside the logo */
+			/* Text beside the logo */
+			$ln = 1;
+
 			$this->SetXY($this->lMargin + $logo_width, $this->tMargin);
+			if($this->label_header_font_size != 0) {
+				/* Cache the label header font size, and reuse that
+				 * so we can save some time instead of always recomputing
+				 * text on the label header */
+				$this->setFontSize($this->label_header_font_size);
+				$ln = 0;
+			}
+
 			$this->FitCell($this->label_width - $logo_width, $header_height+1, 
 					"{$config['fair_name']} {$config['year']}",
-					0, 1, 'L', 'M', 'scale');
+					0, $ln, 'L', 'M', 'scale');
+			$this->label_header_font_size = $this->last_cell_font_size;
+			
 			$this->Line(0 + $this->lMargin, $header_height+1 + $this->tMargin, 
 					$this->label_width +  $this->lMargin, $header_height + 1 + $this->tMargin);
 			/* Bring down the top margin */
