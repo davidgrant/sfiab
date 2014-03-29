@@ -914,9 +914,6 @@ function report_save_field($mysqli, $report, $type)
 					if($f == 'static_text') 
 						$v = $d['value'];
 
-					$v = iconv("ISO-8859-1","UTF-8",$v);
-
-
 					$rep->label_text($d['x'], $d['y'], $d['w'], $d['h'],
 							$v, $show_box, $d['align'], $d['valign'],
 							$d['h_rows'],

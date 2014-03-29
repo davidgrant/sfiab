@@ -6,6 +6,9 @@
 
 #include "anneal.h"
 
+static int l_debug = 0;
+
+#define TRACE(...) if(l_debug) printf(__VA_ARGS__)
 
 int anneal_print_buckets(struct _annealer *annealer)
 {
@@ -88,11 +91,11 @@ int anneal_compute_delta_cost(struct _annealer *annealer, struct _anneal_move *m
 	annealer->item_bucket[move->i1] = move->b1;
 	if(move->p2) annealer->item_bucket[move->i2] = move->b2;
 
-/*	printf("Delta: new_costs:%f %f, old_costs:%f %f, delta: %f\n", 
+	TRACE("Delta: new_costs:%f %f, old_costs:%f %f, delta: %f\n", 
 			move->new_cost1, move->new_cost2,
 			bucket1->cost,bucket2->cost,
 			(move->new_cost1 - bucket1->cost) + (move->new_cost2 - bucket2->cost) );
-*/			
+			
 	return (move->new_cost1 - bucket1->cost) + (move->new_cost2 - bucket2->cost) ;
 }
 
@@ -120,6 +123,26 @@ int anneal_commit_move(struct _annealer *annealer, struct _anneal_move *move)
 	bucket2->cost = move->new_cost2;
 
 	return 0;
+}
+
+float anneal_check_costs(struct _annealer *annealer)
+{
+	float cost = 0;
+	int x;
+
+	cost = 0;
+	for(x=0; x<annealer->num_buckets; x++) {
+		struct _anneal_bucket *b = &annealer->buckets[x];
+		float c;
+		c = annealer->cost_function(annealer, x, b->items);
+		if(b->cost != c) {
+			printf("ERROR: bucket %d current cost %f doesn't match from-scratch cost %f\n",
+				x, b->cost, c);
+		}
+		cost += b->cost;
+	}
+
+	return cost;
 }
 
 
@@ -197,30 +220,34 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 			} else {
 				anneal_propose_move(&annealer, &move);
 			}
-//			printf("Move: %d @[%d] <--> %d @[%d]\n", move.b1, move.i1, move.b2, move.i2);
+			TRACE("Move: %d @[%d] <--> %d @[%d]\n", move.b1, move.i1, move.b2, move.i2);
 
 			delta_cost = anneal_compute_delta_cost(&annealer, &move);
 
 			r = (float)rand() / (float)RAND_MAX;
 			/* Decide if we want to keep it */
 			e = exp(-delta_cost / temperature);
-//			printf("Eval: r=%f, exp=%f, delta=%f\n", r, e, delta_cost);
+			TRACE("Eval: r=%f, exp=%f, delta=%f\n", r, e, delta_cost);
 			if(r < e) {
 				anneal_commit_move(&annealer, &move);
 				cost += delta_cost;
 				num_accepted += 1;
 				num_accepted_this_temp += 1;
-//				printf("Move accepted, cost=%f\n", cost);
+				TRACE("Move accepted, cost=%f\n", cost);
 			} else {
-//				TRACE("Move rejected\n");
+				TRACE("Move rejected\n");
 			}
 			num_moves += 1;
 			num_moves_this_temp += 1;
+
+			//anneal_check_costs(&annealer);
 
 			if(cost == 0) break;
 		}
 
 		if(cost == 0) break;
+
+		anneal_check_costs(&annealer);
 
 		temperature_count ++;
 
@@ -276,7 +303,13 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	}
 
 	free(annealer.buckets);
+
+	l_debug = 0;
+
 	return 0;
 }
 
-
+void anneal_set_debug(int d)
+{
+	l_debug = d;
+}

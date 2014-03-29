@@ -35,6 +35,15 @@ int split_int_list(int *list, char *str)
 	return i;
 }
 
+int list_contains_int(int *list, int len, int val)
+{
+	int x;
+	for(x=0;x<len;x++) {
+		if(list[x] == val) return 1;
+	}
+	return 0;
+}
+
 
 void categories_load(struct _db_data *db, int year)
 {

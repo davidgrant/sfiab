@@ -49,6 +49,9 @@ void students_load(struct _db_data *db, int year)
 			assert(0);
 		}
 
+		prefs = db_fetch_row_field(result, x, "s_sa_nom");
+		s->num_sa_nom = split_int_list(s->sa_nom, prefs);
+
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", s->name, s->grade, s->schools_id, s->tour_id_pref[0], s->tour_id_pref[1], s->tour_id_pref[2], s->id);
 		g_ptr_array_add(students, s);
 
@@ -108,6 +111,7 @@ void projects_load(struct _db_data *db, int year)
 		p->students = NULL;
 
 		p->index = projects->len;
+		p->num_sa_nom = 0;
 		g_ptr_array_add(projects, p);
 
 	}
@@ -118,7 +122,7 @@ void projects_load(struct _db_data *db, int year)
 
 void projects_crosslink_students(void)
 {
-	int i,x;
+	int i,x, j;
 	for(x=0;x<projects->len;x++) {
 		struct _project *p = g_ptr_array_index(projects, x);
 		int c = 0;
@@ -128,9 +132,17 @@ void projects_crosslink_students(void)
 			if(s->pid == p->pid) {
 				s->project = p;
 				p->students[c++] = s;
-			}
 
+				for(j=0;j<s->num_sa_nom;j++) {
+					int sa = s->sa_nom[j];
+					if(list_contains_int(p->sa_nom, p->num_sa_nom, sa)) continue;
+
+					p->sa_nom[p->num_sa_nom] = sa;
+					p->num_sa_nom++;
+				}
+			}
 		}
+		if(p->num_sa_nom > 4) p->num_sa_nom = 4;
 	}
 }
 
@@ -197,6 +209,8 @@ void judges_load(struct _db_data *db, int year)
 		for(y=0; y<i; y++) {
 			j->available_in_round[jround[y]] = 1;
 		}
+
+		memset(j->on_jteams_in_round, 0, sizeof(int) *8);
 
 		/* Turn the languages (stored in php serialize, oops) into a mask */
 		p = db_fetch_row_field(result, x, "j_languages");

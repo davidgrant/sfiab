@@ -43,5 +43,6 @@ struct _challenge *challenge_find(int challenge_id);
 void isef_divisions_load(struct _db_data *db, int year);
 
 int split_int_list(int *list, char *str);
+int list_contains_int(int *list, int len, int val);
 
 #endif

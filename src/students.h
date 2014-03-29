@@ -15,6 +15,9 @@ struct _student {
 	int index;
 	int pid;
 	struct _project *project;
+
+	int sa_nom[16];
+	int num_sa_nom;
 };
 
 
@@ -30,6 +33,9 @@ struct _project {
 	char *language;
 	int language_id;
 	struct _student **students; /* Malloced array of num_students */
+
+	int sa_nom[16];
+	int num_sa_nom;
 };
 
 struct _judge {
@@ -47,6 +53,8 @@ struct _judge {
 	int lang[3];
 
 	void *round1_divisional_jteam;
+
+	int on_jteams_in_round[8];
 };
 
 struct _prize {

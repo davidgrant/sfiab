@@ -21,6 +21,7 @@ struct _jteam {
 	char *name;
 	struct _award *award;
 	int round;
+	int sa_only; /* If this jteam is for sa_only judges (no scheduling) */
 
 	int *isef_div_count;
 	int *lang_count;
@@ -38,6 +39,7 @@ struct _judging_data {
 	int max_judges_per_team;
 	int min_judges_per_cusp_team;
 	int max_judges_per_cusp_team;
+	int projects_per_sa_judge;
 	int *tmp_isef_div;
 	int *tmp_lang;
 } judging_data;
@@ -256,6 +258,11 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 					n_round1_jteams ++;
 				}
 			}
+
+			/* We'd prefer everyone to have some experience in round2 div */
+			if(j->years_school + j->years_regional < 1) {
+				cost += 50;
+			}
 		}
 	}
 
@@ -297,6 +304,7 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 	}
 
 	if(jteam->round == 2) {
+		div_cost = 0;
 		/* Don't care about languages or team lead */
 		/* Divs, we want a good spread */
 		for(i=1; i<isef_divisions->len; i++) {
@@ -322,11 +330,12 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 		}
 	}
 
-	/* Small penalty for a jteam with very little experience, higher penalty in round2 */
-	if(years_experience_weighted < (5 * jteam->round) ) { /* 5 or 10 for round 1,2 */
-		cost += ((5*jteam->round) - years_experience_weighted) * 2 ;
+	/* Small penalty for a jteam with very little experience */
+	if(jteam->round == 1 && years_experience_weighted < 5) { 
+		cost += (5 - years_experience_weighted) * 2 ;
 	}
 
+	assert(cost >= 0);
 	return cost;	
 }
 
@@ -345,6 +354,8 @@ struct _jteam *jteam_create(struct _db_data *db, GPtrArray *jteams, char *name, 
 	jteam->lang_count = malloc(3 * sizeof(int));
 	memset(jteam->lang_count, 0, 3 * sizeof(int));
 	g_ptr_array_add(jteams, jteam);
+
+	jteam->sa_only = 0;
 
 	if(db != NULL) {
 		db_query(db, "INSERT INTO judging_teams (`num`,`name`,`autocreated`,`round`,`year`,`award_id`) "
@@ -390,7 +401,7 @@ void jteam_print(struct _jteam *jteam)
 
 void judges_anneal(struct _db_data *db, int year)
 {
-	int x, i, j;
+	int x, y, i;
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
 	GPtrArray **judge_jteam_assignments = NULL;
@@ -406,6 +417,7 @@ void judges_anneal(struct _db_data *db, int year)
 	judging_data.max_judges_per_team = 3;
 	judging_data.min_judges_per_cusp_team = 6;
 	judging_data.max_judges_per_cusp_team = 6;
+	judging_data.projects_per_sa_judge = 15;
 	
 	students_load(db, year);
 	projects_load(db, year);
@@ -494,10 +506,11 @@ void judges_anneal(struct _db_data *db, int year)
 				GPtrArray *ps = project_jteam_assignments[i];
 				struct _jteam *jteam = g_ptr_array_index(a->jteams, i);
 				printf("JTeam %d: %s: %d projects\n", jteam->num, jteam->name, ps->len );
+				g_ptr_array_free(jteam->projects, 1);
 				jteam->projects = ps;
 
-				for(j=0; j<ps->len;j++) {
-					project_print(g_ptr_array_index(ps, j));
+				for(y=0; y<ps->len;y++) {
+					project_print(g_ptr_array_index(ps, y));
 				}
 			}
 
@@ -526,6 +539,14 @@ void judges_anneal(struct _db_data *db, int year)
 			jteam->round = 0;
 			printf("JTeam %d: Special Award: %s\n", jteam->num, a->name);
 
+			/* Assign any projects that self-nominated */
+			for(i=0;i<projects->len;i++) {
+				struct _project *p = g_ptr_array_index(projects, i);
+				if(list_contains_int(p->sa_nom, p->num_sa_nom, a->id)) {
+					g_ptr_array_add(jteam->projects, p);
+				}
+			}
+			printf("   => Added %d projects that self-nominated\n", jteam->projects->len);
 			g_ptr_array_add(a->jteams, jteam);
 
 		} else {
@@ -608,6 +629,7 @@ void judges_anneal(struct _db_data *db, int year)
 		g_ptr_array_add(judge_list, j);
 	}
 	printf("   Cusp teams have %d JTeams and %d judges available\n", jteams_list->len, judge_list->len);
+//	anneal_set_debug(1);
 	anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
 			&jteam_judge_cost, NULL);
 
@@ -627,6 +649,7 @@ void judges_anneal(struct _db_data *db, int year)
 	/* ====================================================================*/
 	/* Assign special-award-only judges to their jteams, and figure out
 	 * which round they go in */
+	printf("\n");
 	printf("Assigning special-awards-only judges...\n");
 	for(x=0;x<judges->len;x++) {
 		struct _judge *j = g_ptr_array_index(judges, x);
@@ -640,6 +663,47 @@ void judges_anneal(struct _db_data *db, int year)
 			struct _jteam *jteam = g_ptr_array_index(a->jteams, 0);
 			printf("      %d: %s\n", a->id, a->name);  
 			assert(a->jteams->len == 1);
+			g_ptr_array_add(jteam->judges, j);
+			jteam->sa_only = 1;
+		}
+	}
+
+	/* Now find all sa-only jteams */
+	printf("Assigning sa-only JTeams to rounds based on judge availablility...\n");
+	for(x=0;x<jteams->len;x++) {
+		struct _jteam *jteam = g_ptr_array_index(jteams, x);
+		int round_sum[3] = {0,0,0};
+		int on_jteams_in[3] = {0,0,0};
+		int round;
+		if(!jteam->sa_only) continue;
+
+		/* Look at the judges on this team */
+		for(i=0;i<jteam->judges->len;i++) {
+			struct _judge *j = g_ptr_array_index(jteam->judges, i);
+
+			round_sum[0] += j->available_in_round[0];
+			round_sum[1] += j->available_in_round[1];
+			on_jteams_in[0] += j->on_jteams_in_round[0];
+			on_jteams_in[1] += j->on_jteams_in_round[1];
+		}
+
+		if(round_sum[0] > round_sum[1]) 
+			round = 0;
+		else if(round_sum[0] < round_sum[1]) 
+			round = 1;
+		else { /* Same, assign to round where judges have fewest committments */
+			if(on_jteams_in[0] <= on_jteams_in[1])
+				round = 0;
+			else	
+				round = 1;
+		}
+
+		printf("   JTeam %d: %s assigned to round %d.  (sum[0]=%d, sum[1]=%d, in[0]=%d, in[1]=%d)\n", jteam->id, jteam->name, round+1,
+				round_sum[0], round_sum[1], on_jteams_in[0], on_jteams_in[1]);
+		jteam->round = round + 1;
+		for(i=0;i<jteam->judges->len;i++) {
+			struct _judge *j = g_ptr_array_index(jteam->judges, i);
+			j->on_jteams_in_round[round] += 1;
 		}
 	}
 	
@@ -648,44 +712,209 @@ void judges_anneal(struct _db_data *db, int year)
 	/* ====================================================================*/
 	/* Assign special awards to rounds based on available judges
 	 * and special-awards-only judges */
-	printf("Assigning special awards to rounds...\n");
+	{
+	int ideal_projects_in_round[3] = {0,0,0};
+	int total_judges, total_projects;
+	int sa_judges_available_in_round[3] = {0,0,0};
 
 
+	printf("Assigning special award JTeams to rounds...\n");
 
+	g_ptr_array_set_size(jteams_list, 0);
+	for(x=1;x<jteams->len;x++) {
+		struct _jteam *jteam = g_ptr_array_index(jteams, x);
 
-	/* ====================================================================*/
-	/* Assign judges to special awards in all rounds */
-	printf("Assigning judges to special awards...\n");
+		if(jteam->sa_only) continue;
+		if(jteam->award->is_divisional) continue;
 
-
-#if 0
-
-
-
-	/* Write results back to db */
-	printf("Writing judges back to students\n");
-	for(x=0;x<judges->len;x++) {
-		GPtrArray *ta = judge_assignments[x];
-
-		struct _judge *t = g_ptr_array_index(judges, x);
-		for(i=0; i<ta->len; i++) {
-			struct _student *s = g_ptr_array_index(ta, i);
-			db_query(db, "UPDATE users SET judge_id='%d' WHERE uid='%d'", t->id, s->id);
-		}
+		g_ptr_array_add(jteams_list, jteam);
 	}
-#endif
+
+
+	/* Look at the number of projects for each jteam in each round, and 
+	 * the number of free judges, and balance the work, favouring
+	 * round 2 */
+
+	total_projects = 0;
+	for(x=0;x<jteams_list->len;x++) {
+		struct _jteam *jteam = g_ptr_array_index(jteams_list, x);
+		total_projects += jteam->projects->len;
+	}
+	sa_judges_available_in_round[0] = round1_sa_judges->len;
+	sa_judges_available_in_round[1] = round2_sa_judges->len;
+	total_judges = sa_judges_available_in_round[0] + sa_judges_available_in_round[1];
+
+	ideal_projects_in_round[0] = total_projects * sa_judges_available_in_round[0] / total_judges;
+	ideal_projects_in_round[1] = total_projects * sa_judges_available_in_round[1] / total_judges;
+
+
+	printf("   => %d projects, judges in [0]=%d, [1]=%d\n", total_projects, sa_judges_available_in_round[0], sa_judges_available_in_round[1]);
+	printf("   => ideally, projects in [0]=%d, [1]=%d\n", ideal_projects_in_round[0], ideal_projects_in_round[1]);
+
+	for(x=0;x<jteams_list->len;x++) {
+		struct _jteam *jteam = g_ptr_array_index(jteams_list, x);
+		int round;
+		int judges_required;
+		GPtrArray *judge_list;
+
+		if(jteam->projects->len > ideal_projects_in_round[0]) {
+			round = 1;
+			judge_list = round2_sa_judges;
+		} else {
+			round = 0;
+			judge_list = round1_sa_judges;
+		}
+
+
+		ideal_projects_in_round[round] -= jteam->projects->len;
+		jteam->round = round + 1;
+		printf("\n   JTeam %d: %s assigned to round %d.  has %d projects, ideal is now [0]=%d, [1]=%d\n", jteam->id, jteam->name, round+1,
+				jteam->projects->len, ideal_projects_in_round[0], ideal_projects_in_round[1]);
+
+		/* Assign judges randomly */
+		if(jteam->projects->len > 0) 
+			judges_required = (jteam->projects->len - 1) / judging_data.projects_per_sa_judge + 1;
+		else 
+			judges_required = 0;
+		printf("         => %d judges are required.\n", judges_required);
+		for(i=0; i<judges_required; i++) {
+			struct _judge *j;
+			if(judge_list->len == 0) continue;
+
+			j = g_ptr_array_index(judge_list, 0);
+			g_ptr_array_remove_index_fast(judge_list, 0);
+
+			g_ptr_array_add(jteam->judges, j);
+			printf("      => ");
+			judge_print(j);
+		}
+
+	}
+	
+	
+
+	}
+
+
 
 	/* Save any updates we made to jteams:
 	 * - round has been set 
+	 * - user_ids have been set
 	 */
 	printf("Saving changes to JTeams...");
-	for(i=0;i<jteams->len;i++) {
+	for(i=1;i<jteams->len;i++) {
 		struct _jteam *jteam = g_ptr_array_index(jteams, i);
+		char ids[2048];
+		char *ptr;
 		db_query(db, "UPDATE judging_teams SET round='%d' WHERE id='%d'", jteam->round, jteam->id);
+
+
+		ids[0] = 0;
+		ptr = &ids[0];
+		for(x=0;x<jteam->judges->len;x++) {
+			struct _judge *j = g_ptr_array_index(jteam->judges, x);
+			if(ptr != &ids[0]) 
+				ptr += sprintf(ptr, ",");
+			ptr += sprintf(ptr, "%d", j->id);
+		}
+		db_query(db, "UPDATE judging_teams SET user_ids='%s' WHERE id='%d'", ids, jteam->id);
+
+		ids[0] = 0;
+		ptr = &ids[0];
+		for(x=0;x<jteam->projects->len;x++) {
+			struct _project *p = g_ptr_array_index(jteam->projects, x);
+			if(ptr != &ids[0]) 
+				ptr += sprintf(ptr, ",");
+			ptr += sprintf(ptr, "%d", p->pid);
+		}
+		db_query(db, "UPDATE judging_teams SET project_ids='%s' WHERE id='%d'", ids, jteam->id);
 	}
 
+	/* ====================================================================*/
+	/* Assign special awards to rounds based on available judges
+	 * and special-awards-only judges */
+	{
+	struct _judge *timeslot_judge[10][10];
+	int timeslot_type[10][10];
+	int start_type = 0; /* 0 div, 1 special, 2 nothing */
+	static char *timeslot_type_str[3] = {"divisional", "special", "free" };
+	memset(timeslot_judge, 0, sizeof(timeslot_judge));
+	memset(timeslot_type, 0, sizeof(timeslot_type));
 
+	/* Do timeslot assignments */
+	printf("Doing Timeslot Assignments...");
+	db_query(db, "DELETE FROM timeslot_assignments WHERE year='%d'", year);
+	for(i=1;i<jteams->len;i++) {
+		struct _jteam *jteam = g_ptr_array_index(jteams, i);
+		int current_timeslot_type;
+		int start_judge_index = 0;
+		int judge_index = 0;
+		start_type = 0;
+		if(!jteam->award->is_divisional || jteam->round!= 1) continue;
 
+		for(x=0;x<jteam->projects->len;x++) {
+			current_timeslot_type = start_type;
+			judge_index = start_judge_index;
+			/* Go down all 9 timeslots, filling them out */
+			for(y=0;y<9;y++) {
+				timeslot_type[x][y] = current_timeslot_type;
+				if(current_timeslot_type == 0) {
+					timeslot_judge[x][y] = g_ptr_array_index(jteam->judges, judge_index);
+					judge_index++;
+				}
+				current_timeslot_type++;
+				if(current_timeslot_type == 3) current_timeslot_type = 0;
+			}
+			start_judge_index++;
+			if(start_judge_index == jteam->judges->len) {
+				/* Rotate start type backwards so it appears the div judge slot
+				 * is pushed down one */
+				start_judge_index = 0;
+				start_type = (start_type == 0) ? 2 : (start_type-1);
+			}
+		}
+
+		printf("   Timeslot assignments for %s\n", jteam->name);
+		for(x=0;x<jteam->projects->len;x++) {
+			struct _project *p = g_ptr_array_index(jteam->projects, x);
+			printf("\t%d", p->pid);
+		}
+		printf("\n");
+
+		for(y=0;y<9;y++) {
+			printf("%d", y+1);
+			for(x=0;x<jteam->projects->len;x++) {
+				struct _project *p = g_ptr_array_index(jteam->projects, x);
+				struct _judge *j = timeslot_judge[x][y];
+				if(timeslot_type[x][y] == 0) 
+					printf("\t(%d)", j->id);
+				else if(timeslot_type[x][y] == 2) 
+					printf("\t--");
+				else
+					printf("\t%d", timeslot_type[x][y]);
+
+				db_query(db, "INSERT INTO timeslot_assignments (`num`,`pid`,`judging_team_id`,`judge_id`,`type`,`year`)"
+					" VALUES('%d','%d','%d','%d','%s','%d')",
+						(y+1) + (jteam->round - 1)*9,
+						p->pid, 
+						timeslot_type[x][y] == 0 ? jteam->id : 0, 
+						timeslot_type[x][y] == 0 ? j->id : 0, 
+						timeslot_type_str[timeslot_type[x][y]],
+						year);
+
+				db_query(db, "INSERT INTO timeslot_assignments (`num`,`pid`,`judging_team_id`,`judge_id`,`type`,`year`)"
+					" VALUES('%d','%d','%d','%d','%s','%d')",
+						(y+1) + 9,
+						p->pid, 
+						0, 
+						0,
+						timeslot_type_str[timeslot_type[x][y]],
+						year);
+			}
+			printf("\n");
+		}
+	}
+	}
 
 
 	printf("All done!\n");

@@ -40,4 +40,6 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets,
 		int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move)
 	);
 
+void anneal_set_debug(int d);
+
 #endif
