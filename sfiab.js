@@ -50,6 +50,26 @@ function leftnav_main_menu_open() {
 	$('#leftnav_main').collapsible( "collapse" );
 }
 
+function sfiab_form_update_vals(form_id, vals)
+{
+	// Change field values based on the response
+	for(var i=0; i<vals.length; i++) {
+		var v = vals[i];
+		var e = $("#"+form_id+"_"+v[0]);
+		var type = e.prop('type');
+		if(type == 'checkbox') {
+			e.prop('checked', v[1]);
+			e.checkboxradio("refresh");
+		} else if(type == 'select-one') {
+			e.val(v[1]);
+			e.selectmenu("refresh");
+		} else {
+			e.val(v[1]);
+		}
+	}
+
+}
+
 $( document ).on( "pagecreate", function( event ) {
 	// Attach a submit handler to the form
 	$( ".sfiab_form" ).submit(function( event ) {
@@ -93,18 +113,7 @@ $( document ).on( "pagecreate", function( event ) {
 			}
 
 			// Change field values based on the response
-			for(var i=0; i<data.val.length; i++) {
-				var v = data.val[i];
-				// For some reason using # notation doesn't work, but input[ does.
-				var e = $("input[id="+form_id+"_"+v[0]+"]");
-				var type = e.prop('type');
-				if(type == 'checkbox') {
-					e.prop('checked', v[1]);
-					e.checkboxradio("refresh");
-				} else {
-					e.val(v[1]);
-				}
-			}
+			sfiab_form_update_vals(form_id, data.val);
 
 			/* Use the incomplete fields to update the count in the left nav menu */
 			$("#"+form_id+" label").removeClass('error');
