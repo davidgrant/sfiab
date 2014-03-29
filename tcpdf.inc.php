@@ -79,6 +79,9 @@ class pdf extends TCPDF {
 		//set image scale factor
 		$this->setImageScale(PDF_IMAGE_SCALE_RATIO); 
 
+		/* Turning off subsetting is supposed to help */
+		$this->setFontSubsetting(false);
+
 		$this->current_label_index = 1;
 		$this->current_label_row = 0;
 		$this->current_label_col = 0;
@@ -231,6 +234,12 @@ class pdf extends TCPDF {
 			if($on_overflow == 'scale') {	
 				/* reduce the font size and try again */
 				$this->debug("=> Reduce fontsize to $fontsize\n");
+				/* Try to scale the font intelligently, this gets
+				 * us to a fit font faster */
+				$scale = $h / $total_height;
+				if($scale > 0.5 && $scale < 1.0) {
+					$fontsize *= $h / $total_height;
+				}
 				$fontsize -= 0.5;
 				continue;
 			} 
