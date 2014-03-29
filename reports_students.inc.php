@@ -156,7 +156,7 @@ function reports_students_registration_fee($mysqli, &$report, $field, $text)
 function reporst_students_ethics_forms_required($mysqli, &$report, $field, $text)
 {
 	$p = project_load($mysqli, $text);
-	$e &= $p['ethics'];
+	$e =& $p['ethics'];
 	$ret = '';
 	if($e['human1']) $ret .= 'Human';
 	if($e['animals']) $ret .= 'Animal';

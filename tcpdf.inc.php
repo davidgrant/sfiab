@@ -197,13 +197,18 @@ class pdf extends TCPDF {
 		$orig_fs = $this->getFontSizePt();
 		$add_ellipses = false;
 
-		$fontsize = ($h/$ln) * $this->k;
-		$this->debug("Calculate starting font size($h/$ln) * $this->k: $fontsize\n");
+		if($ln > 0) {
+			$fontsize = ($h/$ln) * $this->k;
+			$this->debug("Calculate starting font size($h/$ln) * $this->k: $fontsize\n");
+		} else {
+			$fontsize = $this->getFontSizePt();
+			$this->debug("lines=0, starting with default font size $fontsize\n");
+		}
+
 		while(1) {
 			$this->debug("=> Trying font size $fontsize\n");
 			$this->setFontSize($fontsize);
 			$lines = $this->_cell_lines($w, $txt, '', '', $fontsize);
-
 
 			/* this->FontSize is always correct, we change $fontisze
 			 * below, but then use that to set the internal fontsize */
@@ -214,7 +219,7 @@ class pdf extends TCPDF {
 			$this->debug("=> fontsize=$fontsize, this->fontsize={$this->FontSize}, k={$this->k}, cell_height_ratio={$this->cell_height_ratio}\n");
 			$this->debug("=> fontsize*ratio=".($this->FontSize * $this->cell_height_ratio));
 
-			if(count($lines) > $ln) {
+			if($ln > 0 && count($lines) > $ln) {
 				$this->debug("=> too many lines, max is $ln\n");
 				/* continue into resize code below */
 			} else if($total_height <= $h) {
@@ -388,10 +393,11 @@ class pdf extends TCPDF {
 
 		$logo_width = 0;
 		$header_height = $this->label_height * 0.1;
+		if($header_height > 10) $header_height = 10;
 
 		if($this->label_show_logo) {
 			/* Logo at 10% label height */
-			$logo_width = $this->label_height * 0.1;
+			$logo_width = $header_height;
 			$this->Image("data/logo.jpg", $this->lMargin + 0.5, $this->tMargin + 0.5, 
 				$logo_width, $logo_width, '', '', '', true, 300, '', false, false, 0, true);
 			$logo_width += 1;
@@ -406,7 +412,7 @@ class pdf extends TCPDF {
 			$this->Line(0 + $this->lMargin, $header_height+1 + $this->tMargin, 
 					$this->label_width +  $this->lMargin, $header_height + 1 + $this->tMargin);
 			/* Bring down the top margin */
-			$this->SetTopMargin($tmargin + $this->label_height * 0.1);
+			$this->SetTopMargin($tmargin + $header_height + 2);
 		}
 
 	}

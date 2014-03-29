@@ -307,12 +307,6 @@ function report_save_field($mysqli, $report, $type)
 	$fieldvar = "report_{$report['type']}s_fields";
 	$allow_fields = array_keys($$fieldvar);
 
-	/* First delete all existing fields */
-	$mysqli->real_query("DELETE FROM reports_items 
-			WHERE `reports_id`='{$report['id']}'
-			AND `type`='$type'");
-	/* Now add new ones */
-
 	if(count($report[$type]) == 0) return;
 	
 	$q = '';
@@ -323,6 +317,7 @@ function report_save_field($mysqli, $report, $type)
 			/* field, value, x, y, w, min_w, h, h_rows, align, valign, fn, fs, fsize, overflow */
 			$vals = "'$k','$v','0','0','0',NULL,'0','0','','','','','0','truncate'";
 		} else {
+//			print_r($v);
 			$f_field = array_key_exists('field', $v) ? "'".$mysqli->real_escape_string($v['field'])."'" : "''";
 			$f_value = array_key_exists('value', $v) ? "'".$mysqli->real_escape_string($v['value'])."'" : "''";
 			$f_x = array_key_exists('x', $v) ? "'".((float)$v['x'])."'" : "'0'";
@@ -489,7 +484,7 @@ function report_save_field($mysqli, $report, $type)
 
 /*	print("<pre>");
 	print_r($_POST);
-	print_r($report)_t
+	print_r($report);
 	print("</pre>");
 */
 
@@ -502,6 +497,11 @@ function report_save_field($mysqli, $report, $type)
 			WHERE `id`={$report['id']}");
 	print($mysqli->error);
 
+	/* First delete all existing fields */
+	$mysqli->real_query("DELETE FROM reports_items 
+			WHERE `report_id`='{$report['id']}'");
+
+	/* Now add new ones */
 	report_save_field($mysqli, $report, 'col');
 	report_save_field($mysqli, $report, 'group');
 	report_save_field($mysqli, $report, 'sort');
