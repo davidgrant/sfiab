@@ -76,7 +76,20 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 		$judge_list = array();
 		foreach($judges as &$j) {
 			if($j['j_rounds'][$round] == 1 && $j['j_complete'] == 1 && $j['not_attending'] == 0) {
-				$judge_list[] =& $j;
+				/* Is this judge on a jteam in ths round? */
+				$found = false;
+				foreach($jteams as &$jteam) {
+					if($jteam['round'] != $round+1) continue;
+
+					foreach($jteam['user_ids'] as $uid) {
+						if($uid == $j['uid']) $found = true;
+						break;
+					}
+					if($found == true) break;
+				}
+				if(!$found) {
+					$judge_list[] =& $j;
+				}
 			}
 		}
 ?>
