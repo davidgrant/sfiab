@@ -4,7 +4,7 @@ require_once('filter.inc.php');
 function projects_load_all($mysqli)
 {
 	global $config;
-	$q = $mysqli->query("SELECT * FROM projects WHERE year={$config['year']}");
+	$q = $mysqli->query("SELECT * FROM projects WHERE year={$config['year']} ORDER BY number_sort");
 	$projects = array();
 	while($p = $q->fetch_assoc()) {
 		$pr = project_load($mysqli, $p['pid'], $p);

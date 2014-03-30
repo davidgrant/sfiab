@@ -402,6 +402,7 @@ void jteam_print(struct _jteam *jteam)
 void judges_anneal(struct _db_data *db, int year)
 {
 	int x, y, i;
+	struct _db_result *result;
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
 	GPtrArray **judge_jteam_assignments = NULL;
@@ -411,14 +412,33 @@ void judges_anneal(struct _db_data *db, int year)
 
 	jteams = g_ptr_array_new();
 
-	judging_data.min_projects_per_judge = 3;
-	judging_data.max_projects_per_judge = 7;
-	judging_data.min_judges_per_team = 3;
-	judging_data.max_judges_per_team = 3;
-	judging_data.min_judges_per_cusp_team = 6;
-	judging_data.max_judges_per_cusp_team = 6;
-	judging_data.projects_per_sa_judge = 15;
-	
+	result = db_query(db, "SELECT * FROM config WHERE year='%d'", year);
+	for(x=0;x<result->rows; x++) {
+		char *ptr = db_fetch_row_field(result, x, "var");
+		int val = atoi(db_fetch_row_field(result, x, "val"));
+		if(strcmp(ptr, "judge_div_min_projects") == 0)
+			judging_data.min_projects_per_judge = val;
+		if(strcmp(ptr, "judge_div_max_projects") == 0)
+			judging_data.max_projects_per_judge = val;
+		if(strcmp(ptr, "judge_div_min_team") == 0)
+			judging_data.min_judges_per_team = val;
+		if(strcmp(ptr, "judge_div_max_team") == 0)
+			judging_data.max_judges_per_team = val;
+		if(strcmp(ptr, "judge_cusp_min_team") == 0)
+			judging_data.min_judges_per_cusp_team = val;
+		if(strcmp(ptr, "judge_cusp_max_team") == 0)
+			judging_data.max_judges_per_cusp_team = val;
+		if(strcmp(ptr, "judge_sa_max_projects") == 0)
+			judging_data.projects_per_sa_judge = val;
+	}
+	db_free_result(result);
+
+	printf("Configuration: \n");
+	printf("   => Projects per Div judge: %d -> %d\n", judging_data.min_projects_per_judge, judging_data.max_projects_per_judge);
+	printf("   => Projects per SA judge: up to %d\n", judging_data.projects_per_sa_judge);
+	printf("   => Judges per Div Team: %d -> %d\n", judging_data.min_judges_per_team, judging_data.max_judges_per_team);
+	printf("   => Judges per Cusp Team: %d -> %d\n", judging_data.min_judges_per_cusp_team, judging_data.max_judges_per_cusp_team);
+
 	students_load(db, year);
 	projects_load(db, year);
 	projects_crosslink_students();

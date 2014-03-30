@@ -897,8 +897,6 @@ function report_save_field($mysqli, $report, $type)
 				/* Setup additional options */
 				$show_box = ($report['option']['field_box'] == 'yes') ? true : false;
 
-//				echo "<pre>"; print_r($d); print($v);
-
 				switch($f) {
 				case 'static_box':
 					$rep->label_rect($d['x'], $d['y'], $d['w'], $d['h']);
@@ -909,6 +907,18 @@ function report_save_field($mysqli, $report, $type)
 				case "projectbarcode":
 					$rep->label_barcode($d['x'], $d['y'], $d['w'], $d['h'], $v);
 					break;
+
+/*
+				case 'project_timetable':
+					 $v is supposed to be the project id 
+					$html = sfiab_get_project_timetable($mysqli, $v);
+					$rep->label_html($d['x'], $d['y'], $d['w'], $d['h'],
+							$v, $show_box, $d['align'], $d['valign'],
+							$d['h_rows'],
+							$d['fontname'],$d['fontstyle'],$d['fontsize'],
+							$d['on_overflow']);
+					break;
+*/
 					
 				default:
 					if($f == 'static_text') 

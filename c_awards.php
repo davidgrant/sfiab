@@ -199,7 +199,7 @@ sfiab_page_begin("Edit Awards", $page_id);
 		</thead>
 	<?php
 		$current_type = '';
-		foreach($awards as $a) {
+		foreach($awards as $aid=>$a) {
 			if($a['type'] != $current_type) {
 				$current_type = $a['type'];
 				print("<tr><td colspan=4><h3>{$award_types[$current_type]}</h3></td></tr>");

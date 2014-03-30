@@ -36,7 +36,7 @@ function award_load_all($mysqli)
 	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' ORDER BY `type`,`order`");
 	$awards = array();
 	while($d = $q->fetch_assoc()) {
-		$awards[] = award_load($mysqli, 0, $d);
+		$awards[intval($d['id'])] = award_load($mysqli, 0, $d);
 	}
 	return $awards;
 }

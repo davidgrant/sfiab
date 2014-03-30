@@ -240,7 +240,7 @@ class pdf extends TCPDF {
 				$this->debug("=> Reduce fontsize to $fontsize\n");
 				/* Try to scale the font intelligently, this gets
 				 * us to a fit font faster */
-				$scale = $h / $total_height;
+				$scale = ($h * $columns) / $total_height;
 				if($scale > 0.5 && $scale < 1.0) {
 					$fontsize *= $h / $total_height;
 				}
@@ -523,9 +523,6 @@ class pdf extends TCPDF {
 
 		$this->SetXY($this->x($x), $this->y($y));
 		$this->debug("=> Actual pos (".$this->x($x).",".$this->y($y)."\n");
-//		echo "position (x,y)=($x,$y)\n";
-//		echo "margin (l,t)=({$this->lMargin},{$this->tMargin})\n";
-//		echo "(x,y)=(".($this->lMargin + $x).",".($this->tMargin + $y).")\n";
 		$this->SetFont($fontname, $fs, $fontsize);
 
 		/* Print text */
@@ -536,6 +533,46 @@ class pdf extends TCPDF {
 		$this->SetFont($orig_name, $orig_style, $orig_size);
 		$this->SetXY($orig_x, $orig_y);
 	}
+
+	function label_html($x,$y,$w,$h,$text,$border,$align='center',$valign='middle',
+				$max_lines=1, 
+				$fontname='helvetica',$fontstyle='',$fontsize='6',
+				$on_overflow='scale')
+	{
+		$this->debug("HTML label ($x,$y) $w x $h \"$text\" ($fontname, $fontsize)\n");
+		$orig_name = $this->getFontFamily();
+		$orig_style = $this->getFontStyle();
+		$orig_size = $this->getFontSizePt();
+		$orig_x = $this->GetX();
+		$orig_y = $this->GetY();
+
+		/* Do horiz/vert align */
+		$align_data = array('left' => 'L', 'center' => 'C', 'right' => 'R');
+		$valign_data = array('top' => 'T', 'middle' => 'M', 'bottom' => 'B');
+		$align = $align_data[$align];
+		$valign = $valign_data[$valign];
+
+		/* Set position and font */
+		$st = array('bold' => 'B', 'italic' => 'I', 'underline' => 'U', 'strikethrough' => 'D');
+		$fs = '';
+		if(is_array($fontstyle)) {
+			foreach($fontstyle as $s) $fs .= $st[$s];
+		}
+
+		if($fontsize == 0) $fontsize = 10; /* FIXME: getdefaultfontsize? */
+
+		$this->SetXY($this->x($x), $this->y($y));
+		$this->debug("=> Actual pos (".$this->x($x).",".$this->y($y)."\n");
+		$this->SetFont($fontname, $fs, $fontsize);
+
+		/* Print text */
+		$this->FitCell($this->w($w),$this->h($h), $text,  $border ? 1 : 0, $max_lines, 
+				$align, $valign, $on_overflow);
+
+		/* Restore position and font */
+		$this->SetFont($orig_name, $orig_style, $orig_size);
+		$this->SetXY($orig_x, $orig_y);
+	}	
 
 	function label_rect($x,$y,$w,$h) 
 	{
@@ -623,7 +660,6 @@ class pdf extends TCPDF {
 		/* Compute the lines in height of each row for pagination */
 		$html = '<table cellpadding="0"><thead><tr>';
 		foreach($table['fields'] as $f) {
-			$col = $table['col'][$f];
 			$html .= "<td style=\"border-bottom:1px solid black; border-top:1px solid black\" width=\"{$table['widths'][$f]}mm\" align=\"center\"><b>{$table['header'][$f]}</b></td>";
 		}
 		$html .= '</tr></thead>';
@@ -651,8 +687,6 @@ class pdf extends TCPDF {
 
 			$html .= "<tr $style >";
 			foreach($table['fields'] as $f) {
-				$col = $table['col'][$f];
-
 				/* Convert all entities to HTML, even UTF characters.  Without this
 				 * TCPDF won't add a table if it has a UTF char */
 				$d = htmlentities(utf8_decode($row[$f]));

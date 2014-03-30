@@ -15,7 +15,13 @@ $t = @time(NULL);
 $now = @date( 'Y-m-d H:i:s', $t);
 print($now);
 
+$t = "18:00:00";
+$d = date_parse($t);
+print_r($d);
 
+print date("h:i a", strtotime($t));
+
+print exec("src/sfiab_annealer judges > logs/judge_scheduler.log 2>&1");
 //$mysqli->real_query('ALTER TABLE `projects` ADD `num_mentors` INT( 4 ) NOT NULL ');
 
 #sfiab_session_start($mysqli);

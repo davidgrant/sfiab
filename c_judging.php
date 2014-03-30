@@ -64,31 +64,59 @@ sfiab_page_begin("Judging", $page_id);
 		}
 	}
 
+	$jteam_count = array();
 
-?>	<h3>Judges</h3> 
-	<p>Complete: <b><?=$j_complete?></b> / <b><?=$j_complete+$j_incomplete?></b>,  plus not attending: <b><?=$j_not_attending?></b>.
-	Complete for Round 1: <b><?=$j_round1?></b>, Round 2: <b><?=$j_round2?></b> (both: <b><?=$j_round_both?></b>).
-	
+	$q = $mysqli->query("SELECT round,awards.`type`,COUNT(`judging_teams`.`id`) AS c FROM judging_teams 
+				LEFT JOIN awards ON awards.id=judging_teams.award_id
+				WHERE judging_teams.year='{$config['year']}' GROUP BY round,awards.`type`");
 
+	while($r = $q->fetch_assoc()) {
+		$jteam_count[$r['round']][$r['type']] = $r['c'];
+	}
+
+
+?>	
+	<h3>Stats</h3> 
+	<table border=1>
+	<tr><td valign="top">
+		<table>
+		<tr><td colspan="2" align="center"><b>Complete Judges</b></td></tr>
+		<tr><td align="center">Round 1</td><td align="center"><?=$j_round1?></td></tr>
+		<tr><td align="center">Round 2</td><td align="center"><?=$j_round2?></td></tr>
+		<tr><td align="center">Both</td><td align="center"><?=$j_round_both?></td></tr>
+		<tr><td align="center"><b>Total</b></td><td align="center"><b><?=$j_complete?></b></td></tr>
+		</table>
+	</td><td valign="top">
+		<table>
+		<tr><td colspan="2" align="center"><b>Incomplete Judges</b></td></tr>
+		<tr><td align="center">Incomplete</td><td align="center"><?=$j_incomplete?></td></tr>
+		<tr><td align="center">Not Attending</td><td align="center"><?=$j_not_attending?></td></tr>
+		</table>
+	</td><td valign="top">
+		<table>
+		<tr><td colspan="5" align="center"><b>Judging Teams</b></td></tr>
+		<tr><td colspan="2"></td><td align="center">Divisional</td><td align="center">Special</td><td align="center">Unused</td></tr>
+		<tr><td align="center">Round 1</td><td align="center">Teams</td><td align="center"><?=$jteam_count[1]['divisional']?></td><td align="center"><?=$jteam_count[1]['special']?></td><td align="center">  </td></tr>
+		<tr><td align="center">       </td><td align="center">Judges</td><td align="center">fixme</td><td align="center">fixme</td><td align="center">fixme</td></tr>
+		<tr><td align="center">Round 2</td><td align="center">Teams</td><td align="center"><?=$jteam_count[2]['divisional']?></td><td align="center"><?=$jteam_count[2]['special']?></td><td align="center">  </td></tr>
+		<tr><td align="center">       </td><td align="center">Judges</td><td align="center">fixme</td><td align="center">fixme</td><td align="center">fixme</td></tr>
+		</table>
+
+	</td></tr></table>
+
+
+	<h3>Judges</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="c_judging_invite.php" data-rel="external" data-ajax="false">X Invite a Judge</a></li>
+	<li><a href="index.php#register" data-rel="external" data-ajax="false">Invite a Judge</a></li>
 	<li><a href="c_user_list.php?roles=judge" data-rel="external" data-ajax="false">Judge List / Editor</a></li>
 	</ul>
 
-
-
 	<h3>Judging Assignments</h3> 
-	<p>FIXME: how many juding teams are there?
 	<ul data-role="listview" data-inset="true">
-	<li><a href="#" data-rel="external" data-ajax="false">X Edit Judging Timeslots</a></li>
-	<li><a href="#" data-rel="external" data-ajax="false">X Run the Judge Scheduler</a></li>
-	</ul>
-
-	<h3>Judging Assignments</h3> 
-	<p>FIXME: how many assignments are there, or has the scheduler been run?
-	<ul data-role="listview" data-inset="true">
-	<li><a href="#" data-rel="external" data-ajax="false">X Edit Judging Teams</a></li>
-	<li><a href="#" data-rel="external" data-ajax="false">X Edit Judging Team -- Project Assignments</a></li>
+	<li><a href="c_timeslots.php" data-rel="external" data-ajax="false">Edit Judging Timeslots</a></li>
+	<li><a href="c_judge_scheduler.php" data-rel="external" data-ajax="false">Run the Judge Scheduler</a></li>
+	<li><a href="c_jteam_edit.php" data-rel="external" data-ajax="false">Edit Judging Teams</a></li>
+	<li><a href="#" data-rel="external" data-ajax="false">X Edit Team/Project Timeslot Assignments</a></li>
 	</ul>
 
 <?php

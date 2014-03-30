@@ -114,11 +114,21 @@ $min_year = $u['M'];
 ?>
 
 	<hr/>
+	<h3>Special / Custom Reports</h3>
+	<ul data-role="listview" data-inset="true">
+	<li><a href="report_project_timetable.php" data-rel="external" data-ajax="false">Project Judging Schedules for the Students (one per page, takes a few seconds to generate)</a></li>
+	</ul>
+	<br/>
+
+
+	<hr/>
 	<h3>Edit Reports</h3>
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_reports_edit.php" data-rel="external" data-ajax="false">Edit Reports</a></li>
 	</ul>
 	
+
+
 
 	<script>
 		$( "#<?=$form_id?>_rid" ).change(function() {
