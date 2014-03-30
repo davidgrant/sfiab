@@ -240,7 +240,7 @@ class pdf extends TCPDF {
 				$this->debug("=> Reduce fontsize to $fontsize\n");
 				/* Try to scale the font intelligently, this gets
 				 * us to a fit font faster */
-				$scale = ($h * $columns) / $total_height;
+				$scale = $h / $total_height;
 				if($scale > 0.5 && $scale < 1.0) {
 					$fontsize *= $h / $total_height;
 				}
