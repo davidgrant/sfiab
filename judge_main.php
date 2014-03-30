@@ -11,6 +11,7 @@ sfiab_session_start($mysqli, array('judge'));
 $page_id = "j_home";
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $action = '';
 if(array_key_exists('action', $_POST)) {
@@ -66,10 +67,14 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 		<p>Your registration will still be here next year if you are
 		able to judge again.  
 		
-		<p>If your plans change for this year, just indicate below that
-		you are able to judge at the fair again, and finish the registration
-		process.  If the registration deadline has passed, please contact
-		the chief judges (leonard@gvrsf.ca or ceddy@gvrsf.ca)
+<?php		if($closed) { ?>
+			<p>Registration is now closed for this year.
+<?php		} else { ?>
+			<p>If your plans change for this year, just indicate below that
+			you are able to judge at the fair again, and finish the registration
+			process.  If the registration deadline has passed, please contact
+			the chief judges (leonard@gvrsf.ca or ceddy@gvrsf.ca)
+<?php		} ?>
 		
 		<p>Thank you.	
 <?php
@@ -89,28 +94,40 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
 		
-		The red numbers in the menu on the left indicate which sections
-		have missing data.  Registration closes on March 30, 2014.  You
-		have until this day to complete your registration.  After this
-		date, the registration system closes and you will not be
-		assigned to a judging team.
-<?php
+<?php		if($closed) { ?>
+			<p>Registration is now closed.
+<?php		} else { ?>
+			<p>The red numbers in the menu on the left indicate which sections
+			have missing data.  Registration closes on March 30, 2014.  You
+			have until this day to complete your registration.  After this
+			date, the registration system closes and you will not be
+			assigned to a judging team.
+<?php		}
 	}
 ?>
 		
 
 	<hr/>
+
 	<h3>Cancelling</h3>
 	If you are regrettably unable to judge at the fair this year, just flip
 	the switch below to let us know.  This helps us re-organize judging teams if 
 	judging assignments have already been made.  You can always flip the switch back again.
-	<?php
-
+<?php
+	if($closed) { ?>
+		<p>Since registration is closed and judging teams have been
+		assigned, if you indicate you're not able to attend you will be
+		removed from any judging teams you're on.  If you later change
+		your status back to attending, you may not be assigned to the
+		same judging team.  Last minute judging changes are all done
+		manually by the chief judge. 
+<?php	} 
+		
 	/* This is backwards because it's "not attending" */
 	$sel = array('0'=>'Yes, I\'ll be there', '1'=>'No, I can\'t make it');
 
 	$form_id = 'j_attending_form';
-	form_begin($form_id, 'judge_main.php');	
+	form_begin($form_id, 'judge_main.php');
 	form_radio_h($form_id, 'j_not_attending', "Judging at the fair", $sel, $u['not_attending']);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);

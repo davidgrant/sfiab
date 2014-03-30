@@ -126,7 +126,7 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 				if(is_array($val)) $val = $val['name'];
 				$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
 				
-			        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox">
+			        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox" <?=$d?> >
 			        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
 <?php				$x++;
 			} ?>

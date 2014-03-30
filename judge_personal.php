@@ -9,6 +9,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('judge'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 'j_personal';
 
@@ -19,6 +20,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_text($u['salutation'], 'salutation');
 	post_text($u['firstname'], 'firstname');
 	post_text($u['lastname'], 'lastname');
@@ -62,9 +64,10 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed);
 
 	$form_id = $page_id."_form";
-	form_begin($form_id, 'judge_personal.php');
+	form_begin($form_id, 'judge_personal.php', $closed);
 
 	form_text($form_id, 'salutation', "Salutation", $u);
 	form_text($form_id, 'firstname', "First Name", $u);

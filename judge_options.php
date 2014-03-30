@@ -11,6 +11,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('judge'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 'j_options';
 
@@ -23,6 +24,7 @@ $langs = array('en' => 'English', 'fr' => 'French' );
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_bool($u['j_willing_lead'], 'j_willing_lead');
 	post_bool($u['j_dinner'], 'j_dinner');
 	post_bool($u['j_rounds'][0], 'j_round0');
@@ -62,9 +64,10 @@ sfiab_page_begin("Options", $page_id, $help);
 		$e = join('<br/>', $incomplete_errors);
 	}
 	form_page_begin($page_id, $fields, $e);
+	form_disable_message($page_id, $closed);
 
 	$form_id=$page_id.'_form';
-	form_begin($form_id,'judge_options.php');
+	form_begin($form_id,'judge_options.php', $closed);
 ?>	
 	<h3>Judging Options</h3> 
 <?php	form_yesno($form_id, 'j_willing_lead', "Are you willing to be the team-lead on your judging team?", $u, true);

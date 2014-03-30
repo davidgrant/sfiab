@@ -11,6 +11,7 @@ sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('judge'));
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 'j_expertise';
 
@@ -23,6 +24,7 @@ $awards = award_load_special_for_select($mysqli);
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_bool($u['j_sa_only'], 'j_sa_only');
 	if($u['j_sa_only']) {
 		post_array($u['j_sa'], 'j_sa', $awards);
@@ -73,6 +75,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed);
 
 	$cats = categories_load($mysqli);
 	$isef_data = isef_get_div_names();
@@ -86,7 +89,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	$hidden = "style=\"display:none\"";
 
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'judge_expertise.php');
+	form_begin($form_id, 'judge_expertise.php', $closed);
 ?>
 		<h3>Sponsor Judges</h3>
 <?php

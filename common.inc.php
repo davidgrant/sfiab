@@ -614,6 +614,8 @@ function sfiab_registration_is_closed($u, $role=NULL)
 	if($role !== NULL) {
 		if($role == 'student') {
 			$reg_close_date = $config['date_student_registration_closes'];
+		} else if ($role == 'judge') {
+			$reg_close_date = $config['date_judge_registration_closes'];
 		} else {
 			return false;
 		}
@@ -639,6 +641,9 @@ function sfiab_registration_is_closed($u, $role=NULL)
 			if($u['s_accepted']) {
 				return true;
 			}
+
+		} else if (in_array('judge', $u['roles'])) {
+			$reg_close_date = $config['date_judge_registration_closes'];
 
 		} else {
 			return false;
