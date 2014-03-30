@@ -82,8 +82,10 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 					if($jteam['round'] != $round+1) continue;
 
 					foreach($jteam['user_ids'] as $uid) {
-						if($uid == $j['uid']) $found = true;
-						break;
+						if($uid == $j['uid']) {
+							$found = true;
+							break;
+						}
 					}
 					if($found == true) break;
 				}
