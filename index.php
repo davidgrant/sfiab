@@ -69,6 +69,10 @@ sfiab_page_begin('Welcome', 'welcome');
 		$s_disabled = 'disabled="disabled"';
 		$s_text = ' (registration closed)';
 	}
+	if(sfiab_registration_is_closed(NULL, 'judge')) {
+		$j_disabled = 'disabled="disabled"';
+		$j_text = ' (registration closed)';
+	}
 ?>
 
 	<div data-role="fieldcontain">
