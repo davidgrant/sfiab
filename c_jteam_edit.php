@@ -89,7 +89,7 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 <?php			judge_header();
 			$c = 0;
 			foreach($judge_list as &$j) {
-				judge_row($j);
+				judge_row($j, false);
 				$c++;
 				if($c > count($judge_list)/2 ) {
 ?>					</table>
@@ -151,7 +151,7 @@ function judge_header()
 }
 
 /* Print a table row for a judge, including the delte button */
-function judge_row(&$j)
+function judge_row(&$j, $show_del = true)
 {
 	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
 	$cat_pref = $j['j_pref_cat'] == 0 ? 'none' : $cats[$j['j_pref_cat']]['shortform'];
@@ -180,6 +180,8 @@ function judge_row(&$j)
 	if(in_array('fr', $j['j_languages'])) $langs.= 'fr ';
 
 	$lead = $j['j_willing_lead'] ? 'y' : 'n';
+
+	$del = $show_del ? '<a href="#">[X]</a>' : '';
 ?>
 	<tr><td><?=$j['name']?></td>
 	    <td align="center"><?=$cat_pref?></td>
@@ -187,7 +189,7 @@ function judge_row(&$j)
 	    <td align="center"><?=$exp?></td>
 	    <td align="center"><?=$langs?></td>
 	    <td align="center"><?=$lead?></td>
-	    <td align="center"><button data-mini="true" class="ui-btn ui-icon-delete ui-btn-icon-notext" /></td>
+	    <td align="center"><?=$del?></td>
 	</tr>
 <?php
 
@@ -248,7 +250,7 @@ function jteam_li(&$jteam) {
 			    <td align="center"><?=$cat?></td>
 			    <td align="center"><?=$div?></td>
 			    <td align="center"><?=$lang?></td>
-			    <td align="center"><button data-mini="true" class="ui-btn ui-icon-delete ui-btn-icon-notext" /></td>
+			    <td align="center"><a href="#">[X]</a></td>
 			</tr>
 <?php		} ?>
 		</table>
