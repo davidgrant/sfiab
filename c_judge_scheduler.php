@@ -38,7 +38,7 @@ case 'run':
 	}
 
 	print("hi");
-	print exec("src/sfiab_annealer judges > logs/judge_scheduler.log 2>&1");
+	print exec("./src/sfiab_annealer judges > logs/judge_scheduler.log &");
 
 	print("hi");
 	form_ajax_response(array('status'=>0, ));
@@ -75,7 +75,7 @@ sfiab_page_begin("Judge Scheudler", $page_id);
 	<h3>Run The Scheduler</h3> 
 	<p>The scheduler is much faster than the old one, but it'll still take
 	about a minute to run.  There's no indication (yet) when it's done, but
-	you can watch the output here: <a href="logs/judge_scheduler.log">Log
+	you can watch the output here: <a data-ajax="false" href="logs/judge_scheduler.log">Log
 	File</a>
 
 

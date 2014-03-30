@@ -21,7 +21,7 @@ print_r($d);
 
 print date("h:i a", strtotime($t));
 
-print exec("src/sfiab_annealer judges > logs/judge_scheduler.log 2>&1");
+print exec("sh src/judges.sh");
 //$mysqli->real_query('ALTER TABLE `projects` ADD `num_mentors` INT( 4 ) NOT NULL ');
 
 #sfiab_session_start($mysqli);
