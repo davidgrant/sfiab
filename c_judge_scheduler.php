@@ -74,9 +74,14 @@ sfiab_page_begin("Judge Scheudler", $page_id);
 	<hr/>
 	<h3>Run The Scheduler</h3> 
 	<p>The scheduler is much faster than the old one, but it'll still take
-	about a minute to run.  There's no indication (yet) when it's done, but
-	you can watch the output here: <a data-ajax="false" href="logs/judge_scheduler.log">Log
+	about 2-3 minutes to run.  There's no indication (yet) when it's done, but
+	you can watch for the output here (just keep reloading after the scheduler is 
+	started it until text shows up): <a data-ajax="false" href="logs/judge_scheduler.log">Log
 	File</a>
+
+	<p>There will be no indication that you pressed the button below
+	either.  Just press it once, then check the log file... it'll be empty.
+	Then in 2-3min i'll show some data.
 
 
 <?php
