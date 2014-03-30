@@ -70,6 +70,44 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
+
+<?php	/* Fixme, next year, cleanup this round0/round1 numbering nonsense */
+	for($round=0; $round <=1;$round++) {
+		$judge_list = array();
+		foreach($judges as &$j) {
+			if($j['j_rounds'][$round] == 1 && $j['j_complete'] == 1 && $j['not_attending'] == 0) {
+				$judge_list[] =& $j;
+			}
+		}
+?>
+		<div data-role=collapsible data-collapsed=true>
+			<h3>Round <?=$round+1?> - <?=count($judge_list)?> Unused Judges</h3>
+
+			<div class="ui-grid-a">
+			<div class="ui-block-a">
+			<table>
+<?php			judge_header();
+			$c = 0;
+			foreach($judge_list as &$j) {
+				judge_row($j);
+				$c++;
+				if($c > count($judge_list)/2 ) {
+?>					</table>
+					</div>
+					<div class="ui-block-b">
+					<table>
+		<?php			judge_header();
+					$c = 0;
+				}
+			
+			}
+?>			</table>	
+			</div></div>
+		</div>
+<?php	}
+?>
+					
+
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search..." data-inset="true">
 
 <?php
@@ -100,6 +138,61 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 </ul>
 <?php
 
+function judge_header()
+{
+?>
+	<tr><td align="center">Judge</td><td align="center">Cat Pref</td>
+		<td align="center">Div Pref</td>
+		<td align="center">Years</td>
+		<td align="center">Langs</td>
+		<td align="center">Lead?</td>
+	</tr>
+<?php
+}
+
+/* Print a table row for a judge, including the delte button */
+function judge_row(&$j)
+{
+	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
+	$cat_pref = $j['j_pref_cat'] == 0 ? 'none' : $cats[$j['j_pref_cat']]['shortform'];
+
+	if($j['j_sa_only']) {
+		$exp = '';
+		$div_pref = 'SA: '.join(',', $j['j_sa']);
+	} else {
+		$div_pref = '';
+		for($x=1;$x<=3;$x++) {
+			$pref = $j["j_pref_div$x"];
+			if($pref > 0) {
+				if($isef_divs[$pref]['parent'] != false)
+					$d = $isef_divs[$pref]['parent'];
+				else 
+					$d = $isef_divs[$pref]['div'];
+
+				$div_pref .= $d.' ';
+			}
+		}
+		$exp = $j['j_years_regional'] + $j['j_years_national'];
+	} 
+
+	$langs = '';
+	if(in_array('en', $j['j_languages'])) $langs.= 'en ';
+	if(in_array('fr', $j['j_languages'])) $langs.= 'fr ';
+
+	$lead = $j['j_willing_lead'] ? 'y' : 'n';
+?>
+	<tr><td><?=$j['name']?></td>
+	    <td align="center"><?=$cat_pref?></td>
+	    <td align="center"><?=$div_pref?></td>
+	    <td align="center"><?=$exp?></td>
+	    <td align="center"><?=$langs?></td>
+	    <td align="center"><?=$lead?></td>
+	    <td align="center"><button data-mini="true" class="ui-btn ui-icon-delete ui-btn-icon-notext" /></td>
+	</tr>
+<?php
+
+}
+
 function jteam_li(&$jteam) {
 
 	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
@@ -117,49 +210,10 @@ function jteam_li(&$jteam) {
 		Award: <b><?=$jteam['award_id']?>: <?=$awards[$jteam['award_id']]['name']?></b><br/>
 		Round: <b><?=$jteam['round']?></b><br/>
 		<table>
-		<tr><td align="center">Judge</td><td align="center">Cat Pref</td>
-			<td align="center">Div Pref</td>
-			<td align="center">Exp</td>
-			<td align="center">Langs</td>
-		</tr>
-<?php		foreach($jteam['user_ids'] as $uid) {
-			$j =& $judges[$uid]; 
-			$cat_pref = $j['j_pref_cat'] == 0 ? 'none' : $cats[$j['j_pref_cat']]['shortform'];
-
-			if($j['j_sa_only']) {
-				$exp = '';
-				$div_pref = 'SA: '.join(',', $j['j_sa']);
-			} else {
-				$div_pref = '';
-				for($x=1;$x<=3;$x++) {
-					$pref = $j["j_pref_div$x"];
-					if($pref > 0) {
-						if($isef_divs[$pref]['parent'] != false)
-							$d = $isef_divs[$pref]['parent'];
-						else 
-							$d = $isef_divs[$pref]['div'];
-
-						$div_pref .= $d.' ';
-					}
-				}
-				$exp = $j['j_years_regional'] + $j['j_years_national'];
-			} 
-
-			$langs = '';
-			if(in_array('en', $j['j_languages'])) $langs.= 'en ';
-			if(in_array('fr', $j['j_languages'])) $langs.= 'fr ';
-
-			
-			?>
-
-			<tr><td><?=$j['name']?></td>
-			    <td align="center"><?=$cat_pref?></td>
-			    <td align="center"><?=$div_pref?></td>
-			    <td align="center"><?=$exp?></td>
-			    <td align="center"><?=$langs?></td>
-			    <td align="center"><button data-mini="true" class="ui-btn ui-icon-delete ui-btn-icon-notext" /></td>
-			</tr>
-<?php		} ?>
+<?php		judge_header();
+		foreach($jteam['user_ids'] as $uid) {
+			judge_row($judges[$uid]);
+		} ?>
 		</table>
 		<div data-role="controlgroup" data-type="horizontal">
 		    <a href="#" class="ui-btn ui-corner-all ui-btn-inline">Add Judge</a>
