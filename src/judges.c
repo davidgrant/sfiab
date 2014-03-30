@@ -331,8 +331,8 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 	}
 
 	/* Small penalty for a jteam with very little experience */
-	if(jteam->round == 1 && years_experience_weighted < 5) { 
-		cost += (5 - years_experience_weighted) * 2 ;
+	if(jteam->round == 1 && years_experience_weighted < 10) { 
+		cost += (10 - years_experience_weighted) * 5 ;
 	}
 
 	assert(cost >= 0);
@@ -858,8 +858,10 @@ void judges_anneal(struct _db_data *db, int year)
 	int timeslot_type[10][10];
 	int start_type = 0; /* 0 div, 1 special, 2 nothing */
 	static char *timeslot_type_str[3] = {"divisional", "special", "free" };
+	int first = 0;
 	memset(timeslot_judge, 0, sizeof(timeslot_judge));
 	memset(timeslot_type, 0, sizeof(timeslot_type));
+
 
 	/* Do timeslot assignments */
 	printf("Doing Timeslot Assignments...");
@@ -869,6 +871,7 @@ void judges_anneal(struct _db_data *db, int year)
 		int current_timeslot_type;
 		int start_judge_index = 0;
 		int judge_index = 0;
+		GString *q1;
 		start_type = 0;
 		if(!jteam->award->is_divisional || jteam->round!= 1) continue;
 
@@ -901,6 +904,9 @@ void judges_anneal(struct _db_data *db, int year)
 		}
 		printf("\n");
 
+		q1 = g_string_new("");
+
+		first = 1;
 		for(y=0;y<9;y++) {
 			printf("%d", y+1);
 			for(x=0;x<jteam->projects->len;x++) {
@@ -913,8 +919,11 @@ void judges_anneal(struct _db_data *db, int year)
 				else
 					printf("\t%d", timeslot_type[x][y]);
 
-				db_query(db, "INSERT INTO timeslot_assignments (`num`,`pid`,`judging_team_id`,`judge_id`,`type`,`year`)"
-					" VALUES('%d','%d','%d','%d','%s','%d')",
+
+				if(!first) g_string_append_printf(q1, ",");
+				first = 0;
+
+				g_string_append_printf(q1, "('%d','%d','%d','%d','%s','%d'),",
 						(y+1) + (jteam->round - 1)*9,
 						p->pid, 
 						timeslot_type[x][y] == 0 ? jteam->id : 0, 
@@ -922,8 +931,7 @@ void judges_anneal(struct _db_data *db, int year)
 						timeslot_type_str[timeslot_type[x][y]],
 						year);
 
-				db_query(db, "INSERT INTO timeslot_assignments (`num`,`pid`,`judging_team_id`,`judge_id`,`type`,`year`)"
-					" VALUES('%d','%d','%d','%d','%s','%d')",
+				g_string_append_printf(q1, "('%d','%d','%d','%d','%s','%d')",
 						(y+1) + 9,
 						p->pid, 
 						0, 
@@ -933,6 +941,9 @@ void judges_anneal(struct _db_data *db, int year)
 			}
 			printf("\n");
 		}
+		db_query(db, "INSERT INTO timeslot_assignments (`num`,`pid`,`judging_team_id`,`judge_id`,`type`,`year`) VALUES %s", 
+				q1->str);
+		g_string_free(q1, 1);
 	}
 	}
 

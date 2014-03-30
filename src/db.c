@@ -54,7 +54,7 @@ static struct _db_row *db_fetch_row(struct _db_result *result, struct _db_row *r
 struct _db_result *db_query(struct _db_data *db, char *msg, ...)
 {
 	va_list args;
-	char str[1024];
+	char str[65536];
 	struct _db_result *result;
 
 	if(!db) {
@@ -62,7 +62,7 @@ struct _db_result *db_query(struct _db_data *db, char *msg, ...)
 		exit(-1);
 	}
         va_start(args,msg);
-        vsnprintf(str, 1023, msg, args);
+        vsnprintf(str, 65535, msg, args);
         va_end(args);
 
 	mysql_query(&db->mysql, str);
