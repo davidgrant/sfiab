@@ -101,7 +101,7 @@ sfiab_page_begin("Student Main", 's_home', $help);
 	$files = array();
 	foreach(array('schedule', 'ubcmap', 'safety_checklist','ballroom','partyroom','judgeform') as $f) {
 		if(file_exists("data/{$config['year']}_$f.pdf")) {
-			$files[$f] = "<a href=\"data/{$config['year']}_$f.pdf\">.pdf</a>";
+			$files[$f] = "<a data-ajax=\"false\" href=\"data/{$config['year']}_$f.pdf\">.pdf</a>";
 		} else {
 			$files[$f] = "Coming Soon";
 		}
