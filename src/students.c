@@ -172,12 +172,12 @@ void judges_load(struct _db_data *db, int year)
 		j->index = x;
 		j->sa_only = atoi(db_fetch_row_field(result, x, "j_sa_only"));
 		if(j->sa_only) {
+			printf("%s\n", db_fetch_row_field(result, x, "j_sa"));
 			j->num_sa = split_int_list(j->sa, db_fetch_row_field(result, x, "j_sa"));
-			if(i > 16) {
+			if(j->num_sa > 16) {
 				printf("ERROR: judge %s managed to select more than 16 (=%d) j_sa awards\n", j->name, i);
 				assert(0);
 			}
-			j->sa[i] = -1;
 			j->years_school = 0;
 			j->years_regional = 0;
 			j->years_national = 0;

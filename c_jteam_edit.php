@@ -37,7 +37,7 @@ case 'jdel':
 	$jteam_id = (int)$_POST['jteam_id'];
 	$j_uid = (int)$_POST['uid'];
 
-	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam = jteam_load($mysqli, $jteam_id);
 
 	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND judge_id='$j_uid'");
 
@@ -47,7 +47,7 @@ case 'jdel':
 		$new_uids[] = $uid;
 	}
 	$jteam['user_ids'] = $new_uids;
-	l_jteam_save($mysqli, $jteam);
+	jteam_save($mysqli, $jteam);
 	form_ajax_response(array('status'=>0));
 	exit();
 
@@ -55,16 +55,16 @@ case 'jadd':
 	/* Add a judge to a jduging team */
 	$jteam_id = (int)$_POST['jteam_id'];
 	$j_uid = (int)$_POST['uid'];
-	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam = jteam_load($mysqli, $jteam_id);
 	$jteam['user_ids'][] = $j_uid;
-	l_jteam_save($mysqli, $jteam);
+	jteam_save($mysqli, $jteam);
 	form_ajax_response(array('status'=>0));
 	exit();
 
 case 'jadd_smart':
 	/* Add a best-match single free judge to a judging team */
 	$jteam_id = (int)$_POST['jteam_id'];
-	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam = jteam_load($mysqli, $jteam_id);
 
 	$j_uid = false;
 	foreach($judges as $uid=>&$j) {
@@ -74,7 +74,7 @@ case 'jadd_smart':
 
 
 	$jteam['user_ids'][] = $j_uid;
-	l_jteam_save($mysqli, $jteam);
+	jteam_save($mysqli, $jteam);
 	form_ajax_response(array('status'=>0));
 	exit();
 
@@ -84,7 +84,7 @@ case 'pdel':
 	$jteam_id = (int)$_POST['jteam_id'];
 	$del_pid = (int)$_POST['pid'];
 
-	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam = jteam_load($mysqli, $jteam_id);
 
 	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND pid='$del_pid'");
 
@@ -94,7 +94,7 @@ case 'pdel':
 		$new_pids[] = $pid;
 	}
 	$jteam['project_ids'] = $new_pids;
-	l_jteam_save($mysqli, $jteam);
+	jteam_save($mysqli, $jteam);
 	form_ajax_response(array('status'=>0));
 	exit();
 
@@ -102,9 +102,9 @@ case 'padd':
 	/* Add a project to a jduging team */
 	$jteam_id = (int)$_POST['jteam_id'];
 	$pid = (int)$_POST['pid'];
-	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam = jteam_load($mysqli, $jteam_id);
 	$jteam['project_ids'][] = $pid;
-	l_jteam_save($mysqli, $jteam);
+	jteam_save($mysqli, $jteam);
 	form_ajax_response(array('status'=>0));
 	exit();
 
@@ -119,53 +119,9 @@ foreach($ps as &$p) {
 }
 
 
-function l_jteam_load($mysqli, $jteam_id, $pdata = false)
-{
-	if($pdata == false) {
-		$r = $mysqli->query("SELECT * FROM judging_teams WHERE id=$jteam_id LIMIT 1");
-		if($r->num_rows == 0) {
-			return NULL;
-		}
-		$jteam = $r->fetch_assoc();
-	} else {
-		$jteam = $pdata;
-	}
-
-	filter_int_list($jteam['project_ids']);
-	filter_int_list($jteam['user_ids']);
-	filter_int($jteam['award_id']);
-	filter_int($jteam['num']);
-	filter_int($jteam['round']);
-
-	unset($jteam['original']);
-	$original = $jteam;
-	$jteam['original'] = $original;
-	return $jteam;
-}
-
-function l_jteams_load_all($mysqli, $year)
-{
-	$q = $mysqli->query("SELECT * FROM judging_teams 
-				WHERE
-				judging_teams.year='$year'
-				");
-	$jteams = array();
-	while($j = $q->fetch_assoc()) {
-		$jteams[] = l_jteam_load($mysqli, -1, $j);
-	}
-	return $jteams;
-}
-
-function l_jteam_save($mysqli, &$jteam)
-{
-	generic_save($mysqli, $jteam, "judging_teams", "id");
-
-}
 
 
-
-
-$jteams = l_jteams_load_all($mysqli, $config['year']);
+$jteams = jteams_load_all($mysqli, $config['year']);
 
 
 
