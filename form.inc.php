@@ -84,9 +84,11 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false)
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-?>
+	if($label !== NULL) { ?>
 	<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php	} ?>
+
 		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
 			$x=0;
@@ -97,8 +99,9 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false)
 <?php				$x++;
 			} ?>
 		</fieldset>
+<?php	if($label !== NULL) { ?>
 	</div>
-<?php
+<?php	}
 }
 
 function form_check_group($form_id, $name, $label, $data, &$value, $wide = false)
@@ -116,12 +119,13 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 	}
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
-?>
-	<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
-<?php
-			$x=0;
+
+	if($label !== NULL) { ?>
+		<div class="ui-field-contain <?=$extra_class?>">
+			<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php	} ?>
+			<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
+<?php			$x=0;
 			foreach($data as $key=>$val) {
 				if(is_array($val)) $val = $val['name'];
 				$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
@@ -130,9 +134,11 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 			        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
 <?php				$x++;
 			} ?>
-		</fieldset>
-	</div>
-<?php
+			</fieldset>
+
+<?php	if($label !== NULL) { ?>
+		</div>
+<?php	}
 }
 
 function form_checkbox($form_id, $name, $label, $data_value, &$value) 
@@ -180,9 +186,10 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-?>
-	<div class="ui-field-contain <?=$extra_class?>">
+	if($label !== NULL) { ?>
+		<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php	} ?>
 		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> <?=$d?>>
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
@@ -193,8 +200,9 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php			} ?>
 		</select>
-	</div>
-<?php
+<?php	if($label !== NULL) { ?>
+		</div>
+<?php	}
 }
 
 function form_multiselect($form_id, $name, $label, $data, &$value)

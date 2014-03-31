@@ -135,7 +135,7 @@ function generic_save($mysqli, &$p, $table, $table_key)
 			/* Key changed */
 			if($set != '') $set .= ',';
 
-			if($key == 'categories' || $key == 'trophies') {
+			if($key == 'categories' || $key == 'trophies' || $key == 'user_ids' || $key == 'project_ids') {
 				/* For awards */
 				$v = implode(',', $val);
 			} else {
