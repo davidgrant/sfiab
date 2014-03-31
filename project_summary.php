@@ -1,4 +1,4 @@
-<?
+<?php
 /* 
    This file is part of the 'Science Fair In A Box' project
    SFIAB Website: http://www.sfiab.ca
@@ -28,6 +28,7 @@ require_once('project.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+
 $pn = $mysqli->real_escape_string(stripslashes($_GET['pn']));
 $q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
 if($q->num_rows != 1) {
@@ -41,7 +42,7 @@ $students = project_load_students($mysqli, $p);
 $s_names = "";
 $s_schools = "";
 
-$school_ids = [];
+$school_ids = array();
 
 foreach($students as &$s) {
 	if($s_names != '') $s_names .= ', ';
@@ -85,7 +86,7 @@ else
 </table>
 </center>
 <font size="2" face="Verdana, Arial, Helvetica, sans-serif">
-<?=nl2br(htmlentities($p['summary']))?>
+<?=nl2br(htmlentities(utf8_decode($p['summary'])))?>
 </font>
 
 </body></html>
