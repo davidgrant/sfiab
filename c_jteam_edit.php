@@ -172,11 +172,11 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 		}
 ?>
 		<div data-role=collapsible data-collapsed=true>
-			<h3>Round <?=$round+1?> - <?=count($judge_list)?> Unused Judges</h3>
+			<h3>Round <?=$round+1?> - <span id="jteam_list_unused_round<?=$round+1?>_count"><?=count($judge_list)?></span> Unused Judges</h3>
 
 			<div class="ui-grid-a">
 			<div class="ui-block-a">
-			<table>
+			<table id="jteam_list_unused_round<?=$round+1?>">
 <?php			judge_header();
 			$c = 0;
 			foreach($judge_list as &$j) {
@@ -273,8 +273,8 @@ function judge_row($jteam, &$j, $show_del = true)
 	$lead = $j['j_willing_lead'] ? 'y' : 'n';
 
 	if(is_array($jteam)) {
-		$del = $show_del ? "<a href=\"#\" onclick=\"return jteam_jdel({$jteam['id']},{$j['uid']});\">[X]</a>" : '';
 		$tr_id = "jteam_list_{$jteam['id']}_judge_{$j['uid']}";
+		$del = $show_del ? "<a href=\"#\" id=\"{$tr_id}_X\" onclick=\"return jteam_jdel({$jteam['id']},{$jteam['round']},{$j['uid']});\">[X]</a>" : '';
 
 	} else {
 		$del = '';
@@ -316,12 +316,17 @@ function jteam_li(&$jteam) {
 			judge_row($jteam, $judges[$uid]);
 		} ?>
 		</table>
-		<div data-role="controlgroup" data-type="horizontal">
-		    <a href="#" class="ui-btn ui-corner-all ui-btn-inline">Add Judge</a>
+		<div id="jteam_list_<?=$jteam['id']?>_control" data-role="controlgroup" data-type="horizontal">
+		    <a href="#" onclick="jteam_enable_jadd(<?=$jteam['id']?>, <?=$jteam['round']?>)" class="ui-btn ui-corner-all ui-btn-inline">Add Judge</a>
 		    <a href="#" class="ui-btn ui-corner-all  ui-btn-inline">Auto-add Best Judge</a>
 		    <a href="#" class="ui-btn ui-corner-all  ui-btn-inline">Add Project</a>
-		 </div>
 		</div>
+
+		<div id="jteam_list_<?=$jteam['id']?>_function" style="display:none;">
+		</div>
+
+		</div>
+
 		<div class="ui-block-b">
 		<table>
 		<tr><td align="center">Project</td><td align="center">Title</td>
@@ -342,14 +347,16 @@ function jteam_li(&$jteam) {
 			if(strlen($title) > 50) $title = substr($title, 0, 47)."...";
 
 			$lang = $p['language'];
+
+			$tr_id = "jteam_list_{$jteam['id']}_project_{$pid}";
 ?>
 
-			<tr><td><?=$p['number']?></td>
+			<tr id="<?=$tr_id?>" ><td><?=$p['number']?></td>
 			    <td align="center"><?=$title?></td>
 			    <td align="center"><?=$cat?></td>
 			    <td align="center"><?=$div?></td>
 			    <td align="center"><?=$lang?></td>
-			    <td align="center"><a href="#" >[X]</a></td>
+			    <td align="center"><a id="<?=$tr_id?>_X" href="#" onclick="return jteam_pdel(<?=$jteam['id']?>,<?=$pid?>);">[X]</a></td>
 			</tr>
 <?php		} ?>
 		</table>
@@ -361,20 +368,80 @@ function jteam_li(&$jteam) {
 }
 ?>
 
+
+<div id="jteam_jadd" style="display:none">
+<hr/>
+<div data-role="tabs" id="tabs">
+  <div data-role="navbar" >
+    <ul data-inset="true">
+      <li><a href="#jteam_add_unused" data-ajax="false">Unused Judges</a></li>
+      <li><a href="#jteam_add_all" data-ajax="false">All Judges</a></li>
+    </ul>
+  </div>
+  <div id="jteam_add_unused" class="ui-body-d ">
+<?php
+	form_select("jteam_jadd_1", "jsel", NULL, array(0=>'Available Judges', 1=>'All Judges'), $val);
+	form_button("jteam_jadd_1", "add", "Add", "g");
+	form_button("jteam_jadd_1", "cancel", "Cancel", "r");
+?>
+  </div>
+  <div id="jteam_add_all" class="ui-body-d">
+<?php
+	form_select("jteam_jadd_2", "jsel", NULL, array(0=>'Available Judges', 1=>'All Judges'), $val);
+	form_button("jteam_jadd_1", "add", "Add", "g");
+	form_button("jteam_jadd_1", "cancel", "Cancel", "r");
+?>
+  </div>
+</div>
+
+</div>
+
 </div></div>
 
+
 <script>
-function jteam_jdel(jteam_id, id)
+function jteam_jdel(jteam_id, round, id)
 {
-//	if(confirm('Really delete this award?') == false) return false;
-	alert(jteam_id + " " + id);
 	$.post('c_jteam_edit.php', { action: "jdel", jteam_id: jteam_id, uid: id }, function(data) {
 		if(data.status == 0) {
-			$("#jteam_list_"+jteam_id+"_judge_"+id).hide();
+			var div2 = '#jteam_list_unused_round'+round;
+			$("#jteam_list_"+jteam_id+"_judge_"+id+"_X").remove();
+			$("#jteam_list_"+jteam_id+"_judge_"+id).detach().appendTo(div2);
+
+			var count_span = $(div2+"_count");
+			var c = parseInt(count_span.text()) + 1;
+			count_span.text(c);
 		}
 	}, "json");
 	return false;
 }
+
+function jteam_pdel(jteam_id, id)
+{
+	$.post('c_jteam_edit.php', { action: "pdel", jteam_id: jteam_id, pid: id }, function(data) {
+		if(data.status == 0) {
+			$("#jteam_list_"+jteam_id+"_project_"+id).remove();
+		}
+	}, "json");
+	return false;
+}
+
+function jteam_enable_jadd(jteam_id, round)
+{
+//	$("#jteam_list_"+jteam_id+"_control").hide();
+	$("#jteam_list_"+jteam_id+"_function").show();
+	$("#jteam_jadd").detach().appendTo("#jteam_list_"+jteam_id+"_function");
+	$("#jteam_jadd").show();
+	return false;
+}
+function jteam_cancel_jadd(jteam_id, round)
+{
+	$("#jteam_list_"+jteam_id+"_control").show();
+	$("#jteam_list_"+jteam_id+"_function").hide();
+	$("#jteam_jadd").hide();
+	return false;
+}
+
 
 </script>
 
