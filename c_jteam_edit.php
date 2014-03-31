@@ -19,11 +19,98 @@ $u = user_load($mysqli);
 $awards = award_load_all($mysqli);
 $cats = categories_load($mysqli);
 
+/* Need all jduges for smart add, so load them anyway */
 $js = judges_load_all($mysqli, $config['year']);
 $judges = array();
 foreach($js as &$j) {
 	$judges[$j['uid']] = $j;
 }
+
+$action = '';
+if(array_key_exists('action', $_POST)) {
+	$action = $_POST['action'];
+}
+
+switch($action) {
+case 'jdel':
+	/* Remove a judge from a judging team */
+	$jteam_id = (int)$_POST['jteam_id'];
+	$j_uid = (int)$_POST['uid'];
+
+	$jteam = l_jteam_load($mysqli, $jteam_id);
+
+	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND judge_id='$j_uid'");
+
+	$new_uids = array();
+	foreach($jteam['user_ids'] as $uid) {
+		if($uid == $j_uid) continue;
+		$new_uids[] = $uid;
+	}
+	$jteam['user_ids'] = $new_uids;
+	l_jteam_save($mysqli, $jteam);
+	form_ajax_response(array('status'=>0));
+	exit();
+
+case 'jadd':
+	/* Add a judge to a jduging team */
+	$jteam_id = (int)$_POST['jteam_id'];
+	$j_uid = (int)$_POST['uid'];
+	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam['user_ids'][] = $j_uid;
+	l_jteam_save($mysqli, $jteam);
+	form_ajax_response(array('status'=>0));
+	exit();
+
+case 'jadd_smart':
+	/* Add a best-match single free judge to a judging team */
+	$jteam_id = (int)$_POST['jteam_id'];
+	$jteam = l_jteam_load($mysqli, $jteam_id);
+
+	$j_uid = false;
+	foreach($judges as $uid=>&$j) {
+		if($j['j_round'][$jteam['round']-1] != 1) continue;
+
+	}
+
+
+	$jteam['user_ids'][] = $j_uid;
+	l_jteam_save($mysqli, $jteam);
+	form_ajax_response(array('status'=>0));
+	exit();
+
+
+case 'pdel':
+	/* Remove a project from a judging team */
+	$jteam_id = (int)$_POST['jteam_id'];
+	$del_pid = (int)$_POST['pid'];
+
+	$jteam = l_jteam_load($mysqli, $jteam_id);
+
+	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND pid='$del_pid'");
+
+	$new_pids = array();
+	foreach($jteam['project_ids'] as $pid) {
+		if($pid == $del_pid) continue;
+		$new_pids[] = $pid;
+	}
+	$jteam['project_ids'] = $new_pids;
+	l_jteam_save($mysqli, $jteam);
+	form_ajax_response(array('status'=>0));
+	exit();
+
+case 'padd':
+	/* Add a project to a jduging team */
+	$jteam_id = (int)$_POST['jteam_id'];
+	$pid = (int)$_POST['pid'];
+	$jteam = l_jteam_load($mysqli, $jteam_id);
+	$jteam['project_ids'][] = $pid;
+	l_jteam_save($mysqli, $jteam);
+	form_ajax_response(array('status'=>0));
+	exit();
+
+
+}
+
 
 $ps = projects_load_all($mysqli, $config['year']);
 $projects = array();
@@ -31,6 +118,30 @@ foreach($ps as &$p) {
 	$projects[$p['pid']] = $p;
 }
 
+
+function l_jteam_load($mysqli, $jteam_id, $pdata = false)
+{
+	if($pdata == false) {
+		$r = $mysqli->query("SELECT * FROM judging_teams WHERE id=$jteam_id LIMIT 1");
+		if($r->num_rows == 0) {
+			return NULL;
+		}
+		$jteam = $r->fetch_assoc();
+	} else {
+		$jteam = $pdata;
+	}
+
+	filter_int_list($jteam['project_ids']);
+	filter_int_list($jteam['user_ids']);
+	filter_int($jteam['award_id']);
+	filter_int($jteam['num']);
+	filter_int($jteam['round']);
+
+	unset($jteam['original']);
+	$original = $jteam;
+	$jteam['original'] = $original;
+	return $jteam;
+}
 
 function l_jteams_load_all($mysqli, $year)
 {
@@ -40,15 +151,24 @@ function l_jteams_load_all($mysqli, $year)
 				");
 	$jteams = array();
 	while($j = $q->fetch_assoc()) {
-		filter_int_list($j['project_ids']);
-		filter_int_list($j['user_ids']);
-		filter_int($j['award_id']);
-		$jteams[] = $j;
+		$jteams[] = l_jteam_load($mysqli, -1, $j);
 	}
 	return $jteams;
 }
 
+function l_jteam_save($mysqli, &$jteam)
+{
+	generic_save($mysqli, $jteam, "judging_teams", "id");
+
+}
+
+
+
+
 $jteams = l_jteams_load_all($mysqli, $config['year']);
+
+
+
 
 $page_id = 'c_jteam_list';
 
@@ -104,7 +224,7 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 <?php			judge_header();
 			$c = 0;
 			foreach($judge_list as &$j) {
-				judge_row($j, false);
+				judge_row($round, $j, false);
 				$c++;
 				if($c > count($judge_list)/2 ) {
 ?>					</table>
@@ -166,7 +286,7 @@ function judge_header()
 }
 
 /* Print a table row for a judge, including the delte button */
-function judge_row(&$j, $show_del = true)
+function judge_row($jteam, &$j, $show_del = true)
 {
 	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
 	$cat_pref = $j['j_pref_cat'] == 0 ? 'none' : $cats[$j['j_pref_cat']]['shortform'];
@@ -196,9 +316,16 @@ function judge_row(&$j, $show_del = true)
 
 	$lead = $j['j_willing_lead'] ? 'y' : 'n';
 
-	$del = $show_del ? '<a href="#">[X]</a>' : '';
+	if(is_array($jteam)) {
+		$del = $show_del ? "<a href=\"#\" onclick=\"return jteam_jdel({$jteam['id']},{$j['uid']});\">[X]</a>" : '';
+		$tr_id = "jteam_list_{$jteam['id']}_judge_{$j['uid']}";
+
+	} else {
+		$del = '';
+		$tr_id = "jteam_list_unused_round_{$jteam}_{$j['uid']}";
+	}
 ?>
-	<tr><td><?=$j['name']?></td>
+	<tr id="<?=$tr_id?>" ><td><?=$j['name']?></td>
 	    <td align="center"><?=$cat_pref?></td>
 	    <td align="center"><?=$div_pref?></td>
 	    <td align="center"><?=$exp?></td>
@@ -220,16 +347,17 @@ function jteam_li(&$jteam) {
 		$filter_text .= ' '.$j['name'];
 	}
 ?>
-	<li id="jteam_list_<?=$v['uid']?>" data-filtertext="<?=$filter_text?>">
+	<li id="jteam_list_<?=$jteam['id']?>" data-filtertext="<?=$filter_text?>">
 		<h3>#<?=$jteam['num']?> - <?=$jteam['name']?></h3>
 		<div class="ui-grid-a">
 		<div class="ui-block-a">
 		Award: <b><?=$jteam['award_id']?>: <?=$awards[$jteam['award_id']]['name']?></b><br/>
 		Round: <b><?=$jteam['round']?></b><br/>
-		<table>
+		<table id="jteam_list_<?=$jteam['id']?>_table">
+
 <?php		judge_header();
 		foreach($jteam['user_ids'] as $uid) {
-			judge_row($judges[$uid]);
+			judge_row($jteam, $judges[$uid]);
 		} ?>
 		</table>
 		<div data-role="controlgroup" data-type="horizontal">
@@ -265,7 +393,7 @@ function jteam_li(&$jteam) {
 			    <td align="center"><?=$cat?></td>
 			    <td align="center"><?=$div?></td>
 			    <td align="center"><?=$lang?></td>
-			    <td align="center"><a href="#">[X]</a></td>
+			    <td align="center"><a href="#" >[X]</a></td>
 			</tr>
 <?php		} ?>
 		</table>
@@ -279,6 +407,20 @@ function jteam_li(&$jteam) {
 
 </div></div>
 
+<script>
+function jteam_jdel(jteam_id, id)
+{
+//	if(confirm('Really delete this award?') == false) return false;
+	alert(jteam_id + " " + id);
+	$.post('c_jteam_edit.php', { action: "jdel", jteam_id: jteam_id, uid: id }, function(data) {
+		if(data.status == 0) {
+			$("#jteam_list_"+jteam_id+"_judge_"+id).hide();
+		}
+	}, "json");
+	return false;
+}
+
+</script>
 
 <?php
 sfiab_page_end();
