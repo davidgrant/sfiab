@@ -626,14 +626,10 @@ function sfiab_registration_is_closed($u, $role=NULL)
 				return false;
 			}
 		}
-	
-		if($u['reg_close_override'] !== NULL) {
-			if($now < $u['reg_close_override'])
-				return false;
-			else
-				return true;
-		} 
 
+		/* Get the normal reg close date, if the student's submission
+		 * has been accepted, disregard any reg close override and just
+		 * return that their reg is closed */
 		if(in_array('student', $u['roles'])) {
 			$reg_close_date = $config['date_student_registration_closes'];
 
@@ -648,6 +644,11 @@ function sfiab_registration_is_closed($u, $role=NULL)
 		} else {
 			return false;
 		}
+
+		/* If there is an override, use that date instead */
+		if($u['reg_close_override'] !== NULL) {
+			$reg_close_date = $u['reg_close_override'];
+		} 
 	}
 
 	if($now < $reg_close_date)
