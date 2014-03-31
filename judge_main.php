@@ -87,9 +87,16 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 		for judges to view.
 
 		<h3>Judging Team and Schedule</h3>
-		Judging teams have not been assigned yet.  Look for this information
-		approximately one week before the fair.  
-<?php
+
+		<p>Judging Team and Schedules are available here: <a data-ajax="false" href="judge_schedule.php">Judging Team and Schedules</a>
+		<p>If the page is blank it means you haven't been assigned to a
+		judging team, yet.  You <b>will</b> be assigned to a judging
+		team at or before fair, we're just not sure which one yet.
+		e.g., some judges cancel at the last minute, some judging teams
+		need extra expertise in certain areas, and some unlisted
+		special awards still need judges.
+
+		<?php
 	} else {
 ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>

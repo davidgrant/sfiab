@@ -269,6 +269,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'j_options' => array('Judging Options', 'judge_options.php'),
 			    'j_expertise' => array('Judging Expertise', 'judge_expertise.php'),
 			    'j_mentorship' => array('Mentorship', 'judge_mentorship.php'),
+			    'j_schedule' => array('Judging Assignments', 'judge_schedule.php'),
 			    );
 
 	$volunteer_menu = array('v_home' => array('Volunteer Home', 'v_main.php'),

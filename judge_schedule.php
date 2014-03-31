@@ -54,9 +54,9 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 
 ?>
 			<h4>Team #<?=$jteam['num']?> - <?=$jteam['name']?></h4>
-			<p>Members: <?=$members?><br/>
+			<table><tr><td>Members: </td><td><?=$members?></td></tr>
 
-			<p>Projects:
+			<tr><td valign="top">Projects:</td><td>
 			<table>
 <?php			foreach($jteam['project_ids'] as $pid) {
 				$p =& $projects[$pid];
@@ -66,6 +66,7 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 				</tr>
 <?php			}?>
 			</table>
+			</td></tr></table>
 <?php		}	
 	}
 
