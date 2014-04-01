@@ -28,7 +28,6 @@ require_once('project.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
-print("hi");
 $pn = $mysqli->real_escape_string(stripslashes($_GET['pn']));
 $q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
 if($q->num_rows != 1) {
