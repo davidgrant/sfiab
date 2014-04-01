@@ -27,7 +27,7 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>"  ><div data-role="main" class="sfiab_page" > 
 
-	<h3>Judge Team and Project Assignments:<h3>
+	<h3>Judge Team and Project Assignments:</h3>
 <?php
 	/* Get all jteams this judge is on */
 	$jteams = jteams_load_all_for_judge($mysqli, $u['uid']);
