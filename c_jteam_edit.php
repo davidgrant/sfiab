@@ -411,7 +411,7 @@ function jteam_li(&$jteam) {
 	form_select("jteam_jadd_unused", "jsel", NULL, array(0=>'Does not work yet', 1=>'Does not work yet'), $val);
 ?>
 	<button type="submit" data-role="button" onclick="jteam_jadd();" data-inline="true" data-icon="check" data-theme="g" >Add</button>
-	<button type="submit" data-role="button" onclick="jteam_cancel_edit();" data-inline="true" data-icon="delete" >Done</button>
+	<button type="submit" data-role="button" onclick="jteam_cancel_edit();" data-inline="true" data-icon="delete">Done</button>
   </div>
   <div id="jteam_jadd_all" class="ui-body-d">
 <?php

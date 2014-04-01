@@ -104,7 +104,7 @@ class pdf extends TCPDF {
 	{
 		if(!$this->enable_debug) return;
 
-		print(nl2br($text));
+		print(($text));
 	}
 
 	/* Given a cell of width $w, format  $txt so it fits into that
@@ -229,10 +229,13 @@ class pdf extends TCPDF {
 			if($ln > 0 && count($lines) > $ln) {
 				$this->debug("=> too many lines, max is $ln\n");
 				/* continue into resize code below */
-			} else if($total_height <= $h * $columns) {
+			} else if($total_height <= ($h * $columns) + 0.001) {  /* Stupid floating point precision */
 				/* It fits! */
+				$this->debug("=> Fit in height $h\n");
 				break;
 			}
+
+			$this->debug("=> Doesn't fit, strategy=$on_overflow\n");
 
 			/* else, it doesn't fit */
 			if($on_overflow == 'scale') {	

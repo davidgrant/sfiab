@@ -22,10 +22,10 @@
 */
 
 require_once("reports_students.inc.php");  /* $report_students_fields */
-// require_once("reports_judges.inc.php");  /* $report_students_fields */
+require_once("reports_judges.inc.php");  /* $report_students_fields */
 require_once("reports_awards.inc.php");  /* $report_students_fields */
-// require_once("reports_committees.inc.php");  /* $report_students_fields */
-// require_once("reports_volunteers.inc.php"); /* $report_volunteers_fields */
+require_once("reports_committee.inc.php");  /* $report_students_fields */
+require_once("reports_volunteers.inc.php"); /* $report_volunteers_fields */
 // require_once("reports_schools.inc.php");
 // require_once("reports_tours.inc.php");
 // require_once("reports_fairs.inc.php");
@@ -921,8 +921,9 @@ function report_save_field($mysqli, $report, $type)
 */
 					
 				default:
-					if($f == 'static_text') 
+					if($f == 'static_text') {
 						$v = $d['value'];
+					}
 
 					$rep->label_text($d['x'], $d['y'], $d['w'], $d['h'],
 							$v, $show_box, $d['align'], $d['valign'],
