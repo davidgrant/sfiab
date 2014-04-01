@@ -49,7 +49,7 @@ $report_volunteers_fields = array(
 		'name' => 'Volunteer -- Full Name (salutation first last)',
 		'header' => 'Name',
 		'width' => 1.75,
-		'table' => "CONCAT(IF(users.salutation='', '', CONCAT(users.salutation, ' ')), users.firstname, ' ', users.lastname)",
+		'table' => "CONCAT(IF(users.salutation IS NULL OR users.salutation='', '', CONCAT(users.salutation, ' ')), users.firstname, ' ', users.lastname)",
 		'table_sort'=> 'users.lastname' ),
 
 	'email' => array(

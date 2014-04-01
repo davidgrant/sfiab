@@ -29,7 +29,7 @@ $report_committees_fields = array(
 		'name' => 'Committee Member -- Full Name (salutation first last) ',
 		'header' => 'Name',
 		'width' => 1.75,
-		'table' => "CONCAT(IF(users.salutation='', '', CONCAT(users.salutation, ' ')), users.firstname, ' ', users.lastname)",
+		'table' => "CONCAT(IF(users.salutation IS NULL OR users.salutation='', '', CONCAT(users.salutation, ' ')), users.firstname, ' ', users.lastname)",
 		'table_sort' => 'users.lastname'),
 
 	'last_name' =>  array(
@@ -128,7 +128,7 @@ $report_committees_fields = array(
 						
 	$q = "	FROM 	users
 		WHERE	FIND_IN_SET('committee',`users`.`roles`)>0
-			AND state='active'
+			AND stat='active'
 			AND year='$year'
 		";
 
