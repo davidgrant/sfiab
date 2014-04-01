@@ -128,7 +128,7 @@ $report_committees_fields = array(
 						
 	$q = "	FROM 	users
 		WHERE	FIND_IN_SET('committee',`users`.`roles`)>0
-			AND stat='active'
+			AND state='active'
 			AND year='$year'
 		";
 
