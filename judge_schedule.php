@@ -34,10 +34,14 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 	$awards = award_load_all($mysqli);
 	$projects = projects_load_all($mysqli);
 
+	$found_assignment = false;
+
 	for($round=1;$round<=2;$round++) {
 		$header_printed = false;
 		foreach($jteams as &$jteam) {
 			if($jteam['round'] != $round) continue;
+
+			$found_assignment = true;
 
 			$a=array();
 			foreach($jteam['user_ids'] as $uid) {
@@ -68,6 +72,15 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 			</table>
 			</td></tr></table>
 <?php		}	
+	}
+
+	if($found_assignment == false) {
+?>		<p>You have no judging assignments (yet). You <b>will</b> be
+		assigned to a judging team at or before fair, we're just not
+		sure which one yet.  e.g., some judges cancel at the last
+		minute, some judging teams need extra expertise in certain
+		areas, and some unlisted special awards still need judges.
+<?php
 	}
 
 ?>
