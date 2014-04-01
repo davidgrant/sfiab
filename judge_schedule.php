@@ -39,7 +39,7 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 		foreach($jteams as &$jteam) {
 			if($jteam['round'] != $round) continue;
 
-			$a= [];
+			$a=array();
 			foreach($jteam['user_ids'] as $uid) {
 				$temp_u = user_load($mysqli, $uid);
 				$a[] = $temp_u['name'];
