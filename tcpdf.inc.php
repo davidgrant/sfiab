@@ -80,7 +80,7 @@ class pdf extends TCPDF {
 		$this->setImageScale(PDF_IMAGE_SCALE_RATIO); 
 
 		/* Turning off subsetting is supposed to help */
-		$this->setFontSubsetting(false);
+//		$this->setFontSubsetting(false);
 
 		$this->current_label_index = 1;
 		$this->current_label_row = 0;
@@ -119,7 +119,7 @@ class pdf extends TCPDF {
 		$index = 0;
 		$lines  = array();
 
-		$this->debug("width=$w, text=\"$txt\", font=$fontname, $fontstyle, $fontsize\n");
+		$this->debug("Fit to width=$w, text=\"$txt\", font=$fontname, $fontstyle, $fontsize\n");
 
 		/* Get an array of widths (getStringWidth does both these, but
 		 * we also need the chars array, so no point calling StringToArray twice */
@@ -133,8 +133,6 @@ class pdf extends TCPDF {
 		$curr_width = 0; //$this->clMargin + $this->crMargin;
 		$last_space_index = -1;
 		$start_index = 0;
-
-		$this->debug("Current widht: $curr_width\n");
 
 		for($index=0; $index<$count;$index++) {
 			$newline = false;
@@ -203,6 +201,12 @@ class pdf extends TCPDF {
 		$add_ellipses = false;
 		$columns = 1;
 		$effective_width = $w;
+		$allow_multicolumn = false;
+
+		if(strlen($txt) > 1000) {
+			$allow_multicolumn = true;
+		}
+
 
 		if($ln > 0) {
 			$fontsize = ($h/$ln) * $this->k;
@@ -212,6 +216,7 @@ class pdf extends TCPDF {
 			$this->debug("lines=0, starting with default font size $fontsize\n");
 		}
 
+		$this->debug("FitCell: w=$w, h=$h, txt=\"$txt\", align=$align, valign=$valign, overflow=$on_overflow\n");
 		while(1) {
 			$this->debug("=> Trying font size $fontsize\n");
 			$this->setFontSize($fontsize);
@@ -239,17 +244,19 @@ class pdf extends TCPDF {
 
 			/* else, it doesn't fit */
 			if($on_overflow == 'scale') {	
-				/* reduce the font size and try again */
-				$this->debug("=> Reduce fontsize to $fontsize\n");
 				/* Try to scale the font intelligently, this gets
-				 * us to a fit font faster */
-				$scale = $h / $total_height;
+				 * us to a fit font faster , use count-1 so if we just spill over on 2 lines, 
+				 * we don't end up taking the font scale by 50% lower and significantly undersizing it */
+				$scale = $h / ($cell_height * (count($lines)-1));
 				if($scale > 0.5 && $scale < 1.0) {
-					$fontsize *= $h / $total_height;
+					$fontsize *= $scale;
 				}
 				$fontsize -= 0.5;
 
-				if($fontsize < 6 && $columns == 1) {
+				/* reduce the font size and try again */
+				$this->debug("=> Reduce fontsize to $fontsize (scale=$scale, -0.5)\n");
+
+				if($fontsize < 6 && $columns == 1 && $allow_multicolumn) {
 					/* Switch to columns */
 					$columns = 2;
 					$fontsize = 8;
@@ -502,7 +509,7 @@ class pdf extends TCPDF {
 				$fontname='helvetica',$fontstyle='',$fontsize='6',
 				$on_overflow='scale')
 	{
-		$this->debug("Label ($x,$y) $w x $h \"$text\" ($fontname, $fontsize)\n");
+		$this->debug("Label ($x,$y) $w x $h \"$text\" ($fontname, $fontsize) align($align, $valign)\n");
 		$orig_name = $this->getFontFamily();
 		$orig_style = $this->getFontStyle();
 		$orig_size = $this->getFontSizePt();
@@ -525,7 +532,7 @@ class pdf extends TCPDF {
 		if($fontsize == 0) $fontsize = 10; /* FIXME: getdefaultfontsize? */
 
 		$this->SetXY($this->x($x), $this->y($y));
-		$this->debug("=> Actual pos (".$this->x($x).",".$this->y($y)."\n");
+		$this->debug("=> Actual pos (".$this->x($x).",".$this->y($y).")\n");
 		$this->SetFont($fontname, $fs, $fontsize);
 
 		/* Print text */

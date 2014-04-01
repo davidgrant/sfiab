@@ -428,7 +428,7 @@ function report_save_field($mysqli, $report, $type)
 
 			/* Check sanity of options just because we can */
 			$align_opts = array ('left', 'right', 'center', 'full');
-			$valign_opts = array ('vtop', 'vbottom', 'vcenter');
+			$valign_opts = array ('top', 'bottom', 'middle');
 			$style_opts = array ('bold');
 			if(!in_array($val['align'], $align_opts)) $val['align'] = 'left';
 			if(!in_array($val['valign'], $valign_opts)) $val['valign'] = 'top';
@@ -806,7 +806,7 @@ function report_save_field($mysqli, $report, $type)
 	$x = 0;
 	while($i = $r->fetch_assoc()) {
 		$x++;
-//		if($x == 10) break;
+//		if($x == 13) break;
 
 //		echo "<pre>"; print_r($i);
 

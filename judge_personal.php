@@ -39,6 +39,11 @@ case 'save':
 	$updates['phone1'] = $u['phone1'];
 	$updates['phone2'] = $u['phone2'];
 
+	if($u['salutation'] == 'dr' || $u['salutation'] == 'Dr') {
+		$u['salutation'] = 'Dr.';
+		$updates['salutation'] = $u['salutation'];
+	}
+
 	user_save($mysqli, $u);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
@@ -69,7 +74,7 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 	$form_id = $page_id."_form";
 	form_begin($form_id, 'judge_personal.php', $closed);
 
-	form_text($form_id, 'salutation', "Salutation", $u);
+	form_text($form_id, 'salutation', "Salutation<br/>(for your name tag)", $u);
 	form_text($form_id, 'firstname', "First Name", $u);
 	form_text($form_id, 'lastname', "Last Name", $u);
 	form_radio_h($form_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u);
