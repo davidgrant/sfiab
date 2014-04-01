@@ -231,7 +231,7 @@ function sfiab_print_left_nav_menu($menu_id, $text, $current_page_id, $menu)
 	$collapsed = array_key_exists($current_page_id, $menu) ? 'false' : 'true';
 ?>
 	<div id="<?=$menu_id?>" data-role="collapsible" data-inset="true" data-collapsed="<?=$collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" class="ui-shadow ui-alt-icon ui-nodisc-icon">
-		<h3><?=$text?><?=$incomplete?></span></h3>
+		<h3><?=$text?><?=$incomplete?></h3>
 		<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
 			<?=sfiab_print_left_nav_menu_entries($current_page_id, $menu);?>
 		</ul>

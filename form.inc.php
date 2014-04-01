@@ -218,9 +218,11 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 	$v = (is_array($value)) ? $value[$name] : $value;
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-?>
-	<div class="ui-field-contain">
+	if($label !== NULL) { ?>
+		<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php	} ?>
+	
 		<select name="<?=$name?>" id="<?=$id?>" <?=$d?> >
 		<option value="">Choose...</option>
 <?php		foreach($data as $name=>$group) { ?>
@@ -233,8 +235,10 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 			</optgroup>
 <?php		} ?>
 		</select>
-	</div>
+<?php	if($label !== NULL) { ?>
+		</div>
 <?php
+	}
 }
 
 function form_lang($page_id, $name, $label, &$value)

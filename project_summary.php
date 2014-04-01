@@ -28,12 +28,14 @@ require_once('project.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+print("hi");
 $pn = $mysqli->real_escape_string(stripslashes($_GET['pn']));
 $q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
 if($q->num_rows != 1) {
 	print("not found");
 	exit();
 }
+
 
 $p = project_load($mysqli, -1, $q->fetch_assoc());
 $students = project_load_students($mysqli, $p);
