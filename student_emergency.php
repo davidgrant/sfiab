@@ -48,7 +48,8 @@ case 'save':
 //	user_save($mysqli, $u);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
-	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$vals));
+	form_ajax_response(array('status'=>0, 'error'=>'Saving is temporarily bjorked by Dave.  Way to go Dave. ', 
+						'missing'=>$ret, 'val'=>$vals));
 	exit();
 }
 
@@ -80,7 +81,6 @@ sfiab_page_begin("Student Emergency Contact", $page_id, $help);
 		$x += 1;
 ?>		<h3>Emergency Contact <?=$x?></h3>
 <?php
-		print_r($ec);
 		form_hidden($form_id, "emerg{$x}_id", $ec['id']);
 		form_text($form_id, "emerg{$x}_firstname", "First Name", $ec['firstname']);
 		form_text($form_id, "emerg{$x}_lastname", "Last Name", $ec['lastname']);
