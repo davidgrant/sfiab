@@ -33,141 +33,6 @@ function report_judges_languages($mysqli, &$report, $field, $text)
 	return ($l?join(' ', $l):'');
 }
 
-/* It's possible to get through this code and need to have access to more
- * than one year, so we're going to index this array by year first */
-$report_judges_divs = array();
-$report_judges_cats = array();
-
-function report_judges_load_divs($year)
-{
-	global $report_judges_divs;
-	/* Load divisions for this year, only once */
-	if(!array_key_exists($year, $report_judges_divs)) {
-		$report_judges_divs[$year] = array();
-		$q = mysql_query("SELECT * FROM projectdivisions WHERE year='$year'");
-		while(($d = mysql_fetch_assoc($q))) {
-			$report_judges_divs[$year][$d['id']] = $d;
-		}
-	}
-}
-function report_judges_load_cats($year)
-{
-	global $report_judges_cats;
-	if(!array_key_exists($year, $report_judges_cats)) {
-	        $q = mysql_query("SELECT * FROM projectcategories WHERE year='$year'");
-		while(($c = mysql_fetch_assoc($q))) {
-			$report_judges_cats[$year][$c['id']] = $c;
-		}
-	}
-}
-
-
-/* Return all divisions rated at expertise level x */
-function report_judges_divs_at_exp($mysqli, &$report, $field, $text)
-{
-	global $report_judges_divs;
-
-	/* field is divs_at_exp_x[_long] */
-	$exp = substr($field, 12,1);
-	$long = (strlen($field) == 13) ? false : true;
-
-	/* Text is users_judge.div_prefs */
-        $year = $report['year'];
-	$divprefs = unserialize($text);
-	if(!is_array($divprefs)) return '';
-
-	report_judges_load_divs($year);
-	
-	/* Find all the requested selections, and add them to the return */
-	$ret = array();
-	$retl = array();
-	foreach($divprefs as $div_id=>$sel) {
-		if($sel != $exp) continue;
-		$ret[] = $report_judges_divs[$year][$div_id]['division_shortform'];
-		$retl[] = $report_judges_divs[$year][$div_id]['division'];
-	}
-	/* Join it all together with spaces */
-	if($long == false) return join(' ', $ret);
-	return join(', ', $retl);
-}
-
-function report_judges_cats_at_pref($mysqli, &$report, $field, $text)
-{
-	global $report_judges_cats;
-	$prefs = array('H' => 2, 'h' => 1, 'i' => 0, 'l' => -1, 'L' => -2);
-
-	/* field is cats_at_pref_x[_long] */
-	$pref = $prefs[substr($field, 13,1)];
-	$long = (strlen($field) == 14) ? false : true;
-
-	/* Text is users_judge.cat_prefs */
-        $year = $report['year'];
-	$catprefs = unserialize($text);
-	if(!is_array($catprefs)) return '';
-
-	report_judges_load_cats($year);
-
-	/* Find all 2-highest selections, and add them to the return */
-	$ret = array();
-	$retl = array();
-	foreach($catprefs as $cat_id=>$sel) {
-		if($sel != $pref) continue;
-		$ret[] = $report_judges_cats[$year][$cat_id]['category_shortform'];
-		$retl[] = $report_judges_cats[$year][$cat_id]['category'];
-	}
-	/* Join it all together with spaces */
-	if($long == false) return join(' ', $ret);
-	return join(', ', $retl);
-}
-
-function report_judges_custom_question($mysqli, &$report, $field, $text)
-{
-	/* Field is 'question_x', users_id is passed in $text */
-	$q_ord = substr($field, 9);
-        $year = $report['year'];
-	$users_id = $text;
-
-	/* Find the actual question ID */
-	$q = mysql_query("SELECT * FROM questions WHERE year='$year' AND ord='$q_ord'");
-	if(mysql_num_rows($q) != 1)
-		return 'Question not specified';
-	$question = mysql_fetch_assoc($q);
-
-	$q = mysql_query("SELECT * FROM question_answers WHERE users_id='$users_id' AND questions_id='{$question['id']}'");
-	if(mysql_num_rows($q) != 1)
-		return '';
-	$answer = mysql_fetch_assoc($q);
-	return $answer['answer'];
-}
-
-function report_judges_div_exp($mysqli, &$report, $field, $text)
-{
-	/* Field is 'div_exp_x', users_id is passed in $text */
-	$div_id = substr($field, 8);
-	$year = $report['year'];
-	$users_id = $text;
-
-	$divprefs = unserialize($text);
-	if(!is_array($divprefs)) return '';
-
-	return $divprefs[$div_id];
-}
-function report_judges_cat_pref($mysqli, &$report, $field, $text)
-{
-	$prefs = array(-2 => 'Lowest', -1 => 'Low',
-			0 => '--',
-			'1' => 'High', 2=>'Highest');
-	/* Field is 'div_pref_x', users_id is passed in $text */
-	$cat_id = substr($field, 9);
-        $year = $report['year'];
-	$users_id = $text;
-
-	$catprefs = unserialize($text);
-	if(!is_array($catprefs)) return '';
-
-	return i18n($prefs[$catprefs[$cat_id]]);
-}
-
 function report_judges_team_members($mysqli, &$report, $field, $text)
 {
 	$year = $report['year'];
@@ -387,198 +252,6 @@ $report_judges_fields = array(
 		'table' => 'users.highest_psd'),
 
 
-/* Headers for Division Expertise/Preference Selection */
-/*
-	'divs_at_exp_5' => array(
-		'name' => 'Judge -- Divisions Selected as Expertise 5-Expert (Shortform)',
-		'header' => 'Expert Div',
-		'width' => 1,
-		'table' => 'users_judge.div_prefs',
-		'exec_function' => 'report_judges_divs_at_exp',
-		'components' => array('users_judge')),
-
-	'divs_at_exp_5_long' => array(
-		'name' => 'Judge -- Divisions Selected as Expertise 5-Expert (Full division names)',
-		'header' => 'Expert Div',
-		'width' => 1.5,
-		'table' => 'users_judge.div_prefs',
-		'exec_function' => 'report_judges_divs_at_exp', /* Yes, the same function as divs_at_exp_5 
-		'components' => array('users_judge')),
-
-	'divs_at_exp_4' => array(
-		'name' => 'Judge -- Divisions Selected as Expertise 4 (Shortform)',
-		'header' => '4 Div',
-		'width' => 1,
-		'table' => 'users_judge.div_prefs',
-		'exec_function' => 'report_judges_divs_at_exp',
-		'components' => array('users_judge')),
-
-	'divs_at_exp_4_long' => array(
-		'name' => 'Judge -- Divisions Selected as Expertise 4 (Full division names)',
-		'header' => '4 Div',
-		'width' => 1.5,
-		'table' => 'users_judge.div_prefs',
-		'exec_function' => 'report_judges_divs_at_exp', /* Yes, the same function as divs_at_exp_5 
-		'components' => array('users_judge')),
-
-	'divs_at_exp_3' => array(
-		'name' => 'Judge -- Divisions Selected as Expertise 3 (Shortform)',
-		'header' => '3 Div',
-		'width' => 1,
-		'table' => 'users_judge.div_prefs',
-		'exec_function' => 'report_judges_divs_at_exp',
-		'components' => array('users_judge')),
-
-	'divs_at_exp_3_long' => array(
-		'name' => 'Judge -- Divisions Selected as Expertise 3 (Full division names)',
-		'header' => '3 Div',
-		'width' => 1.5,
-		'table' => 'users_judge.div_prefs',
-		'exec_function' => 'report_judges_divs_at_exp', /* Yes, the same function as divs_at_exp_5 
-		'components' => array('users_judge')),
-
-	/* Fill these in below, they're all the same 
-	'div_exp_1' => array(), 'div_exp_2' => array(), 'div_exp_3' => array(), 'div_exp_4' => array(), 'div_exp_5' => array(), 
-	'div_exp_6' => array(), 'div_exp_7' => array(), 'div_exp_8' => array(), 'div_exp_9' => array(), 'div_exp_10' => array(), 
-	'div_exp_11' => array(), 'div_exp_12' => array(), 'div_exp_13' => array(), 'div_exp_14' => array(), 'div_exp_15' => array(), 
-	'div_exp_16' => array(), 'div_exp_17' => array(), 'div_exp_18' => array(), 'div_exp_19' => array(), 'div_exp_20' => array(), 
-	'div_exp_21' => array(), 'div_exp_22' => array(), 'div_exp_23' => array(), 'div_exp_24' => array(), 'div_exp_25' => array(), 
-	'div_exp_26' => array(), 'div_exp_27' => array(), 'div_exp_28' => array(), 'div_exp_29' => array(), 'div_exp_30' => array(), 
-	'div_exp_31' => array(), 'div_exp_32' => array(), 'div_exp_33' => array(), 'div_exp_34' => array(), 'div_exp_35' => array(), 
-	'div_exp_36' => array(), 'div_exp_37' => array(), 'div_exp_38' => array(), 'div_exp_39' => array(), 'div_exp_40' => array(), 
-	'div_exp_41' => array(), 'div_exp_42' => array(), 'div_exp_43' => array(), 'div_exp_44' => array(), 'div_exp_45' => array(), 
-	'div_exp_46' => array(), 'div_exp_47' => array(), 'div_exp_48' => array(), 'div_exp_49' => array(), 'div_exp_50' => array(), 
-
-/* Category preferences 
-
-	'cats_at_pref_H' => array(
-		'name' => 'Judge -- Age Categories Selected as Preference: Highest (Shortform)',
-		'header' => 'Highest',
-		'width' => 0.8,
-		'table' => 'users_judge.cat_prefs',
-		'exec_function' => 'report_judges_cats_at_pref',
-		'components' => array('users_judge')),
-
-	'cats_at_pref_H_long' => array(
-		'name' => 'Judge -- Age Categories Selected as Preference: Highest (Full category names)',
-		'header' => 'Highest',
-		'width' => 1.2,
-		'table' => 'users_judge.cat_prefs',
-		'exec_function' => 'report_judges_cats_at_pref',/* Yes, the same function as cats_at_pref_H 
-		'components' => array('users_judge')),
-
-	'cats_at_pref_h' => array(
-		'name' => 'Judge -- Age Categories Selected as Preference: High (Shortform)',
-		'header' => 'High',
-		'width' => 0.8,
-		'table' => 'users_judge.cat_prefs',
-		'exec_function' => 'report_judges_cats_at_pref',
-		'components' => array('users_judge')),
-
-	'cats_at_pref_h_long' => array(
-		'name' => 'Judge -- Age Categories Selected as Preference: High (Full category names)',
-		'header' => 'High',
-		'width' => 1.2,
-		'table' => 'users_judge.cat_prefs',
-		'exec_function' => 'report_judges_cats_at_pref',/* Yes, the same function as cats_at_pref_H 
-		'components' => array('users_judge')),
-
-	'cats_at_pref_i' => array(
-		'name' => 'Judge -- Age Categories Selected as Preference: Indifferent (Shortform)',
-		'header' => 'Indifferent',
-		'width' => 0.8,
-		'table' => 'users_judge.cat_prefs',
-		'exec_function' => 'report_judges_cats_at_pref',
-		'components' => array('users_judge')),
-
-	'cats_at_pref_i_long' => array(
-		'name' => 'Judge -- Age Categories Selected as Preference: Indifferent (Full category names)',
-		'header' => 'Indifferent',
-		'width' => 1.2,
-		'table' => 'users_judge.cat_prefs',
-		'exec_function' => 'report_judges_cats_at_pref',/* Yes, the same function as cats_at_pref_H 
-		'components' => array('users_judge')),
-
-	'cat_pref_1' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 1',
-		'header' => 'cat1',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,  /* Only disables in the report editor, a report can still use it 
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_2' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 2',
-		'header' => 'cat2',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_3' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 3',
-		'header' => 'cat3',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_4' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 4',
-		'header' => 'cat4',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_5' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 5',
-		'header' => 'cat5',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_6' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 6',
-		'header' => 'cat6',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_7' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 7',
-		'header' => 'cat7',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_8' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 8',
-		'header' => 'cat8',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_9' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 9',
-		'header' => 'cat9',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
-	'cat_pref_10' => array(
-		'name' => 'Judge -- Age Category Preference for Category ID 10',
-		'header' => 'cat10',
-		'width' => 0.5,
-		'table' => 'users_judge.cat_prefs',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_cat_pref',
-		'components' => array('users_judge')),
 
 /* Time Availability 
 	'available_in_divisional1' =>  array(
@@ -593,15 +266,14 @@ $report_judges_fields = array(
 		'width' => 0.5,
 		'exec_function' => 'report_judges_time_availability',
 		'table' => 'users.id'),
-
-/* Others 
+*/
+/* Others  */
 
 	'special_award_only' =>  array(
 		'name' => 'Judge -- Special Award Only Requested',
 		'header' => 'SA Only',
 		'width' => 0.8,
-		'table' => 'users_judge.special_award_only',
-		'components' => array('users_judge')),
+		'table' => 'users.j_sa_only'),
 
 	'year' =>  array(
 		'name' => 'Judge -- Year',
@@ -609,27 +281,37 @@ $report_judges_fields = array(
 		'width' => 0.5,
 		'table' => 'users.year'),
 
-	'captain' => array(
-		'name' => 'Judge Team -- Team Captain? (Is the judge the captain? Yes/No)',
-		'header' => 'Cptn',
-		'width' => 0.5,
-		'table' => 'judges_teams_link.captain',
-		'value_map' => array ('no' => 'No', 'yes' => 'Yes'),
-		'components' => array('teams')),
 
-	'team' => array(
+/* Judging Teams */
+	'team_name' => array(
+		'start_option_group' => 'Judging Team',
 		'name' => 'Judge Team -- Name',
 		'header' => 'Team Name',
 		'width' => 3.0,
-		'table' => 'judges_teams.name',
+		'table' => 'judging_teams.name',
 		'components' => array('teams')),
 
-	'teamnum' => array(
+	'team_num' => array(
 		'name' => 'Judge Team -- Team Number',
 		'header' => 'Team',
 		'width' => 0.5,
-		'table' => 'judges_teams.num',
+		'table' => 'judging_teams.num',
 		'components' => array('teams')),
+
+	'team_round' => array(
+		'name' => 'Judge Team -- Team Round',
+		'header' => 'Round',
+		'width' => 0.5,
+		'table' => 'judging_teams.round',
+		'components' => array('teams')),
+
+	'team_award_name' => array(
+		'name' => 'Judge Team -- Award Name',
+		'header' => 'Team',
+		'width' => 0.5,
+		'table' => 'awards.name',
+		'components' => array('teams')),
+		
 
 /* Fixme, this requires passing 2 args to the function, can't do that yet 
 	'team_members_all_except_this' => array(
@@ -734,85 +416,6 @@ $report_judges_fields = array(
 		'width' => 1.00,
 		'table' => '""' ),
 
-	'question_1' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 1',
-		'header' => 'Q1',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,  /* Only disables in the report editor, a report can still use it 
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_2' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 2',
-		'header' => 'Q2',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_3' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 3',
-		'header' => 'Q3',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_4' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 4',
-		'header' => 'Q4',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_5' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 5',
-		'header' => 'Q5',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_6' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 6',
-		'header' => 'Q6',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_7' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 7',
-		'header' => 'Q7',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_8' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 8',
-		'header' => 'Q8',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_9' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 9',
-		'header' => 'Q9',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
-
-	'question_10' => array(
-		'name' => 'Judge -- Custom Judge Registration Question 10',
-		'header' => 'Q10',
-		'width' => 1,
-		'table' => 'users.id',
-		'editor_disabled' => true,
-		'exec_function' => 'report_judges_custom_question'),
 */
 
 	'static_text' =>  array(
@@ -822,84 +425,19 @@ $report_judges_fields = array(
 		'table' => "CONCAT(' ')"),
 );
 
-/* Overwrite the question_1 .. question_10 fields with the 
- * question name and header from the list of questions */
-function report_judges_update_questions($year)
-{
-	global $report_judges_fields;
-	$qs = questions_load_questions('judgereg', $year);
-	if(count($qs) > 10) {
-		echo "Not enough judge question fields, please file a bug report at sfiab.ca and report that you have ".count($qs)." custom judge questions, but the system can handle a maximum of 10.";
-		exit;
-	}
-	foreach($qs as $qid=>$q) {
-		$f = "question_{$q['ord']}";
-		$report_judges_fields[$f]['header'] = $q['db_heading'];
-		$report_judges_fields[$f]['name'] = 'Judge -- Custom Judge Question: '.$q['question'];
-		$report_judges_fields[$f]['editor_disabled'] = false;
-	}
-}
-
-function report_judges_update_divs($year)
-{
-	global $report_judges_fields, $report_judges_divs;
-
-	report_judges_load_divs($year);
-
-	if(count($report_judges_divs[$year]) > 50) {
-		echo "Not enough judge division fields, please file a bug report at sfiab.ca and report that you have ".count($report_judges_divs[$year])." divisions, but the system can handle a maximum of 50.";
-		exit;
-	}
-	foreach($report_judges_divs[$year] as $div_id=>$d) {
-		$f = "div_exp_$div_id";
-		$report_judges_fields[$f]['header'] = "{$d['division_shortform']} - {$d['division']}";
-		$report_judges_fields[$f]['name'] = 'Judge -- Expertise in Division: '.$d['division'];
-		$report_judges_fields[$f]['editor_disabled'] = false;
-	}
-}
-function report_judges_update_cats($year)
-{
-	global $report_judges_fields, $report_judges_cats;
-
-	report_judges_load_cats($year);
-
-	if(count($report_judges_cats[$year]) > 10) {
-		echo "Not enough judge age category fields, please file a bug report at sfiab.ca and report that you have ".count($report_judges_cats[$year])." age categories, but the system can handle a maximum of 10.";
-		exit;
-	}
-	if(is_array($report_judges_cats[$year])){
-		foreach($report_judges_cats[$year] as $cat_id=>$d) {
-			$f = "cat_pref_$cat_id";
-			$report_judges_fields[$f]['header'] = "{$d['category_shortform']} - {$d['category']}";
-			$report_judges_fields[$f]['name'] = 'Judge -- Preference for Age Category: '.$d['category'];
-			$report_judges_fields[$f]['editor_disabled'] = false;
-		}
-	}
-}
-
-$report_judges_questions_updated = false;
-/* Do the overwrites for the current year, this is for the editor, because
- * it doesn't call a _fromwhere */
-//report_judges_update_questions($config['year']);
-//report_judges_update_divs($config['year']);
-//report_judges_update_cats($config['year']);
-
 function report_judges_fromwhere($report, $components)
 {
  	global $config, $report_judges_fields;
 
 	$year = $report['year'];
 
-/*
 	$teams_from = '';
 	$teams_where = '';
 	if(in_array('teams', $components)) {
-		$teams_from = "LEFT JOIN judges_teams_link ON judges_teams_link.users_id=users.id
-				LEFT JOIN judges_teams ON judges_teams.id=judges_teams_link.judges_teams_id";
-		$teams_where = "AND judges_teams_link.year='$year'
-				AND judges_teams.year='$year'";
+		$teams_from = "LEFT JOIN judging_teams ON FIND_IN_SET(`users`.`uid`, `judging_teams`.`user_ids`)
+				LEFT JOIN awards on `awards`.`id`=`judging_teams`.`award_id`";
 	}
-
+/*
 	$projects_from='';
 	$projects_where='';
 	if(in_array('projects', $components)) {
