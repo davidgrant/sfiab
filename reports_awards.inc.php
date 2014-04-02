@@ -105,60 +105,55 @@ $report_awards_fields = array(
 
 	'sponsor_organization' => array(
 		'start_option_group' => 'Sponsor',
-		'name' => 'Sponsor -- Organization',
+		'name' => 'Sponsor',
 		'header' => 'Sponsor',
 		'width' => 2.0,
 		'table' => 'sponsor' ),
-/*
+
+	'sponsor_organization' => array(
+		'start_option_group' => 'Sponsor',
+		'name' => 'Sponsor -- Contact Name',
+		'header' => 'Contact Name',
+		'width' => 2.0,
+		'table' => 'sponsor_name' ),
+
 	'sponsor_phone' => array(
-		'name' => 'Sponsor -- Phone (broken)',
+		'name' => 'Sponsor -- Phone',
 		'header' => 'Sp. Phone',
 		'width' => 1,
-		'table' => 'sponsors.phone' ),
-
-	'sponsor_fax' => array(
-		'name' => 'Sponsor -- Fax(broken)',
-		'header' => 'Sp. Fax',
-		'width' => 1,
-		'table' => 'sponsors.fax' ),
+		'table' => 'sponsor_phone' ),
 
 	'sponsor_address' =>  array(
-		'name' => 'Sponsor -- Street Address(broken)',
+		'name' => 'Sponsor -- Street Address',
 		'header' => 'Sponsor Address',
 		'width' => 2.0,
-		'table' => 'sponsors.address'),
+		'table' => 'sponsor_address'),
 
 	'sponsor_city' =>  array(
-		'name' => 'Sponsor -- City(broken)',
+		'name' => 'Sponsor -- City',
 		'header' => 'Sp. City',
 		'width' => 1.5,
-		'table' => 'sponsors.city' ),
+		'table' => 'sponsor_city' ),
 
 	'sponsor_province' =>  array(
-		'name' => 'Sponsor -- '.$config['provincestate'].'(broken)',
+		'name' => 'Sponsor -- '.$config['provincestate'],
 		'header' => 'Sp. '.$config['provincestate'],
 		'width' => 0.75,
-		'table' => 'sponsors.province_code' ),
+		'table' => 'sponsor_province' ),
 
 	'sponsor_postal' =>  array(
-		'name' => 'Sponsor -- '.$config['postalzip'].'(broken)',
+		'name' => 'Sponsor -- '.$config['postalzip'],
 		'header' => 'Sp. '.$config['postalzip'],
 		'width' => 0.75,
-		'table' => 'sponsors.postalcode' ),
+		'table' => 'sponsor_postalcode' ),
 
 	'sponsor_notes' =>  array(
-		'name' => 'Sponsor -- Notes(broken)',
+		'name' => 'Sponsor -- Notes',
 		'header' => 'Sponsor Notes',
 		'width' => 3,
-		'table' => 'sponsors.notes' ),
+		'table' => 'sponsor_notes' ),
 
-	'sponsorship_status' =>  array(
-		'name' => 'Sponsorship -- Status (broken)',
-		'header' => 'Sp. Status',
-		'width' => .5,
-		'table' => 'sponsorships.status',
-		'value_map' => array ('pending' => 'Pending', 'confirmed' => 'Confirmed'), "received"=>"Received"),
-
+/*
 	'pcontact_salutation' =>  array(
 		'start_option_group' => 'Sponsor Primary Contact',
 		'name' => 'Primary Contact -- Salutation',
