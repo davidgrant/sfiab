@@ -18,12 +18,17 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
+$ecs = emergency_contact_load_for_user($mysqli, $u);
+
 switch($action) {
 case 'save':
 	if($closed) exit();
 
+	print("Saving is broken on this page :(");
+
 	$vals = array();
 	for($i=1; $i<=2; $i++) {
+	/*
 		post_text($u["emerg{$i}_firstname"], "emerg{$i}_firstname");
 		post_text($u["emerg{$i}_lastname"], "emerg{$i}_lastname");
 		post_text($u["emerg{$i}_relation"], "emerg{$i}_relation");
@@ -37,8 +42,10 @@ case 'save':
 		$vals["emerg{$i}_phone1"] = $u["emerg{$i}_phone1"];
 		$vals["emerg{$i}_phone2"] = $u["emerg{$i}_phone2"];
 		$vals["emerg{$i}_phone3"] = $u["emerg{$i}_phone3"];
+		*/
 	}
-	user_save($mysqli, $u);
+//
+//	user_save($mysqli, $u);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$vals));
@@ -68,27 +75,22 @@ sfiab_page_begin("Student Emergency Contact", $page_id, $help);
 
 	form_begin($form_id, 'student_emergency.php', $closed);
 
-?>	<h3>Emergency Contact 1</h3>
+	$x = 0;
+	foreach($ecs as $id=>&$ec) {
+		$x += 1;
+?>		<h3>Emergency Contact <?=$x?></h3>
 <?php
-	form_text($form_id, 'emerg1_firstname', "First Name", $u);
-	form_text($form_id, 'emerg1_lastname', "Last Name", $u);
-	form_select($form_id, 'emerg1_relation', "Relation", $relations, $u);
-	form_text($form_id, 'emerg1_email', 'Email', $u, 'email');
-	form_text($form_id, 'emerg1_phone1', 'Phone 1', $u, 'tel');
-	form_text($form_id, 'emerg1_phone2', 'Phone 2', $u, 'tel');
-	form_text($form_id, 'emerg1_phone3', 'Phone 3', $u, 'tel');
-	form_submit($form_id, 'save', 'Save', 'Emergency Contacts Saved');
-
-?>	<h3>Emergency Contact 2</h3>
-<?php
-	form_text($form_id, 'emerg2_firstname', "First Name", $u);
-	form_text($form_id, 'emerg2_lastname', "Last Name", $u);
-	form_select($form_id, 'emerg2_relation', "Relation", $relations, $u);
-	form_text($form_id, 'emerg2_email', 'Email', $u, 'email');
-	form_text($form_id, 'emerg2_phone1', 'Phone 1', $u, 'tel');
-	form_text($form_id, 'emerg2_phone2', 'Phone 2', $u, 'tel');
-	form_text($form_id, 'emerg2_phone3', 'Phone 3', $u, 'tel');
-	form_submit($form_id, 'save', 'Save', 'Emergency Contacts Saved');
+		print_r($ec);
+		form_hidden($form_id, "emerg{$x}_id", $ec['id']);
+		form_text($form_id, "emerg{$x}_firstname", "First Name", $ec['firstname']);
+		form_text($form_id, "emerg{$x}_lastname", "Last Name", $ec['lastname']);
+		form_select($form_id, "emerg{$x}_relation", "Relation", $relations, $ec['relation']);
+		form_text($form_id, "emerg{$x}_email", 'Email', $ec['email'], 'email');
+		form_text($form_id, "emerg{$x}_phone1", 'Phone 1', $ec['phone1'], 'tel');
+		form_text($form_id, "emerg{$x}_phone2", 'Phone 2', $ec['phone2'], 'tel');
+		form_text($form_id, "emerg{$x}_phone3", 'Phone 3', $ec['phone3'], 'tel');
+		form_submit($form_id, 'save', 'Save', 'Emergency Contacts Saved');
+	}
 ?>
 
 </div></div>

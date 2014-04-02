@@ -1,6 +1,7 @@
 <?php
 require_once('filter.inc.php');
 
+
 function user_load_all_for_project($mysqli, $pid)
 {
 	$r = $mysqli->query("SELECT * FROM users WHERE s_pid=$pid");
@@ -279,17 +280,6 @@ function user_homepage(&$u)
 	else
 		$page .= 'index.php';
 	return $page;
-}
-
-
-function emergency_contact_load_for_user($mysqli, $uid)
-{
-
-}
-
-function emergeny_contact_save($mysqli, $id)
-{
-
 }
 
 ?>

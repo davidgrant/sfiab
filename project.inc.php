@@ -298,4 +298,45 @@ function tour_get_for_student_select($mysqli, &$u)
 	return $tours;
 }
 
+
+function emergency_contact_load($mysqli, $id, $data=NULL)
+{
+	$id = (int)$id;
+	if($data !== NULL) {
+		$m = $data;
+	} else {
+		$q = $mysqli->query("SELECT * FROM emergency_contacts WHERE id='$id'");
+		$m = $q->fetch_assoc();
+		print($mysqli->error);
+	}
+	filter_phone($m['phone1']);
+	filter_phone($m['phone2']);
+	filter_phone($m['phone3']);
+
+	unset($m['original']);
+	$original = $m;
+	$m['original'] = $original;
+	
+	return $m;
+}
+
+function emergency_contact_load_for_user($mysqli, &$u)
+{
+	$q = $mysqli->query("SELECT * FROM emergency_contacts WHERE uid='{$u['uid']}'");
+	$contacts = array();
+	while($d = $q->fetch_assoc()) {
+		$contacts[(int)$d['id']] = emergency_contact_load($mysqli, -1, $d);
+	}
+	return $contacts;
+
+}
+
+function emergeny_contact_save($mysqli, $ec)
+{
+	generic_save($mysqli, $ec, "emergency_contacts", "id");
+}
+
+
+
+
 ?>
