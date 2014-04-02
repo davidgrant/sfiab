@@ -39,6 +39,12 @@ case 'save':
 	post_text($a['sponsor_name'],'sponsor_name');
 	post_text($a['sponsor_email'],'sponsor_email');
 	post_text($a['sponsor_phone'],'sponsor_phone');
+	post_text($u['sponsor_address'],'sponsor_address');
+	post_text($u['sponsor_city'],'sponsor_city');
+	post_text($u['sponsor_province'],'sponsor_province');
+	post_text($u['sponsor_postalcode'],'sponsor_postalcode');
+	post_text($u['sponsor_notes'],'sponsor_notes');
+	
 	post_text($a['presenter'],'presenter');
 	post_bool($a['schedule_judges'],'schedule_judges');
 //	post_bool($a['include_in_script'],'include_in_script');
@@ -143,7 +149,18 @@ sfiab_page_begin("Edit Awards", $page_id);
 		form_textbox($form_id, 'criteria', "Criteria (Students see this)", $a);
 		form_textbox($form_id, 'notes', "Notes (committee only)", $a);
 		form_text($form_id, 'sponsor', "Sponsor", $a);
-		form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
+?>		<div data-role="collapsible" data-collapsed="true">
+			<h3>Sponsor Contact Information</h3>
+<?php			form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
+			form_text($form_id, 'sponsor_email', "Sponsor Contact Email", $a, 'email');
+			form_text($form_id, 'sponsor_phone', "Sponsor Contact Phone", $a, 'tel');
+			form_text($form_id, 'sponsor_address', 'Address 1', $u);
+			form_text($form_id, 'sponsor_city', 'City', $u);
+			form_province($form_id, 'sponsor_province', 'Province / Territory', $u);
+			form_text($form_id, 'sponsor_postalcode', 'Postal Code', $u);
+			form_text($form_id, 'sponsor_notes', 'Notes', $u);
+?>		</div>
+<?php		form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
 		form_text($form_id, 'sponsor_email', "Sponsor Contact Email", $a, 'email');
 		form_text($form_id, 'sponsor_phone', "Sponsor Contact Phone", $a, 'tel');
 		form_check_group($form_id, 'categories', "Categories", $cats, $a);
