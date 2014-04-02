@@ -22,6 +22,8 @@ while($ud = $q->fetch_assoc()) {
 
 	print("Loaded {$u['firstname']} {$u['lastname']}\n");
 
+	$mysqli->query("DELETE FROM emergency_contacts WHERE uid='{$u['uid']}'");
+
 	for($x=1;$x<=2;$x++) {
 		$fn = $mysqli->real_escape_string($u["emerg{$x}_firstname"]);
 		$ln = $mysqli->real_escape_string($u["emerg{$x}_lastname"]);
@@ -33,7 +35,6 @@ while($ud = $q->fetch_assoc()) {
 
 		if($fn == '' || $fn === NULL) continue;
 
-		$mysqli->query("DELETE FROM emergency_contacts WHERE uid='{$u['uid']}'");
 
 		$str = "INSERT INTO emergency_contacts(`uid`,`firstname`,`lastname`,`email`,`phone1`,`phone2`,`phone3`,`relation`)
 				VALUES('{$u['uid']}','$fn','$ln','$email','$phone1','$phone2','$phone3','$re')";

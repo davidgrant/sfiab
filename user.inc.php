@@ -281,4 +281,15 @@ function user_homepage(&$u)
 	return $page;
 }
 
+
+function emergency_contact_load_for_user($mysqli, $uid)
+{
+
+}
+
+function emergeny_contact_save($mysqli, $id)
+{
+
+}
+
 ?>
