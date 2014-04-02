@@ -44,13 +44,20 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='
 
 	$extra .= $form_disabled ? ' disabled="disabled"': '';
 
-	
-	?>
-	<div class="ui-field-contain">
+	if($label !== NULL) {
+?>		<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php	} ?>
 		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>" <?=$extra?> >
-	</div>
-<?php
+
+<?php	if($label !== NULL) { ?>
+		</div>
+<?php	}
+}
+
+function form_text_inline($form_id, $name, &$value = '', $type='text', $extra='')
+{
+	form_text($form_id, $name, NULL, $value, $type, $extra.' data-inline="true"');
 }
 
 function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL) 
@@ -172,7 +179,7 @@ function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false
 	}
 }
 
-function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false)
+function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false, $inline=false)
 { 
 	global $form_disabled;
 	$id = $page_id.'_'.$name;
@@ -185,12 +192,13 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
+	$d .= $inline ? 'data-inline="true"' : '';
 
 	if($label !== NULL) { ?>
 		<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 <?php	} ?>
-		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> <?=$d?>>
+		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> <?=$d?> >
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
 <?php			}

@@ -61,20 +61,7 @@ function post_report()
 	post_text($report['type'], 'type');
 
 	/* For these, just do $report['col'][$i]['field'] = $_POST['col'][$i] */
-	foreach(array('col', 'group','sort','distinct') as $c) {
-		$report[$c] = array();
-		if(!array_key_exists($c, $_POST)) continue;
-
-		$num = count($_POST[$c]);
-		for($i=0; $i<$num; $i++) {
-			if(trim($_POST[$c][$i]) == '') continue;
-			$report[$c][$i] = array();
-			post_text($report[$c][$i]['field'], $i, $_POST[$c]);
-		}
-	}
-
-	/* Full parse */
-	foreach(array('filter') as $c) {
+	foreach(array('col') as $c) {
 		$report[$c] = array();
 		if(!array_key_exists($c, $_POST)) continue;
 
@@ -98,6 +85,34 @@ function post_report()
 			post_text($report[$c][$i]['on_overflow'], 'on_overflow', $_POST[$c][$i]);
 		}
 	}
+	foreach(array('group','sort','distinct') as $c) {
+		$report[$c] = array();
+		if(!array_key_exists($c, $_POST)) continue;
+
+		$num = count($_POST[$c]);
+		for($i=0; $i<$num; $i++) {
+			if(trim($_POST[$c][$i]) == '') continue;
+			$report[$c][$i] = array();
+			post_text($report[$c][$i]['field'], $i, $_POST[$c]);
+//			post_text($report[$c][$i]['value'], 'value', $_POST[$c][$i]);
+		}
+	}
+
+	/* Full parse */
+	foreach(array('filter') as $c) {
+		$report[$c] = array();
+		if(!array_key_exists($c, $_POST)) continue;
+
+		$num = count($_POST[$c]);
+//		print_r($_POST);
+		for($i=0; $i<$num; $i++) {
+			if(trim($_POST[$c][$i]['field']) == '') continue;
+			$report[$c][$i] = array();
+			post_float($report[$c][$i]['x'], 'x', $_POST[$c][$i]);
+			post_text($report[$c][$i]['field'], 'field', $_POST[$c][$i]);
+			post_text($report[$c][$i]['value'], 'value', $_POST[$c][$i]);
+		}
+	}
 
 	$report['option'] = array();
 	if(array_key_exists('option', $_POST)) {
@@ -116,6 +131,8 @@ case 'save':
 	form_ajax_response(array('status'=>0));
 	exit();
 }
+
+
 
 sfiab_page_begin("Edit Reports", $page_id, $help);
 ?>
@@ -190,15 +207,49 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 ?>		<h4>Report Data</h4>
 <?php		if(count($r['col'])) {
 			foreach($r['col'] as $index=>$d) {
-				form_select_optgroup($form_id, "col[$index]", 'Column '.($index+1), $report_fields, $d['field']);
-			}
+				form_select_optgroup($form_id, "col[$index][field]", 'Column '.($index+1), $report_fields, $d['field']);
+?>				<div class="ui-field-contain"> 
+					<label></label>
+<?php					form_select($form_id, "col[$index][align]", NULL, $report_col_align, $d['align'], '', false, false, true);
+					form_select($form_id, "col[$index][valign]", NULL, $report_col_valign, $d['valign'], '', false, false, true);
+					form_select($form_id, "col[$index][on_overflow]", NULL, $report_col_on_overflow, $d['on_overflow'], '', false, false, true);
+//					form_text_inline($form_id, "col_fontname[$index]", $d['fontname'], 'text', 'max-width="10"');
+//					$n = array("col_fontstyle[$index]" => $d['fontstyle']);
+//					form_select($form_id, "col_fontstyle[$index]", NULL, $report_font_styles, $n, '', false, true, true);
+//					form_text_inline($form_id, "col_fontsize[$index]", $d['fontsize']);
+					form_hidden($form_id, "col[$index][fontname]", $d['fontname']);
+					form_hidden($form_id, "col[$index][fontstyle][]", join(',', $d['fontstyle']));
+					form_hidden($form_id, "col[$index][fontsize]", $d['fontsize']);
+					form_hidden($form_id, "col[$index][x]", $d['x']);
+					form_hidden($form_id, "col[$index][y]", $d['y']);
+					form_hidden($form_id, "col[$index][w]", $d['w']);
+					form_hidden($form_id, "col[$index][h]", $d['h']);
+					form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
+					form_hidden($form_id, "col[$index][h_rows]", $d['h_rows']);
+?>				</div>
+<?php			}
 		}
 
 		for($i = 0; $i < 3; $i++) {
 			$index = count($r['col']) + $i;
 			$v = '';
-			form_select_optgroup($form_id, "col[$index]", 'Column '.($index+1), $report_fields, $v);
-		}
+			form_select_optgroup($form_id, "col[$index][field]", 'Column '.($index+1), $report_fields, $v);
+?>			<div class="ui-field-contain"> 
+				<label></label>
+<?php				form_select($form_id, "col[$index][align]", NULL , $report_col_align, $v, '', false, false, true);
+				form_select($form_id, "col[$index][valign]", NULL, $report_col_valign, $v, '', false, false, true);
+				form_select($form_id, "col[$index][on_overflow]", NULL, $report_col_on_overflow, $v, '', false, false, true);
+				form_hidden($form_id, "col[$index][fontname]", $v);
+				form_hidden($form_id, "col[$index][fontstyle][]", $v);
+				form_hidden($form_id, "col[$index][fontsize]", $v);
+				form_hidden($form_id, "col[$index][x]", $v);
+				form_hidden($form_id, "col[$index][y]", $v);
+				form_hidden($form_id, "col[$index][w]", $v);
+				form_hidden($form_id, "col[$index][h]", $v);
+				form_hidden($form_id, "col[$index][min_w]", $v);
+				form_hidden($form_id, "col[$index][h_rows]", $v);
+?>			</div>
+<?php		}
 
 
 ?>		<h4>Sort By</h4>

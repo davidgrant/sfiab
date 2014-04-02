@@ -293,7 +293,7 @@ $report_judges_fields = array(
 
 	'team_num' => array(
 		'name' => 'Judge Team -- Team Number',
-		'header' => 'Team',
+		'header' => 'Num',
 		'width' => 0.5,
 		'table' => 'judging_teams.num',
 		'components' => array('teams')),
@@ -307,8 +307,8 @@ $report_judges_fields = array(
 
 	'team_award_name' => array(
 		'name' => 'Judge Team -- Award Name',
-		'header' => 'Team',
-		'width' => 0.5,
+		'header' => 'Award Name',
+		'width' => 1.5,
 		'table' => 'awards.name',
 		'components' => array('teams')),
 		
@@ -456,7 +456,6 @@ function report_judges_fromwhere($report, $components)
 		$students_where = "AND students.year='$year'";
 	}
 */
-	$teams_from = '';
 
 	/* Search the report for a filter based on judge year */
 	$year_where = "AND users.year='$year'";

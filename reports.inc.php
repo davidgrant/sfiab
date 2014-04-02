@@ -46,7 +46,11 @@ require_once('tcpdf.inc.php');
 			9 => 'NOT LIKE ',
 		);
 
- $report_font_styles = array('bold','italic','underline','strikethrough');
+ $report_col_on_overflow = array('nothing' => 'Do Nothing', 'wrap' => 'Wrap Text', 'truncate' => 'Truncate Text', '...' => 'Truncate and add ...', 'scale' => 'Scale Down Font');
+ $report_col_align = array ('left' => 'Left', 'right' => 'Right', 'center' => 'Centered', 'full' => 'Full Justification');
+ $report_col_valign = array ('top' => 'Top', 'bottom' => 'Bottom', 'middle' => 'Middle');
+
+ $report_font_styles = array('bold' => 'Bold','italic'=> 'Italics','underline'=> 'Underline','strikethrough'=> 'Strikethrough');
  
  $report_options = array();
  $report_options['type'] = array('desc' => 'Report Format',
@@ -298,9 +302,9 @@ foreach($report_stock as $n=>$v) {
 
 function report_save_field($mysqli, $report, $type)
 {
-	global $report_students_fields; /*$report_judges_fields, $report_awards_fields;
-	global $report_committees_fields, $report_schools_fields;
-	global $report_volunteers_fields, $report_fairs_fields;
+	global $report_students_fields, $report_judges_fields, $report_awards_fields;
+	global $report_committees_fields, $report_volunteers_fields; /*$report_schools_fields;
+	global $report_fairs_fields;
 	global $report_tours_fields, $report_fundraisings_fields;
 */	
 
@@ -324,12 +328,7 @@ function report_save_field($mysqli, $report, $type)
 			$f_y = array_key_exists('y', $v) ? "'".((float)$v['y'])."'" : "'0'";
 			$f_w = array_key_exists('w', $v) ? "'".((float)$v['w'])."'" : "'0'";
 			$f_h = array_key_exists('h', $v) ? "'".((float)$v['h'])."'" : "'0'";
-			if(array_key_exists('h_rows', $v)) {
-				$f_h_rows = (int)$v['h_rows'];
-				if($f_h_rows == 0) $f_h_rows = 1;
-			} else {
-				$f_h_rows = 1;
-			}
+			$f_h_rows = array_key_exists('h_rows', $v) ? "'".((int)$v['h_rows'])."'" : "'0'";
 			$f_min_w = (array_key_exists('min_w', $v) && $v['min_w'] != NULL) ? "'".((float)$v['min_w'])."'" : "NULL";
 			$f_align = array_key_exists('align', $v) ? "'".$mysqli->real_escape_string($v['align'])."'" : "''";
 			$f_valign = array_key_exists('valign', $v) ? "'".$mysqli->real_escape_string($v['valign'])."'" : "''";
@@ -363,6 +362,7 @@ function report_save_field($mysqli, $report, $type)
 	global $report_committees_fields, $report_awards_fields;
 	global $report_schools_fields, $report_volunteers_fields;
 	global $report_tours_fields, $report_fairs_fields;
+	global $report_col_align, $report_col_valign;
 
 	$report = array();
 
@@ -427,11 +427,9 @@ function report_save_field($mysqli, $report, $type)
 
 
 			/* Check sanity of options just because we can */
-			$align_opts = array ('left', 'right', 'center', 'full');
-			$valign_opts = array ('top', 'bottom', 'middle');
 			$style_opts = array ('bold');
-			if(!in_array($val['align'], $align_opts)) $val['align'] = 'left';
-			if(!in_array($val['valign'], $valign_opts)) $val['valign'] = 'top';
+			if(!array_key_exists($val['align'], $report_col_align)) $val['align'] = 'left';
+			if(!array_key_exists($val['valign'], $report_col_valign)) $val['valign'] = 'top';
 			foreach($val['fontstyle'] as $s) {
 				if(!in_array($s, $style_opts)) {
 					print("Unknown style '$s'");
