@@ -126,9 +126,6 @@ $min_year = $u['M'];
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_reports_edit.php" data-rel="external" data-ajax="false">Edit Reports</a></li>
 	</ul>
-	
-
-
 
 	<script>
 		$( "#<?=$form_id?>_rid" ).change(function() {
