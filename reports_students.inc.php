@@ -398,9 +398,9 @@ $report_students_fields = array(
 
 	'cat' => array(
 		'name' => 'Project -- Category Short Form' ,
-		'header' => 'cat',
+		'header' => 'Cat.',
 		'width' => 0.4,
-		'table' => 'categories.name_shortform' ),
+		'table' => 'categories.shortform' ),
 
 	'fr_category' => array(
 		'name' => 'Project -- Category (French)',
@@ -784,29 +784,29 @@ $report_students_fields = array(
 		'name' => 'Emergency Contact -- Name',
 		'header' => 'Contact Name',
 		'width' => 1.5,
-		'table' => "CONCAT(emergencycontact.firstname, ' ', emergencycontact.lastname)",
-		'components' => array('emergencycontacts')),
+		'table' => "CONCAT(emergency_contacts.firstname, ' ', emergency_contacts.lastname)",
+		'components' => array('emergency_contacts')),
 
 	'emerg_relation' => array(
 		'name' => 'Emergency Contact -- Relationship',
 		'header' => 'Relation',
 		'width' => 1,
-		'table' => "emergencycontact.relation",
-		'components' => array('emergencycontacts')),
+		'table' => "emergency_contacts.relation",
+		'components' => array('emergency_contacts')),
 
 	'emerg_phone' => array(
 		'name' => 'Emergency Contact -- Phone',
 		'header' => 'Emrg.Phone',
 		'width' => 1,
-		'table' => "CONCAT(emergencycontact.phone1, ' ', emergencycontact.phone2, ' ', emergencycontact.phone3, ' ', emergencycontact.phone4)",
-		'components' => array('emergencycontacts')),
+		'table' => "CONCAT(emergency_contacts.phone1, ' ', emergency_contacts.phone2, ' ', emergency_contacts.phone3)",
+		'components' => array('emergency_contacts')),
 
 	'emerg_email' => array(
 		'name' => 'Emergency Contact -- Email',
 		'header' => 'Email',
 		'width' => 1,
-		'table' => "emergencycontact.email",
-		'components' => array('emergencycontacts')),
+		'table' => "emergency_contacts.email",
+		'components' => array('emergency_contacts')),
 
 /* Tour Information */
 	'tour_assign_name' => array(
@@ -1074,6 +1074,11 @@ $report_students_fields = array(
 						LEFT JOIN regfee_items ON regfee_items.id=regfee_items_link.regfee_items_id";
 	}
 
+	$emerg_join = '';
+	if(in_array('emergency_contacts', $components)) {
+		$emerg_join = "LEFT JOIN emergency_contacts ON emergency_contacts.uid=users.uid";
+	}
+
 
 	switch($report['option']['include_registrations']) {
 	case 'complete':
@@ -1096,6 +1101,7 @@ $report_students_fields = array(
 			$awards_join
 			$fairs_join
 			$tour_join
+			$emerg_join
 		WHERE
 			FIND_IN_SET('student',`users`.`roles`)>0
 			AND users.year='$year'
