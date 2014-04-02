@@ -154,15 +154,13 @@ sfiab_page_begin("Edit Awards", $page_id);
 <?php			form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
 			form_text($form_id, 'sponsor_email', "Sponsor Contact Email", $a, 'email');
 			form_text($form_id, 'sponsor_phone', "Sponsor Contact Phone", $a, 'tel');
-			form_text($form_id, 'sponsor_address', 'Address 1', $u);
-			form_text($form_id, 'sponsor_city', 'City', $u);
-			form_province($form_id, 'sponsor_province', 'Province / Territory', $u);
-			form_text($form_id, 'sponsor_postalcode', 'Postal Code', $u);
-			form_text($form_id, 'sponsor_notes', 'Notes', $u);
+			form_text($form_id, 'sponsor_address', 'Address 1', $a);
+			form_text($form_id, 'sponsor_city', 'City', $a);
+			form_province($form_id, 'sponsor_province', 'Province / Territory', $a);
+			form_text($form_id, 'sponsor_postalcode', 'Postal Code', $a);
+			form_text($form_id, 'sponsor_notes', 'Notes', $a);
 ?>		</div>
-<?php		form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
-		form_text($form_id, 'sponsor_email', "Sponsor Contact Email", $a, 'email');
-		form_text($form_id, 'sponsor_phone', "Sponsor Contact Phone", $a, 'tel');
+<?php		
 		form_check_group($form_id, 'categories', "Categories", $cats, $a);
 		form_yesno($form_id, 'schedule_judges', 'Schedule Judges', $a);
 		form_yesno($form_id, 'self_nominate', 'Students can Self Nominate', $a);
