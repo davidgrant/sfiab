@@ -693,6 +693,13 @@ class pdf extends TCPDF {
 			else 
 				$style='style="background-color:#DDDDDD"';
 
+			$td_style = '';
+			if(array_key_exists('cell_border', $table)) {
+				if($table['cell_border'] == true) {
+					$td_style = 'border:1px solid black;';
+				}
+			}
+
 			$row_alternator = !$row_alternator;
 
 			$html .= "<tr $style >";
@@ -700,6 +707,7 @@ class pdf extends TCPDF {
 				/* Convert all entities to HTML, even UTF characters.  Without this
 				 * TCPDF won't add a table if it has a UTF char */
 				$d = htmlentities(utf8_decode($row[$f]));
+				$d = str_replace("\n", "<br/>", $d);
 
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell
@@ -734,7 +742,7 @@ class pdf extends TCPDF {
 					}
 				}
 
-				$html .= "<td width=\"{$table['widths'][$f]}mm\" align=\"{$table['col'][$f]['align']}\">$d</td>";
+				$html .= "<td width=\"{$table['widths'][$f]}mm\" align=\"{$table['col'][$f]['align']}\" style=\"$td_style\" >$d</td>";
 			}
 			$html .= '</tr>';
 		}

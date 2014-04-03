@@ -97,6 +97,13 @@ $report_awards_fields = array(
 					'other' => 'Other',
 					'grand' => 'Grand')),
 
+	'matrix_data' => array(
+		'name' => 'Award -- Matrix Data',
+		'header' => 'Data',
+		'width' => 13.0,
+		'table' => "CONCAT(awards.name,'\n\n', awards.criteria, '\n', awards.description, '\n', awards.notes)"),
+
+
 	'empty_winner_box' => array(
 		'name' => 'Award -- Empty Winner Box (for hand entry on printed reports)',
 		'header' => 'Winner',

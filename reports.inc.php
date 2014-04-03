@@ -119,7 +119,32 @@ LRP 100		99764	5965	1	8 1/2 x 11	1
 LRP 180		99765	5967	4	1 3/4 x 1/2 	80 */
 
 
-/* FIXME: put these in a databse */
+/* FIXME: put these in a databse 
+ * Specify page_format and page_orientation using TCPDF values:
+ * 	Orientation: P or Portrait (default)
+ *		     L or Landscape 
+ * 
+ * 	Format: Too many to list, see tcpdf_6/include/tcpdf_static.php.  
+ * 		here are some of them:
+ 	 * <li>LEDGER, USLEDGER (432x279 mm ; 17.00x11.00 in)</li>
+	 * <li>TABLOID, USTABLOID, BIBLE, ORGANIZERK (279x432 mm ; 11.00x17.00 in)</li>
+	 * <li>LETTER, USLETTER, ORGANIZERM (216x279 mm ; 8.50x11.00 in)</li>
+	 * <li>LEGAL, USLEGAL (216x356 mm ; 8.50x14.00 in)</li>
+	 * <li>GLETTER, GOVERNMENTLETTER (203x267 mm ; 8.00x10.50 in)</li>
+	 * <li>JLEGAL, JUNIORLEGAL (203x127 mm ; 8.00x5.00 in)</li>
+	 * <li><b>Other North American Paper Sizes</b></li>
+	 * <li>QUADDEMY (889x1143 mm ; 35.00x45.00 in)</li>
+	 * <li>SUPER_B (330x483 mm ; 13.00x19.00 in)</li>
+	 * <li>QUARTO (229x279 mm ; 9.00x11.00 in)</li>
+	 * <li>FOLIO, GOVERNMENTLEGAL (216x330 mm ; 8.50x13.00 in)</li>
+	 * <li>EXECUTIVE, MONARCH (184x267 mm ; 7.25x10.50 in)</li>
+	 * <li>MEMO, STATEMENT, ORGANIZERL (140x216 mm ; 5.50x8.50 in)</li>
+	 * <li>FOOLSCAP (210x330 mm ; 8.27x13.00 in)</li>
+	 * <li>COMPACT (108x171 mm ; 4.25x6.75 in)</li>
+	 * <li>ORGANIZERJ (70x127 mm ; 2.75x5.00 in)</li>
+		
+ 
+ */
  $report_stock = array();
  $report_stock['fullpage'] = array('name' => 'Letter 8.5 x 11 (3/4" margin)',
 			'page_width' => 8.5,
@@ -274,7 +299,7 @@ LRP 180		99765	5967	4	1 3/4 x 1/2 	80 */
 			'label_height' => 17,
 			'y_spacing' => 0,
 			'rows' => 1,
-			'page_format' => 'LETTER',
+			'page_format' => 'TABLOID',
 			'page_orientation' => 'P',
 			);
 	
@@ -287,8 +312,8 @@ LRP 180		99765	5967	4	1 3/4 x 1/2 	80 */
 			'label_height' => 11,
 			'y_spacing' => 0,
 			'rows' => 1,
-			'page_format' => 'LETTER',
-			'page_orientation' => 'P',
+			'page_format' => 'TABLOID',
+			'page_orientation' => 'L',
 			);
 
 
@@ -570,6 +595,7 @@ function report_save_field($mysqli, $report, $type)
 	$table['fields'] = array();
 	$table['data'] = array();
 	$table['total']=0;
+	$table['cell_border'] = $report['option']['label_box'] == 'yes' ? true : false;
 
 	/* Validate the stock */
 	if($report['option']['stock'] != '') {
@@ -583,6 +609,9 @@ function report_save_field($mysqli, $report, $type)
 	$show_fair = ($report['option']['label_fairname'] == 'yes') ? true : false;
 	$show_logo = ($report['option']['label_logo'] == 'yes') ? true : false;
 
+	$fontsize = $report['option']['default_font_size'];
+	if($fontsize == 0) $fontsize = 10;
+
 	switch($report['option']['type']) {
 	case 'csv':
 		$rep=new csv(i18n($report['name']));
@@ -593,18 +622,7 @@ function report_save_field($mysqli, $report, $type)
 		/* FIXME: handle landscape pages in here */
 		$label_stock = $report_stock[$report['option']['stock']];
 		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'], $label_stock['page_format'], $label_stock['page_orientation']);
-		$rep->setup_for_tables(); /* fontname, fontsize */
-		$gen_mode = 'label';
-/*
-		if($report['option']['default_font_size']) {
-			$rep->setDefaultFontSize($report['option']['default_font_size']);
-			$rep->setFontSize($report['option']['default_font_size']);
-		}
-		else {
-			$rep->setDefaultFontSize(11);
-			$rep->setFontSize(11);
-		}
-*/
+		$rep->setup_for_tables('', $fontsize);
 		$gen_mode = 'table';
 		break;
 

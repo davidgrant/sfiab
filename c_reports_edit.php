@@ -218,7 +218,9 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 //					form_select($form_id, "col_fontstyle[$index]", NULL, $report_font_styles, $n, '', false, true, true);
 //					form_text_inline($form_id, "col_fontsize[$index]", $d['fontsize']);
 					form_hidden($form_id, "col[$index][fontname]", $d['fontname']);
-					form_hidden($form_id, "col[$index][fontstyle][]", join(',', $d['fontstyle']));
+					foreach($d['fontstyle'] as $s) {
+						form_hidden($form_id, "col[$index][fontstyle][]", $s);
+					}
 					form_hidden($form_id, "col[$index][fontsize]", $d['fontsize']);
 					form_hidden($form_id, "col[$index][x]", $d['x']);
 					form_hidden($form_id, "col[$index][y]", $d['y']);
@@ -230,6 +232,7 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 <?php			}
 		}
 
+		/* 3 more just for adding columns */
 		for($i = 0; $i < 3; $i++) {
 			$index = count($r['col']) + $i;
 			$v = '';
