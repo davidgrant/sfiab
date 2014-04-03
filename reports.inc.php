@@ -832,7 +832,12 @@ function report_save_field($mysqli, $report, $type)
 			foreach($report['group'] as $x=>$g) {
 				$c = $fieldname[$g['field']];
 
-				if(array_key_exists('exce_function', $fields[$g['field']]))
+				if(array_key_exists('value_map', $fields[$g['field']])) {
+					if(array_key_exists($i[$c], $fields[$g['field']]['value_map']))
+						$i_c = $fields[$g['field']]['value_map'][$i[$c]];
+					else
+						$i_c = 'n/a';
+				} else if(array_key_exists('exce_function', $fields[$g['field']]))
 					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($mysqli,$report,$f,$i[$c]));
 				else
 					$i_c=$i[$c];
