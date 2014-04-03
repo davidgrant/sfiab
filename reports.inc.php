@@ -854,7 +854,7 @@ function report_save_field($mysqli, $report, $type)
 					* dumped, so the first page doesn't
 					* end up blank */
 					if($report['option']['group_new_page'] == 'yes') {
-//						$rep->br();
+						$rep->AddPage();	
 					} else {
 						$rep->hr();
 						$rep->vspace(-0.1);
