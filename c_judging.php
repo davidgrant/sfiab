@@ -15,31 +15,12 @@ $u = user_load($mysqli);
 
 $page_id = 'c_judging';
 
-
-$saved = false;
-if(array_key_exists('action', $_POST)) {
-
-	if($_POST['action'] == 'save') {
-		form_ajax_response_error(0, 'save response');
-		exit();
-	}
-
-	if($_POST['action'] == 'save2') {
-		$saved = true;
-	}
-
-}
-
 sfiab_page_begin("Judging", $page_id);
-
 ?>
-
-
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-<?php
-	form_page_begin($page_id, array());
+<?php	form_page_begin($page_id, array());
 	/* Count judges */
 	$judges = judges_load_all($mysqli, $config['year']);
 
@@ -119,14 +100,10 @@ sfiab_page_begin("Judging", $page_id);
 	<li><a href="#" data-rel="external" data-ajax="false">X Edit Team/Project Timeslot Assignments</a></li>
 	</ul>
 
-<?php
-/*        $form_id = 'j_attending_form';
-        form_begin($form_id, 'c_judging.php');
-        form_text($form_id, 'j_not_attending', "Judging at the fair", $u['not_attending']);
-        form_submit($form_id, 'save', 'Save', 'Information Saved');
-        form_end($form_id);
-*/	
-?>
+	<h3>Judge Score Entry</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="#" data-rel="external" data-ajax="false">X Enter Round 1 Divisional Scores</a></li>
+
 
 </div></div>
 	

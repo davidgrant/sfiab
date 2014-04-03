@@ -23,6 +23,7 @@
 require_once('common.inc.php');
 require_once('project.inc.php');
 require_once('user.inc.php');
+require_once('awards.inc.php');
 
 function report_awards_fr($mysqli, &$report, $field, $text) {
 	return i18n($text,array(),array(),"fr");
@@ -92,10 +93,7 @@ $report_awards_fields = array(
 		'header' => 'Award Type',
 		'width' => 1.0,
 		'table' => 'awards.type',
-		'value_map' => array ('divisional' => 'Divisional',
-					'special' => 'Special',
-					'other' => 'Other',
-					'grand' => 'Grand')),
+		'value_map' => $award_types),
 
 	'matrix_data' => array(
 		'name' => 'Award -- Matrix Data',

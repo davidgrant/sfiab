@@ -1,9 +1,16 @@
 <?php
 require_once('filter.inc.php');
 
+
+$award_types = array('divisional' => 'Divisional',
+			'special' => 'Special',
+			'other' => 'Other',
+			'grand' => 'Grand');
+
+
 function award_load($mysqli, $id , $data = NULL)
 {
-		$id = (int)$id;
+	$id = (int)$id;
 	if($id != 0) {
 		$q = $mysqli->query("SELECT * FROM awards WHERE id='$id'");
 		$a = $q->fetch_assoc();
@@ -28,6 +35,14 @@ function award_load($mysqli, $id , $data = NULL)
 	$original = $a;
 	$a['original'] = $original;
 	return $a;
+}
+
+function award_load_by_prize($mysqli, $prize_id)
+{
+	/* Find the award to load */
+	$q = $mysqli->query("SELECT award_id FROM award_prizes WHERE id='$pid'");
+	$p = $q->fetch_assoc();
+	return award_load($mysqli, $p['award_id']);
 }
 
 function award_load_all($mysqli)
@@ -78,6 +93,7 @@ function prize_load($mysqli, $pid, $data=NULL)
 		$pid = $p['id'];
 	}
 	$p['trophies'] = explode(',', $p['trophies']);
+	filter_int($p['id']);
 	filter_bool_or_null($p['include_in_script']);
 	filter_bool($p['external_register_winners']);
 

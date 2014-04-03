@@ -249,6 +249,33 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 	}
 }
 
+function form_select_filter($page_id, $name, $label, $data, &$value)
+{
+	global $form_disabled;
+	$id = $page_id.'_'.$name;
+	/* This is so we can pass $u or $p in, and use the name to index into the array */
+	$v = (is_array($value)) ? $value[$name] : $value;
+	$d = $form_disabled ? ' disabled="disabled"': '';
+
+	if($label !== NULL) { ?>
+		<div class="ui-field-contain">
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php	} ?>
+		<input data-type="search" id="<?=$id?>_filter">
+		<select name="<?=$name?>" data-filter="true" data-input="#<?=$id?>_filter" id="<?=$id?>" <?=$d?> >
+		<option value="">Choose...</option>
+<?php		foreach($data as $key=>$val) {
+			if(is_array($val)) $val = $val['name'];
+			$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
+		        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
+<?php		} ?>
+		</select>
+<?php	if($label !== NULL) { ?>
+		</div>
+<?php
+	}
+}
+
 function form_lang($page_id, $name, $label, &$value)
 {
 //	$f = json_decode('"Fran\u00e7ais"');
