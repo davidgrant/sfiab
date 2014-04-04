@@ -66,11 +66,15 @@ sfiab_page_begin('Welcome', 'welcome');
 	$j_disabled = '';
 	$j_text = '';
 	if(sfiab_registration_is_closed(NULL, 'student')) {
-		$s_disabled = 'disabled="disabled"';
+		/* Only disable if user is not a committeemember */
+		if(!sfiab_user_is_a('committee')) 
+			$s_disabled = 'disabled="disabled"';
 		$s_text = ' (registration closed)';
 	}
 	if(sfiab_registration_is_closed(NULL, 'judge')) {
-		$j_disabled = 'disabled="disabled"';
+		/* Only disable if user is not a committeemember */
+		if(!sfiab_user_is_a('committee')) 
+			$j_disabled = 'disabled="disabled"';
 		$j_text = ' (registration closed)';
 	}
 ?>

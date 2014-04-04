@@ -100,7 +100,7 @@ case 'register':
 	$fn = $mysqli->real_escape_string($_POST['firstname']);
 	$ln = $mysqli->real_escape_string($_POST['lastname']);
 
-	if(sfiab_registration_is_closed(NULL, $as)) {
+	if(!sfiab_user_is_a('committee') && sfiab_registration_is_closed(NULL, $as)) {
 		/* Should never get here */
 		exit();
 	}
