@@ -331,7 +331,7 @@ function emergency_contact_load_for_user($mysqli, &$u)
 
 }
 
-function emergeny_contact_save($mysqli, $ec)
+function emergency_contact_save($mysqli, $ec)
 {
 	generic_save($mysqli, $ec, "emergency_contacts", "id");
 }

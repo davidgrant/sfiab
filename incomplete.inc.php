@@ -63,11 +63,18 @@ function incomplete_check_ge_zero(&$ret, &$data, $fields)
 
 function incomplete_check_text(&$ret, &$data, $fields)
 {
+	/* if there's no data, return that everything is missing */
 	if(!is_array($data)) $ret = array_merge($ret, $fields);
 	foreach($fields as $f) {
-		$v = $data[$f];
-		if(!is_string($v) || $v == '') {
+		/* If the field doesn't exist, it's be missing */
+		if(!array_key_exists($f, $data)) {
 			$ret[] = $f;
+		} else {
+			/* Get the field value, make sure it's a string and not empty */
+			$v = $data[$f];
+			if(!is_string($v) || $v == '') {
+				$ret[] = $f;
+			}
 		}
 	}
 }
@@ -100,8 +107,21 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		incomplete_check_gt_zero($ret, $u, array('schools_id', 'grade'));
 		break;
 	case 's_emergency':
-		incomplete_check_text($ret, $u, array('emerg1_firstname','emerg1_lastname',
-				'emerg1_relation','emerg1_email','emerg1_phone1'));
+		$ecs = emergency_contact_load_for_user($mysqli, $u);
+		/* PUt somethign in the array so incomplete_check_text can run and just
+		 * return everything is missing */
+		if(count($ecs) == 0) $ecs[0] = array();
+
+		foreach($ecs as $em_id=>$em) {
+			$ret1 = array();
+			incomplete_check_text($ret1, $em, array('firstname','lastname',
+					'relation','email','phone1'));
+			foreach($ret1 as $r) {
+				$ret[] = "emerg1_".$r;
+			}
+			/* Only do the first one */
+			break;
+		}
 		break;
 	case 's_reg_options':
 		incomplete_check_text($ret, $u, array('tshirt'));

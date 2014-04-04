@@ -24,32 +24,38 @@ switch($action) {
 case 'save':
 	if($closed) exit();
 
-	print("Saving is broken on this page :(");
-
+//	print_r($_POST);
 	$vals = array();
+
 	for($i=1; $i<=2; $i++) {
-	/*
-		post_text($u["emerg{$i}_firstname"], "emerg{$i}_firstname");
-		post_text($u["emerg{$i}_lastname"], "emerg{$i}_lastname");
-		post_text($u["emerg{$i}_relation"], "emerg{$i}_relation");
-		post_text($u["emerg{$i}_email"], "emerg{$i}_email");
-		post_text($u["emerg{$i}_phone1"], "emerg{$i}_phone1");
-		post_text($u["emerg{$i}_phone2"], "emerg{$i}_phone2");
-		post_text($u["emerg{$i}_phone3"], "emerg{$i}_phone3");
-		filter_phone($u["emerg{$i}_phone1"]);
-		filter_phone($u["emerg{$i}_phone2"]);
-		filter_phone($u["emerg{$i}_phone3"]);
-		$vals["emerg{$i}_phone1"] = $u["emerg{$i}_phone1"];
-		$vals["emerg{$i}_phone2"] = $u["emerg{$i}_phone2"];
-		$vals["emerg{$i}_phone3"] = $u["emerg{$i}_phone3"];
-		*/
+		$id = (int)$_POST["emerg{$i}_id"];
+		if($id == 0) {
+			/* Need a new one, insert and loadback */
+			$mysqli->query("INSERT INTO emergency_contacts(`uid`) VALUES ('{$u['uid']}')");
+			$id = $mysqli->insert_id;
+			$ecs[$id] = emergency_contact_load($mysqli, $id);
+		}
+
+		post_text($ecs[$id]["firstname"], "emerg{$i}_firstname");
+		post_text($ecs[$id]["lastname"], "emerg{$i}_lastname");
+		post_text($ecs[$id]["relation"], "emerg{$i}_relation");
+		post_text($ecs[$id]["email"], "emerg{$i}_email");
+		post_text($ecs[$id]["phone1"], "emerg{$i}_phone1");
+		post_text($ecs[$id]["phone2"], "emerg{$i}_phone2");
+		post_text($ecs[$id]["phone3"], "emerg{$i}_phone3");
+		filter_phone($ecs[$id]["phone1"]);
+		filter_phone($ecs[$id]["phone2"]);
+		filter_phone($ecs[$id]["phone3"]);
+
+		emergency_contact_save($mysqli, $ecs[$id]);
+
+		$vals["emerg{$i}_phone1"] = $ecs[$id]["phone1"];
+		$vals["emerg{$i}_phone2"] = $ecs[$id]["phone2"];
+		$vals["emerg{$i}_phone3"] = $ecs[$id]["phone3"];
 	}
-//
-//	user_save($mysqli, $u);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
-	form_ajax_response(array('status'=>0, 'error'=>'Saving is temporarily bjorked by Dave.  Way to go Dave. ', 
-						'missing'=>$ret, 'val'=>$vals));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$vals));
 	exit();
 }
 
@@ -75,6 +81,11 @@ sfiab_page_begin("Student Emergency Contact", $page_id, $help);
 			'familyfriend'=>"Family Friend", 'other'=>"Other");
 
 	form_begin($form_id, 'student_emergency.php', $closed);
+
+	for($x=count($ecs); $x < 2; $x++) {
+		$ec = array('id' => 0);
+		$ecs[-$x] = $ec;
+	}
 
 	$x = 0;
 	foreach($ecs as $id=>&$ec) {

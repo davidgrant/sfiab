@@ -28,7 +28,9 @@ function award_load($mysqli, $id , $data = NULL)
 	$a['prizes'] = array();
 	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `order`");
 	while($p = $q->fetch_assoc()) {
-		$a['prizes'][] = prize_load($mysqli, 0, $p);
+		$prize = prize_load($mysqli, 0, $p);
+		$prize['award'] = &$a;
+		$a['prizes'][] = $prize;
 	}
 
 	unset($a['original']);

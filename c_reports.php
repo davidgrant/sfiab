@@ -113,7 +113,21 @@ $min_year = $u['M'];
 	form_end($form_id);
 ?>
 
-	<hr/>
+	<h3>Award Ceremony Scripts</h3>
+	
+	<div data-role="controlgroup" data-type="horizontal">
+	<a href="report_ceremony.php?award_types[]=divisional&show_pronunciation=1&group_by_prize=1&cats[]=1" data-ajax="false" data-role="button">Junior Ceremony Part 1/3 - Divisional</a>
+	<a href="report_ceremony.php?name=Junior%20Ceremony%202/3%20-%20Special%20Awards&award_types[]=special&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Junior Ceremony Part 2/3 - Special</a>
+	<a href="report_ceremony.php?award_types[]=grand&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Junior Ceremony Part 3/3 - Grand</a>
+	</div>
+	<div data-role="controlgroup" data-type="horizontal">
+	<a href="report_ceremony.php?award_types[]=divisional&show_pronunciation=1&group_by_prize=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">M+S Ceremony Part 1/4 - Divisional</a>
+	<a href="report_ceremony.php?award_types[]=special&show_pronunciation=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">M+S Ceremony Part 2/4 - Special</a>
+	<a href="report_ceremony.php?award_types[]=grand&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">M+S Ceremony Part 3/4 - Junior Grand</a>
+	<a href="report_ceremony.php?award_types[]=grand&show_pronunciation=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">M+S Ceremony Part 4/4 - Grand</a>
+	</div>
+	<br/>
+
 	<h3>Special / Custom Reports</h3>
 	<ul data-role="listview" data-inset="true">
 	<li><a href="report_project_timetable.php" data-rel="external" data-ajax="false">Project Judging Schedules for the Students (one per page, takes a few seconds to generate)</a></li>
@@ -121,7 +135,6 @@ $min_year = $u['M'];
 	<br/>
 
 
-	<hr/>
 	<h3>Edit Reports</h3>
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_reports_edit.php" data-rel="external" data-ajax="false">Edit Reports</a></li>
