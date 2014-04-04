@@ -78,7 +78,7 @@ sfiab_page_begin("Students", $page_id);
 
 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="c_student_invite.php" data-rel="external" data-ajax="false">X Invite a Student</a></li>
+	<li><a href="index.php#register" data-rel="external" data-ajax="false">Invite a Student</a></li>
 	<li><a href="c_user_list.php?roles=student" data-rel="external" data-ajax="false">Student List / Editor</a></li>
 	</ul>
 
