@@ -42,11 +42,6 @@ sfiab_page_begin("Timeslot Editor", $page_id);
 ?>
 	</table>
 
-	<h3>Timeslot Assignments</h3> 
-	<ul data-role="listview" data-inset="true">
-	<li><a href="c_timeslots_assign.php" data-rel="external" data-ajax="false">Automatically assign all timeslots</a></li>
-	</ul>
-
 
 </div></div>
 
