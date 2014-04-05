@@ -84,6 +84,10 @@ function do_timeslot_assignments_from_scratch($mysqli)
 		$start_judge_index = 0;
 		$judge_index = 0;
 		$start_type = 0;
+		$n_rise = 1;
+		$n_run = 0;
+
+		$target_rise_run = count($jteam['project_ids']) / count($jteam['user_ids']);
 		
 		for($iproject=0;$iproject<count($jteam['project_ids']);$iproject++) {
 			$pid = $jteam['project_ids'][$iproject];
@@ -105,12 +109,17 @@ function do_timeslot_assignments_from_scratch($mysqli)
 				$current_timeslot_type++;
 				if($current_timeslot_type == 3) $current_timeslot_type = 0;
 			}
+
 			$start_judge_index++;
 			if($start_judge_index == count($jteam['user_ids'])) {
-				/* Rotate start type backwards so it appears the div judge slot
-				 * is pushed down one */
 				$start_judge_index = 0;
-				$start_type = ($start_type == 0) ? 2 : ($start_type-1);
+			}
+
+			$n_run += 1;
+			if($n_run / $n_rise >= $target_rise_run) {
+				$n_rise += 1;
+				$start_type -= 1;
+				if($start_type == -1) $start_type = 2;
 			}
 		}
 
