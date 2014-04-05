@@ -118,9 +118,9 @@ sfiab_page_begin("Judging", $page_id);
 
 	<h3>Judging Assignments</h3> 
 	<ul data-role="listview" data-inset="true">
+	<li><a href="c_jteam_edit.php" data-rel="external" data-ajax="false">Edit Judging Teams</a></li>
 	<li><a href="c_timeslots.php" data-rel="external" data-ajax="false">Edit Judging Timeslots and Timeslot Assignments</a></li>
 	<li><a href="c_judge_scheduler.php" data-rel="external" data-ajax="false">Run the Judge Scheduler</a></li>
-	<li><a href="c_jteam_edit.php" data-rel="external" data-ajax="false">Edit Judging Teams</a></li>
 	<li><a href="c_judging_sanity.php" data-rel="external" data-ajax="false">Display Judging Sanity Checks</a></li>
 	</ul>
 
