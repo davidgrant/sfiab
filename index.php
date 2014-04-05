@@ -1,4 +1,10 @@
 <?php
+
+if(array_key_exists('p', $_GET)) {
+	header("location: project_summary.php?p={$_GET['p']}");
+	exit();
+}
+
 require_once('common.inc.php');
 require_once('form.inc.php');
 
@@ -8,6 +14,8 @@ sfiab_load_config($mysqli);
 sfiab_session_start();
 
 sfiab_page_begin('Welcome', 'welcome');
+
+
 
 //<script>
 //	$( document ).on("pagebeforeshow", "#welcome, #important_dates, #committee", function() { $('#leftnav_main').collapsible( "expand" ); });

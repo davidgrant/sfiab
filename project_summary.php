@@ -34,7 +34,7 @@ if(array_key_exists('pn', $_GET)) {
 	$q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
 } else if(array_key_exists('p', $_GET)) {
 	$floornumber = (int)$_GET['p'];
-	$q=$mysqli->query("SELECT * FROM projects WHERE floornumber='$p' AND year='{$config['year']}'");
+	$q=$mysqli->query("SELECT * FROM projects WHERE floor_number='$floornumber' AND year='{$config['year']}'");
 } 
 if($q === NULL || $q->num_rows != 1) {
 	print("not found");
