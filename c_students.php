@@ -25,7 +25,7 @@ sfiab_page_begin("Students", $page_id);
 	/* Count students */
 	$students = students_load_all($mysqli, $config['year']);
 	$cats = categories_load($mysqli);
-	$projects = projects_load_all($mysqli);
+	$projects = projects_load_all($mysqli, false);
 
 	$j_complete = 0;
 	$j_not_attending = 0;
@@ -43,14 +43,16 @@ sfiab_page_begin("Students", $page_id);
 			$p =& $projects[$s['s_pid']];
 			$stats['total']['students']['accepted']+=1;
 			$stats[$p['cat_id']]['students']['accepted']+=1;
-
-			if(!array_key_exists('counted_for_s_accepted', $p)) {
-				$p['counted_for_s_accepted'] = true;
-				$stats['total']['projects']['accepted']+=1;
-				$stats[$p['cat_id']]['projects']['accepted']+=1;
-			}
 		}
 	}
+
+	foreach($projects as &$p) {
+		if($p['accepted']) {
+			$stats['total']['projects']['accepted']+=1;
+			$stats[$p['cat_id']]['projects']['accepted']+=1;
+		}
+	}
+		
 
 
 

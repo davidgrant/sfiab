@@ -49,7 +49,7 @@ foreach($jteams as &$jteam) {
 
 $notices['Projects'] = array();
 $notices['Projects']['r1assigned'] = array("OK All projects have a Round 1 Divisional judging team");
-$notices['Projects']['unavailable'] = array("OK No Projects has special availability requirements");
+$notices['Projects']['unavailable'] = array("OK No Projects have restricted timeslot availability requirements");
 foreach($projects as $pid=>&$p) {
 	/* Check that each project is judged in round 1 */
 	$found = false;
