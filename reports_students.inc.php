@@ -175,7 +175,7 @@ $report_students_fields = array(
 		'name' => 'Project Barcode',
 		'header' => 'Barcode',
 		'width' => 1,
-		'table' => 'projects.number',
+		'table' => 'projects.floor_number',
 		'table_sort' => 'projects.number_sort, projects.number',
 		),
 

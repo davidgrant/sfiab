@@ -11,37 +11,24 @@ print("remove the exit line at the top of the file");
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
-
 $year = $config['year'];
 
 $users = array();
 
-$q = $mysqli->query("SELECT * FROM users where year=2014");
-while($ud = $q->fetch_assoc()) {
-	$u = user_load($mysqli, -1, -1, NULL, $ud);
+$q = $mysqli->query("SELECT * FROM projects where year=2014");
+$c = 0;
+while($d = $q->fetch_assoc()) {
+	$p = project_load($mysqli, -1, $d);
 
-	print("Loaded {$u['firstname']} {$u['lastname']}\n");
-
-	$mysqli->query("DELETE FROM emergency_contacts WHERE uid='{$u['uid']}'");
-
-	for($x=1;$x<=2;$x++) {
-		$fn = $mysqli->real_escape_string($u["emerg{$x}_firstname"]);
-		$ln = $mysqli->real_escape_string($u["emerg{$x}_lastname"]);
-		$re = $mysqli->real_escape_string($u["emerg{$x}_relation"]);
-		$phone1 = trim($u["emerg{$x}_phone1"]);
-		$phone2 = trim($u["emerg{$x}_phone2"]);
-		$phone3 = trim($u["emerg{$x}_phone3"]);
-		$email = $mysqli->real_escape_string($u["emerg{$x}_email"]);
-
-		if($fn == '' || $fn === NULL) continue;
-
-
-		$str = "INSERT INTO emergency_contacts(`uid`,`firstname`,`lastname`,`email`,`phone1`,`phone2`,`phone3`,`relation`)
-				VALUES('{$u['uid']}','$fn','$ln','$email','$phone1','$phone2','$phone3','$re')";
-		print($str."\n");
-		$mysqli->real_query($str);
-		print($mysqli->error);
+	$q1  =$mysqli->query("SELECT * FROM users WHERE s_accepted=0 AND s_pid='{$p['pid']}'");
+	if($q1->num_rows == 0) {
+		$q1 = $mysqli->query("UPDATE projects SET accepted=1 WHERE pid='{$p['pid']}'");
+		$c++;
 	}
 }
+
+print("Set $c projects to accepted\n");
+
+
 
 ?>

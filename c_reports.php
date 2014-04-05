@@ -139,6 +139,7 @@ $min_year = $u['M'];
 	<h3>Special / Custom Reports</h3>
 	<ul data-role="listview" data-inset="true">
 	<li><a href="report_project_timetable.php" data-rel="external" data-ajax="false">Project Judging Schedules for the Students (one per page, takes a few seconds to generate)</a></li>
+	<li><a href="report_jteam_timetable.php" data-rel="external" data-ajax="false">Judging Team Schedules (one judging team per page, takes a few seconds to generate)</a></li>
 	</ul>
 	<br/>
 

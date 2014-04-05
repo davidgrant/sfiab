@@ -926,7 +926,7 @@ function report_save_field($mysqli, $report, $type)
 					$rep->label_fair_logo($d['x'], $d['y'], $d['w'], $d['h'], $show_box);
 					break;
 				case "projectbarcode":
-					$rep->label_barcode($d['x'], $d['y'], $d['w'], $d['h'], $v);
+					$rep->label_barcode($d['x'], $d['y'], $d['w'], $d['h'], "reg.gvrsf.ca/?p=$v");
 					break;
 
 /*

@@ -292,6 +292,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_user_edit' => NULL,
 			    'c_report_editor' => NULL,
 			    'c_timeslots' => NULL,
+			    'c_timeslots_assign' => NULL,
 			    'c_jteam_edit' => NULL,
 			    'c_jteam_list' => NULL,
 			    'c_input_signature_forms' => NULL,

@@ -2,8 +2,10 @@
 require_once(__DIR__.'/../user.inc.php');
 require_once(__DIR__.'/../project.inc.php');
 
-function judges_load_all($mysqli, $year)
+function judges_load_all($mysqli, $year = NULL)
 {
+	global $config;
+	if($year === NULL) $year = $config['year'];
 	$q = $mysqli->query("SELECT * FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('judge',`roles`)>0
@@ -11,7 +13,7 @@ function judges_load_all($mysqli, $year)
 					AND state != 'deleted'");
 	$judges = array();
 	while($j = $q->fetch_assoc()) {
-		$judges[] = user_load($mysqli, -1, -1, NULL, $j);
+		$judges[(int)$j['uid']] = user_load($mysqli, -1, -1, NULL, $j);
 	}
 	return $judges;
 }
@@ -50,7 +52,7 @@ function jteams_load_all($mysqli, $year=NULL)
 				judging_teams.year='$year'");
 	$jteams = array();
 	while($j = $q->fetch_assoc()) {
-		$jteams[] = jteam_load($mysqli, -1, $j);
+		$jteams[(int)$j['id']] = jteam_load($mysqli, -1, $j);
 	}
 	return $jteams;
 }
@@ -78,4 +80,3 @@ function jteam_save($mysqli, &$jteam)
 
 
 ?>
-

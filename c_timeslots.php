@@ -27,8 +27,6 @@ sfiab_page_begin("Timeslot Editor", $page_id);
 	<h3>Sorry, can't edit yet, but here's the timeslots:</h3>
 	<table>
 	<tr><td>Round</td><td>Num</td><td>Start</td><td>Length</td></tr>
-
-
 <?php	for($round=1;$round <= 2;$round++) {
 		for($x=1;$x<9;$x++) {
 			$num = $x + (($round == 1) ? 0 : 9);
@@ -39,13 +37,17 @@ sfiab_page_begin("Timeslot Editor", $page_id);
 			<td><?=$ts['start']?></td>
 			<td><?=$ts['length_minutes']?> min</td>
 			</tr>
-<?php
-
-
-		}
+<?php		}
 	}
 ?>
 	</table>
+
+	<h3>Timeslot Assignments</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_timeslots_assign.php" data-rel="external" data-ajax="false">Automatically assign all timeslots</a></li>
+	</ul>
+
+
 </div></div>
 
 <?php

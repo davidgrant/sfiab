@@ -4,6 +4,7 @@ require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('timeslots.inc.php');
+require_once('committee/students.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -16,32 +17,72 @@ $u = user_load($mysqli);
 
 $projects = projects_load_all($mysqli);
 $timeslots = timeslots_load_all($mysqli);
+$students = students_load_all_accepted($mysqli);
 
+foreach($projects as $pid=>&$p) {
+	$p['students'] = array();
+	$p['timeslots'] = array();
+}
+
+foreach($students as $uid=>&$s) {
+	/* Cross link them with projects */
+	$pid = $s['s_pid'];
+	$projects[$pid]['students'][] = $s;
+}
+
+$q = $mysqli->query("SELECT * FROM timeslot_assignments WHERE year='{$config['year']}'");
+while($r = $q->fetch_assoc()) {
+	$pid = $r['pid'];
+	$timeslot = &$projects[$pid]['timeslots'];
+	if(!array_key_exists($r['num'], $timeslot)) {
+		$timeslot[$r['num']] = array();
+	}
+	$timeslot[$r['num']][] = $r;
+}
+
+
+$project_numbers = array();
+$project_floor_numbers = array();
+if(array_key_exists('pn', $_GET)) {
+	$project_numbers[] = $_GET['pn'];
+} else if (array_key_exists('p', $_GET)) {
+	$project_floor_numbers[] = (int)$_GET['p'];
+}
 
 $pdf=new pdf( "Project Judging Schedule", $config['year'] );
 
-foreach($projects as &$p) {
+$filter_project_numbers = (count($project_numbers) > 0) ? true : false;
+$filter_project_floor_numbers = (count($project_floor_numbers) > 0) ? true : false;
+
+$pdf->SetFont('helvetica');
+
+//print("<pre>");
+foreach($projects as $pid=>&$p) {
+
+//	print_r($p);
 
 	if($p['number'] == '') continue;
 
-	$users = user_load_all_for_project($mysqli, $p['pid']);
+	if($filter_project_numbers) {
+		if(!in_array($p['number'], $project_numbers)) continue;
+	}
+	if($filter_project_floor_numbers) {
+		if(!in_array($p['floor_number'], $project_floor_numbers)) continue;
+	}
 
 	$pdf->AddPage();
 
-
 	$x = $pdf->GetX();
 	$y = $pdf->GetY();
-
-	$pdf->SetFont('helvetica');
 	$pdf->setFontSize(20);
 	$pdf->SetXY(-40, 10);
 	$pdf->Cell(30, 0, $p['number'], 0);
-	$pdf->barcode_2d(185, $y, 30, 30, $p['pid']);
+	$pdf->barcode_2d(185, $y, 30, 30, "reg.gvrsf.ca/?p={$p['floor_number']}");
 	$pdf->SetXY($x, $y);
 	$pdf->setFontSize(11);
 
 	$n = array();
-	foreach($users as &$s) {
+	foreach($p['students'] as &$s) {
 		$n[] = $s['name'];
 	}
 	$names = join(', ', $n);
@@ -50,14 +91,7 @@ foreach($projects as &$p) {
 		".i18n('Project Title').": <b>{$p['title']}</b> <br/>
 		".i18n('Students').": <b>$names</b><br/>");
 
-	$timeslot = array();
-	$q = $mysqli->query("SELECT * FROM timeslot_assignments WHERE pid='{$p['pid']}'");
-	while($r = $q->fetch_assoc()) {
-		if(!array_key_exists($r['num'], $timeslot)) {
-			$timeslot[$r['num']] = array();
-		}
-		$timeslot[$r['num']][] = $r;
-	}
+	$ptimeslot = &$p['timeslots'];
 
 	$num = 0;
 	for($round=1;$round<=2;$round++) {
@@ -86,17 +120,16 @@ foreach($projects as &$p) {
 		for($num = $round_start_num; $num < $round_end_num; $num++) {
 			$row = array();
 
-			
 			$ts = $timeslots[$num];
 			$row['time'] = date("g:i a", strtotime($ts['start']));
 
-			if(!array_key_exists($num, $timeslot)) {
+			if(!array_key_exists($num, $ptimeslot)) {
 				$row['slot'] = 'Judging';
 			} else {
 				$txt = '';
-				switch($timeslot[$num][0]['type']) {
+				switch($ptimeslot[$num][0]['type']) {
 				case 'free':
-					$txt = "--\nBreak --\n \n";
+					$txt = "-- Break --";
 					break;
 				case 'special':
 					if($round == 1) {
@@ -136,10 +169,6 @@ foreach($projects as &$p) {
 	<li>Please remain inside the exhibit halls during your breaks.  You are free move between Ballroom and the Partyroom, and of course go to the washroom.
 	</ul>");
 
-
-
-
-	
 }
 
 print($pdf->output());
