@@ -102,9 +102,9 @@ sfiab_page_begin("Judging", $page_id);
 		<tr><td colspan="5" align="center"><b>Judging Teams</b></td></tr>
 		<tr><td colspan="2"></td><td align="center">Divisional</td><td align="center">Special</td><td align="center">Unused</td></tr>
 		<tr><td align="center">Round 1</td><td align="center">Teams</td><td align="center"><?=$jteam_count[1]['divisional']?></td><td align="center"><?=$jteam_count[1]['special']?></td><td align="center">  </td></tr>
-		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[1]['divisional']?></td><td align="center"><?=$jteam_count[1]['special']?></td><td align="center"><?=$unused_judge_count[1]?></td></tr>
+		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[1]['divisional']?></td><td align="center"><?=$jteam_judge_count[1]['special']?></td><td align="center"><?=$unused_judge_count[1]?></td></tr>
 		<tr><td align="center">Round 2</td><td align="center">Teams</td><td align="center"><?=$jteam_count[2]['divisional']?></td><td align="center"><?=$jteam_count[2]['special']?></td><td align="center">  </td></tr>
-		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[2]['divisional']?></td><td align="center"><?=$jteam_count[2]['special']?></td><td align="center"><?=$unused_judge_count[2]?></td></tr>
+		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[2]['divisional']?></td><td align="center"><?=$jteam_judge_count[2]['special']?></td><td align="center"><?=$unused_judge_count[2]?></td></tr>
 		</table>
 
 	</td></tr></table>
