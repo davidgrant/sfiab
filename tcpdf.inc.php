@@ -80,7 +80,7 @@ class pdf extends TCPDF {
 		$this->setImageScale(PDF_IMAGE_SCALE_RATIO); 
 
 		/* Turning off subsetting is supposed to help */
-//		$this->setFontSubsetting(false);
+		$this->setFontSubsetting(false);
 
 		$this->current_label_index = 1;
 		$this->current_label_row = 0;

@@ -159,86 +159,58 @@ for($round=1;$round <=2; $round++) {
 			else 
 				$slot_type = 'special';
 
-			if(0) {
-				/* Lots of projects, too many to list horizontally */
 
-				$table['fields'][] = "slot";
-				$table['header']['slot'] = "Projects Available";
-				$table['col']['slot'] = array('on_overflow' => '',
+			$table['header']['time'] = 'Project';
+			for($x = 0; $x < 9; $x++) {
+				$num  = ($round == 1) ? ($x+1) : ($x + 10);
+				$ts = $timeslots[$num];
+
+				$table['fields'][] = "T$x";
+				$table['header']["T$x"] = date("g:i", strtotime($ts['start']));
+				$table['col']["T$x"] = array('on_overflow' => '',
 							      'align' => 'center');
-				$table['widths']['slot'] = 150;
+				$table['widths']["T$x"] = 20;
+			}
 
-				for($i = 1; $i <=9; $i++) {
-					$num  = ($round == 1) ? $i : ($i + 9);
-					$row = array();
+			$sorted_project_ids = array();
+			foreach($jteam['project_ids'] as $pid) {
+				$project = &$projects[$pid];
+				$sorted_project_ids[$project['number_sort']] = $pid;
+			}
+			ksort($sorted_project_ids);
+		
 
-					$ts = $timeslots[$num];
-					$row['time'] = date("g:i a", strtotime($ts['start']));
+			foreach($sorted_project_ids as $pid) {
+				$row = array();
+				$project = &$projects[$pid];
 
-					$txt = '';
-					foreach($jteam['project_ids'] as $pid) {
-						$project = &$projects[$pid];
-						if(!array_key_exists($num, $project['timeslots']) || $project['timeslots'][$num] == $slot_type) {
-							if($txt != '') $txt .= ', ';
-							$txt .= $project['number'];
-						}
-					}
-					$row['slot'] = $txt;
-					$table['data'][] = $row;
-				}
+				$row['time'] = $project['number'];
 
-				$pdf->add_table($table);
-				$pdf->WriteHTML("<br/><br/><br/><h3>Important Notes:</h3>
-				<ul>
-				<li>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.
-				</ul>");
-			} else {
-				$table['header']['time'] = 'Project';
+				$x = 0;
 				for($x = 0; $x < 9; $x++) {
 					$num  = ($round == 1) ? ($x+1) : ($x + 10);
-					$ts = $timeslots[$num];
 
-					$table['fields'][] = "T$x";
-					$table['header']["T$x"] = date("g:i", strtotime($ts['start']));
-					$table['col']["T$x"] = array('on_overflow' => '',
-								      'align' => 'center');
-					$table['widths']["T$x"] = 20;
-				}
-
-				foreach($jteam['project_ids'] as $pid) {
-					$row = array();
-					$project = &$projects[$pid];
-
-					$row['time'] = $project['number'];
-
-					$x = 0;
-					for($x = 0; $x < 9; $x++) {
-						$num  = ($round == 1) ? ($x+1) : ($x + 10);
-
-						if(!array_key_exists($num, $project['timeslots'])) {
-							print("<pre>");
-							print_r($project);
-							exit();
-						}
-
-						$txt = '';
-						if($project['timeslots'][$num] == $slot_type) {
-							$txt = 'O';
-						}
-						$row["T$x"] = $txt;
+					if(!array_key_exists($num, $project['timeslots'])) {
+						print("<pre>");
+						print_r($project);
+						exit();
 					}
-					$table['data'][] = $row;
+
+					$txt = '';
+					if($project['timeslots'][$num] == $slot_type) {
+						$txt = 'O';
+					}
+					$row["T$x"] = $txt;
 				}
+				$table['data'][] = $row;
+			}
 
-				$pdf->add_table($table);
-				$pdf->WriteHTML("<br/><br/><br/><h3>Important Notes:</h3>
-				<ul>
-				<li>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.
-				</ul>");
-			}	
-
-		}
-
+			$pdf->add_table($table);
+			$pdf->WriteHTML("<br/><br/><br/><h3>Important Notes:</h3>
+			<ul>
+			<li>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.
+			</ul>");
+		}	
 
 	}
 
