@@ -50,7 +50,7 @@ foreach($jteams as &$jteam) {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
 		if($c < $config['judge_cusp_min_team'] || $c > $config['judge_cusp_max_team']) {
-			$notices['Judging Teams']['r1div_judges'] = "NO Round 2 Divisional (Cusp) Juding Team {$jteam['name']} has $c judges.  Not {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']}";
+			$notices['Judging Teams']['r2div_judges'] = "NO Round 2 Divisional (Cusp) Juding Team {$jteam['name']} has $c judges.  Not {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']}";
 		}
 	}
 }
