@@ -622,7 +622,7 @@ function report_save_field($mysqli, $report, $type)
 		/* FIXME: handle landscape pages in here */
 		$label_stock = $report_stock[$report['option']['stock']];
 		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'], $label_stock['page_format'], $label_stock['page_orientation']);
-		$rep->setup_for_tables('', $fontsize);
+		$rep->setup_for_tables('helvetica', $fontsize);
 		$gen_mode = 'table';
 		break;
 

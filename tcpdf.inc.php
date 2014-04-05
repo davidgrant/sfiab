@@ -633,7 +633,7 @@ class pdf extends TCPDF {
 		$this->SetY($this->GetY() + $space);
 	}
 
-	function setup_for_tables($fontname='times', $fontsize=10)
+	function setup_for_tables($fontname='helvetica', $fontsize=10)
 	{
 		$fontstyle = '';
 		$this->SetFont($fontname, $fontstyle, $fontsize);
