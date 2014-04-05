@@ -27,6 +27,7 @@ foreach($projects as $pid=>&$p) {
 foreach($students as $uid=>&$s) {
 	/* Cross link them with projects */
 	$pid = $s['s_pid'];
+	if(!array_key_exists($pid, $projects)) continue;
 	$projects[$pid]['students'][] = $s;
 }
 

@@ -1,13 +1,16 @@
 <?php
 require_once('filter.inc.php');
 
-function projects_load_all($mysqli)
+function projects_load_all($mysqli, $only_accepted=true, $year = NULL)
 {
 	global $config;
-	$q = $mysqli->query("SELECT * FROM projects WHERE year={$config['year']} ORDER BY number_sort");
+	if($year == NULL) $year = $config['year'];
+	$acc = $only_accepted ? " accepted='1' AND ": '';
+
+	$q = $mysqli->query("SELECT * FROM projects WHERE $acc year='$year' ORDER BY number_sort");
 	$projects = array();
 	while($p = $q->fetch_assoc()) {
-		$pr = project_load($mysqli, $p['pid'], $p);
+		$pr = project_load($mysqli, -1, $p);
 		$projects[(int)$p['pid']] = $pr;
 	}
 	return $projects;

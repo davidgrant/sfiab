@@ -34,6 +34,9 @@ case 'c':
 		}
 
 		if($ok == true) {
+			$p['accepted'] = 1;
+			project_save($mysqli, $p);
+
 			foreach($users as &$u) {
 				$u['s_accepted'] = 1;
 				$u['s_paid'] = 1;
@@ -47,39 +50,15 @@ case 'c':
 	}
 	form_ajax_response(1);
 	exit();
-case 'c':
-	$pid = (int)$_POST['pid'];
-	if($pid > 0) {
-		$p = project_load($mysqli, $pid);
-		$users = project_load_students($mysqli, $p);
 
-		$ok = true;
-		foreach($users as &$u) {
-			/* User must be "complete" */
-			if($u['s_complete'] != 1) {
-				$ok = false;
-			}
-		}
-
-		if($ok == true) {
-			foreach($users as &$u) {
-				$u['s_accepted'] = 1;
-				$u['s_paid'] = 1;
-				user_save($mysqli, $u);
-			}
-			form_ajax_response(0);
-		} else {
-			form_ajax_response(1);
-		}
-		exit();
-	}
-	form_ajax_response(1);
-	exit();
 case 'i':
 	$pid = (int)$_POST['pid'];
 	if($pid > 0) {
 		$p = project_load($mysqli, $pid);
 		$users = project_load_students($mysqli, $p);
+
+		$p['accepted'] = 0;
+		project_save($mysqli, $p);
 
 		foreach($users as &$u) {
 			/* User must be "complete" */
@@ -107,6 +86,8 @@ case 'w':
 		}
 
 		if($ok == true) {
+			$p['accepted'] = 1;
+			project_save($mysqli, $p);
 			foreach($users as &$u) {
 				$u['s_accepted'] = 1;
 				$u['s_paid'] = 0;
