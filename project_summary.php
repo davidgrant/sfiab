@@ -28,14 +28,18 @@ require_once('project.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
-
-$pn = $mysqli->real_escape_string(stripslashes($_GET['pn']));
-$q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
-if($q->num_rows != 1) {
+$q = NULL;
+if(array_key_exists('pn', $_GET)) {
+	$pn = $mysqli->real_escape_string(stripslashes($_GET['pn']));
+	$q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
+} else if(array_key_exists('p', $_GET)) {
+	$floornumber = (int)$_GET['p'];
+	$q=$mysqli->query("SELECT * FROM projects WHERE floornumber='$p' AND year='{$config['year']}'");
+} 
+if($q === NULL || $q->num_rows != 1) {
 	print("not found");
 	exit();
 }
-
 
 $p = project_load($mysqli, -1, $q->fetch_assoc());
 $students = project_load_students($mysqli, $p);
