@@ -167,7 +167,7 @@ $report_students_fields = array(
 	'pn' => array(
 		'name' => 'Project Number',
 		'header' => '#',
-		'width' => 0.6,
+		'width' => 0.7,
 		'table' => 'projects.number',
 		'table_sort' => 'projects.number_sort, projects.number'),
 
