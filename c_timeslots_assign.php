@@ -18,7 +18,17 @@ $u = user_load($mysqli);
 $timeslots = timeslots_load_all($mysqli);
 $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
+$projects = projects_load_all($mysqli);
 
+$debug = array_key_exists('debug', $_GET) ? true : false;
+
+
+if($debug) print("<pre>");
+function debug($txt)
+{
+	global $debug;
+	if($debug) print($txt);
+}
 
 $action = array_key_exists('action', $_POST) ? $_POST['action'] : '';
 
@@ -37,8 +47,8 @@ case 'go':
 
 function do_timeslot_assignments_from_scratch($mysqli)
 {
-	global $timeslots, $jteams, $awards;
-	global $config;
+	global $timeslots, $jteams, $awards, $projects;
+	global $config, $debug;
 
 	$timeslot_type_str = array(0=>"divisional", 1 => "special", 2=>"free");
 
@@ -104,39 +114,58 @@ function do_timeslot_assignments_from_scratch($mysqli)
 			}
 		}
 
-/*		print("   Timeslot assignments for {$jteam['name']}");
-		print_r($jteam);
-		foreach($jteam['project_ids'] as $pid) {
-			print("\t$pid");
+		if($debug) {
+			debug("   Timeslot assignments for {$jteam['name']}");
+			debug(print_r($jteam, true));
+			foreach($jteam['project_ids'] as $pid) {
+				debug("\t$pid");
+			}
+			debug("\n");
 		}
-		print("\n");
-*/
+
 		$queries = array();
 		for($y=0;$y<9;$y++) {
-//			print($y+1);
+			debug($y+1);
 			for($iproject=0;$iproject<count($jteam['project_ids']);$iproject++) {
 				$pid = $jteam['project_ids'][$iproject];
 				$judge_id = $timeslot_judge[$iproject][$y];
 
-/*				if($timeslot_type[$iproject][$y] == 0) 
-					print("\t$judge_id");
-				else if($timeslot_type[$iproject][$y] == 2) 
-					print("\t--");
-				else
-					print("\tsa");
-*/
+				if($debug) {
+					if($timeslot_type[$iproject][$y] == 0) 
+						debug("\t$judge_id");
+					else if($timeslot_type[$iproject][$y] == 2) 
+						debug("\t--");
+					else
+						debug("\tsa");
+				}
+
+				/* Round 1 */
 				$timeslot_num = $y+1;
-				$t = $timeslot_type_str[$timeslot_type[$iproject][$y]];
+				$t_type = $timeslot_type[$iproject][$y];
 
-				$t_id = $timeslot_type[$iproject][$y] == 0 ? $jteam['id'] : 0;
-				$j_id = $timeslot_type[$iproject][$y] == 0 ? $judge_id : 0;
+				if($t_type == 0) {
+					/* Divisional */
+					$t_id = $jteam['id'];
+					$j_id = $judge_id;
+				} else {
+					$j_id = 0;
+					$tid = 0;
+				}
+					
+				if(in_array($timeslot_num, $projects[$pid]['unavailable_timeslots'])) {
+					$t_type = 2;
+				}
+				$queries[] = "('$timeslot_num','$pid','$t_id','$j_id','{$timeslot_type_str[$t_type]}', '{$config['year']}')";
 
-				$queries[] = "('$timeslot_num','$pid','$t_id','$j_id','$t', '{$config['year']}')";
-
+				/* Round 2 */
+				$t_type = $timeslot_type[$iproject][$y];
 				$timeslot_num = $y+1 + 9;
-				$queries[] = "('$timeslot_num','$pid','$t_id','$j_id','$t', '{$config['year']}')";
+				if(in_array($timeslot_num, $projects[$pid]['unavailable_timeslots'])) {
+					$t_type = 2;
+				}
+				$queries[] = "('$timeslot_num','$pid','0','0','{$timeslot_type_str[$t_type]}', '{$config['year']}')";
 			}
-//			print("\n");
+			debug("\n");
 		}
 		$query = "INSERT INTO timeslot_assignments (`num`,`pid`,`judging_team_id`,`judge_id`,`type`,`year`) VALUES ";
 

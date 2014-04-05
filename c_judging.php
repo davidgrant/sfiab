@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('committee/judges.inc.php');
+require_once('awards.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -23,6 +24,8 @@ sfiab_page_begin("Judging", $page_id);
 <?php	form_page_begin($page_id, array());
 	/* Count judges */
 	$judges = judges_load_all($mysqli, $config['year']);
+	$jteams = jteams_load_all($mysqli);
+	$awards = award_load_all($mysqli);
 
 	$j_complete = 0;
 	$j_not_attending = 0;
@@ -45,15 +48,36 @@ sfiab_page_begin("Judging", $page_id);
 		}
 	}
 
-	$jteam_count = array();
+	$jteam_count = array(1=>array(), 2=>array());
+	$jteam_judge_count = array(1=>array(), 2=>array());
+	$judges_used_in_round = array(1=>array(), 2=>array());
+	$unused_judge_count = array(1=>0, 2=>0);
 
-	$q = $mysqli->query("SELECT round,awards.`type`,COUNT(`judging_teams`.`id`) AS c FROM judging_teams 
-				LEFT JOIN awards ON awards.id=judging_teams.award_id
-				WHERE judging_teams.year='{$config['year']}' GROUP BY round,awards.`type`");
+	foreach($jteams as &$jteam) {
+		$round = $jteam['round'];
+		$type = $awards[$jteam['award_id']]['type'];
+		$n_judges = count($jteam['user_ids']);
 
-	while($r = $q->fetch_assoc()) {
-		$jteam_count[$r['round']][$r['type']] = $r['c'];
+		if($type == 'grand' || $type == 'other') $type = 'special';
+
+		if(!array_key_exists($type, $jteam_count[$round])) $jteam_count[$round][$type] = 0;
+		if(!array_key_exists($type, $jteam_judge_count[$round])) $jteam_judge_count[$round][$type] = 0;
+
+		$jteam_count[$round][$type] += 1;
+		$jteam_judge_count[$round][$type] += $n_judges;
+
+		$judges_used_in_round[$round] = array_merge($judges_used_in_round[$round], $jteam['user_ids']);
 	}
+
+	/* Count unused judges */
+	foreach($judges as &$j) {
+		if($j['j_rounds'][0] == 1 && !in_array($j['uid'], $judges_used_in_round[1])) 
+			$unused_judge_count[1]+=1;
+		if($j['j_rounds'][1] == 1 && !in_array($j['uid'], $judges_used_in_round[2])) 
+			$unused_judge_count[2]+=1;
+	}
+
+
 
 
 ?>	
@@ -78,9 +102,9 @@ sfiab_page_begin("Judging", $page_id);
 		<tr><td colspan="5" align="center"><b>Judging Teams</b></td></tr>
 		<tr><td colspan="2"></td><td align="center">Divisional</td><td align="center">Special</td><td align="center">Unused</td></tr>
 		<tr><td align="center">Round 1</td><td align="center">Teams</td><td align="center"><?=$jteam_count[1]['divisional']?></td><td align="center"><?=$jteam_count[1]['special']?></td><td align="center">  </td></tr>
-		<tr><td align="center">       </td><td align="center">Judges</td><td align="center">fixme</td><td align="center">fixme</td><td align="center">fixme</td></tr>
+		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[1]['divisional']?></td><td align="center"><?=$jteam_count[1]['special']?></td><td align="center"><?=$unused_judge_count[1]?></td></tr>
 		<tr><td align="center">Round 2</td><td align="center">Teams</td><td align="center"><?=$jteam_count[2]['divisional']?></td><td align="center"><?=$jteam_count[2]['special']?></td><td align="center">  </td></tr>
-		<tr><td align="center">       </td><td align="center">Judges</td><td align="center">fixme</td><td align="center">fixme</td><td align="center">fixme</td></tr>
+		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[2]['divisional']?></td><td align="center"><?=$jteam_count[2]['special']?></td><td align="center"><?=$unused_judge_count[2]?></td></tr>
 		</table>
 
 	</td></tr></table>
@@ -94,10 +118,10 @@ sfiab_page_begin("Judging", $page_id);
 
 	<h3>Judging Assignments</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="c_timeslots.php" data-rel="external" data-ajax="false">Edit Judging Timeslots</a></li>
+	<li><a href="c_timeslots.php" data-rel="external" data-ajax="false">Edit Judging Timeslots and Timeslot Assignments</a></li>
 	<li><a href="c_judge_scheduler.php" data-rel="external" data-ajax="false">Run the Judge Scheduler</a></li>
 	<li><a href="c_jteam_edit.php" data-rel="external" data-ajax="false">Edit Judging Teams</a></li>
-	<li><a href="#" data-rel="external" data-ajax="false">X Edit Team/Project Timeslot Assignments</a></li>
+	<li><a href="c_judging_sanity.php" data-rel="external" data-ajax="false">Display Judging Sanity Checks</a></li>
 	</ul>
 
 	<h3>Judge Score Entry</h3> 

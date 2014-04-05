@@ -55,6 +55,8 @@ function project_filter(&$p)
 	filter_int_or_null($p['req_electricity']);
 	filter_int_or_null($p['num_students']);
 	filter_int_or_null($p['num_mentors']);
+	filter_int($p['accepted']);
+	filter_int_list($p['unavailable_timeslots']);
 
 	if(!is_array($p['ethics'])) {
 		if($p['ethics'] == NULL) {
@@ -138,7 +140,7 @@ function generic_save($mysqli, &$p, $table, $table_key)
 			/* Key changed */
 			if($set != '') $set .= ',';
 
-			if($key == 'categories' || $key == 'trophies' || $key == 'user_ids' || $key == 'project_ids') {
+			if($key == 'categories' || $key == 'trophies' || $key == 'user_ids' || $key == 'project_ids' || $key == 'unavailable_timeslots') {
 				/* For awards */
 				$v = implode(',', $val);
 			} else {

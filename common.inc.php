@@ -283,6 +283,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_awards_edit' => NULL,
 			    'c_award_winners' => NULL,
 			    'c_judging' => array('Judging', 'c_judging.php'),
+			    'c_judging_sanity' => NULL,
 			    'c_reports' => array('Reports', 'c_reports.php'),
 			    'c_communication' => array('Send Emails', 'c_communication.php'),
 			    'c_students' => array('Students / Projects', 'c_students.php'),
