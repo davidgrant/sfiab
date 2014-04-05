@@ -36,13 +36,21 @@ $projects = projects_load_all($mysqli);
 $notices = array();
 
 $notices['Judging Teams'] = array();
-$notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Juding Team have {$config['judge_div_min_team']}-{$config['judge_div_max_team']} judges");
+$notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Judging Teams have {$config['judge_div_min_team']}-{$config['judge_div_max_team']} judges");
+$notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']} judges");
 foreach($jteams as &$jteam) {
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
 		if($c < $config['judge_div_min_team'] || $c > $config['judge_div_max_team']) {
 			$notices['Judging Teams']['r1div_judges'] = "NO Round 1 Divisional Juding Team {$jteam['name']} has $c judges.  Not {$config['judge_div_min_team']}-{$config['judge_div_max_team']}";
+		}
+	}
+	if($jteam['round'] == 2 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+		$c = count($jteam['user_ids']);
+		/* round1 divisional */
+		if($c < $config['judge_cusp_min_team'] || $c > $config['judge_cusp_max_team']) {
+			$notices['Judging Teams']['r1div_judges'] = "NO Round 2 Divisional (Cusp) Juding Team {$jteam['name']} has $c judges.  Not {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']}";
 		}
 	}
 }
