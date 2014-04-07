@@ -13,7 +13,7 @@ $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 sfiab_session_start($mysqli, array('committee'));
 
-$config['cusps'] = array(0.05, 0.1, 0.15, 0.15);
+$config['cusps'] = array(0.05, 0.10, 0.15, 0.20);
 
 $u = user_load($mysqli);
 
