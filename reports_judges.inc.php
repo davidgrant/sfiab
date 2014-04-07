@@ -242,7 +242,7 @@ $report_judges_fields = array(
 	'years_national' => array(
 		'name' => 'Judge -- Years of Experience at National level',
 		'header' => 'Ntl',
-		'width' => 0.5,
+		bber'width' => 0.5,
 		'table' => 'users.j_years_national'),
 
 	'highest_psd' => array(
@@ -256,6 +256,13 @@ $report_judges_fields = array(
 		'header' => 'Has Mentored',
 		'width' => 1,
 		'table' => 'users.j_mentored',
+		'value_map' => array(0 => 'No', 1 => 'Yes')),
+
+	'j_dinner' => array(
+		'name' => 'Judge -- Coming to Dinner',
+		'header' => 'Dinner?',
+		'width' => 0.75,
+		'table' => 'users.j_dinner',
 		'value_map' => array(0 => 'No', 1 => 'Yes')),
 
 /* Time Availability 
