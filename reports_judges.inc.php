@@ -242,7 +242,7 @@ $report_judges_fields = array(
 	'years_national' => array(
 		'name' => 'Judge -- Years of Experience at National level',
 		'header' => 'Ntl',
-		bber'width' => 0.5,
+		'width' => 0.5,
 		'table' => 'users.j_years_national'),
 
 	'highest_psd' => array(
