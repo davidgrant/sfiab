@@ -23,6 +23,10 @@ $jteams = jteams_load_all($mysqli);
 foreach($jteams as &$jteam) {
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		foreach($jteam['project_ids'] as $pid) {
+			if(!in_array($pid, $projects)) {
+				print("WARNING: Project $pid is assigned to a jteam but doesn't exist!");
+				continue;
+			}
 			$projects[$pid]['round_1_jteam'] = &$jteam;
 		}
 	}
