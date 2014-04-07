@@ -38,6 +38,7 @@ $notices = array();
 $notices['Judging Teams'] = array();
 $notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Judging Teams have {$config['judge_div_min_team']}-{$config['judge_div_max_team']} judges");
 $notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']} judges");
+$notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
 foreach($jteams as &$jteam) {
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
@@ -53,6 +54,14 @@ foreach($jteams as &$jteam) {
 			$notices['Judging Teams']['r2div_judges'][] = "NO Round 2 Divisional (Cusp) Juding Team {$jteam['name']} has $c judges.  Not {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']}";
 		}
 	}
+	/* Make sure all projects exist */
+	foreach($jteam['project_ids'] as $pid) {
+		if(!array_key_exists($pid, $projects)) {
+			$notices['Judging Teams']['bad_projects'][] = "ER Judging {$jteam['name']} is assigned (pid:$pid), but it doesn't exist.  Deleted project?";
+		}
+	}
+			
+
 }
 
 $notices['Projects'] = array();
