@@ -127,7 +127,8 @@ sfiab_page_begin("Judging", $page_id);
 
 	<h3>Judge Score Entry</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="#" data-rel="external" data-ajax="false">X Enter Round 1 Divisional Scores</a></li>
+	<li><a href="c_judge_score_entry.php" data-rel="external" data-ajax="false">Enter Round 1 Divisional Scores</a></li>
+	<li><a href="c_judge_score_summary.php" data-rel="external" data-ajax="false">Round 1 Score Summary / Build Cusp Teams</a></li>
 
 
 </div></div>

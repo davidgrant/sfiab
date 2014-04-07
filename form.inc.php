@@ -3,6 +3,7 @@ $form_incomplete_fields = array();
 $form_page_id = NULL;
 $form_form_id = NULL;
 $form_disabled = false;
+$form_show_data_clear_buttons = true;
 
 function form_inc($name)
 {
@@ -23,11 +24,20 @@ function form_label($page_id, $name, $label, $data)
 <?php
 }
 
-		
+
+function form_data_clear_btn()
+{
+	global $form_show_data_clear_buttons;
+	if($form_show_data_clear_buttons) {
+		return 'data-clear-btin="true"';
+	}
+	return '';
+}
 
 function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='') 
 { 
 	global $form_disabled;
+	global $form_show_data_clear_buttons;
 
 	if(!in_array($type, array('text', 'tel','date','email','password'))) {
 		print("Error 1001: $type\n");
@@ -48,7 +58,7 @@ function form_text($page_id, $name, $label, &$value = '', $type='text', $extra='
 ?>		<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 <?php	} ?>
-		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="<?=$type?>" <?=$extra?> >
+		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" <?=form_data_clear_btn()?> type="<?=$type?>" <?=$extra?> >
 
 <?php	if($label !== NULL) { ?>
 		</div>

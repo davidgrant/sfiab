@@ -63,6 +63,8 @@ function sfiab_form_update_vals(form_id, vals)
 		} else if(type == 'select-one') {
 			e.val(v[1]);
 			e.selectmenu("refresh");
+		} else if(e.prop('tagName') == 'SPAN') {
+			e.html(v[1]);
 		} else {
 			e.val(v[1]);
 		}
@@ -92,10 +94,15 @@ $( document ).on( "pagecreate", function( event ) {
 		event.preventDefault();
 		$.post( form.attr('action'), form.serialize(), function( data ) {
 
-			$('#'+form_id+' button').each(function(index) {
-				$(this).attr('disabled', true);
-				$(this).text($(this).attr('data-alt2'));
-			});
+			/* Disable the button if the status is 0, else 
+			 * leave it alone because there was an error and 
+			 * we want the user to click again */
+			if(data.status == 0) {
+				$('#'+form_id+' button').each(function(index) {
+					$(this).attr('disabled', true);
+					$(this).text($(this).attr('data-alt2'));
+				});
+			}
 
 			// Any error message?
 			if(data.error != '') {

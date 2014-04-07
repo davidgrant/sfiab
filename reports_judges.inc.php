@@ -225,7 +225,7 @@ $report_judges_fields = array(
 		'header' => 'Will Lead?',
 		'width' => 1,
 		'table' => 'users.j_willing_lead',
-		'value_map' => array ('no' => 'No', 'yes' => 'Yes')),
+		'value_map' => array (0 => 'No', 1 => 'Yes')),
 
 	'years_school' => array(
 		'name' => 'Judge -- Years of Experience at School level',
@@ -251,7 +251,12 @@ $report_judges_fields = array(
 		'width' => 1.25,
 		'table' => 'users.highest_psd'),
 
-
+	'j_mentored' => array(
+		'name' => 'Judge -- Has Mentored a Student/Project at the Fair',
+		'header' => 'Has Mentored',
+		'width' => 1,
+		'table' => 'users.j_mentored',
+		'value_map' => array(0 => 'No', 1 => 'Yes')),
 
 /* Time Availability 
 	'available_in_divisional1' =>  array(
