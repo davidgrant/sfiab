@@ -73,17 +73,7 @@ while($r = $q->fetch_assoc()) {
 	$winners[$prize_id][] = (int)$r['projects_id'];
 }
 
-/* Load all projects, and re-index them by pid.
- * FIXME: do this indexing by default */
-$ps = projects_load_all($mysqli, $config['year']);
-$projects = array();
-foreach($ps as &$p) {
-	/* Only use projects with accepted students */
-	$q = $mysqli->query("SELECT * FROM users WHERE s_pid='{$p['pid']}' AND s_accepted='0'");
-	if($q->num_rows == 0) {
-		$projects[$p['pid']] = $p;
-	}
-}
+$projects = projects_load_all($mysqli, $config['year']);
 
 $page_id = 'c_award_winners';
 $help = '<p>Enter Winning Projects';
