@@ -28,7 +28,7 @@ $projects = projects_load_all($mysqli);
 /* $notices is divided into sections, and then a check type.  The first element of the check type array
  * is displayed if no other messages are added to it. It's like the "everything is ok" message.
  * if anything else is added, the first element of the array is ignored.
- * Messages can start with OK = green OK:, NO = red Notice:, ER = red Error: */
+ * Messages can start with OK = green OK:, NO = red Notice:, ER = red Error:, IN = blue info */
 
 /* Jteam stanity */
 
@@ -39,6 +39,7 @@ $notices['Judging Teams'] = array();
 $notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Judging Teams have {$config['judge_div_min_team']}-{$config['judge_div_max_team']} judges");
 $notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']} judges");
 $notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
+$notices['Judging Teams']['sa_judges'] = array("OK All Special Award Judging Teams have (at most) {$config['judge_sa_max_projects']} projects per judge");
 foreach($jteams as &$jteam) {
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
@@ -57,9 +58,18 @@ foreach($jteams as &$jteam) {
 	/* Make sure all projects exist */
 	foreach($jteam['project_ids'] as $pid) {
 		if(!array_key_exists($pid, $projects)) {
-			$notices['Judging Teams']['bad_projects'][] = "ER Judging {$jteam['name']} is assigned (pid:$pid), but it doesn't exist.  Deleted project?";
+			$notices['Judging Teams']['bad_projects'][] = "ER Judging {$jteam['name']} is assigned (pid:$pid), but it doesn't exist.  Project deleted or not accepted?";
 		}
 	}
+
+	if($awards[$jteam['award_id']]['type'] == 'special') {
+		$c = count($jteam['user_ids']);
+		$p = count($jteam['project_ids']);
+		if($c * (int)$config['judge_sa_max_projects'] < $p) {
+			$notices['Judging Teams']['sa_judges'][] = "NO Special Award Judging Team {$jteam['name']} has $c judges and $p projects.  More than {$config['judge_sa_max_projects']} projects per judge";
+		}
+	}
+
 }
 
 $notices['Awards'] = array();
@@ -102,7 +112,7 @@ foreach($projects as $pid=>&$p) {
 
 	/* Info notices for timeslot execptions */
 	if(count($p['unavailable_timeslots'])) {
-		$notices['Projects']['unavailable'][] = "NO Project (id:$pid) <b>\"{$p['number']}\"</b> has been marked as unavailabled in the following timeslots: ".join(',', $p['unavailable_timeslots']);
+		$notices['Projects']['unavailable'][] = "IN Project (id:$pid) <b>\"{$p['number']}\"</b> has been marked as unavailabled in the following timeslots: ".join(',', $p['unavailable_timeslots']);
 	}
 }
 
@@ -141,6 +151,9 @@ foreach($projects as $pid=>&$p) {
 					break;
 				case 'ER':
 					print("<font color=red>ERROR:</font>");
+					break;
+				case 'IN':
+					print("<font color=green>Info:</font>");
 					break;
 				}
 				print(substr($txt, 2));
