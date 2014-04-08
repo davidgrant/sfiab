@@ -116,15 +116,19 @@ function project_row(&$p, $tr = true)
 	$title = $p['title'];
 	if(strlen($title) > 75) $title = substr($title, 0, 72)."...";
 	$lang = $p['language'];
+
+	if($p['disqualified_from_awards']) $pn = "DISQUALIFIED FROM AWARDS ".$p['number'];
+	else $pn = $p['number'];
+
 	if($tr == true) { ?>
-		<tr id="<?=$p['pid']?>" ><td>(<?=$p['number']?>)</td>
+		<tr id="<?=$p['pid']?>" ><td>(<?=$pn?>)</td>
 		    <td align="left"><?=$title?></td>
 		    <td align="center">(<?=$lang?>)</td>
 		    <td align="center"></td>
 		</tr>
 <?php
 	} else {
-		return "({$p['number']}) $title, $lang";
+		return "({$pn}) $title, $lang";
 	}
 }
 
@@ -231,16 +235,6 @@ function award_li(&$a) {
   <div id="prize_editor_all" class="ui-body-d ">
 <?php
 	$optlist = array();
-/*
-	foreach($cats as $cid=>$cat) {
-		$optlist[$cat['name']][] = array();
-		foreach($projects as $pid=>&$p) {
-			if($p['cat_id'] == $cid) {
-				$optlist[$cat['name']][$pid] = project_row($p, false);
-			}
-		}
-	}
-*/
 	foreach($projects as $pid=>&$p) {
 		$optlist[$pid] = project_row($p, false);
 	}

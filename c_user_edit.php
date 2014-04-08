@@ -26,6 +26,11 @@ if($edit_uid == 0) exit();
 
 $edit_u = user_load($mysqli, $edit_uid);
 
+$edit_p = NULL;
+if(in_array('student', $edit_u['roles'])) {
+	$edit_p = project_load($mysqli, $edit_u['s_pid']);
+}
+
 $action = '';
 if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
@@ -33,12 +38,17 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+case 'save_back':
 	post_text($edit_u['firstname'], 'firstname');
 	post_text($edit_u['lastname'], 'lastname');
 	post_text($edit_u['email'], 'email');
 	post_text($edit_u['username'], 'username');
 	post_bool($edit_u['not_attending'], 'not_attending');
 	post_text($edit_u['reg_close_override'], 'reg_close_override');
+
+	if(in_array('student', $edit_u['roles'])) {
+		post_int($edit_u['tour_id'], 'tour_id');
+	}
 
 	if($edit_u['reg_close_override'] !== NULL) {
 		$d = date_parse($edit_u['reg_close_override']);
@@ -49,8 +59,26 @@ case 'save':
 		}
 	}
 	user_save($mysqli, $edit_u);
-	form_ajax_response(array('status'=>0, 'location'=>'back'));
+	if($action == 'save') {
+		form_ajax_response(array('status'=>0));
+	} else {
+		form_ajax_response(array('status'=>0, 'location'=>'back'));
+	}
 	exit();
+
+case 'psave': 
+case 'psave_back':
+	if(in_array('student', $edit_u['roles'])) {
+		post_int($edit_p['disqualified_from_awards'], 'disqualified_from_awards');
+		project_save($mysqli, $edit_p);
+		if($action == 'psave') {
+			form_ajax_response(array('status'=>0));
+		} else {
+			form_ajax_response(array('status'=>0, 'location'=>'back'));
+		}
+	}
+	exit();
+
 
 case 'purge':
 	if(in_array('student', $edit_u['roles'])) {
@@ -114,7 +142,6 @@ form_page_begin($page_id, array());
 
 <h3>Edit <?=$edit_u['name']?></h3>
 <?php
-
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'c_user_edit.php');
 	form_hidden($form_id, 'uid', $edit_u['uid']);
@@ -125,11 +152,29 @@ form_page_begin($page_id, array());
 	$sel = array('0'=>'Yes, I\'ll be there', '1'=>'No, I can\'t make it');
 	form_radio_h($form_id, 'not_attending', "At the fair", $sel, $edit_u['not_attending']);
 	form_text($form_id, 'reg_close_override', "Registration Close Override", $edit_u, 'date');
-	form_submit($form_id, 'save', 'Save and Go Back', 'User Saved');
+
+	if(in_array('student', $edit_u['roles'])) { 
+		$tours = tour_get_for_student_select($mysqli, $edit_u);
+		form_select($form_id, 'tour_id', 'Assigned Tour', $tours, $edit_u['tour_id']);
+	}
+
+	form_submit($form_id, 'save', 'Save', 'User Saved');
+	form_submit($form_id, 'save_back', 'Save and Go Back', 'User Saved');
+	form_end($form_id); 
+
+
+if(in_array('student', $edit_u['roles'])) { ?>
+	<h3>Project</h3>
+<?php	$form_id = $page_id.'_project_form';
+	form_begin($form_id, 'c_user_edit.php');
+	form_hidden($form_id, 'uid', $edit_u['uid']);
+	form_yesno($form_id, 'disqualified_from_awards', 'Project Disqualifed from Awards', $edit_p['disqualified_from_awards']);
+	form_submit($form_id, 'psave', 'Save', 'Project Saved');
+	form_submit($form_id, 'psave_back', 'Save and Go Back', 'Project Saved');
+	form_end($form_id); 
+}
 ?>
-	<a href="#" data-role="button" data-inline="true" data-icon="back" data-rel="back" data-theme="r">Cancel</a>
-<?php	form_end($form_id);
-?>
+
 
 <h3>Change Password</h3>
 	<p>Passwords must be at least 8 characters long and contain at least one letter, one number, and one non-alphanumberic character (something other than a letter and a number)
