@@ -15,7 +15,7 @@ sfiab_session_start($mysqli, array('committee'));
 
 $u = user_load($mysqli);
 
-$page_id = 'c_judging_sanity';
+$page_id = 'c_judge_sanity';
 
 sfiab_page_begin("Judging", $page_id);
 
