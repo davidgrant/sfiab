@@ -282,6 +282,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_awards' => array('Awards', 'c_awards.php'),
 			    'c_awards_edit' => NULL,
 			    'c_award_winners' => NULL,
+			    'c_config' => array('Configuration', 'c_config.php'),
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_judging_sanity' => NULL,
 			    'c_reports' => array('Reports', 'c_reports.php'),
