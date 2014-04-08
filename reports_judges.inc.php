@@ -484,15 +484,14 @@ function report_judges_fromwhere($report, $components)
 	default:		
 		$reg_where = '';
 	}
-	
-										
+
 	$q = "	FROM 	users
 			$teams_from
 		WHERE
 			FIND_IN_SET('judge',`users`.`roles`)>0
 			$year_where
 			$reg_where
-			AND state='active'
+			AND state='active' AND not_attending='0'
 		";
 
 	return $q;

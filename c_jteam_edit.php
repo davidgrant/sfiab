@@ -114,16 +114,7 @@ case 'padd':
 }
 
 
-$ps = projects_load_all($mysqli, $config['year']);
-$projects = array();
-foreach($ps as &$p) {
-	/* Only use projects with accepted students */
-	$q = $mysqli->query("SELECT * FROM users WHERE s_pid='{$p['pid']}' AND s_accepted='0'");
-	if($q->num_rows == 0) {
-		$projects[$p['pid']] = $p;
-	}
-}
-
+$projects = projects_load_all($mysqli, $config['year']);
 $jteams = jteams_load_all($mysqli, $config['year']);
 
 
@@ -297,6 +288,13 @@ function judge_row(&$j, $tr = true)
 function project_row(&$p, $tr = true)
 {
 	global $cats, $isef_divs;
+
+	if(!array_key_exists($p['cat_id'], $cats)) {
+		print("--");
+		print_r($p);
+		print("Project {$p['pid']} has an invalid cat {$p['cat_id']}");
+		debug_print_backtrace();
+	}
 	$cat = $cats[$p['cat_id']]['shortform'];
 	$pref = $p['isef_id'];
 	if($isef_divs[$pref]['parent'] != false)
@@ -365,6 +363,9 @@ function jteam_li(&$jteam) {
 			<td align="center">Lang</td>
 		</tr>
 <?php		foreach($jteam['project_ids'] as $pid) {
+				if(!array_key_exists($pid, $projects) || !array_key_exists('pid', $projects[$pid])) {
+					print("pid $pid doesn't exist in accepted projects!");
+				}
 			project_row($projects[$pid]);
 		} ?>
 		</table>
@@ -388,7 +389,7 @@ function jteam_li(&$jteam) {
 	</table>
 	<table id="p_tr">
 	<?php
-	foreach($projects as &$p) {
+	foreach($projects as $pid=>&$p) {
 		project_row($p);
 	}
 	?>

@@ -60,12 +60,30 @@ foreach($jteams as &$jteam) {
 			$notices['Judging Teams']['bad_projects'][] = "ER Judging {$jteam['name']} is assigned (pid:$pid), but it doesn't exist.  Deleted project?";
 		}
 	}
-			
-
 }
 
+$notices['Awards'] = array();
+$notices['Awards']['all_sa'] = array("OK All Special Awards Marked as 'Schedule Judges' have a Judging Team");
+foreach($awards as &$award) {
+	if($award['type'] == 'special' && $award['schedule_judges'] == 1) {
+		/* Find the judging team */
+		$found = false;
+		foreach($jteams as &$jteam) {
+			if($jteam['award_id'] == $award['id']) {
+				$found = true;
+				break;
+			}
+		}
+		if($found == false) {
+			$notices['Awards']['all_sa'][] = "ER Award \"{$award['name']}\" is marked 'Schedule Judges', but has no Judging Team";
+		}
+	}
+}
+
+$num_projects = count($projects);
+
 $notices['Projects'] = array();
-$notices['Projects']['r1assigned'] = array("OK All projects have a Round 1 Divisional judging team");
+$notices['Projects']['r1assigned'] = array("OK All $num_projects projects have a Round 1 Divisional judging team");
 $notices['Projects']['unavailable'] = array("OK No Projects have restricted timeslot availability requirements");
 foreach($projects as $pid=>&$p) {
 	/* Check that each project is judged in round 1 */
