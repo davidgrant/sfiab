@@ -66,7 +66,7 @@ foreach($jteams as &$jteam) {
 		$c = count($jteam['user_ids']);
 		$p = count($jteam['project_ids']);
 		if($c * (int)$config['judge_sa_max_projects'] < $p) {
-			$notices['Judging Teams']['sa_judges'][] = "NO Special Award Judging Team <b>{$jteam['name']}</> has <b>$c</> judges and <b>$p</b> projects.  More than {$config['judge_sa_max_projects']} projects per judge";
+			$notices['Judging Teams']['sa_judges'][] = "NO Special Award Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges and <b>$p</b> projects.  More than {$config['judge_sa_max_projects']} projects per judge";
 		}
 	}
 
