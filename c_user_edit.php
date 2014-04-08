@@ -164,7 +164,8 @@ form_page_begin($page_id, array());
 
 
 if(in_array('student', $edit_u['roles'])) { ?>
-	<h3>Project</h3>
+	<h3>Project <?=$edit_p['number']?></h3>
+	<p>Title: <?=$edit_p['title']?>
 <?php	$form_id = $page_id.'_project_form';
 	form_begin($form_id, 'c_user_edit.php');
 	form_hidden($form_id, 'uid', $edit_u['uid']);
