@@ -95,6 +95,7 @@ $num_projects = count($projects);
 $notices['Projects'] = array();
 $notices['Projects']['r1assigned'] = array("OK All $num_projects projects have a Round 1 Divisional judging team");
 $notices['Projects']['unavailable'] = array("OK No Projects have restricted timeslot availability requirements");
+$notices['Projects']['disqualified_from_awards'] = array("OK No Projects have been disqualifed from winning awards");
 foreach($projects as $pid=>&$p) {
 	/* Check that each project is judged in round 1 */
 	$found = false;
@@ -114,6 +115,11 @@ foreach($projects as $pid=>&$p) {
 	if(count($p['unavailable_timeslots'])) {
 		$notices['Projects']['unavailable'][] = "IN Project (id:$pid) <b>\"{$p['number']}\"</b> has been marked as unavailabled in the following timeslots: ".join(',', $p['unavailable_timeslots']);
 	}
+
+	if($p['disqualified_from_awards']) {
+		$notices['Projects']['disqualified_from_awards'][] = "IN Project (id:$pid) <b>\"{$p['number']}\"</b> has been marked as <b>Disqualified From Awards</b>";
+	}
+		
 }
 
 
