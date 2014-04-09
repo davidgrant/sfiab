@@ -191,7 +191,8 @@ for($round=1;$round <=2; $round++) {
 					$num  = ($round == 1) ? ($x+1) : ($x + 10);
 
 					if(!array_key_exists($num, $project['timeslots'])) {
-						print("<pre>");
+						
+						print("<pre>Timeslot $num doesn't exist in timeslots: ");
 						print_r($project);
 						exit();
 					}
