@@ -460,7 +460,7 @@ class pdf extends TCPDF {
 				$ln = 0;
 			}
 
-			$this->FitCell($this->label_width - $logo_width, $header_height+1, 
+			$this->FitCell(($this->label_width - $logo_width) * .9, $header_height+1, 
 					"{$config['fair_name']} {$config['year']}",
 					0, $ln, 'L', 'M', 'scale');
 			$this->label_header_font_size = $this->last_cell_font_size;
