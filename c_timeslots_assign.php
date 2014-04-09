@@ -22,7 +22,6 @@ $projects = projects_load_all($mysqli);
 
 $debug = array_key_exists('debug', $_GET) ? true : false;
 
-
 if($debug) print("<pre>");
 function debug($txt)
 {
@@ -75,7 +74,7 @@ function do_timeslot_assignments_from_scratch($mysqli)
 		for($iproject=0;$iproject<count($jteam['project_ids']);$iproject++) {
 			$timeslot_judge[$iproject] = array();
 			$timeslot_type[$iproject] = array();
-			for($y=0;$y<10;$y++) {
+			for($y=0;$y<18;$y++) {
 				$timeslot_judge[$iproject][$y] = 0;
 				$timeslot_type[$iproject][$y] = '';
 			}
@@ -120,6 +119,30 @@ function do_timeslot_assignments_from_scratch($mysqli)
 				$n_rise += 1;
 				$start_type -= 1;
 				if($start_type == -1) $start_type = 2;
+			}
+
+			/* Copy the round1 to round2 */
+			for($y=0;$y<9;$y++) {
+				$timeslot_type[$iproject][$y+9] = $timeslot_type[$iproject][$y];
+			}
+
+			/* Check for round2 missing timeslots and move them if we can to a free one */
+			for($y=9;$y<18;$y++) {
+				if($timeslot_type[$iproject][$y] == 2) continue;
+				$timeslot_num = $y+1;
+				if(in_array($timeslot_num, $projects[$pid]['unavailable_timeslots'])) {
+					/* Move it elsewhere if we can */
+					for($z=9;$z<18;$z++) {
+						$z_timeslot_num = $z+1;
+						/* Can't go here if it's an unavailable slot, or if there's already a non-break */
+						if(in_array($z_timeslot_num, $projects[$pid]['unavailable_timeslots'])) continue;
+						if($timeslot_type[$iproject][$z] != 2) continue;
+
+						/* Move it */
+						$timeslot_type[$iproject][$z] = $timeslot_type[$iproject][$y];
+						$timeslot_type[$iproject][$y] = 2;
+					}
+				}
 			}
 		}
 
@@ -167,7 +190,7 @@ function do_timeslot_assignments_from_scratch($mysqli)
 				$queries[] = "('$timeslot_num','$pid','$t_id','$j_id','{$timeslot_type_str[$t_type]}', '{$config['year']}')";
 
 				/* Round 2 */
-				$t_type = $timeslot_type[$iproject][$y];
+				$t_type = $timeslot_type[$iproject][$y+9];
 				$timeslot_num = $y+1 + 9;
 				if(in_array($timeslot_num, $projects[$pid]['unavailable_timeslots'])) {
 					$t_type = 2;
