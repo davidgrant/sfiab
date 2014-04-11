@@ -344,8 +344,8 @@ $report_awards_fields = array(
 		'name' => 'Prize -- Annual Trophy (\'Yes\' if the award has a school or student trophy that isn\'t a keeper)',
 		'header' => 'Trophy',
 		'width' => 0.5,
-		'table' => "IF ( FIND_IN_SET(`award_prizes`.`trophies`,'return')>0
-		  		 OR FIND_IN_SET(`award_prizes`.`trophies`,'school_return')>0,
+		'table' => "IF ( FIND_IN_SET('return',`award_prizes`.`trophies`)>0
+		  		 OR FIND_IN_SET('school_return',`award_prizes`.`trophies`)>0,
 				 'Yes', 'No')",
 		'components' => array('prizes')),
 
@@ -353,14 +353,14 @@ $report_awards_fields = array(
 		'name' => 'Prize -- Annual Student Trophy (\'Yes\' if the award has astudent trophy that isn\'t a keeper)',
 		'header' => 'Ind.',
 		'width' => 0.5,
-		'table' => "IF ( FIND_IN_SET(`award_prizes`.`trophies`,'return')>0, 'Yes', 'No')",
+		'table' => "IF ( FIND_IN_SET('return',`award_prizes`.`trophies`)>0, 'Yes', 'No')",
 		'components' => array('prizes')),
 
 	'prize_trophy_return_school' => array(
 		'name' => 'Prize -- Annual School Trophy (\'Yes\' if the award has a school trophy that isn\'t a keeper)',
 		'header' => 'Sch.',
 		'width' => 0.5,
-		'table' => "IF ( FIND_IN_SET(`award_prizes`.`trophies`,'school_return')>0, 'Yes', 'No')",
+		'table' => "IF ( FIND_IN_SET('school_return',`award_prizes`.`trophies`)>0, 'Yes', 'No')",
 		'components' => array('prizes')),
 
 	'prize_all' => array(
@@ -368,14 +368,14 @@ $report_awards_fields = array(
 		'header' => 'Prize',
 		'width' => 2,
 		'table' => "CONCAT(
-				IF(award_prizes.prize != '', CONCAT(award_prizes.prize,'\n', ''),''),
+				IF(award_prizes.name != '', CONCAT(award_prizes.name,'\n', ''),''),
 				IF(award_prizes.cash != '', CONCAT('$',award_prizes.cash,'\n'), ''),
 				IF(award_prizes.scholarship != '', CONCAT('$',award_prizes.scholarship,' scholarship\n'), ''),
 				IF(award_prizes.value != '', CONCAT('$',award_prizes.value,' value\n'), ''),
-				IF(FIND_IN_SET(`award_prizes`.`trophies`,'keeper')>0, CONCAT('Student Keeper Trophy\n'), ''),
-				IF(FIND_IN_SET(`award_prizes`.`trophies`,'return')>0, CONCAT('Student Annual-Return Trophy\n'), ''),
-				IF(FIND_IN_SET(`award_prizes`.`trophies`,'school_keeper')>0, CONCAT('School Keeper Trophy\n'), ''),
-				IF(FIND_IN_SET(`award_prizes`.`trophies`,'school_return')>0, CONCAT('School Annual-Return Trophy\n'), '')
+				IF(FIND_IN_SET('keeper',`award_prizes`.`trophies`)>0, CONCAT('Student Keeper Trophy\n'), ''),
+				IF(FIND_IN_SET('return',`award_prizes`.`trophies`)>0, CONCAT('Student Annual-Return Trophy\n'), ''),
+				IF(FIND_IN_SET('school_keeper',`award_prizes`.`trophies`)>0, CONCAT('School Keeper Trophy\n'), ''),
+				IF(FIND_IN_SET('school_return',`award_prizes`.`trophies`)>0, CONCAT('School Annual-Return Trophy\n'), '')
 				)",
 		'components' => array('prizes')),
 

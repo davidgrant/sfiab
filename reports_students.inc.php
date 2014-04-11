@@ -68,10 +68,10 @@ function reports_students_numstudents($mysqli, &$report, $field, $text)
 function reports_students_award_selfnom_num($mysqli, &$report, $field, $text, $n)
 {
 	$year = $report['year'];
-	$q = mysql_query("SELECT award_awards.name FROM 
+	$q = mysql_query("SELECT awards.name FROM 
 				projects 
 				LEFT JOIN project_specialawards_link ON project_specialawards_link.projects_id=projects.id
-				LEFT JOIN award_awards ON award_awards.id=project_specialawards_link.award_awards_id
+				LEFT JOIN awards ON awards.id=project_specialawards_link.awards_id
 				WHERE projects.id='$text'
 					AND projects.year='$year'
 					AND project_specialawards_link.year='$year'
@@ -586,60 +586,61 @@ $report_students_fields = array(
 		'name' => 'Award -- Type + Name',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => "CONCAT(IF(award_types.type='Other','Special',award_types.type),' ', award_awards.name)",
-		'table_sort' => 'award_awards.name',
+		'table' => "CONCAT(IF(awards.type='other','Special',awards.type),' ', awards.name)",
+		'table_sort' => 'awards.name',
 		'components' => array('awards')),
 
 	'award_name' =>  array(
 		'name' => 'Award -- Name',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => 'award_awards.name',
+		'table' => 'awards.name',
 		'components' => array('awards')),
 
 	'award_excludefromac' => array(
 		'name' => 'Award -- Exclude from Award Ceremony (Yes/No)',
 		'header' => 'Exclude',
 		'width' => .5,
-		'table' => "award_awards.excludefromac",
+		'table' => "awards.excludefromac",
 		'value_map' => array ('no' => 'No', 'yes' => 'Yes')),
 
 	'order' =>  array(
 		'name' => 'Award -- Order',
 		'header' => 'Award Order',
 		'width' => 0.5,
-		'table' => 'award_awards.order',
-		'table_sort' => 'award_awards.order',
+		'table' => 'awards.order',
+		'table_sort' => 'awards.order',
 		'components' => array('awards')),
 
 	'award_type' => array(
-		'name' => 'Award -- Type (Challengeal, Special, etc.)',
+		'name' => 'Award -- Type (Divisional, Special, etc.)',
 		'header' => 'Award Type',
 		'width' => 1,
-		'table' => 'award_types.type',
+		'table' => 'awards.type',
+		'value_map' => array ('divisional' => 'Divisional', 'special' => 'Special', 'other' => 'Other', 'grand' => 'Grand'),
 		'components' => array('awards')),
 		
 	'sponsor' =>  array(
 		'name' => 'Award -- Sponsor DB ID',
 		'header' => 'Award Sponsor',
 		'width' => 1.5,
-		'table' => 'award_awards.sponsors_id',
-		'table_sort' => 'award_awards.sponsors_id',
+		'table' => 'awards.sponsors_id',
+		'table_sort' => 'awards.sponsors_id',
 		'components' => array('awards')),
 
 	'pn_awards' =>  array(
 		'name' => 'Award -- Project Num + Award Name (will be unique for each award)',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => "CONCAT(projects.number,' ', award_awards.name)",
-		'table_sort' => 'award_awards.order',
+		'table' => "CONCAT(projects.number,' ', awards.name)",
+		'table_sort' => 'awards.order',
 		'components' => array('awards')),
 
 	'award_prize_name' => array(
 		'name' => 'Award -- Prize Name',
 		'header' => 'Prize Name',
 		'width' => 2,
-		'table' => 'award_prizes.prize',
+		'table' => 'award_prizes.name',
 		'components' => array('awards')),
 
 	'award_prize_cash' => array(
@@ -683,7 +684,7 @@ $report_students_fields = array(
 		'name' => 'Award -- Prize Name, Category, Challenge',
 		'header' => 'Prize Name',
 		'width' => 4,
-		'table' => "CONCAT(award_prizes.prize,' in ',categories.name,' ', challenges.name)",
+		'table' => "CONCAT(award_prizes.name,' in ',categories.name,' ', challenges.name)",
 		'table_sort' => 'award_prizes.order',
 		'components' => array('awards')),
 
@@ -691,32 +692,31 @@ $report_students_fields = array(
 		'name' => 'Award -- Trophy (\'Yes\' if the award has a trophy)',
 		'header' => 'Trophy',
 		'width' => 0.5,
-		'table' => "IF ( award_prizes.trophystudentkeeper=1
-				OR award_prizes.trophystudentreturn=1
-				OR award_prizes.trophyschoolkeeper=1
-				OR award_prizes.trophyschoolreturn=1, 'Yes', 'No')",
+		'table' => "IF ( FIND_IN_SET('keeper',`award_prizes`.`trophies`)>0 OR
+						 FIND_IN_SET('return',`award_prizes`.`trophies`)>0 OR
+					   FIND_IN_SET('school_keeper',`award_prizes`.`trophies`)>0 OR
+					   FIND_IN_SET('school_return',`award_prizes`.`trophies`)>0, 'Yes','No' )" ,
 		'components' => array('awards')),
 
 	'award_prize_trophy_return' => array(
 		'name' => 'Award -- Annual Trophy (\'Yes\' if the award has a school or student trophy that isn\'t a keeper)',
 		'header' => 'Trophy',
 		'width' => 0.5,
-		'table' => "IF ( award_prizes.trophystudentreturn=1
-				OR award_prizes.trophyschoolreturn=1, 'Yes', 'No')",
+		'table' => "IF ( FIND_IN_SET('return',`award_prizes`.`trophies`)>0 OR FIND_IN_SET('school_return',`award_prizes`.`trophies`)>0, 'Yes','No')",
 		'components' => array('awards')),
 
 	'award_prize_trophy_return_student' => array(
 		'name' => 'Award -- Annual Student Trophy (\'Yes\' if the award has astudent trophy that isn\'t a keeper)',
 		'header' => 'Ind.',
 		'width' => 0.5,
-		'table' => "IF ( award_prizes.trophystudentreturn=1, 'Yes', 'No')",
+		'table' => "IF ( FIND_IN_SET('return',`award_prizes`.`trophies`)>0, 'Yes', 'No')",
 		'components' => array('awards')),
 
 	'award_prize_trophy_return_school' => array(
 		'name' => 'Award -- Annual School Trophy (\'Yes\' if the award has a school trophy that isn\'t a keeper)',
 		'header' => 'Sch.',
 		'width' => 0.5,
-		'table' => "IF ( award_prizes.trophyschoolreturn=1, 'Yes', 'No')",
+		'table' => "IF ( FIND_IN_SET('school_return',`award_prizes`.`trophies`)>0, 'Yes', 'No')",
 		'components' => array('awards')),
 
 	'nom_awards' => array(
@@ -724,16 +724,16 @@ $report_students_fields = array(
 		'name' => 'Award Nominations -- Award Name',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => "CONCAT(award_types.type,' -- ',award_awards.name)",
-		'table_sort' => 'award_awards.name',
+		'table' => "CONCAT(awards.type,' -- ',awards.name)",
+		'table_sort' => 'awards.name',
 		'components' => array('awards_nominations')),
 
 	'nom_pn_awards' =>  array(
 		'name' => 'Award Nominations -- Project Num + Award Name(will be unique)',
 		'header' => 'Award Name',
 		'width' => 4,
-		'table' => "CONCAT(projects.number,' ', award_awards.name)",
-		'table_sort' => 'award_awards.name',
+		'table' => "CONCAT(projects.number,' ', awards.name)",
+		'table_sort' => 'awards.name',
 		'components' => array('awards_nominations')),
 
 	'nom_awards_name_1' =>  array(
@@ -1022,23 +1022,19 @@ $report_students_fields = array(
 	if(in_array('awards', $components)) {
 		/* This requires some extra gymnastics and will duplicate
 		 * students/projects if they have won multiple awards */
-		$awards_join = "LEFT JOIN winners ON winners.projects_id = projects.id
+		$awards_join = "LEFT JOIN winners ON winners.projects_id = projects.pid
 				LEFT JOIN award_prizes ON award_prizes.id = winners.awards_prizes_id
-				LEFT JOIN award_awards ON award_awards.id = award_prizes.award_awards_id
-				LEFT JOIN award_types ON award_types.id=award_awards.award_types_id";
-		$awards_where = " AND winners.year='$year'
-				AND award_awards.year='$year'
-				AND award_prizes.year='$year'
-				AND award_types.year='$year' ";
+				LEFT JOIN awards ON awards.id = award_prizes.award_id";
+		$awards_where = " AND winners.year='$year'";
 	}
 
 	if(in_array('awards_nominations', $components)) {
 		$awards_join = "LEFT JOIN project_specialawards_link 
 					ON(projects.id=project_specialawards_link.projects_id),
-					award_awards,award_types";
-		$awards_where = " AND project_specialawards_link.award_awards_id=award_awards.id
-					AND award_types.id=award_awards.award_types_id
-					AND award_awards.year='$year'
+					awards,award_types";
+		$awards_where = " AND project_specialawards_link.awards_id=awards.id
+					AND award_types.id=awards.award_types_id
+					AND awards.year='$year'
 					AND award_types.year='$year' ";
 	}
 

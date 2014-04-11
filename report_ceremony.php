@@ -140,12 +140,12 @@ function get_winners_html_for_prize(&$prize, &$winner_count)
 		$pn = $project['number'];
 		foreach($project['students'] as $s) {
 			$n = $s['name'];
-			if($script_show_pronunciation) {
+			if($script_show_pronunciation && trim($s['pronounce']) != '') {
 				$n .= "<br/>&nbsp;&nbsp;&nbsp;({$s['pronounce']})";
 			}
 
 			$html .= "<tr><td width=\"25mm\" align=\"center\">$pn</td>";
-			$html .= "<td width=\"80mm\">{$s['name']}</td>";
+			$html .= "<td width=\"80mm\">$n</td>";
 			$html .= "<td width=\"80mm\">{$schools[$s['schools_id']]}</td></tr>";
 			$pn = '';
 		}

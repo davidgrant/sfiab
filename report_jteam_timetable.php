@@ -192,7 +192,7 @@ for($round=1;$round <=2; $round++) {
 
 					if(!array_key_exists($num, $project['timeslots'])) {
 						
-						print("<pre>Timeslot $num doesn't exist in timeslots: ");
+						print("<pre>Timeslot $num doesn't exist in timeslots for pid:$pid: ");
 						print_r($project);
 						exit();
 					}

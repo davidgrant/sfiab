@@ -25,6 +25,10 @@ function award_load($mysqli, $id , $data = NULL)
 	filter_bool_or_null($a['self_nominate']);
 	filter_int_or_null($a['order']);
 
+	unset($a['original']);
+	$original = $a;
+	$a['original'] = $original;
+
 	$a['prizes'] = array();
 	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `order`");
 	while($p = $q->fetch_assoc()) {
@@ -33,9 +37,6 @@ function award_load($mysqli, $id , $data = NULL)
 		$a['prizes'][] = $prize;
 	}
 
-	unset($a['original']);
-	$original = $a;
-	$a['original'] = $original;
 	return $a;
 }
 
