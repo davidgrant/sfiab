@@ -229,7 +229,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 	$project['num_students'] = count($remote_project['students']);
 	project_save($mysqli, $project);
 
-	$p_students = project_load_students($mysqli, $project);
+	project_load_students($mysqli, $project);
 
 	/* Remember if we matched remote students */
 	foreach($remote_project['students'] as &$remote_student) {
@@ -237,7 +237,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 	}
 
 	/* Check all students currently attached to the project (none if the project is new)  */
-	foreach($p_students as &$ps) {
+	foreach($p['students']as &$ps) {
 		/* Is this remote student already attached to the project?, check by name */
 		$match = false;
 		foreach($remote_project['students'] as &$remote_student) {

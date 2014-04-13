@@ -35,7 +35,7 @@ sfiab_page_begin("Awards", $page_id);
 
 	<h3>External</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="#" data-rel="external" data-ajax="false">X Upload CWSF Winners</a></li>
+	<li><a href="c_award_cwsf.php" data-rel="external" data-ajax="false">Upload CWSF Winners</a></li>
 	</ul>
 
 </div></div>

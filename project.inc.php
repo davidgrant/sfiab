@@ -115,7 +115,7 @@ function project_load_students($mysqli, &$p)
 	while($u = $r->fetch_assoc()) {
 		$users[] = user_load($mysqli, -1, -1, NULL, $u);
 	}
-	return $users;
+	$p['students'] = $users;
 }
 
 function project_create($mysqli) 

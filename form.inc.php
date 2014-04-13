@@ -453,7 +453,7 @@ function form_ajax_response_error($status, $error)
 
 function form_ajax_response($response)
 {
-	$headers = array( 'status', 'missing', 'left_error_count', 'error', 'happy', 'location');
+	$headers = array( 'status', 'missing', 'left_error_count', 'error', 'happy', 'info', 'location');
 	if(!is_array($response)) {
 		$response = array('status'=>$response);
 	}

@@ -35,7 +35,7 @@ function debug($str) {
 
 $projects = projects_load_all($mysqli, $script_year);
 foreach($projects as &$p) {
-	$p['students'] = project_load_students($mysqli, $p);
+	project_load_students($mysqli, $p);
 }
 
 $q=$mysqli->query("SELECT id,school FROM schools WHERE year='{$script_year}' ORDER by city,school");

@@ -126,7 +126,7 @@ for($round=1;$round <=2; $round++) {
 
 			$html = '';
 			foreach($award['prizes'] as $p) { 
-				$html .= '<h4>'.$p['name'].' - '.$p['number'].' Prizes To Award</h4>';
+				$html .= '<h4>'.$p['name'].' - '.$p['number'].' Prize(s) To Award</h4>';
 
 
 				$html .= '<table>';

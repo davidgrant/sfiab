@@ -23,10 +23,10 @@ case 'c':
 	$pid = (int)$_POST['pid'];
 	if($pid > 0) {
 		$p = project_load($mysqli, $pid);
-		$users = project_load_students($mysqli, $p);
+		project_load_students($mysqli, $p);
 
 		$ok = true;
-		foreach($users as &$u) {
+		foreach($p['students'] as &$u) {
 			/* User must be "complete" */
 			if($u['s_complete'] != 1) {
 				$ok = false;
@@ -37,7 +37,7 @@ case 'c':
 			$p['accepted'] = 1;
 			project_save($mysqli, $p);
 
-			foreach($users as &$u) {
+			foreach($p['students'] as &$u) {
 				$u['s_accepted'] = 1;
 				$u['s_paid'] = 1;
 				user_save($mysqli, $u);
@@ -55,12 +55,12 @@ case 'i':
 	$pid = (int)$_POST['pid'];
 	if($pid > 0) {
 		$p = project_load($mysqli, $pid);
-		$users = project_load_students($mysqli, $p);
+		project_load_students($mysqli, $p);
 
 		$p['accepted'] = 0;
 		project_save($mysqli, $p);
 
-		foreach($users as &$u) {
+		foreach($p['students'] as &$u) {
 			/* User must be "complete" */
 			$u['s_accepted'] = 0;
 			$u['s_paid'] = 0;
@@ -75,7 +75,7 @@ case 'w':
 	$pid = (int)$_POST['pid'];
 	if($pid > 0) {
 		$p = project_load($mysqli, $pid);
-		$users = project_load_students($mysqli, $p);
+		project_load_students($mysqli, $p);
 
 		$ok = true;
 		foreach($users as &$u) {
@@ -88,7 +88,7 @@ case 'w':
 		if($ok == true) {
 			$p['accepted'] = 1;
 			project_save($mysqli, $p);
-			foreach($users as &$u) {
+			foreach($p['students'] as &$u) {
 				$u['s_accepted'] = 1;
 				$u['s_paid'] = 0;
 				user_save($mysqli, $u);

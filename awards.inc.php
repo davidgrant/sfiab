@@ -1,6 +1,6 @@
 <?php
 require_once('filter.inc.php');
-
+require_once('project.inc.php');
 
 $award_types = array('divisional' => 'Divisional',
 			'special' => 'Special',
@@ -11,13 +11,13 @@ $award_types = array('divisional' => 'Divisional',
 function award_load($mysqli, $id , $data = NULL)
 {
 	$id = (int)$id;
-	if($id != 0) {
+	if($data !== NULL) {
+		$a = $data;
+		$id = $a['id'];
+	} else {
 		$q = $mysqli->query("SELECT * FROM awards WHERE id='$id'");
 		$a = $q->fetch_assoc();
 		print($mysqli->error);
-	} else {
-		$a = $data;
-		$id = $a['id'];
 	}
 
 	$a['categories'] = explode(',',$a['categories']);
@@ -109,6 +109,27 @@ function prize_load($mysqli, $pid, $data=NULL)
 function award_save($mysqli, $a)
 {
 	generic_save($mysqli, $a, "awards", "id");
+}
+
+
+function award_load_cwsf($mysqli)
+{
+	global $config;
+	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' AND cwsf_award='1'");
+	if($q->num_rows != 1) return NULL;
+
+	return award_load($mysqli, -1, $q->fetch_assoc());
+}
+
+function prize_load_winners($mysqli, &$prize)
+{
+	$q = $mysqli->query("SELECT * FROM winners WHERE awards_prizes_id='{$prize['id']}'");
+	$projects = array();
+	while($r = $q->fetch_assoc()) {
+		$projects[(int)$r['projects_id']] = project_load($mysqli, $r['projects_id']);
+		project_load_students($mysqli, $projects[(int)$r['projects_id']]);
+	}
+	return $projects;
 }
 
 ?>

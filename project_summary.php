@@ -42,14 +42,14 @@ if($q === NULL || $q->num_rows != 1) {
 }
 
 $p = project_load($mysqli, -1, $q->fetch_assoc());
-$students = project_load_students($mysqli, $p);
+project_load_students($mysqli, $p);
 
 $s_names = "";
 $s_schools = "";
 
 $school_ids = array();
 
-foreach($students as &$s) {
+foreach($p['students'] as &$s) {
 	if($s_names != '') $s_names .= ', ';
 	$s_names .= $s['name'];
 
