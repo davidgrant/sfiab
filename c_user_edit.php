@@ -70,6 +70,9 @@ case 'psave':
 case 'psave_back':
 	if(in_array('student', $edit_u['roles'])) {
 		post_int($edit_p['disqualified_from_awards'], 'disqualified_from_awards');
+		post_int($edit_p['number_sort'], 'number_sort');
+		post_int($edit_p['floor_number'], 'floor_number');
+		post_text($edit_p['number'], 'number');
 		project_save($mysqli, $edit_p);
 		if($action == 'psave') {
 			form_ajax_response(array('status'=>0));
@@ -169,7 +172,10 @@ if(in_array('student', $edit_u['roles'])) { ?>
 <?php	$form_id = $page_id.'_project_form';
 	form_begin($form_id, 'c_user_edit.php');
 	form_hidden($form_id, 'uid', $edit_u['uid']);
-	form_yesno($form_id, 'disqualified_from_awards', 'Project Disqualifed from Awards', $edit_p['disqualified_from_awards']);
+	form_text($form_id, 'number', 'Project Number', $edit_p);
+	form_text($form_id, 'number_sort', 'Numeric Project Number for Sorting', $edit_p);
+	form_text($form_id, 'floor_number', 'Floor Location Number', $edit_p);
+	form_yesno($form_id, 'disqualified_from_awards', 'Project Disqualifed from Awards', $edit_p);
 	form_submit($form_id, 'psave', 'Save', 'Project Saved');
 	form_submit($form_id, 'psave_back', 'Save and Go Back', 'Project Saved');
 	form_end($form_id); 
