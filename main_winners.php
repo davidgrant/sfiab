@@ -38,9 +38,9 @@ if(array_key_exists('type', $_GET)) {
 ?>
 			<h3><?=$year?></h3>
 			<ul>
-			<li><a data-external=true href="main_winners.php?year=<?=$year?>&type=divisional"><?=$year?> Divisional Award Winners</a>
-			<li><a data-external=true href="main_winners.php?year=<?=$year?>&type=special"><?=$year?> Special Award Winners</a>
-			<li><a data-external=true href="main_winners.php?year=<?=$year?>&type=grand"><?=$year?> Grand Award Winners</a>
+			<li><a data-rel="external" data-ajax="false" href="main_winners.php?year=<?=$year?>&type=divisional"><?=$year?> Divisional Award Winners</a>
+			<li><a data-rel="external" data-ajax="false" href="main_winners.php?year=<?=$year?>&type=special"><?=$year?> Special Award Winners</a>
+			<li><a data-rel="external" data-ajax="false" href="main_winners.php?year=<?=$year?>&type=grand"><?=$year?> Grand Award Winners</a>
 			</ul>
 <?php
 		}
@@ -96,7 +96,7 @@ if(array_key_exists('type', $_GET)) {
 				if($type == 'divisional') print("<li>$prize_name<ul>");
 
 				foreach($projects as $p) {
-?>					<li><a data-external="true" href="project_summary.php?pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
+?>					<li><a data-rel="external" data-ajax="false" href="project_summary.php?pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
 <?php				}
 				if($type == 'divisional') print("</ul>");
 			}
