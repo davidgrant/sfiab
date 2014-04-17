@@ -86,8 +86,8 @@ if(array_key_exists('type', $_GET)) {
 		foreach($w as $award_name => $prizes) {
 ?>			<h4><?=$year?> - <?=$award_name?></h4>	
 
-<?php			if($r['description'] != '') { 
-?>				<p><?=$r['description']?>
+<?php			if($desc[$award_name] != '') { 
+?>				<p><?=$desc[$award_name]?>
 <?php			}
 			
 ?>			<ul>
