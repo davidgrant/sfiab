@@ -59,6 +59,7 @@ if(array_key_exists('type', $_GET)) {
 					WHERE
 						`awards`.`type`='$type'
 						AND `winners`.`year`='$year'
+						AND `award_prizes`.`include_in_script`='1'
 					ORDER BY
 						`awards`.`order`, `award_prizes`.`order`, `projects`.`number_sort`
 					");
