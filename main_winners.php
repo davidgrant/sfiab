@@ -87,7 +87,7 @@ if(array_key_exists('type', $_GET)) {
 ?>			<h4><?=$year?> - <?=$award_name?></h4>	
 
 <?php			if($desc[$award_name] != '') { 
-?>				<p><?=$desc[$award_name]?>
+?>				<p><i><?=$desc[$award_name]?></i>
 <?php			}
 			
 ?>			<ul>
