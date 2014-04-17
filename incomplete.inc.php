@@ -350,7 +350,8 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 
 	$ret = array();
 	$incomplete_errors = array();
-
+	$closed = sfiab_registration_is_closed($u);
+	
 	if($page_id !== false) {
 		incomplete_fields_check($mysqli, $ret, $page_id, $u, $force);
 
@@ -404,7 +405,9 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 		/* Adjust student status in the user if it changed */
 		if($student_complete != $u['s_complete']) {
 			$u['s_complete'] = $student_complete;
-			user_save($mysqli, $u);
+			if(!$closed) {
+				user_save($mysqli, $u);
+			}
 		}
 		$total_c += $c + $c1;
 	}
@@ -423,7 +426,9 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 		/* Adjust judge status in the user if it changed */
 		if($judge_complete != $u['j_complete']) {
 			$u['j_complete'] = $judge_complete;
-			user_save($mysqli, $u);
+			if(!$closed) {
+				user_save($mysqli, $u);
+			}
 		}
 		$total_c += $c;
 	}
@@ -441,7 +446,9 @@ function incomplete_check($mysqli, &$ret, &$u, $page_id = false, $force = true)
 		/* Adjust judge status in the user if it changed */
 		if($v_complete != $u['v_complete']) {
 			$u['v_complete'] = $v_complete;
-			user_save($mysqli, $u);
+			if(!$closed) {
+				user_save($mysqli, $u);
+			}
 		}
 		$total_c += $c;
 	}
