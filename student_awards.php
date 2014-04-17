@@ -53,9 +53,9 @@ case 'save':
 			}
 		}
 	}
-	$u['s_sa_nom'] = $awards;
+	$p['sa_nom'] = $awards;
 
-	user_save($mysqli, $u);
+	project_save($mysqli, $p);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	$response = array('status'=>0, 'missing'=>$ret);
@@ -107,14 +107,14 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 ?>
 	<fieldset data-role="controlgroup">
 		<?=form_checkbox($form_id, 'award', '<b>No Special Award Nominations</b><br/>Select this option if you do not wish to nominate for any special awards', 
-				0, $u['s_sa_nom']); ?>
+				0, $p['sa_nom']); ?>
 	</fieldset>
 
 	<?=form_submit($form_id, 'save', 'Save', 'Award Selections Saved');?>
 	<fieldset data-role="controlgroup">
 <?php	foreach($awards as $aid=>$a) { 
 		form_checkbox($form_id, 'award', "<b>{$a['name']}</b><br/>{$a['description']}<br/>{$a['criteria']}", 
-				$aid, $u['s_sa_nom']); 
+				$aid, $p['sa_nom']); 
 	}?>
 	</fieldset>
 

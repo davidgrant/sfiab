@@ -98,7 +98,7 @@ sfiab_page_begin("Project Information", $page_id, $help);
 	form_lang($form_id, 'language', "Judging Language", $p);
 	form_yesno($form_id, 'req_electricity', "Electricity Needed", $p);
 	form_textbox($form_id, 'summary', "Summary", $p,
-			200, 1000);
+			$config['s_summary_min_words'], $config['s_summary_max_words']);
 	form_submit($form_id, 'save', 'Save', 'Project Saved');
 	form_end($form_id);
 ?>

@@ -104,11 +104,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	if($u['birthdate'] == '0000-00-00') $u['birthdate'] = NULL;
 	if($u['reg_close_override'] == '0000-00-00') $u['reg_close_override'] = NULL;
 
-	if($u['s_sa_nom'] === NULL || $u['s_sa_nom'] === '') 
-		$u['s_sa_nom'] = array();
-	else 
-		$u['s_sa_nom'] = explode(',', $u['s_sa_nom']);
-
 	if($u['tour_id_pref'] === NULL)
 		$u['tour_id_pref'] = array(NULL,NULL,NULL);
 	else {
@@ -215,7 +210,7 @@ function user_save($mysqli, &$u)
 				$v = implode(',', $a);
 				break;
 
-			 case 'j_sa': case 's_sa_nom': case 'tour_id_pref':
+			 case 'j_sa': case 'tour_id_pref':
 			 	if(count($val) == 0) {
 					$v = NULL;
 				} else {

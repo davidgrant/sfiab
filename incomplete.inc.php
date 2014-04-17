@@ -201,7 +201,6 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		$e = $p['ethics'];
 
 		incomplete_check_bool($ret, $e, array('human1', 'animals', 'agree'));
-
 		
 		if($e['human1']) {
 			incomplete_check_bool($ret, $e, array(
@@ -251,11 +250,9 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		}
 		break;
 
-
 	case 's_awards':
-		if(count($u['s_sa_nom']) > 0) {
-//			if($u['s_sa_nom'][0] === NULL || $u['s_sa_nom'][0] === '') {
-		} else {
+		$p = project_load($mysqli, $u['s_pid']);
+		if(count($p['sa_nom']) == 0) {
 			$ret[] = 'award';
 		}
 		break;
