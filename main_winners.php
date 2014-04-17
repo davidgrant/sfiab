@@ -65,37 +65,45 @@ if(array_key_exists('type', $_GET)) {
 
 		$current_award = NULL;
 		$current_prize = NULL;
+
+		$w = array();
+		$desc = array();
 		while($r = $q->fetch_assoc()) {
 			if($r['award_name'] != $current_award) {
-				if($current_award !== NULL) {
-					/* Finish off the last award's UL */
-?>					</ul></ul>
-<?php				}
 				$current_award = $r['award_name'];
-?>				<h4><?=$year?> - <?=$current_award?></h4>
-<?				if($r['description'] != '') { ?>
-					<p><?=$r['description']?>
-<?php				}	?>
-				<ul>
-<?php			}
-			if($r['prize_name'] != $current_prize) {
-				if($current_prize !== NULL) {
-					/* Finish off the last prizes's UL */
-?>					</ul>
-<?php				}
+				$w[$current_award] = array();
+				$desc[$current_award] = $r['description'];
+				$current_prize = NULL;
+			}
+			if($r['prize_name'] != $current_prize ) {
 				$current_prize = $r['prize_name'];
-?>				<li><?=$current_prize?>
-				<ul>
-<?php			}
-?>
-			<li><a href="project_summary.php?pn=<?=$r['number']?>"><?=$r['number']?></a> - <?=$r['title']?>
-<?php				
-
+				$w[$current_award][$current_prize] = array();
+			}
+			$w[$current_award][$current_prize][] = array('number' => $r['number'], 'title' => $r['title']);
 		}
-?>
-		</ul></ul>
+
+
+		foreach($w as $award_name => $prizes) {
+?>			<h4><?=$year?> - <?=$award_name?></h4>	
+
+<?php			if($r['description'] != '') { 
+?>				<p><?=$r['description']?>
+<?php			}
+			
+?>			<ul>
+
+<?php			foreach($prizes as $prize_name => $projects) {
+				if($type == 'divisional') print("<li>$prize_name<ul>");
+
+				foreach($projects as $p) {
+?>					<li><a href="project_summary.php?pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
+<?php				}
+				if($type == 'divisional') print("</ul>");
+			}
+?>			</ul>
 <?php
 
+		}
 	}
 ?>
 
