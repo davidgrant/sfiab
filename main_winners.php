@@ -96,7 +96,7 @@ if(array_key_exists('type', $_GET)) {
 				if($type == 'divisional') print("<li>$prize_name<ul>");
 
 				foreach($projects as $p) {
-?>					<li><a href="project_summary.php?pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
+?>					<li><a data-external="true" href="project_summary.php?pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
 <?php				}
 				if($type == 'divisional') print("</ul>");
 			}
