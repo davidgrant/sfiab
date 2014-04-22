@@ -12,6 +12,8 @@ function conv_students($mysqli, $mysqli_old, $year)
 	$mysqli->real_query("DELETE FROM users WHERE FIND_IN_SET('student',`roles`) > 0 AND year<$year");
 	$mysqli->real_query("DELETE FROM projects WHERE year<$year");
 
+	$registration_to_project_map = array();
+
 	$q = $mysqli_old->query("SELECT * FROM students WHERE year='$year'");
 	while($old_s = $q->fetch_assoc()) {
 
@@ -21,7 +23,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 		/* Skip incomplete students */
 		$q1 = $mysqli_old->query("SELECT * FROM registrations WHERE id=$rid");
 		$r = $q1->fetch_assoc();
-		if($r['status'] != 'complete') continue;
+		if($r['status'] == 'new') continue;
 
 		/* Create a new user */
 		$password = NULL;
@@ -41,8 +43,12 @@ function conv_students($mysqli, $mysqli_old, $year)
 		$u['postalcode'] = $old_s['postalcode'];
 		$u['grade'] = $old_s['grade'];
 		$u['birthdate'] = $old_s['dateofbirth'];
-		$u['schools_id'] = $schools_map[(int)$old_s['schools_id']];
-		$u['fairs_id'] = 0;
+		if(!array_key_exists((int)$old_s['schools_id'], $schools_map))
+			$u['schools_id'] = 0;
+		else
+			$u['schools_id'] = $schools_map[(int)$old_s['schools_id']];
+
+		$u['fair_id'] = $old_s['fairs_id'];
 		$u['tshirt'] = $old_s['tshirt'];
 		$u['medicalert'] = $old_s['medicalalert'];
 		$u['food_req'] = $old_s['foodreq'];
@@ -87,8 +93,8 @@ function conv_students($mysqli, $mysqli_old, $year)
 		}
 
 		/* Load project if not loaded */
-		if(array_key_exists($rid, $projects_map)) {
-			$pid = $projects_map[$rid];
+		if(array_key_exists($rid, $registration_to_project_map)) {
+			$pid = $registration_to_project_map[$rid];
 			$u['s_pid'] = $pid;
 			$new_p = project_load($mysqli, $pid);
 			$new_p['num_students'] += 1;
@@ -101,6 +107,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$pid = project_create($mysqli, $year);
 			$new_p = project_load($mysqli, $pid);
 			$projects_map[(int)$p['id']] = $pid;
+			$registration_to_project_map[$rid] = $pid;
 
 			$new_p['number'] = $p['projectnumber'];
 			$new_p['title'] = $p['title'];
@@ -116,6 +123,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$new_p['cat_id'] = $p['projectcategories_id'];
 			$new_p['challenge_id'] = $p['projectdivisions_id'];
 			$new_p['accepted'] = 1;
+			$new_p['fair_id'] = $p['fairs_id'];
 
 			/* Load mentors */
 			$q2 = $mysqli_old->query("SELECT * FROM mentors WHERE registrations_id=$rid");

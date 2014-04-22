@@ -126,6 +126,10 @@ function award_save($mysqli, $a)
 {
 	generic_save($mysqli, $a, "awards", "id");
 }
+function prize_save($mysqli, $p)
+{
+	generic_save($mysqli, $p, "award_prizes", "id");
+}
 
 
 function award_load_cwsf($mysqli)

@@ -5,7 +5,7 @@ $prizes_map = array();
 
 function conv_awards($mysqli, $mysqli_old, $year) 
 {
-	global $sponsors_map;
+	global $sponsors_map, $awards_map, $prizes_map;
 
 	print("Convert Awards for $year...\n");
 
@@ -17,12 +17,10 @@ function conv_awards($mysqli, $mysqli_old, $year)
 	/* Load the old awards, and save to a new award array */
 	$q = $mysqli_old->query("SELECT * FROM award_awards WHERE year='$year'");
 	while($a = $q->fetch_assoc()) {
-		print($a['name'] . "\n");
 		$a['prizes'] = array();
 		$aid = $a['id'];
 		$q1 = $mysqli_old->query("SELECT * FROM award_prizes WHERE award_awards_id='$aid'");
 		while($p = $q1->fetch_assoc()) {
-			print("   ".$p['prize'] . "\n");
 			$a['prizes'][] = $p;
 		}
 		$a['categories'] = array();
@@ -53,6 +51,8 @@ function conv_awards($mysqli, $mysqli_old, $year)
 		$a = award_load($mysqli, $aid);
 
 		$a['name'] = $old_a['name'];
+		print($a['name'] . "\n");
+
 		$a['s_desc'] = $old_a['description'];
 		$a['j_desc'] = $old_a['criteria'];
 		$a['presenter'] = $old_a['presenter'];
@@ -67,25 +67,26 @@ function conv_awards($mysqli, $mysqli_old, $year)
 		$a['order'] = $old_a['order'];
 		$a['type'] = $type_map[(int)$old_a['award_types_id']];
 
-		foreach($a['prizes'] as $old_p) {
+		foreach($old_a['prizes'] as &$old_p) {
 			$pid = prize_create($mysqli, $aid);
 			$p = prize_load($mysqli, $pid);
 
 			$p['name'] = $old_p['prize'];
+			print("   ".$p['name'] . "\n");
 			$p['cash'] = $old_p['cash'];
 			$p['scholarship'] = $old_p['scholarship'];
 			$p['value'] = $old_p['value'];
-			$t = array();
-			if($old_p['trophystudentkeeper'] == 1) $t[] = 'keeper';
-			if($old_p['trophystudentreturn'] == 1) $t[] = 'return';
-			if($old_p['trophyschoolkeeper'] == 1) $t[] = 'school_keeper';
-			if($old_p['trophyschoolreturn'] == 1) $t[] = 'school_return';
-			$p['trophies'] = join(',', $t);
-			$p['order'] = $old_p['order'];
-			$p['number'] = $old_p['number'];
+			$p['trophies'] = array();
+			if($old_p['trophystudentkeeper'] == 1) $p['trophies'] [] = 'keeper';
+			if($old_p['trophystudentreturn'] == 1) $p['trophies'] [] = 'return';
+			if($old_p['trophyschoolkeeper'] == 1) $p['trophies'] [] = 'school_keeper';
+			if($old_p['trophyschoolreturn'] == 1) $p['trophies'] [] = 'school_return';
+			$p['order'] = (int)$old_p['order'];
+			$p['number'] = (int)$old_p['number'];
 			if($p['number'] == 0) $p['number'] = 1;
 
-			if($old_p['excludeformac'] == 0) $a['include_in_script'] = 1;
+//			print_r($old_p);
+			if($old_p['excludefromac'] == 0) $a['include_in_script'] = 1;
 
 			prize_save($mysqli, $p);
 			$prizes_map[(int)$old_p['id']] = $pid;
@@ -93,8 +94,7 @@ function conv_awards($mysqli, $mysqli_old, $year)
 
 		award_save($mysqli, $a);
 
-		$award_map[(int)$old_a['id']] = $aid;
-
+		$awards_map[(int)$old_a['id']] = $aid;
 	}
 }
 
@@ -102,9 +102,11 @@ function conv_awards($mysqli, $mysqli_old, $year)
 
 function conv_winners($mysqli, $mysqli_old, $year) 
 {
-	global $awards_map, $projects_map;
+	global $prizes_map, $projects_map, $fairs_map;
 
 	print("Convert Winners for $year...\n");
+
+//	print_r($prizes_map);
 
 	/* Delete existing old awards and prizes for the year */
 	$mysqli->query("DELETE FROM winners WHERE year='$year'");
@@ -113,11 +115,12 @@ function conv_winners($mysqli, $mysqli_old, $year)
 	$q = $mysqli_old->query("SELECT * FROM winners WHERE year='$year'");
 	while($w = $q->fetch_assoc()) {
 		$prize_id = $prizes_map[(int)$w['awards_prizes_id']];
-		$projects_id = $projects_map[(int)$w['projects_id']];
+		$pid = $projects_map[(int)$w['projects_id']];
+		$fair_id = (int)$w['fairs_id'];
 
-		$mysqli->query("INSERT INTO winners (`award_prize_id`,`pid`,`year`,`fair_id`
-
-
+		$mysqli->query("INSERT INTO winners (`award_prize_id`,`pid`,`year`,`fair_id`)
+				VALUES('$prize_id','$pid','$year','$fair_id')");
+	}
 }
 
 
