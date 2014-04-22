@@ -8,6 +8,13 @@ $award_types = array('divisional' => 'Divisional',
 			'grand' => 'Grand');
 
 
+function award_create($mysqli, $year)
+{
+	$mysqli->query("INSERT INTO awards(`year`) VALUES('$year')");
+	$aid = $mysqli->insert_id;
+	return $aid;
+}
+
 function award_load($mysqli, $id , $data = NULL)
 {
 	$id = (int)$id;
@@ -24,6 +31,7 @@ function award_load($mysqli, $id , $data = NULL)
 	filter_bool_or_null($a['schedule_judges']);
 	filter_bool_or_null($a['self_nominate']);
 	filter_int_or_null($a['order']);
+	filter_int($a['sponsor_uid']);
 
 	unset($a['original']);
 	$original = $a;
@@ -86,6 +94,14 @@ function award_load_special_for_project_select($mysqli, &$p)
 	return $awards;
 }
 
+
+function prize_create($mysqli, $award_id)
+{
+	$mysqli->query("INSERT INTO award_prizes(`award_id`) VALUES('$award_id')");
+	$prize_id = $mysqli->insert_id;
+	return $prize_id;
+}
+
 function prize_load($mysqli, $pid, $data=NULL)
 {
 	if($data === NULL) {
@@ -123,11 +139,12 @@ function award_load_cwsf($mysqli)
 
 function prize_load_winners($mysqli, &$prize)
 {
-	$q = $mysqli->query("SELECT * FROM winners WHERE awards_prizes_id='{$prize['id']}'");
+	$q = $mysqli->query("SELECT * FROM winners WHERE award_prize_id='{$prize['id']}'");
 	$projects = array();
 	while($r = $q->fetch_assoc()) {
-		$projects[(int)$r['projects_id']] = project_load($mysqli, $r['projects_id']);
-		project_load_students($mysqli, $projects[(int)$r['projects_id']]);
+		$pid = (int)$r['pid'];
+		$projects[$pid] = project_load($mysqli, $pid);
+		project_load_students($mysqli, $projects[$pid]);
 	}
 	return $projects;
 }

@@ -49,17 +49,17 @@ if(array_key_exists('type', $_GET)) {
 <?php
 		/* Load the winners list for the specific type */
 		$q = $mysqli->query("SELECT `awards`.`name` AS award_name,
-						`awards`.`description`,
+						`awards`.`s_desc`,
 						`award_prizes`.`name` AS prize_name,
 						`projects`.`number`,`projects`.`title`
 					FROM winners 
-						LEFT JOIN award_prizes ON `winners`.`awards_prizes_id`=`award_prizes`.`id`
+						LEFT JOIN award_prizes ON `winners`.`award_prize_id`=`award_prizes`.`id`
 						LEFT JOIN awards on `award_prizes`.`award_id` = `awards`.`id`
-						LEFT JOIN projects on `winners`.`projects_id`=`projects`.`pid`
+						LEFT JOIN projects on `winners`.`pid`=`projects`.`pid`
 					WHERE
 						`awards`.`type`='$type'
 						AND `winners`.`year`='$year'
-						AND `award_prizes`.`include_in_script`='1'
+						AND `awards`.`include_in_script`='1'
 					ORDER BY
 						`awards`.`order`, `award_prizes`.`order`, `projects`.`number_sort`
 					");
@@ -73,7 +73,7 @@ if(array_key_exists('type', $_GET)) {
 			if($r['award_name'] != $current_award) {
 				$current_award = $r['award_name'];
 				$w[$current_award] = array();
-				$desc[$current_award] = $r['description'];
+				$desc[$current_award] = $r['s_desc'];
 				$current_prize = NULL;
 			}
 			if($r['prize_name'] != $current_prize ) {

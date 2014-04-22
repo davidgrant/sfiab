@@ -74,13 +74,13 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 	$form_id = $page_id."_form";
 	form_begin($form_id, 'judge_personal.php', $closed);
 
-	form_text($form_id, 'salutation', "Salutation<br/>(for your name tag)", $u);
+	form_text($form_id, 'salutation', "Salutation<br/>(This goes on your name tag!)", $u);
 	form_text($form_id, 'firstname', "First Name", $u);
 	form_text($form_id, 'lastname', "Last Name", $u);
 	form_radio_h($form_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u);
 	form_text($form_id, 'phone1', "Primary Phone", $u, 'tel');
 	form_text($form_id, 'phone2', "Secondary Phone", $u, 'tel');
-	form_text($form_id, 'organization', "Organization", $u);
+	form_text($form_id, 'organization', "Organization<br/>(This goes on your name tag!)", $u);
 	form_text($form_id, 'city', 'City', $u['city']);
 	form_province($form_id, 'province', 'Province / Territory', $u);
 	form_lang($form_id, 'language', "Preferred Language", $u);

@@ -29,8 +29,10 @@ function user_create($mysqli, $username, $email, $role, $year, &$password)
 	}
 	$password_hash = hash('sha512', $password);
 
+	$u = ($username === NULL) ? 'NULL' : "'$username'";
+
 	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`password`,`salt`,`password_expired`) 
-				VALUES('$username', 'new','$email','$year','$role','$password_hash', '', '1')");
+				VALUES($u, 'new','$email','$year','$role','$password_hash', '', '1')");
 	$uid = $mysqli->insert_id;
 	print($mysqli->error);
 	/* Since this is a new user, set the unique id == uid */
@@ -117,6 +119,9 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	}
 
 	filter_int_or_null($u['tour_id']);
+	filter_bool($u['s_web_firstname']);
+	filter_bool($u['s_web_lastname']);
+	filter_bool($u['s_web_photo']);
 
 
 	/* Judge filtering */
@@ -140,7 +145,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 			$u['j_rounds'][$r] = 1;
 		}
 	}
-
 	filter_int_list($u['j_sa']);
 
 	if($u['j_languages'] === NULL)

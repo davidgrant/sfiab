@@ -32,10 +32,11 @@ case 'save':
 
 	post_text($a['name'],'name');
 	post_text($a['type'],'type');
-	post_text($a['description'],'description');
-	post_text($a['notes'],'notes');
-	post_text($a['criteria'],'criteria');
-	post_text($a['sponsor'],'sponsor');
+	post_text($a['c_desc'],'c_desc');
+	post_text($a['j_desc'],'j_desc');
+	post_text($a['s_desc'],'s_desc');
+	post_text($a['sponsor_organization'],'sponsor_organization');
+	post_text($a['sponsor_website'],'sponsor_website');
 	post_text($a['sponsor_name'],'sponsor_name');
 	post_text($a['sponsor_email'],'sponsor_email');
 	post_text($a['sponsor_phone'],'sponsor_phone');
@@ -145,13 +146,14 @@ sfiab_page_begin("Edit Awards", $page_id);
 		form_hidden($form_id, 'aid',$a['id']);
 		form_text($form_id, 'name', "Name", $a);
 		form_select($form_id, 'type', "Type", $award_types, $a);
-		form_textbox($form_id, 'description', "Description (Students see this)", $a);
-		form_textbox($form_id, 'criteria', "Criteria (Students see this)", $a);
-		form_textbox($form_id, 'notes', "Notes (committee only)", $a);
-		form_text($form_id, 'sponsor', "Sponsor", $a);
+		form_textbox($form_id, 's_desc', "Student Description (Student and Judges see this, public on website, goes in ceremony script)", $a);
+		form_textbox($form_id, 'j_desc', "Judge Description (Only judges see this)", $a);
+		form_textbox($form_id, 'c_desc', "Committee Notes (Only the committee sees this)", $a);
+		form_text($form_id, 'sponsor_organization', "Sponsor", $a);
 ?>		<div data-role="collapsible" data-collapsed="true">
 			<h3>Sponsor Contact Information</h3>
-<?php			form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
+<?php			form_text($form_id, 'sponsor_website', "Sponsor Contact Name", $a);
+			form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
 			form_text($form_id, 'sponsor_email', "Sponsor Contact Email", $a, 'email');
 			form_text($form_id, 'sponsor_phone', "Sponsor Contact Phone", $a, 'tel');
 			form_text($form_id, 'sponsor_address', 'Address 1', $a);

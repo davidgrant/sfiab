@@ -38,13 +38,21 @@ case 'save':
 	post_int($u['schools_id'],'schools_id');
 	post_int($u['grade'],'grade');
 	post_text($u['s_teacher'],'s_teacher');
-	post_text($u['s_teacheremail'],'s_teacheremail');
+	post_text($u['s_teacher_email'],'s_teacher_email');
 	post_text($u['medicalert'],'medicalert');
 
+	/* If the grade changed, clear the tours and the special awards, also
+	 * recompute the project category */
 	if($old_grade !== $u['grade']) {
 		$u['tour_id_pref'][0] = NULL;
 		$u['tour_id_pref'][2] = NULL;
 		$u['tour_id_pref'][1] = NULL;
+
+		categories_load($mysqli);
+		$p = project_load($mysqli, $u['s_pid']);
+		$p['cat_id'] = category_get_from_grade($u['grade']);
+		$p['sa_nom'] = array();
+		project_save($mysqli, $p);
 	}
 
 	/* Scrub data */
@@ -114,12 +122,13 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 	form_select($form_id, 'schools_id','School', $schools, $u);
 	form_select($form_id, 'grade', 'Grade', $grades, $u);
 	form_text($form_id, 's_teacher', 'Teacher Name', $u);
-	form_text($form_id, 's_teacheremail', 'Teacher E-Mail', $u);
+	form_text($form_id, 's_teacher_email', 'Teacher E-Mail', $u);
 	form_text($form_id, 'medicalert', 'Medical Alert Info', $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 
 ?>
+	<p><b>Note:</b> Changing your grade will delete your tour selections, special award selections, and could change your project Age Category.
 </div></div>
 
 <?php

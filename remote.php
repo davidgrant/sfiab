@@ -43,7 +43,7 @@ function handle_getstats(&$u, $fair,&$data, &$response)
 	$response['statconfig'] = split(',', $fair['gather_stats']);
 
 	/* Send back the stats we currently have */
-	$q = mysql_query("SELECT * FROM fairs_stats WHERE fairs_id='{$u['fairs_id']}'
+	$q = mysql_query("SELECT * FROM fairs_stats WHERE fair_id='{$u['fair_id']}'
 				AND year='$year'");
 	$response['stats'] = mysql_fetch_assoc($q);
 	unset($response['stats']['id']);
@@ -58,9 +58,9 @@ function handle_stats(&$u,$fair, &$data, &$response)
 	}
 
 //	$str = join(',',$stats);
-	$keys = '`fairs_id`,`'.join('`,`', array_keys($stats)).'`';
-	$vals = "'{$u['fairs_id']}','".join("','", array_values($stats))."'";
-	mysql_query("DELETE FROM fairs_stats WHERE fairs_id='{$u['fairs_id']}'
+	$keys = '`fair_id`,`'.join('`,`', array_keys($stats)).'`';
+	$vals = "'{$u['fair_id']}','".join("','", array_values($stats))."'";
+	mysql_query("DELETE FROM fairs_stats WHERE fair_id='{$u['fair_id']}'
 		AND year='{$stats['year']}'");
 	echo mysql_error();
 	mysql_query("INSERT INTO fairs_stats (`id`,$keys) VALUES ('',$vals)");
@@ -85,7 +85,7 @@ function handle_getawards($mysqli, &$u, $fair, &$data, &$response)
 		$award['external_additional_materials'] = '';
 		$award['year'] = $a['year'];
 		$award['name_en'] = $a['name'];
-		$award['criteria_en'] = $a['criteria'];
+		$award['criteria_en'] = $a['s_desc'];
 		$award['upload_winners'] = 'yes';
 		$award['self_nominate'] = $a['self_nominate'] ? "yes" : "no";
 		$award['schedule_judges'] = $a['schedule_judges'] ? "yes" : "no";
@@ -203,7 +203,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 	}
 
 	/* See if this project already exists */
-	$q = $mysqli->query("SELECT * FROM projects WHERE number='$pn' AND fairs_id='{$fair['id']}' AND year='$year'");
+	$q = $mysqli->query("SELECT * FROM projects WHERE number='$pn' AND fair_id='{$fair['id']}' AND year='$year'");
 	if($q->num_rows == 1) {
 		/* Project with this number+fairid+year already exists */
 		$p = $q->fetch_assoc();
@@ -218,7 +218,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 
 		$project['year'] = $year;
 		$project['number'] = $pn;
-		$project['fairs_id'] = $fair['id'];
+		$project['fair_id'] = $fair['id'];
 	}
 	/* Update the project in case anything changed (besides the project number, which will trigger
 	 * a whole new registration */
@@ -282,7 +282,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 			$s['s_pid'] = $pid;
 			$s['state'] = 'active';
 			$s['year'] = $year;
-			$s['fairs_id'] = $fair['id'];
+			$s['fair_id'] = $fair['id'];
 			$s['firstname'] = $remote_student['firstname'];
 			$s['lastname'] = $remote_student['lastname'];
 			user_save($mysqli, $s);
@@ -309,7 +309,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 		$s['postalcode'] = $remote_student['postalcode'];
 		$s['phone1'] = $remote_student['phone'];
 		$s['s_teacher'] = $remote_student['teachername'];
-		$s['s_teacheremail'] = $remote_student['teacheremail'];
+		$s['s_teacher_email'] = $remote_student['teacheremail'];
 		$s['grade'] = $remote_student['grade'];
 		$s['schools_id'] = $schools_id;
 
@@ -334,7 +334,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 	}
 
 	/* Record the winner */
-	$mysqli->real_query("INSERT INTO winners(`awards_prizes_id`,`projects_id`,`year`,`fairs_id`)
+	$mysqli->real_query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`)
 			VALUES('{$prize['id']}','$pid','$year','{$fair['id']}')");
 }
 
@@ -364,7 +364,7 @@ function handle_awards_upload($mysqli, &$u, &$fair, &$data, &$response)
 			/* Clean out existing winners for this prize */
 			$mysqli->real_query("DELETE FROM winners WHERE 
 					award_prize_id='{$prize['id']}' 
-					AND fairs_id='{$fair['id']}'");
+					AND fair_id='{$fair['id']}'");
 
 			/* Iterate over all prizes of the same name */
 			$ul_p =& $award_data['prizes'][$prize['name']];
