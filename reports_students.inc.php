@@ -319,7 +319,7 @@ $report_students_fields = array(
 		'name' => 'Student -- Birthdate',
 		'header' => 'Birthdate',
 		'width' => 0.9,
-		'table' => 'users.dateofbirth'),
+		'table' => 'users.birthdate'),
 
 	'age' => array(
 		'name' => 'Student -- Age (when this report is created)',
