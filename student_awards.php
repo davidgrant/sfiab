@@ -113,7 +113,7 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 	<?=form_submit($form_id, 'save', 'Save', 'Award Selections Saved');?>
 	<fieldset data-role="controlgroup">
 <?php	foreach($awards as $aid=>$a) { 
-		form_checkbox($form_id, 'award', "<b>{$a['name']}</b><br/>{$a['description']}<br/>{$a['criteria']}", 
+		form_checkbox($form_id, 'award', "<b>{$a['name']}</b><br/>{$a['s_desc']}", 
 				$aid, $p['sa_nom']); 
 	}?>
 	</fieldset>

@@ -498,13 +498,25 @@ function challenges_load($mysqli, $year = false) {
 	return $chals;
 }
 
+$categories = array();
 function categories_load($mysqli, $year = false) {
-	global $config;
+	global $config, $categories;
 	if($year == false) $year = $config['year'];
 	$cats = array();
 	$q = $mysqli->query("SELECT * FROM categories WHERE year='$year'");
 	while($c=$q->fetch_assoc()) $cats[$c['id']] = $c;
+	$categories = $cats;
 	return $cats;
+}
+
+function category_get_from_grade($grade)
+{
+	global $categories;
+	foreach($categories as $cid=>&$c) {
+		if($grade >= $c['grade_min'] && $c <= $c['grade_max']) 
+			return $cid;
+	}
+	return false;
 }
 
 function cms_get($mysqli, $name) {

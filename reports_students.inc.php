@@ -510,7 +510,7 @@ $report_students_fields = array(
 		'name' => 'School -- Teacher Email (as entered by the student)',
 		'header' => 'Teacher Email',
 		'width' => 2.0,
-		'table' => 'users.s_teacheremail' ),
+		'table' => 'users.s_teacher_email' ),
 
 	'school_phone' => array(
 		'name' => 'School -- Phone',
@@ -1022,12 +1022,12 @@ $report_students_fields = array(
 	if(in_array('awards', $components)) {
 		/* This requires some extra gymnastics and will duplicate
 		 * students/projects if they have won multiple awards */
-		$awards_join = "LEFT JOIN winners ON winners.projects_id = projects.pid
-				LEFT JOIN award_prizes ON award_prizes.id = winners.awards_prizes_id
+		$awards_join = "LEFT JOIN winners ON winners.pid = projects.pid
+				LEFT JOIN award_prizes ON award_prizes.id = winners.award_prize_id
 				LEFT JOIN awards ON awards.id = award_prizes.award_id";
 		$awards_where = " AND winners.year='$year'";
 	}
-
+/*
 	if(in_array('awards_nominations', $components)) {
 		$awards_join = "LEFT JOIN project_specialawards_link 
 					ON(projects.id=project_specialawards_link.projects_id),
@@ -1037,7 +1037,7 @@ $report_students_fields = array(
 					AND awards.year='$year'
 					AND award_types.year='$year' ";
 	}
-
+*/
 	$partner_join = '';
 	if(in_array('partner', $components)) {
 		$partner_join = "LEFT JOIN users AS student2

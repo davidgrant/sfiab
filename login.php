@@ -18,8 +18,14 @@ sfiab_load_config($mysqli);
 
 function check_username($username)
 {
+	/* Return false if there's a character thats isn't one of these: */
 	$m = preg_match("/^[a-zA-Z0-9_\-@\.]+$/", $username); 
-	return ($m == 1) ? true : false;
+	if($m != 1) return false;
+
+	/* Return false if the username is too short */
+	if(strlen($username) < 2) return false;
+
+	return true;
 }
 
 function check_email($email)

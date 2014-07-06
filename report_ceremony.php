@@ -16,7 +16,6 @@ $page_id = 'c_ceremony';
 
 $script_debug = array_key_exists('debug',$_GET) ? true : false;
 $script_year = array_key_exists('year',$_GET) ? $_GET['year'] : $config['year'];
-$script_show_criteria = false;
 $script_show_pronunciation = true;
 $script_start_award_on_new_page = true;
 $script_group_by_prize = array_key_exists('group_by_prize', $_GET) ? (int)$_GET['group_by_prize'] : false;
@@ -64,11 +63,11 @@ if($script_type == 'pdf') {
 $winners = array();
 $q = $mysqli->query("SELECT * FROM winners WHERE year='$script_year'");
 while($r = $q->fetch_assoc()) {
-	$prize_id = (int)$r['awards_prizes_id'];
+	$prize_id = (int)$r['award_prize_id'];
 	if(!array_key_exists($prize_id, $winners)) {
 		$winners[$prize_id] = array();
 	}
-	$winners[$prize_id][] = (int)$r['projects_id'];
+	$winners[$prize_id][] = (int)$r['pid'];
 }
 
 
@@ -77,18 +76,14 @@ while($r = $q->fetch_assoc()) {
 
 function get_award_info_html(&$award)
 {
-	global $script_show_criteria;
 	$html = '';
 	if($award['type'] != 'divisional')
 		$html .= "<tr><td width=\"30mm\" align=\"right\">Sponsored by:</td><td width=\"150mm\">{$award['sponsor']}</td></tr>";
 
 	if($award['presenter'] != '')
 		$html .= "<tr><td width=\"30mm\" align=\"right\">Presented by:</td><td width=\"150mm\">{$award['presenter']}</td></tr>";
-	if($award['description'] != '') 
-		$html .= "<tr><td width=\"30mm\" align=\"right\"t>Description:</td><td width=\"150mm\">{$award['description']}</td></tr>";
-
-	if($script_show_criteria)
-		$html .= "<tr><td width=\"30mm\" align=\"right\">Criteria:</td><td width=\"150mm\">{$award['criteria']}</td></tr>";
+	if($award['s_desc'] != '') 
+		$html .= "<tr><td width=\"30mm\" align=\"right\"t>Description:</td><td width=\"150mm\">{$award['s_desc']}</td></tr>";
 
 	/* Did we do anything? */
 	if($html == '') {

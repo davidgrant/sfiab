@@ -82,10 +82,10 @@ for($round=1;$round <=2; $round++) {
 			<tr><td align=\"right\" width=\"40mm\">Team Members: &nbsp;</td><td width=\"150mm\"><b>$names</b></td></tr>
 			<tr><td></td><td></td></tr>
 			<tr><td align=\"right\" width=\"40mm\">Award: &nbsp;</td><td><b>{$award['name']}</b></td></tr>";
-		if($award['description'] != '')
-			$html .= "<tr><td align=\"right\" >Award Description: &nbsp;</td><td>{$award['description']}</td></tr>";
-		if($award['criteria'] != '') 
-			$html .= "<tr><td align=\"right\" >Award Criteria: &nbsp;</td><td>{$award['criteria']}</td></tr>";
+		if($award['s_desc'] != '')
+			$html .= "<tr><td align=\"right\" >Student Description: &nbsp;</td><td>{$award['s_desc']}</td></tr>";
+		if($award['j_desc'] != '') 
+			$html .= "<tr><td align=\"right\" >Judge Information: &nbsp;</td><td>{$award['j_desc']}</td></tr>";
 		$html .= "</table><br/><br/><br/>";
 
 		$pdf->WriteHTML($html);

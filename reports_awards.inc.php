@@ -44,30 +44,30 @@ $report_awards_fields = array(
 		'table' => 'awards.name',
 		'exec_function' => 'report_awards_fr' ),
 
-	'criteria' =>  array(
-		'name' => 'Award -- Criteria',
-		'header' => 'Award Criteria',
-		'width' => 3.0,
-		'table' => 'awards.criteria' ),
-
 	'criteria_fr' =>  array(
 		'name' => 'Award -- Criteria (French)',
 		'header' => 'Award Criteria',
 		'width' => 3.0,
-		'table' => 'awards.criteria',
+		'table' => 'awards.j_desc',
 		'exec_function' => 'report_awards_fr' ),
 
 	'description' =>  array(
-		'name' => 'Award -- Description',
+		'name' => 'Award -- Description (for Students)',
 		'header' => 'Award Description',
 		'width' => 3.0,
-		'table' => 'awards.description' ),
+		'table' => 'awards.s_desc' ),
+
+	'criteria' =>  array(
+		'name' => 'Award -- Description (for Judges)',
+		'header' => 'Judge Desc',
+		'width' => 3.0,
+		'table' => 'awards.j_desc' ),
 
 	'notes' =>  array(
-		'name' => 'Award -- Notes',
+		'name' => 'Award -- Committee Notes',
 		'header' => 'Award Notes',
 		'width' => 3.0,
-		'table' => 'awards.notes' ),
+		'table' => 'awards.c_desc' ),
 
 	'presenter' =>  array(
 		'name' => 'Award -- Presenter',
@@ -99,7 +99,7 @@ $report_awards_fields = array(
 		'name' => 'Award -- Matrix Data',
 		'header' => 'Data',
 		'width' => 13.0,
-		'table' => "CONCAT(awards.name,'\n\n', awards.criteria, '\n', awards.description, '\n', awards.notes)"),
+		'table' => "CONCAT(awards.name,'\n\n', awards.s_desc, '\n', awards.j_desc, '\n', awards.c_desc)"),
 
 
 	'empty_winner_box' => array(
@@ -110,17 +110,22 @@ $report_awards_fields = array(
 
 	'sponsor_organization' => array(
 		'start_option_group' => 'Sponsor',
-		'name' => 'Sponsor',
+		'name' => 'Sponsor Organization',
 		'header' => 'Sponsor',
 		'width' => 2.0,
-		'table' => 'sponsor' ),
+		'table' => 'sponsor_organization' ),
 
-	'sponsor_organization' => array(
-		'start_option_group' => 'Sponsor',
+	'sponsor_name' => array(
 		'name' => 'Sponsor -- Contact Name',
-		'header' => 'Contact Name',
+		'header' => 'Sponsor Name',
 		'width' => 2.0,
 		'table' => 'sponsor_name' ),
+
+	'sponsor_website' => array(
+		'name' => 'Sponsor -- Website',
+		'header' => 'Sponsor Website',
+		'width' => 3.0,
+		'table' => 'sponsor_website' ),
 
 	'sponsor_phone' => array(
 		'name' => 'Sponsor -- Phone',

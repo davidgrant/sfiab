@@ -42,7 +42,7 @@ case 'pdel':
 	$prize_id = (int)$_POST['prize_id'];
 	$prize = prize_load($mysqli, $prize_id);
 	$pid = (int)$_POST['pid'];
-	$mysqli->query("DELETE FROM winners WHERE `awards_prizes_id`='$prize_id' AND `projects_id`='$pid'");
+	$mysqli->query("DELETE FROM winners WHERE `award_prize_id`='$prize_id' AND `pid`='$pid'");
 	form_ajax_response(array('status'=>0, 'happy'=>get_prize_count($prize) ));
 	exit();
 
@@ -54,7 +54,7 @@ case 'padd':
 	/* This insert may fail because the table is keyed to unique (prize, project, year).  That's
 	 * ok, just read the error and return that so the javascirpt doesn't think the insert was 
 	 * successful */
-	$mysqli->query("INSERT INTO winners(`awards_prizes_id`,`projects_id`,`year`,`fairs_id`) 
+	$mysqli->query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`) 
 			VALUES('$prize_id','$pid','{$config['year']}','0')");
 	
 	$error = ($mysqli->errno == 0) ? 0 : 1;
@@ -66,11 +66,11 @@ case 'padd':
 $winners = array();
 $q = $mysqli->query("SELECT * FROM winners WHERE year='{$config['year']}'");
 while($r = $q->fetch_assoc()) {
-	$prize_id = (int)$r['awards_prizes_id'];
+	$prize_id = (int)$r['award_prize_id'];
 	if(!array_key_exists($prize_id, $winners)) {
 		$winners[$prize_id] = array();
 	}
-	$winners[$prize_id][] = (int)$r['projects_id'];
+	$winners[$prize_id][] = (int)$r['pid'];
 }
 
 $projects = projects_load_all($mysqli, $config['year']);
@@ -137,7 +137,7 @@ function get_prize_count(&$prize)
 	global $winners, $mysqli;
 
 	if($winners === NULL) {
-		$q = $mysqli->query("SELECT * FROM winners WHERE `awards_prizes_id`='{$prize['id']}'");
+		$q = $mysqli->query("SELECT * FROM winners WHERE `award_prize_id`='{$prize['id']}'");
 		$pcount = (int)$q->num_rows;
 	} else {
 		if(!array_key_exists($prize['id'], $winners)) {
@@ -173,9 +173,9 @@ function award_li(&$a) {
 	<li id="award_<?=$a['id']?>" data-filtertext="<?=$filter_text?>">
 		<h3><?=$a['name']?></h3>
 		<div id="award_desc_<?=$a['id']?>" style="display:none" >
-			Desc: <?=$a['description']?><br/>
-			Criteria: <?=$a['criteria']?><br/>
-			Notes: <?=$a['notes']?><br/>
+			Desc: <?=$a['s_desc']?><br/>
+			Judge Desc: <?=$a['j_desc']?><br/>
+			Notes: <?=$a['c_desc']?><br/>
 		</div>
 <?php		
 		foreach($a['prizes'] as &$prize) { 

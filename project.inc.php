@@ -118,10 +118,11 @@ function project_load_students($mysqli, &$p)
 	$p['students'] = $users;
 }
 
-function project_create($mysqli) 
+function project_create($mysqli, $year = NULL) 
 {
 	global $config;
-	$r = $mysqli->real_query("INSERT INTO projects(`year`) VALUES('{$config['year']}')");
+	if($year === NULL) $year = $config['year'];
+	$r = $mysqli->real_query("INSERT INTO projects(`year`) VALUES('$year')");
 	$pid = $mysqli->insert_id;
 	return $pid;
 }
@@ -149,6 +150,8 @@ function generic_save($mysqli, &$p, $table, $table_key)
 				/* Serialize any non-special arrays */
 				if(is_array($val)) 
 					$v = serialize($val);
+				else if(is_null($val)) 
+					$v = NULL;
 				else 
 					$v = $val;
 
@@ -156,8 +159,13 @@ function generic_save($mysqli, &$p, $table, $table_key)
 				$v = stripslashes($v);
 				$v = $mysqli->real_escape_string($v);
 			}
-			$set .= "`$key`='$v'";
-
+			if(is_null($v)) {
+				$set .= "`$key`=NULL";
+			} else {
+				$v = stripslashes($v);
+				$v = $mysqli->real_escape_string($v);
+				$set .= "`$key`='$v'";
+			}
 			/* Set the original to the unprocessed value */
 			$p['original'][$key] = $val;
 		}
@@ -282,10 +290,11 @@ function tour_save($mysqli, &$t)
 	generic_save($mysqli, $t, "tours", "id");
 }
 
-function tour_create($mysqli) 
+function tour_create($mysqli, $year=NULL) 
 {
 	global $config;
-	$r = $mysqli->real_query("INSERT INTO tours(`year`) VALUES('{$config['year']}')");
+	if($year === NULL) $year = $config['year'];
+	$r = $mysqli->real_query("INSERT INTO tours(`year`) VALUES('$year')");
 	$tid = $mysqli->insert_id;
 	return $tid;
 }

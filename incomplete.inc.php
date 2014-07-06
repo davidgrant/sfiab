@@ -103,7 +103,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 	case 's_personal':
 		incomplete_check_text($ret, $u, array('firstname', 'lastname', 'sex', 'phone1',
 				'birthdate', 'address', 'city', 'province', 
-				'postalcode', 's_teacher', 's_teacheremail'));
+				'postalcode', 's_teacher', 's_teacher_email'));
 		incomplete_check_gt_zero($ret, $u, array('schools_id', 'grade'));
 		break;
 	case 's_emergency':

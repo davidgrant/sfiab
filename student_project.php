@@ -34,7 +34,6 @@ case 'save':
 	post_text($p['title'], 'title');
 	post_text($p['language'], 'language');
 	post_text($p['summary'], 'summary');
-	post_int($p['cat_id'], 'cat_id');
 	post_int($p['challenge_id'], 'challenge_id');
 	post_int($p['isef_id'], 'isef_id');
 	post_bool($p['req_electricity'], 'req_electricity');
@@ -53,7 +52,7 @@ case 'save':
 
 $help = '
 <ul><li><b>Title</b> - Limited to 255 characters
-<li><b>Category</b> - Eligible categories are based on the maximum grade of all partners in a project.  You may register in a category at or above your grade level (not below).
+<li><b>Category</b> - The age category is chosen automatically from the maximum grade of all partners in a project.   You may register in a category at or above your grade level (not below).  If you wish to register in a different category, please contact the committee.
 <li><b>Challenge</b> - Used exclusively for floor placement and general information.  It has no effect on judging or award distribution.
 <li><b>Detailed Division</b> - Used to match qualified judges to your project.  We do not separate projects into distinct divisions any more, all projects in the same age category are judged together now (regardless of division). See the student handbook for more information about these judging changes.
 <li><b>Summary</b> - Summary just contain between 200 and 1000 words.
@@ -80,20 +79,14 @@ sfiab_page_begin("Project Information", $page_id, $help);
 	foreach($chals as $cid=>$c) {
 		$chals_data[$cid] = $c['name'];
 	}
-
-	$cats_data = array();
-	foreach($legal_ids as $cid) {
-		$cats_data[$cid] = $cats[$cid]['name'];
-	}
 ?>
 	<h3>Project Information</h3>
 <?php	
-	
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'student_project.php', $closed);
 	form_text($form_id, 'title', "Title", $p);
-	form_select($form_id, 'cat_id', "Category", $cats_data, $p);
 	form_select($form_id, 'challenge_id', "Challenge", $chals_data, $p);
+	form_label($form_id, 'cat_id', 'Age Category', $cats[$p['cat_id']]['name']);
 	form_select_optgroup($form_id, 'isef_id', "Detailed Division", $isef_data, $p);
 	form_lang($form_id, 'language', "Judging Language", $p);
 	form_yesno($form_id, 'req_electricity', "Electricity Needed", $p);
