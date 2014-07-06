@@ -43,6 +43,9 @@ if(array_key_exists('type', $_GET)) {
 			<li><a data-rel="external" data-ajax="false" href="main_winners.php?year=<?=$year?>&type=grand"><?=$year?> Grand Award Winners</a>
 			</ul>
 <?php
+			if($year == $config['year']) {
+				print('<hr/>');
+			}
 		}
 	} else {
 ?>		<h3><?=$year?> <?=$award_types[$type]?> Awards</h3>
@@ -97,7 +100,7 @@ if(array_key_exists('type', $_GET)) {
 				if($type == 'divisional') print("<li>$prize_name<ul>");
 
 				foreach($projects as $p) {
-?>					<li><a data-rel="external" data-ajax="false" href="project_summary.php?pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
+?>					<li><a data-rel="external" data-ajax="false" href="project_summary.php?year=<?=$year?>&pn=<?=$p['number']?>"><?=$p['number']?></a> - <?=$p['title']?>
 <?php				}
 				if($type == 'divisional') print("</ul>");
 			}

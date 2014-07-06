@@ -8,6 +8,7 @@ if(array_key_exists('p', $_GET)) {
 require_once('common.inc.php');
 require_once('form.inc.php');
 
+
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 

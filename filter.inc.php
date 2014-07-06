@@ -39,14 +39,33 @@ function filter_phone(&$val)
 		$val = NULL;
 	}
 }
+function filter_language(&$val)
+{
+	$languages = array('en','fr');
+	if(!in_array($val, $languages)) $val = NULL;
+}
+function filter_languages(&$val) 
+{
+	$langs = explode(',', $val);
+	$val = array();
+	foreach($langs as $l) {
+		filter_language($l);
+		if($l !== NULL) {
+			$val[] = $value;
+		}
+	}
+}
 function filter_int_list(&$val)
 {
 	if(is_array($val)) return;
 	if($val === NULL or $val == '') {
 		$val = array();
 	} else {
-		$v = $val;
-		$val = explode(',', $v);
+		$l = explode(',', $val);
+		$val = array();
+		foreach($l as $value) {
+			$val[] = (int)$value;
+		}
 	}
 }
 
@@ -102,5 +121,18 @@ function post_array(&$val, $var, &$choices, $arr = NULL)
 		}
 	}
 }
+
+function post_int_list(&$val, $var, $arr = NULL) 
+{
+	if($arr === NULL) $arr = &$_POST;
+
+	$val = array();
+	if(array_key_exists($var, $arr)) {
+		foreach($arr[$var] as $i=>$v) {
+			$val[(int)$i] = (int)$v;
+		}
+	}
+}
+
 
 ?>

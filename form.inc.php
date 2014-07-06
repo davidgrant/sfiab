@@ -189,12 +189,43 @@ function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false
 	}
 }
 
+function form_get_value(&$name, &$value) 
+{
+	if(!is_array($value)) return $value;
+
+	$p = strpos($name, '[');
+	if($p !== false) {
+		/* Expect the name is either in the form:  j_pref_div[0] */
+		$array_name = substr($name, 0, $p);
+		$array_index = (int)substr($name, $p+1, -1);
+
+		if(array_key_exists($array_name, $value)) {
+			
+			if(is_array($value[$array_name])) {
+				if(array_key_exists($array_index, $value[$array_name])) {
+					/* Return the double array deref at index */
+					return $value[$array_name][$array_index];
+				} else {
+					/* Array exists, but index doesn't */
+					return '';
+				}
+			} else {
+				print("form_get_value(): values[$array_name] is not an array, but an index was specified.");
+				exit();
+			}
+		}
+	}
+	/* Value is an array, but name is not pointing to an array */
+	return $value[$name];
+}
+
+
+
 function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false, $inline=false)
 { 
 	global $form_disabled;
 	$id = $page_id.'_'.$name;
-	/* This is so we can pass $u or $p in, and use the name to index into the array */
-	$v = (is_array($value)) ? $value[$name] : $value;
+
 
 	if($data_role != '') 
 		$data_role = "data-role=\"$data_role\"";
@@ -203,6 +234,8 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
 	$d .= $inline ? 'data-inline="true"' : '';
+
+	$v = form_get_value($name, $value);
 
 	if($label !== NULL) { ?>
 		<div class="ui-field-contain <?=$extra_class?>">
@@ -233,7 +266,8 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 	global $form_disabled;
 	$id = $page_id.'_'.$name;
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
-	$v = (is_array($value)) ? $value[$name] : $value;
+	$v = form_get_value($name, $value);
+
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
 	if($label !== NULL) { ?>

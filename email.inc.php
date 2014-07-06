@@ -36,6 +36,8 @@ function email_create($mysqli)
 
 function email_send($mysqli, $email_name, $uid, $additional_replace = array()) 
 {
+	global $config;
+
 	/* Lookup the ID of this email */
 	$q = $mysqli->prepare("SELECT id FROM emails WHERE name = ?");
 	$q->bind_param('s', $email_name); 
@@ -55,6 +57,10 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	if($u == NULL) return false;
 	if($u['state'] == 'deleted') return false;
 
+	/* Fill in additional replace vars that the email send script can't calculate, like the fair URL */
+	$additional_replace['fair_url'] = $config['fair_url'];
+
+
 	$ad = $mysqli->real_escape_string(serialize($additional_replace));
 	$n = $mysqli->real_escape_string($u['name']);
 	$em = $mysqli->real_escape_string($u['email']);
@@ -69,37 +75,40 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	return true;
 }
 
-function email_get_user_replacements(&$u) {
+function email_get_user_replacements(&$u, &$additional_replacements) 
+{
 	global $config;
-	/* Replacements that depend on the configuration */
+	/* Replacements that depend on the configuration or must be specified */
 	$rep = array(	'FAIRNAME' => $config['fair_name'],
-			'LOGIN_LINK' => $config['fair_url'].'/index.php#login',
-			'FAIR_URL' => $config['fair_url'],
 			'YEAR' => $config['year'],
+			'LOGIN_LINK' => $additional_replacements['FAIR_URL'].'/index.php#login',
+			'FAIR_URL' => $additional_replacements['FAIR_URL'],
 		);
+
+	/* Optional replacements */
+	if(array_key_exists('PASSWORD', $additional_replacements)) {
+		$rep['PASSWORD'] = $additional_replacements['PASSWORD'];
+	}
 
 	if(is_array($u)) {
 		/* Replacements that depend on a user */
-		$r = array(
-			'NAME' => $u['name'],
-			'EMAIL' => $u['email'],
-			'USERNAME' => $u['username'],
-			'SALUTATION' => $u['salutation'], 
-			'FIRSTNAME' => $u['firstname'],
-			'LASTNAME' => $u['lastname'],
-//			'ORGANIZATION' => $u['sponsor']['organization']
-			);
-		$rep = array_merge($rep, $r);
+		$rep['NAME'] = $u['name'];
+		$rep['EMAIL'] = $u['email'];
+		$rep['USERNAME'] = $u['username'];
+		$rep['SALUTATION'] = $u['salutation'],;
+		$rep['FIRSTNAME'] = $u['firstname'];
+		$rep['LASTNAME'] = $u['lastname'];
+		$rep['ORGANIZATION'] = $u['organization'];
 	}
 	return $rep;
 }
 
-function email_replace_vars($text, &$u, $otherrep=array()) {
+/* This is only called from the send email script */
+function email_replace_vars($text, &$u, &$additional_replacements) 
+{
 	global $config;
 
-	$userrep=email_get_user_replacements($u);
-
-	$rep=array_merge($userrep,$otherrep);
+	$rep=email_get_user_replacements($u, $additional_replacements);
 
 	$pats = array();
 	$reps = array();
@@ -107,7 +116,7 @@ function email_replace_vars($text, &$u, $otherrep=array()) {
 		$pats[] = "/\[$k\]/";
 		$reps[] = $v;
 	}
-	$text=preg_replace($pats, $reps,$text);
+	$text=preg_replace($pats, $reps, $text);
 	return $text;
 }
 

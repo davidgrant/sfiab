@@ -281,16 +281,19 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 
 	case 'j_expertise':
 		/* If j_sa isn't entered, that's the one that's missing */
-		if($u['j_sa_only'] === NULL)
-			$ret[] = 'j_sa';
-
 		if($u['j_sa_only']) {
-			if($u['j_sa'] == array(NULL, NULL, NULL)) {
-				$ret[] = 'j_sa';
+			if(count($u['j_sa']) > 0 && $u['j_sa'][0] > 0) {
+				/* ok */
+			} else {
+				$ret[] = 'j_sa[0]';
 			}
 		} else {
-			incomplete_check_gt_zero($ret, $u, array('j_pref_div1', 'j_pref_div2','j_pref_div3'));
-			incomplete_check_ge_zero($ret, $u, array('j_pref_cat', 'j_years_school', 'j_years_regional','j_years_national'));
+			for($x=0;$x<3;$x++) {
+				if(!array_key_exists($x, $u['j_div_pref']) || $u['j_div_pref'][$x] <= 0) {
+					$ret[] = "j_div_pref[$x]";
+				}
+			}
+			incomplete_check_ge_zero($ret, $u, array('j_cat_pref', 'j_years_school', 'j_years_regional','j_years_national'));
 		}
 		break;
 	case 'j_mentorship':

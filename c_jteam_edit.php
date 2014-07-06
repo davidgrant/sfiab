@@ -238,15 +238,14 @@ function judge_header()
 function judge_row(&$j, $tr = true)
 {
 	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
-	$cat_pref = $j['j_pref_cat'] == 0 ? 'none' : $cats[$j['j_pref_cat']]['shortform'];
+	$cat_pref = $j['j_cat_pref'] == 0 ? 'none' : $cats[$j['j_cat_pref']]['shortform'];
 
 	if($j['j_sa_only']) {
 		$exp = '';
 		$div_pref = 'SA: '.join(',', $j['j_sa']);
 	} else {
 		$div_pref = '';
-		for($x=1;$x<=3;$x++) {
-			$pref = $j["j_pref_div$x"];
+		foreach($j['j_div_pref'] as $pref) {
 			if($pref > 0) {
 				if($isef_divs[$pref]['parent'] != false)
 					$d = $isef_divs[$pref]['parent'];

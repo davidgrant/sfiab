@@ -51,7 +51,7 @@ function conv_awards($mysqli, $mysqli_old, $year)
 		$a = award_load($mysqli, $aid);
 
 		$a['name'] = $old_a['name'];
-		print($a['name'] . "\n");
+//		print($a['name'] . "\n");
 
 		$a['s_desc'] = $old_a['description'];
 		$a['j_desc'] = $old_a['criteria'];
@@ -72,7 +72,7 @@ function conv_awards($mysqli, $mysqli_old, $year)
 			$p = prize_load($mysqli, $pid);
 
 			$p['name'] = $old_p['prize'];
-			print("   ".$p['name'] . "\n");
+//			print("   ".$p['name'] . "\n");
 			$p['cash'] = $old_p['cash'];
 			$p['scholarship'] = $old_p['scholarship'];
 			$p['value'] = $old_p['value'];
@@ -114,7 +114,21 @@ function conv_winners($mysqli, $mysqli_old, $year)
 	/* Load the old awards, and save to a new award array */
 	$q = $mysqli_old->query("SELECT * FROM winners WHERE year='$year'");
 	while($w = $q->fetch_assoc()) {
+		$prize_id = (int)$w['awards_prizes_id'];
+		if(!array_key_exists($prize_id, $prizes_map)) {
+			$q1 = $mysqli_old->query("SELECT * FROM award_prizes WHERE id=$prize_id");
+			if($q1->num_rows == 0) {
+				print("   Old Prize ID $prize_id doesn't exist, but is awarded.  Skipping.\n");
+				continue;
+			}
+			$r1 = $q1->fetch_assoc();
+			print("   Old Prize ID $prize_id doesn't exist in map, but is awarded, and exists: \n");
+			print_r($r1);
+			exit();
+		}
 		$prize_id = $prizes_map[(int)$w['awards_prizes_id']];
+
+
 		$pid = $projects_map[(int)$w['projects_id']];
 		$fair_id = (int)$w['fairs_id'];
 

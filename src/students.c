@@ -190,10 +190,8 @@ void judges_load(struct _db_data *db, int year)
 			j->years_school = atoi(db_fetch_row_field(result, x, "j_years_school"));
 			j->years_regional = atoi(db_fetch_row_field(result, x, "j_years_regional"));
 			j->years_national = atoi(db_fetch_row_field(result, x, "j_years_national"));
-			j->cat_pref = atoi(db_fetch_row_field(result, x, "j_pref_cat")); /* can be zero */
-			j->isef_id_pref[0] = atoi(db_fetch_row_field(result, x, "j_pref_div1"));
-			j->isef_id_pref[1] = atoi(db_fetch_row_field(result, x, "j_pref_div2"));
-			j->isef_id_pref[2] = atoi(db_fetch_row_field(result, x, "j_pref_div3"));
+			j->cat_pref = atoi(db_fetch_row_field(result, x, "j_cat_pref")); /* can be zero */
+			split_int_list(j->isef_id_pref, db_fetch_row_field(result, x, "j_div_pref"));
 
 			/* Some judges have been writing the year, 2013,  for the years of experience */
 			if(j->years_school > 100) j->years_school = 1;

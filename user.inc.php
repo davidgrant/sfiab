@@ -125,14 +125,13 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 
 
 	/* Judge filtering */
-	filter_int_or_null($u['j_pref_div1']);
-	filter_int_or_null($u['j_pref_div2']);
-	filter_int_or_null($u['j_pref_div3']);
-	filter_int_or_null($u['j_pref_cat']);
+	filter_int_list($u['j_div_pref']);
+	filter_int_or_null($u['j_cat_pref']);
 	filter_int_or_null($u['j_years_school']);
 	filter_int_or_null($u['j_years_regional']);
 	filter_int_or_null($u['j_years_national']);
 	filter_bool_or_null($u['j_sa_only']);
+	filter_int_list($u['j_sa']);
 	filter_bool_or_null($u['j_willing_lead']);
 	filter_bool_or_null($u['j_dinner']);
 	filter_bool_or_null($u['j_mentored']);
@@ -145,12 +144,8 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 			$u['j_rounds'][$r] = 1;
 		}
 	}
-	filter_int_list($u['j_sa']);
 
-	if($u['j_languages'] === NULL)
-		$u['j_languages'] = array();
-	else 
-		$u['j_languages'] = unserialize($u['j_languages']);
+	filter_languages($u['languages']);
 
 	/* Volutneer */
 	filter_bool_or_null($u['v_complete']);
@@ -214,23 +209,19 @@ function user_save($mysqli, &$u)
 				$v = implode(',', $a);
 				break;
 
-			 case 'j_sa': case 'tour_id_pref':
-			 	if(count($val) == 0) {
-					$v = NULL;
-				} else {
-					$a = array();
-					foreach($val as $index=>$id) {
-						if($id !== NULL) $a[] = $id;
-					}
-					$v = implode(',', $a);
-				}
-				break;
-
 			default:
-				/* Serialize any non-special arrays */
-				if(is_array($val)) 
-					$v = serialize($val);
-				else if(is_null($val)) 
+				/* Join non-special arrays */
+				if(is_array($val)) {
+					if(count($val) == 0) {
+						$v = NULL;
+					} else {
+						$a = array();
+						foreach($val as $index=>$id) {
+							if($id !== NULL) $a[] = $id;
+						}
+						$v = implode(',', $a);
+					}
+				} else if(is_null($val)) 
 					$v = NULL;
 				else 
 					$v = $val;

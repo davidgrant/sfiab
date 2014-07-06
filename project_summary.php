@@ -28,13 +28,17 @@ require_once('project.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+
+$year = array_key_exists('year', $_GET) ? (int)$_GET['year'] : $config['year'];
+
+
 $q = NULL;
 if(array_key_exists('pn', $_GET)) {
 	$pn = $mysqli->real_escape_string(stripslashes($_GET['pn']));
-	$q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='{$config['year']}'");
+	$q=$mysqli->query("SELECT * FROM projects WHERE number='$pn' AND year='$year'");
 } else if(array_key_exists('p', $_GET)) {
 	$floornumber = (int)$_GET['p'];
-	$q=$mysqli->query("SELECT * FROM projects WHERE floor_number='$floornumber' AND year='{$config['year']}'");
+	$q=$mysqli->query("SELECT * FROM projects WHERE floor_number='$floornumber' AND year='$year'");
 } 
 if($q === NULL || $q->num_rows != 1) {
 	print("not found");
@@ -58,7 +62,7 @@ foreach($p['students'] as &$s) {
 		$school_ids[] = $s['schools_id'];
 
 		if($s_schools != '') $s_schools .= ', ';
-		$q2 = $mysqli->query("SELECT school from schools WHERE id='{$s['schools_id']}' and year='{$config['year']}'");
+		$q2 = $mysqli->query("SELECT school from schools WHERE id='{$s['schools_id']}' and year='$year'");
 	
 		$r2 = $q2->fetch_assoc();
 		$s_schools .= $r2['school'];

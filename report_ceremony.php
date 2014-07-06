@@ -74,11 +74,12 @@ while($r = $q->fetch_assoc()) {
 
 
 
-function get_award_info_html(&$award)
+function get_award_info_html($mysqli, &$award)
 {
+	$sponsor = user_load($mysqli, $award['sponsor_uid']);
 	$html = '';
 	if($award['type'] != 'divisional')
-		$html .= "<tr><td width=\"30mm\" align=\"right\">Sponsored by:</td><td width=\"150mm\">{$award['sponsor']}</td></tr>";
+		$html .= "<tr><td width=\"30mm\" align=\"right\">Sponsored by:</td><td width=\"150mm\">{$sponsor['organization']}</td></tr>";
 
 	if($award['presenter'] != '')
 		$html .= "<tr><td width=\"30mm\" align=\"right\">Presented by:</td><td width=\"150mm\">{$award['presenter']}</td></tr>";
@@ -174,7 +175,7 @@ if(!$script_group_by_prize) {
 		
 		$a_html = '';
 		$a_html .= "<h3>{$award['name']}</h3>";
-		$a_html .= get_award_info_html($award);
+		$a_html .= get_award_info_html($mysqli, $award);
 
 		$award_winner_count = 0;
 		$p_html = '';

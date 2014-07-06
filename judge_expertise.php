@@ -28,19 +28,15 @@ case 'save':
 	post_bool($u['j_sa_only'], 'j_sa_only');
 	if($u['j_sa_only']) {
 		post_array($u['j_sa'], 'j_sa', $awards);
-		$u['j_pref_div1'] = NULL;
-		$u['j_pref_div2'] = NULL;
-		$u['j_pref_div3'] = NULL;
-		$u['j_pref_cat'] = NULL;
+		$u['j_div_pref'] = array();
+		$u['j_cat_pref'] = NULL;
 		$u['j_years_school'] = NULL;
 		$u['j_years_regional'] = NULL;
 		$u['j_years_national'] = NULL;
 	} else {
 		$u['j_sa'] = array();
-		post_int($u['j_pref_div1'], 'j_pref_div1');
-		post_int($u['j_pref_div2'], 'j_pref_div2');
-		post_int($u['j_pref_div3'], 'j_pref_div3');
-		post_int($u['j_pref_cat'], 'j_pref_cat');
+		post_int($u['j_cat_pref'], 'j_cat_pref');
+		post_int_list($u['j_div_pref'], 'j_div_pref');
 		post_int($u['j_years_school'], 'j_years_school');
 		post_int($u['j_years_regional'], 'j_years_regional');
 		post_int($u['j_years_national'], 'j_years_national');
@@ -102,8 +98,8 @@ sfiab_page_begin("Expertise", $page_id, $help);
 <?php
 
 		for($x=0;$x<3;$x++) {
-			$sa = ($x < count($u['j_sa'])) ? (int)$u['j_sa'][$x] : -1;
-			form_select($form_id, 'j_sa[]', "Special Award", $awards, $sa);
+//		$sa = ($x < count($u['j_sa'])) ? (int)$u['j_sa'][$x] : -1;
+			form_select($form_id, "j_sa[$x]", "Special Award", $awards, $u);
 		}
 ?>		
 	</div>
@@ -129,10 +125,11 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	you are assigned to judge will be a perfect match.
 <?php
 
-	form_select_optgroup($form_id, 'j_pref_div1', "Detailed Division 1", $isef_data, $u);
-	form_select_optgroup($form_id, 'j_pref_div2', "Detailed Division 2", $isef_data, $u);
-	form_select_optgroup($form_id, 'j_pref_div3', "Detailed Division 3", $isef_data, $u);
-	form_select($form_id, 'j_pref_cat', "Category Preference", $cats_data, $u);
+	
+	form_select_optgroup($form_id, 'j_div_pref[0]', "Detailed Division 1", $isef_data, $u);
+	form_select_optgroup($form_id, 'j_div_pref[1]', "Detailed Division 2", $isef_data, $u);
+	form_select_optgroup($form_id, 'j_div_pref[2]', "Detailed Division 3", $isef_data, $u);
+	form_select($form_id, 'j_cat_pref', "Category Preference", $cats_data, $u);
 ?>
 	</div>
 <?php

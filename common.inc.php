@@ -57,14 +57,10 @@ function sfiab_load_config($mysqli)
 		$config[$db_var] = $db_val;
 	}
 
-/*
-	if(array_key_exists('HTTPS', $_SERVER)) {
-		$proto = 'https://';
-	else
-		$proto = 'http://';
-*/	
-	$config['fair_url'] = $config['fair_host'].$config['document_root'];
-
+	if(array_key_exists('HTTP_HOST', $_SERVER)) {
+		$config['fair_url'] = (array_key_exists('HTTPS', $_SERVER) ? 'https://' : 'http://')
+					.$_SERVER['HTTP_HOST'].substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']) );
+	} 
 	$config['provincestate'] = 'Province';
 	$config['postalzip'] = 'Postal Code';
 }

@@ -8,22 +8,24 @@ function conv_students($mysqli, $mysqli_old, $year)
 {
 	global $schools_map, $tours_map;
 	global $students_map, $projects_map;
+	
+	$count = 0;
 
-	$mysqli->real_query("DELETE FROM users WHERE FIND_IN_SET('student',`roles`) > 0 AND year<$year");
-	$mysqli->real_query("DELETE FROM projects WHERE year<$year");
+	print("Converting Students for $year...\n");
+
+	$mysqli->real_query("DELETE FROM users WHERE FIND_IN_SET('student',`roles`)>0 AND year=$year");
+	$mysqli->real_query("DELETE FROM projects WHERE year=$year");
 
 	$registration_to_project_map = array();
 
-	$q = $mysqli_old->query("SELECT * FROM students WHERE year='$year'");
+	/* Load all students, skip "new" students. */
+	$q = $mysqli_old->query("SELECT students.* FROM students 
+					LEFT JOIN registrations ON students.registrations_id=registrations.id 
+					WHERE students.year='$year' AND registrations.status!='new'");
 	while($old_s = $q->fetch_assoc()) {
 
 		$sid = $old_s['id'];
 		$rid = $old_s['registrations_id'];
-
-		/* Skip incomplete students */
-		$q1 = $mysqli_old->query("SELECT * FROM registrations WHERE id=$rid");
-		$r = $q1->fetch_assoc();
-		if($r['status'] == 'new') continue;
 
 		/* Create a new user */
 		$password = NULL;
@@ -81,8 +83,12 @@ function conv_students($mysqli, $mysqli_old, $year)
 		$u['tour_id_pref'] = array();
 		$q1 = $mysqli_old->query("SELECT * FROM tours_choice WHERE year='$year' AND students_id=$sid AND rank>0 ORDER BY rank");
 		while($t = $q1->fetch_assoc()) {
-			$tid = $t['tour_id'];
-			$u['tour_id_pref'][] = $tours_map[(int)$tid];
+			$tid = (int)$t['tour_id'];
+			if(!array_key_exists($tid, $tours_map)) {
+				print("   Old Student $sid tour choice $tid doesn't exist.  Skipping.\n");
+				continue;
+			}
+			$u['tour_id_pref'][] = $tours_map[$tid];
 		}
 
 		/* Should only be one tour assignment */
@@ -99,7 +105,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$new_p = project_load($mysqli, $pid);
 			$new_p['num_students'] += 1;
 			project_save($mysqli, $new_p);
-			print("      Adjust project $pid to {$new_p['num_students']} students\n");
+//			print("      Adjust project $pid to {$new_p['num_students']} students\n");
 		} else {
 			$q1 = $mysqli_old->query("SELECT * FROM projects WHERE registrations_id=$rid");
 			$p = $q1->fetch_assoc();
@@ -144,16 +150,19 @@ function conv_students($mysqli, $mysqli_old, $year)
 				$new_p['num_mentors'] += 1;
 			}
 			project_save($mysqli, $new_p);
-			print("      Save project $pid {$new_p['number']} with 1 student and {$new_p['num_mentors']} mentors\n");
+//			print("      Save project $pid {$new_p['number']} with 1 student and {$new_p['num_mentors']} mentors\n");
 
 			$u['s_pid'] = $pid;
 		}
-		print("      Save Student $sid {$u['firstname']} {$u['lastname']}, pid=$pid\n");
+//		print("      Save Student $sid {$u['firstname']} {$u['lastname']}, pid=$pid\n");
 
 		$students_map[$sid] = $uid;
 
 		user_save($mysqli, $u);
+		$count += 1;
 	}
+	print("   Converted $count students\n");
 }
+
 
 ?>

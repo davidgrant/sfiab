@@ -44,21 +44,22 @@ if (!defined('K_TCPDF_EXTERNAL_CONFIG')) {
 
 	define('K_TCPDF_EXTERNAL_CONFIG',true);
 
-	$k_sfiab_path = $_SERVER['DOCUMENT_ROOT'].$config['document_root'].'/';
-	$k_tcpdf_path = $k_sfiab_path.'tcpdf_6/';
-	$k_sfiab_url = $config['document_root'].'/';
-	$k_tcpdf_url = $k_sfiab_url.'/tcpdf_6/';
+	/* TCPDF wants all directories to end with '/' */
+	$k_sfiab_tcpdf_path = __DIR__.'/';
+	$k_sfiab_tcpdf_url = substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT'])).'/';
+	$k_sfiab_data_path = realpath(__DIR__.'/../data').'/';
+	
 /**
  * Installation path (/var/www/tcpdf/).
  * By default it is automatically calculated but you can also set it as a fixed string to improve performances.
  */
-define ('K_PATH_MAIN', $k_tcpdf_path);
+define ('K_PATH_MAIN', $k_sfiab_tcpdf_path);
 
 /**
  * URL path to tcpdf installation folder (http://localhost/tcpdf/).
  * By default it is automatically set but you can also set it as a fixed string to improve performances.
  */
-define ('K_PATH_URL', $k_tcpdf_url);
+define ('K_PATH_URL', $k_sfiab_tcpdf_url);
 
 /**
  * Path for PDF fonts.
@@ -70,7 +71,7 @@ define ('K_PATH_FONTS', K_PATH_MAIN.'fonts/');
  * Default images directory.
  * By default it is automatically set but you can also set it as a fixed string to improve performances.
  */
-define ('K_PATH_IMAGES', $k_sfiab_path.'data/');
+define ('K_PATH_IMAGES', $k_sfiab_data_path);
 
 /**
  * Deafult image logo used be the default Header() method.
