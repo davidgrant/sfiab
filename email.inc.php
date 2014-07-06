@@ -95,7 +95,7 @@ function email_get_user_replacements(&$u, &$additional_replacements)
 		$rep['NAME'] = $u['name'];
 		$rep['EMAIL'] = $u['email'];
 		$rep['USERNAME'] = $u['username'];
-		$rep['SALUTATION'] = $u['salutation'],;
+		$rep['SALUTATION'] = $u['salutation'];
 		$rep['FIRSTNAME'] = $u['firstname'];
 		$rep['LASTNAME'] = $u['lastname'];
 		$rep['ORGANIZATION'] = $u['organization'];

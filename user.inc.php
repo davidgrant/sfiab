@@ -31,8 +31,8 @@ function user_create($mysqli, $username, $email, $role, $year, &$password)
 
 	$u = ($username === NULL) ? 'NULL' : "'$username'";
 
-	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`password`,`salt`,`password_expired`) 
-				VALUES($u, 'new','$email','$year','$role','$password_hash', '', '1')");
+	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`password`,`password_expired`) 
+				VALUES($u, 'new','$email','$year','$role','$password_hash', '1')");
 	$uid = $mysqli->insert_id;
 	print($mysqli->error);
 	/* Since this is a new user, set the unique id == uid */

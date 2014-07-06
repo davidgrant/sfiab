@@ -16,6 +16,9 @@ sfiab_session_start();
 
 sfiab_page_begin('Welcome', 'welcome');
 
+$login_hash = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
+$_SESSION['login_hash'] = $login_hash;
+
 
 
 //<script>
@@ -90,7 +93,7 @@ sfiab_page_begin('Welcome', 'welcome');
 
 	<div data-role="fieldcontain">
 		<label for="register_as" class="select">Register as a:</label>
-		<select name="register_as" id="register_as" <?php/*<!--data-native-menu="false"*/?> >
+		<select name="register_as" id="register_as" >
 		    <option value="student" <?=$s_disabled?> >Student<?=$s_text?></option>
 		    <option value="judge" <?=$j_disabled?> >Judge<?=$j_text?></option>
 		    <option value="volunteer">Volunteer</option>
@@ -224,21 +227,16 @@ sfiab_page_begin('Welcome', 'welcome');
 	<div id="login_msg" class="error error_hidden">
 	</div>
 
-	<div class="info"><p>Note: We have had reports of users using Safari on
-	MacOS being unable to login.  If your password suddenly stops working,
-	you're not going crazy.  Try using Google Chrome or Firefox on MacOS.  We
-	have our best trained monkeys trying to resolve the problem.
-	</div>
-
 	<form action="/" id="login_form">
 		<div data-role="fieldcontain">
 			<label for="un" >Username:</label>
 			<input name="user" id="un" value="" placeholder="Username" type="text">
-		</div>			
+		</div>
 		<div data-role="fieldcontain">
 			<label for="pw" >Password:</label>
 			<input name="pass" id="pw" value="" placeholder="Password" type="password">
-		</div>			
+		</div>
+		<input type="hidden" id="hash" value="<?=$login_hash?>" >
 		<button type="submit" data-inline="true" data-icon="check" data-theme="g">Log in</button>
 	</form>
 
@@ -252,25 +250,24 @@ sfiab_page_begin('Welcome', 'welcome');
 			$('#login_msg').addClass("error_hidden");
 			var u = $('#un').val();
 			var p = $('#pw').val();
+			var h = $('#hash').val();
 
-			$.post( "login.php", { username: u, action: "salt" }, function( data ) {
-				var hash = hex_sha512(hex_sha512(p) + data);
+			var hash = hex_sha512(hex_sha512(p) + h);
 
-				// Send the data using post
-				$.post( "login.php", { username: u, password: hash, action: "login" }, function( data ) {
-					if(data.s == '0') {
-						/* Success */
-						window.location.replace(data.m);
-					} else if(data.s == '3') {
-						/* Account hasn't been activated yet */
-						$.mobile.changePage('#register_send');
-					} else {
-						$('#login_msg').text(data.m);
-						$('#login_msg').removeClass("error_hidden");
-						$.mobile.changePage('#login', { allowSamePageTransition: true } );
-					}
-				}, 'json');
-			});
+			// Send the data using post
+			$.post( "login.php", { username: u, password: hash, action: "login" }, function( data ) {
+				if(data.s == '0') {
+					/* Success */
+					window.location.replace(data.m);
+				} else if(data.s == '3') {
+					/* Account hasn't been activated yet */
+					$.mobile.changePage('#register_send');
+				} else {
+					$('#login_msg').text(data.m);
+					$('#login_msg').removeClass("error_hidden");
+					$.mobile.changePage('#login', { allowSamePageTransition: true } );
+				}
+			}, 'json');
 			return false;
 		});
 	</script>		

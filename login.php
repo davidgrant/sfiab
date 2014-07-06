@@ -15,6 +15,8 @@ if(!array_key_exists('action', $_POST)) {
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+sfiab_session_start();
+
 
 function check_username($username)
 {
@@ -73,26 +75,9 @@ function check_attempts($mysqli, $uid)
 }
 
 switch($action) {
-case 'salt':
-	$username = $mysqli->real_escape_string($_POST['username']);
-	/* Create a salt and send it back */
-	if(!check_username($username)) {
-		print('');
-		exit();
-	}
-
-	$salt = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
-	if(!$mysqli->query("UPDATE users SET salt='$salt' WHERE username='$username'")) {
-		/* If it fails, log it, but send a salt anyway so the queryer (attacker?)
-		 * can't tell if the user exists or not */
-		sfiab_log($mysqli, -1, 'login bad salt', "username: $username");
-	}
-	print($salt);
-	exit();
 
 case 'register':
 	global $sfiab_roles;
-	sfiab_session_start();
 
 	if(sfiab_user_is_a('committee')) {
 		$not_allowed_roles = array();
@@ -181,6 +166,13 @@ case 'register':
 
 	
 case 'login':
+	if(!array_key_exists('login_hash', $_SESSION)) {
+		sfiab_log($mysqli, 'login no user', $username);
+		print(ajax(1, 'Sorry, invalid username or password'));
+		exit();
+	}
+	$login_hash = $_SESSION['login_hash'];
+	
 	$username = strtolower($mysqli->real_escape_string($_POST['username']));
 	$hash = $mysqli->real_escape_string(filter_hash($_POST['password']));
 
@@ -210,15 +202,16 @@ case 'login':
 		exit();
 	}
 
-	/* Salt must be valid */
-	if(strlen($u['salt']) != 128) {
+	/* Hash must be valid, it gets read from the $_SESSION, so there's no 
+	 * reason for it not to be valid*/
+	if(strlen($login_hash) != 128) {
 		sfiab_log($mysqli, 'login bad salt', $username);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
 	/* Wipe out the salt so the same hash can't be used twice */
-	$mysqli->query("UPDATE users SET salt='0' WHERE uid={$u['uid']}");
+//	$mysqli->query("UPDATE users SET salt='0' WHERE uid={$u['uid']}");
 
 	/* Check for too many login attempts */
 	if(check_attempts($mysqli, $u['uid']) == true) { 
@@ -228,7 +221,7 @@ case 'login':
 	}
 
 	/* Passwords match? */
-	$password_hash = hash('sha512', $u['password'].$u['salt']); // hash the password with the unique salt.
+	$password_hash = hash('sha512', $u['password'].$login_hash); // hash the password with the session login hash.
 	if($password_hash != $hash) {
 		sfiab_log($mysqli, 'login bad pass', $username, $u['uid']);
 		print(ajax(1, 'Sorry, invalid username or password'));
@@ -247,7 +240,7 @@ case 'login':
 		user_save($mysqli, $u);
 	}
 
-	sfiab_session_start();
+//	sfiab_session_start();
 	$_SESSION['uid'] = $u['uid'];
 	$_SESSION['unique_uid'] = $u['unique_uid'];
 	$_SESSION['username'] = $username;
@@ -272,7 +265,6 @@ case 'login':
 	exit();
 
 case 'change_pw':
-	sfiab_session_start();
 	$pw1 = $_POST['pw1'];
 	$pw2 = $_POST['pw2'];
 	$letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
