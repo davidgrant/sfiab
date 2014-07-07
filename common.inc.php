@@ -431,6 +431,8 @@ function output_start($title = '')
 	});
   </script>
   <script src="scripts/jquery.mobile-1.4.2.min.js"></script>
+  <script src="scripts/jquery-ui.min.js"></script>
+  <script src="scripts/jquery.ui.touch-punch.min.js"></script>
   <link rel="stylesheet" href="sfiab.css">
   <script src="sfiab.js"></script>
 </head>

@@ -26,39 +26,38 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 switch($action) {
+case 'order':
+	/* Called when an award is reordered.  awards is an array
+	 * of awards, in order, starting from ord=1 */
+	$ord = 0;
+	print_r($_POST);
+
+	foreach($_POST['awards'] as $aid) {
+		$ord++;
+		$aid = (int)$aid;
+		if($aid == 0) continue;
+
+		$mysqli->query("UPDATE awards SET ord='$ord' WHERE id='$aid'");
+	}
+	form_ajax_response(0);
+	exit();
+
 case 'save':
 	$aid = (int)$_POST['aid'];
 	$a = award_load($mysqli, $aid);
-
 	post_text($a['name'],'name');
 	post_text($a['type'],'type');
 	post_text($a['c_desc'],'c_desc');
 	post_text($a['j_desc'],'j_desc');
 	post_text($a['s_desc'],'s_desc');
-	post_text($a['sponsor_organization'],'sponsor_organization');
-	post_text($a['sponsor_website'],'sponsor_website');
-	post_text($a['sponsor_name'],'sponsor_name');
-	post_text($a['sponsor_email'],'sponsor_email');
-	post_text($a['sponsor_phone'],'sponsor_phone');
-	post_text($u['sponsor_address'],'sponsor_address');
-	post_text($u['sponsor_city'],'sponsor_city');
-	post_text($u['sponsor_province'],'sponsor_province');
-	post_text($u['sponsor_postalcode'],'sponsor_postalcode');
-	post_text($u['sponsor_notes'],'sponsor_notes');
-	
 	post_text($a['presenter'],'presenter');
 	post_bool($a['schedule_judges'],'schedule_judges');
-//	post_bool($a['include_in_script'],'include_in_script');
+	post_int($a['sponsor_uid'], 'sponsor_uid');
+	post_bool($a['include_in_script'],'include_in_script');
 	post_bool($a['self_nominate'],'self_nominate');
-	post_int($a['order'],'order');
-	$a['categories'] = array();
-
-	foreach($_POST['categories'] as $index=>$val) {
-		$cid = (int)$val;
-		if($val > 0) $a['categories'][] = $val;
-	}
+	post_int($a['ord'],'ord');
+	post_array($a['categories'], 'categories');
 	award_save($mysqli, $a);
-
 	form_ajax_response(0);
 	exit();
 
@@ -71,10 +70,9 @@ case 'psave':
 	post_float($p['cash'],'cash');
 	post_float($p['scholarship'],'scholarship');
 	post_float($p['value'],'value');
-	post_bool($p['include_in_script'],'include_in_script');
 	post_bool($p['self_nominate'],'self_nominate');
 	post_bool($p['external_register_winners'],'external_register_winners');
-	post_int($p['order'],'order');
+	post_int($p['ord'],'ord');
 	$p['trophies'] = array();
 	if(array_key_exists('trophies', $_POST)) {
 		foreach($_POST['trophies'] as $index=>$val) {
@@ -113,7 +111,9 @@ case 'pdel':
 $award_types = array('divisional' => 'Divisional','special'=>'Special','grand'=>'Grand','other'=>'Other');
 $trophies = array('keeper'=>'Student Keeper','return'=>'Student Return','school_keeper'=>'School Keeper','school_return'=>'School Return');
 
-sfiab_page_begin("Edit Awards", $page_id);
+$help = 'Use the <button data-icon="gear" data-iconpos="notext" data-inline="true"></button> button to edit the award.  Drag and drop the <button data-icon="bars" data-iconpos="notext" data-inline="true"></button> icon to reorder the awards.';
+
+sfiab_page_begin("Edit Awards", $page_id, $help);
 
 ?>
 
@@ -150,29 +150,16 @@ sfiab_page_begin("Edit Awards", $page_id);
 		form_textbox($form_id, 'j_desc', "Judge Description (Only judges see this)", $a);
 		form_textbox($form_id, 'c_desc', "Committee Notes (Only the committee sees this)", $a);
 		form_text($form_id, 'sponsor_organization', "Sponsor", $a);
-?>		<div data-role="collapsible" data-collapsed="true">
-			<h3>Sponsor Contact Information</h3>
-<?php			form_text($form_id, 'sponsor_website', "Sponsor Contact Name", $a);
-			form_text($form_id, 'sponsor_name', "Sponsor Contact Name", $a);
-			form_text($form_id, 'sponsor_email', "Sponsor Contact Email", $a, 'email');
-			form_text($form_id, 'sponsor_phone', "Sponsor Contact Phone", $a, 'tel');
-			form_text($form_id, 'sponsor_address', 'Address 1', $a);
-			form_text($form_id, 'sponsor_city', 'City', $a);
-			form_province($form_id, 'sponsor_province', 'Province / Territory', $a);
-			form_text($form_id, 'sponsor_postalcode', 'Postal Code', $a);
-			form_text($form_id, 'sponsor_notes', 'Notes', $a);
-?>		</div>
-<?php		
+
 		form_check_group($form_id, 'categories', "Categories", $cats, $a);
 		form_yesno($form_id, 'schedule_judges', 'Schedule Judges', $a);
 		form_yesno($form_id, 'self_nominate', 'Students can Self Nominate', $a);
-//		form_yesno($form_id, 'include_in_script', 'Include in Ceremony Script', $a);
+		form_yesno($form_id, 'include_in_script', 'Include in Ceremony Script', $a);
 		form_text($form_id, 'presenter', "Presenter", $a);
-		form_int($form_id, 'order', "Order", $a);
 		form_submit($form_id, 'save', 'Save', 'Award Saved');
 		form_end($form_id);
 ?>		<h3>Prizes</h3> 
-<?php	foreach($a['prizes'] as $p) {
+<?php		foreach($a['prizes'] as $p) {
 			$pid = $p['id'];
 			$form_id = $page_id.'_prize'.$pid.'_form';
 			$show = ($pid == $show_pid) ? 'data-collapsed="false"' : '';
@@ -183,14 +170,13 @@ sfiab_page_begin("Edit Awards", $page_id);
 				form_begin($form_id, 'c_awards_edit.php?page=edit&aid='.$aid);
 				form_hidden($form_id, 'pid', $pid);
 				form_text($form_id, "name", 'Name', $p);
-				form_int($form_id, "number", "Number of this Prize", $p);
+				form_int($form_id, "number", "Number Available to be Awarded", $p);
 				form_text($form_id, "cash", 'Cash Award', $p);
 				form_text($form_id, "scholarship", 'Scholarship', $p);
 				form_text($form_id, "value", 'Prize Value', $p);
 				form_check_group($form_id, "trophies", "Trophies", $trophies, $p);
-				form_yesno($form_id, "include_in_script", 'Include in Ceremony Script', $p);
 				form_yesno($form_id, 'external_register_winners', "(External) Register Winners at this fair", $p);
-				form_int($form_id, "order", "Order", $p);
+				form_int($form_id, "ord", "Order", $p);
 	
 ?>	
 				<div class="ui-grid-a">
@@ -200,13 +186,9 @@ sfiab_page_begin("Edit Awards", $page_id);
 				<div class="ui-block-b"> 
 				<a href="#" onclick="return prize_delete(<?=$p['id']?>);" data-role="button" data-icon="delete" data-theme="r">Delete Prize</a>
 				</div></div>
-<?php
-				form_end($form_id);
-?>
+<?php				form_end($form_id); ?>
 			</div>
-<?php	
-		}
-?>
+<?php		} ?>
 		<a href="c_awards_edit.php?page=edit&aid=<?=$aid?>&pid=0" data-role="button" data-icon="plus" data-theme="g" data-ajax="false">New Prize</a>
 <?php
 
@@ -216,44 +198,86 @@ sfiab_page_begin("Edit Awards", $page_id);
 	default:
 		$awards = award_load_all($mysqli);
 	?>
-		<table >
+		<p>Use the <button data-icon="gear" data-iconpos="notext" data-inline="true"></button> button to edit the award.  Drag and drop the <button data-icon="bars" data-iconpos="notext" data-inline="true"></button> icon to reorder the awards.
+
+		<table id="awards_list" >
 		<thead>
-		<tr><th>Order</th><th>Name</th><th>Prizes</th><th>Actions</th></td>
+			<tr><th>Order /<br/>Type</th><th>Name / Prize(s)</th><th>Actions</th></tr>
 		</thead>
+		<tbody>
 	<?php
 		$current_type = '';
 		foreach($awards as $aid=>$a) {
-			if($a['type'] != $current_type) {
-				$current_type = $a['type'];
-				print("<tr><td colspan=4><h3>{$award_types[$current_type]}</h3></td></tr>");
+
+			if(count($a['prizes']) > 0) {
+				$prizes = '';
+				foreach($a['prizes'] as &$p) {
+					if($prizes != '') $prizes .= ', ';
+					$prizes .= $p['name'];
+				}
+			} else {
+				$prizes = '<b><font color="red">Award has NO prizes (it can\'t be awarded)</font></b>';
 			}
-	?>
-		<tr id="award_row_<?=$a['id']?>" >
-		<td align="center"><?=$a['order']?></td>
-		<td width="50%" ><?=$a['name']?></td>
-		<td align="center"><?=count($a['prizes'])?></td>
+
+			$script_str = '';
+			if($a['include_in_script'] != 1) {
+				$script_str = '<br/><b><font color="red">Excluded from Award Ceremony Script</font></b>';
+			}
+
+
+			?>
+			<tr id="<?=$a['id']?>" >
+			<td align="center"><b><span id="award_order_<?=$a['id']?>"><?=$a['ord']?></span></b><br/><font size=-1><?=$award_types[$a['type']]?></font></td>
+			<td width="50%" ><b><?=$a['name']?></b><br/><font size=-1><?=$prizes?><?=$script_str?></font></td>
 			<td align="center">
 				<div data-role="controlgroup" data-type="horizontal" data-mini="true">
 					<a href="c_awards_edit.php?page=edit&aid=<?=$a['id']?>" data-role="button" data-iconpos="notext" data-icon="gear" data-ajax="false">Edit</a>
-					<a href="#" onclick="return award_delete(<?=$a['id']?>);" data-role="button" data-iconpos="notext" data-icon="delete">Delete</a>
+					<a href="#" data-role="button" data-iconpos="notext" data-icon="bars" class='handle'>Move</a>
 				</div>
 			</td>
-		</tr>
 
-	<?php
-	}
-	?>
+
+			</tr>
+
+<?php		} ?>
+</tbody>
 		</table>
 		<a href="c_awards_edit.php?page=edit&aid=0" data-role="button" data-icon="plus" data-ajax="false" data-theme="g">New Award</a>
-	<?php
 	
-	}
+
+<?php	}
 ?>
 
 
 </div></div>
 	
 <script>
+
+$('#awards_list tbody').sortable({
+		'containment': 'parent',
+		'opacity': 0.6,
+		update: function(event, ui) {
+			/* Create an array to store the awards, in order.  Award in index 0 will be assigned ord=1, and up from there */
+			var awards = [];
+			$('#awards_list tbody tr').each(function(index) {
+				var award_id = $(this).attr('id');
+				awards[index] = award_id;
+				$('#award_order_'+award_id).text(index + 1);
+			});
+			$.post('c_awards_edit.php', { action: "order", awards: awards }, function(data) {
+				});
+
+		}, 
+		/* This fixes the width bug on drag where a table is compressed instead of maintaining its original width */
+		helper: function(e, ui) {
+			ui.children().each(function() {
+				$(this).width($(this).width());
+			});
+			return ui;
+		},
+		handle: ".handle" });
+
+
 function award_delete(id) {
 	if(confirm('Really delete this award?') == false) return false;
 	$.post('c_awards_edit.php', { action: "del", aid: id }, function(data) {

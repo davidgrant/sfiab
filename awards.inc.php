@@ -30,7 +30,8 @@ function award_load($mysqli, $id , $data = NULL)
 	$a['categories'] = explode(',',$a['categories']);
 	filter_bool_or_null($a['schedule_judges']);
 	filter_bool_or_null($a['self_nominate']);
-	filter_int_or_null($a['order']);
+	filter_bool_or_null($a['include_in_script']);
+	filter_int_or_null($a['ord']);
 	filter_int($a['sponsor_uid']);
 
 	unset($a['original']);
@@ -38,7 +39,7 @@ function award_load($mysqli, $id , $data = NULL)
 	$a['original'] = $original;
 
 	$a['prizes'] = array();
-	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `order`");
+	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `ord`");
 	while($p = $q->fetch_assoc()) {
 		$prize = prize_load($mysqli, 0, $p);
 		$prize['award'] = &$a;
@@ -59,7 +60,7 @@ function award_load_by_prize($mysqli, $prize_id)
 function award_load_all($mysqli)
 {
 	global $config;
-	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' ORDER BY `type`,`order`");
+	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' ORDER BY `ord`");
 	$awards = array();
 	while($d = $q->fetch_assoc()) {
 		$awards[intval($d['id'])] = award_load($mysqli, 0, $d);
@@ -113,7 +114,6 @@ function prize_load($mysqli, $pid, $data=NULL)
 	}
 	$p['trophies'] = explode(',', $p['trophies']);
 	filter_int($p['id']);
-	filter_bool_or_null($p['include_in_script']);
 	filter_bool($p['external_register_winners']);
 
 	unset($p['original']);
