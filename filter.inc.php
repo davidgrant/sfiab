@@ -69,6 +69,20 @@ function filter_int_list(&$val)
 	}
 }
 
+function filter_str_list(&$val)
+{
+	if(is_array($val)) return;
+	if($val === NULL or $val == '') {
+		$val = array();
+	} else {
+		$l = explode(',', $val);
+		$val = array();
+		foreach($l as $value) {
+			$val[] = $value;
+		}
+	}
+}
+
 function post_bool(&$val, $var)
 {
 	if(array_key_exists($var, $_POST)) {

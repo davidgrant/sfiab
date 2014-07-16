@@ -112,7 +112,8 @@ function prize_load($mysqli, $pid, $data=NULL)
 		$p = $data;
 		$pid = $p['id'];
 	}
-	$p['trophies'] = explode(',', $p['trophies']);
+	
+	filter_str_list($p['trophies']);
 	filter_int($p['id']);
 	filter_bool($p['external_register_winners']);
 
