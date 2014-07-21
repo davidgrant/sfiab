@@ -125,7 +125,7 @@ for($round=1;$round <=2; $round++) {
 			/* Use the same logic for cusp and SA teams, except query a different slot type */
 
 			$html = '';
-			foreach($award['prizes'] as $p) { 
+			foreach($award['prizes_in_order'] as $p) { 
 				$html .= '<h4>'.$p['name'].' - '.$p['number'].' Prize(s) To Award</h4>';
 
 

@@ -179,9 +179,9 @@ if(!$script_group_by_prize) {
 
 		$award_winner_count = 0;
 		$p_html = '';
-		foreach($award['prizes'] as $prize_id => &$prize) {
+		foreach($award['prizes_in_order'] as &$prize) {
 
-			if($prize['include_in_script'] == 0) continue;
+			$prize_id = $prize['id'];
 
 			$p_html = '';
 
@@ -236,8 +236,6 @@ if(!$script_group_by_prize) {
 		if(!in_array($award['type'], $script_award_types)) continue;
 
 		foreach($award['prizes'] as $prize_id => &$prize) {
-
-			if($prize['include_in_script'] == 0) continue;
 
 			if(!array_key_exists($prize_id, $winners)) {
 				$winners[$prize_id] = array();

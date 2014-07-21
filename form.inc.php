@@ -29,7 +29,7 @@ function form_data_clear_btn()
 {
 	global $form_show_data_clear_buttons;
 	if($form_show_data_clear_buttons) {
-		return 'data-clear-btin="true"';
+		return 'data-clear-btn="true"';
 	}
 	return '';
 }
@@ -227,13 +227,14 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$id = $page_id.'_'.$name;
 
 
-	if($data_role != '') 
-		$data_role = "data-role=\"$data_role\"";
 
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
-	$mstr = ($multi) ?  'multiple="true" data-native-menu="false"' : '';
-	$d = $form_disabled ? ' disabled="disabled"': '';
-	$d .= $inline ? 'data-inline="true"' : '';
+
+	$select_attrs = '';
+	if($data_role != '') $select_attrs += " data-role=\"$data_role\"";
+	if($multi) $select_attrs += ' multiple="true" data-native-menu="false"';
+	if($form_disabled) $select_attrs += ' disabled="disabled"';
+	if($inline) $select_attrs += ' data-inline="true"';
 
 	$v = form_get_value($name, $value);
 
@@ -241,7 +242,7 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 		<div class="ui-field-contain <?=$extra_class?>">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
 <?php	} ?>
-		<select name="<?=$name?>" id="<?=$id?>" <?=$data_role?> <?=$mstr?> <?=$d?> >
+		<select name="<?=$name?>" id="<?=$id?>" <?=$select_attrs?> >
 <?php 			if($data_role == '') { ?>
 				<option value="">Choose...</option>
 <?php			}
@@ -251,6 +252,7 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php			} ?>
 		</select>
+
 <?php	if($label !== NULL) { ?>
 		</div>
 <?php	}
@@ -367,6 +369,7 @@ function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwor
 	}
 }
 
+/* This has a data-alt2 attribute so it is enabled/disabled with the sfiab_form */
 function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g')
 {
 	global $form_disabled;
@@ -377,12 +380,17 @@ function form_submit($form_id, $action, $text = "Save", $saved_text = "Informati
 	</button>
 <?php
 }
+
+/* This doesn't create a data-alt2 attribute, so it won't be enabled/disabled with the sfiab_form, it's always
+ * enabled */
 function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check")
 {
 	global $form_disabled;
-	$d = $form_disabled ? ' disabled="disabled"': '';
+	$attrs = '';
+	if($form_disabled) $attrs += ' disabled="disabled"';
+	
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" <?=$d?> >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" <?=$attrs?> >
 		<?=$text?>
 	</button>
 <?php
@@ -453,31 +461,6 @@ function form_disable_message($page_id, $closed, $accepted=false)
 		Registration is closed.  Information on this page cannot be changed.
 		</div>
 <?php	} 
-}
-
-function form_scripts_no_ajax($action, $page_id, $fields)
-{
-	$form_id = $page_id . "_form";
-	$button_id = $page_id . "_form_submit";
-?>
-	<script>
-		// highlight any incomplete fields
-<?php 		foreach($fields as $f) { ?>
-			$("label[for='<?=$page_id?>_<?=$f?>']").addClass('error');
-<?php		}?>
-
-		$( "#<?=$form_id?> :input" ).change(function() {
-	               $('#<?=$button_id?>').removeAttr('disabled');
-		       $('#<?=$button_id?>').text('Save');
-		});
-
-		$( "#<?=$form_id?> :input" ).keyup(function() {
-	               $('#<?=$button_id?>').removeAttr('disabled');
-		       $('#<?=$button_id?>').text('Save');
-		});
-
-	</script>			
-<?php
 }
 
 function form_ajax_response_error($status, $error) 

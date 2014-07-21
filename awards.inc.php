@@ -7,6 +7,11 @@ $award_types = array('divisional' => 'Divisional',
 			'other' => 'Other',
 			'grand' => 'Grand');
 
+$award_trophies = array('keeper'=>'Student Keeper',
+			'return'=>'Student Return',
+			'school_keeper'=>'School Keeper',
+			'school_return'=>'School Return');
+
 
 function award_create($mysqli, $year)
 {
@@ -34,17 +39,28 @@ function award_load($mysqli, $id , $data = NULL)
 	filter_int_or_null($a['ord']);
 	filter_int($a['sponsor_uid']);
 
+	/* Make a copy for the original */
 	unset($a['original']);
 	$original = $a;
 	$a['original'] = $original;
 
+	/* This reverse-links $prize['award'] to a reference to the original award, 
+	 * so it does create a recursion, but can't really avoid that unless we make 
+	 * more copies */
 	$a['prizes'] = array();
+	$a['prizes_in_order'] = array();
 	$q = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='$id' ORDER BY `ord`");
 	while($p = $q->fetch_assoc()) {
 		$prize = prize_load($mysqli, 0, $p);
-		$prize['award'] = &$a;
-		$a['prizes'][] = $prize;
+		$pid = $prize['id'];
+
+		$a['prizes'][$pid] = $prize;
+		/* Link back to award */
+		$a['prizes'][$pid]['award'] = &$a;
+		/* Also store it in order as a reference */
+		$a['prizes_in_order'][] = &$a['prizes'][$pid];
 	}
+
 
 	return $a;
 }
@@ -98,7 +114,11 @@ function award_load_special_for_project_select($mysqli, &$p)
 
 function prize_create($mysqli, $award_id)
 {
-	$mysqli->query("INSERT INTO award_prizes(`award_id`) VALUES('$award_id')");
+	$q = $mysqli->query("SELECT MAX(ord) AS c FROM award_prizes WHERE award_id='$award_id'");
+	$r = $q->fetch_assoc();
+	$ord = (int)$r['c'] + 1;
+
+	$mysqli->query("INSERT INTO award_prizes(`award_id`,`ord`) VALUES('$award_id','$ord')");
 	$prize_id = $mysqli->insert_id;
 	return $prize_id;
 }
