@@ -93,6 +93,8 @@ case 'save_back':
 case 'del':
 	$aid = (int)$_POST['aid'];
 	if($aid > 0) {
+		$a = award_load($mysqli, $aid);
+		$mysqli->real_query("UPDATE awards SET `ord`=`ord`-1 WHERE year='{$config['year']}' AND ord > '{$a['ord']}'");
 		/* Delete prizes and awards */
 		$mysqli->real_query("DELETE FROM award_prizes WHERE award_id='$aid'");
 		$mysqli->real_query("DELETE FROM awards WHERE id='$aid'");
@@ -168,6 +170,11 @@ function print_prize_div($form_id, $pid, $show, &$p)
 	$aid = (int)$_GET['aid'];
 	$cats = categories_load($mysqli);
 
+/*	if($aid == 0) {
+		$mysqli->real_query("INSERT INTO awards (`name`,`year`) VALUES('New Award','{$config['year']}')");
+		$aid = $mysqli->insert_id;
+	}
+*/
 	$sponsor_list = array();
 	$sponsor_list[0] = "Create a New Sponsor (Enter Sponsor Below)";
 	$sponsor_list += sponsors_load_for_select($mysqli);
@@ -294,7 +301,6 @@ function prize_create(aid) {
 		$("#prizes").trigger('create');
 	});
 	return false;
-	
 }
 
 /* Toggle for the new sponsor textbox */

@@ -54,12 +54,16 @@ case 'prize_order':
 	exit();
 
 case 'add':
-	$mysqli->real_query("INSERT INTO awards (`name`,`year`) VALUES('New Award','{$config['year']}')");
+	/* Create an award with a default name and ord=1 (move all other awards down one).
+	 * Create a prize for it too */
+	$mysqli->real_query("UPDATE awards SET `ord` = `ord`+1 WHERE year='{$config['year']}'");
+	$mysqli->real_query("INSERT INTO awards (`name`,`ord`,`year`) VALUES('New Award',1,'{$config['year']}')");
 	$aid = $mysqli->insert_id;
 	$pid = prize_create($mysqli, $aid);
 	$prize = prize_load($mysqli, $pid);
 	$prize['name'] = 'New prize';
 	$prize['number'] = 1;
+	$prize['ord'] = 1;
 	prize_save($mysqli, $prize);
 	/* Print the award id, the js function takes this and redirects to c_awards_edit?aid=..." */
 	print("$aid");
