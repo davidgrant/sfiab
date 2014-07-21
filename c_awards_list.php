@@ -53,7 +53,17 @@ case 'prize_order':
 	form_ajax_response(0);
 	exit();
 
-
+case 'add':
+	$mysqli->real_query("INSERT INTO awards (`name`,`year`) VALUES('New Award','{$config['year']}')");
+	$aid = $mysqli->insert_id;
+	$pid = prize_create($mysqli, $aid);
+	$prize = prize_load($mysqli, $pid);
+	$prize['name'] = 'New prize';
+	$prize['number'] = 1;
+	prize_save($mysqli, $prize);
+	/* Print the award id, the js function takes this and redirects to c_awards_edit?aid=..." */
+	print("$aid");
+	exit();
 }
 
 
@@ -145,7 +155,7 @@ sfiab_page_begin("Edit Awards", $page_id, $help);
 <?php	} ?>
 	</tbody>
 	</table>
-	<a href="c_awards_edit.php?&aid=0" data-role="button" data-icon="plus"  data-ajax="false" data-theme="g">New Award</a>
+	<a href="#" onclick="return award_create();" data-role="button" data-icon="plus"  data-ajax="false" data-theme="g">New Award</a>
 
 </div></div>
 	
@@ -202,6 +212,14 @@ $('.prize_list>tbody').sortable({
 		},
 		handle: ".prize_handle" 
 	});
+
+function award_create() {
+	$.post('c_awards_list.php', { action: "add" }, function(data) {
+		window.location = "c_awards_edit.php?aid="+data;
+	});
+	return false;
+}
+
 
 </script>
 
