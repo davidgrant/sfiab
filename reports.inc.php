@@ -334,7 +334,9 @@ function report_save_field($mysqli, $report, $type)
 */	
 
 	$fieldvar = "report_{$report['type']}s_fields";
-	$allow_fields = array_keys($$fieldvar);
+//	print($report['type']." = $fieldvar\n");
+
+//	$allow_fields = array_keys($$fieldvar);
 
 	if(count($report[$type]) == 0) return;
 	
@@ -516,7 +518,8 @@ function report_save_field($mysqli, $report, $type)
 			`section`='".$mysqli->real_escape_string($report['section'])."',
 			`desc`='".$mysqli->real_escape_string($report['desc'])."',
 			`creator`='".$mysqli->real_escape_string($report['creator'])."',
-			`type`='".$mysqli->real_escape_string($report['type'])."'
+			`type`='".$mysqli->real_escape_string($report['type'])."',
+			`use_abs_coords`='".(int)$report['use_abs_coords']."'
 			WHERE `id`={$report['id']}");
 	print($mysqli->error);
 

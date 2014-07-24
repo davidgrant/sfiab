@@ -1,4 +1,4 @@
-<?
+<?php
 /* 
    This file is part of the 'Science Fair In A Box' project
    SFIAB Website: http://www.sfiab.ca

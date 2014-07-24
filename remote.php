@@ -444,7 +444,7 @@ $password = $data['auth']['password'];
 #$response['query'] = $data;
 
 $u = user_load_by_username($mysqli, $username);
-$fair = fair_load($mysqli, $username);
+$fair = fair_load_by_username($mysqli, $username);
 
 #print_r($fair);
 // echo "Authenticating... ";

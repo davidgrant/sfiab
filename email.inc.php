@@ -16,6 +16,7 @@ function email_load($mysqli, $email_name, $eid=-1, $data=NULL)
 		$e = $data;
 	}
 
+	unset($e['original']);
 	$original = $e;
 	$e['original'] = $original;
 	return $e;
@@ -80,6 +81,7 @@ function email_get_user_replacements(&$u, &$additional_replacements)
 	global $config;
 	/* Replacements that depend on the configuration or must be specified */
 	$rep = array(	'FAIRNAME' => $config['fair_name'],
+			'FAIRABBR' => $config['fair_abbreviation'],
 			'YEAR' => $config['year'],
 			'LOGIN_LINK' => $additional_replacements['FAIR_URL'].'/index.php#login',
 			'FAIR_URL' => $additional_replacements['FAIR_URL'],

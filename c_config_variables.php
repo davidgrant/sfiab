@@ -37,17 +37,14 @@ case 'save':
 			$mysqli->query("UPDATE config SET `val`='$val' WHERE `var`='$var' AND year='{$config['year']}'");
 		}
 	}
-	form_ajax_response(array('status'=>0));
+	form_ajax_response(0);
 	exit();
 }
 
-$page_id = 'c_config';
-$help = '<p>Configuration';
-sfiab_page_begin("Configuration", $page_id, $help);
+$page_id = 'c_config_variables';
+$help = '<p>SFIAB Configuration';
+sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 ?>
-
-
-
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
@@ -66,7 +63,7 @@ sfiab_page_begin("Configuration", $page_id, $help);
 		<div id="<?=$cfg_tab_names[$k]?>" class="ui-body-d tablist-content">
 			<h3><?=$k?></h3>
 <?php			$form_id = $page_id.'_'.$cfg_tab_names[$k].'_form';
-			form_begin($form_id, 'c_config.php');
+			form_begin($form_id, 'c_config_variables.php');
 			foreach($v as $var=>&$d) { 
 				form_text($form_id, 'cfg_'.$d['var'], $d['var'], $d['val']);
 			}
