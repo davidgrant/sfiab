@@ -55,7 +55,7 @@ function filter_languages(&$val)
 		}
 	}
 }
-function filter_int_list(&$val)
+function filter_int_list(&$val, $size=0)
 {
 	if(is_array($val)) return;
 	if($val === NULL or $val == '') {
@@ -63,10 +63,27 @@ function filter_int_list(&$val)
 	} else {
 		$l = explode(',', $val);
 		$val = array();
+		$x = 0;
 		foreach($l as $value) {
-			$val[] = (int)$value;
+			if($value === '') {
+				$val[] = NULL;
+			} else {
+				$val[] = (int)$value;
+			}
+
+			/* If we hit size, stop.  If $size == 0 we'll never hit this */
+			$x++;
+			if($x == $size) break;
 		}
 	}
+
+	/* If it's not big enough, pad it */
+	if(count($val) < $size) {
+		for($x=count($val); $x<$size; $x++) {
+			$val[] = NULL;
+		}
+	}
+
 }
 
 function filter_str_list(&$val)

@@ -392,7 +392,7 @@ function sfiab_print_header($page_id)
 <?php		if(sfiab_logged_in() && isset($_SESSION['edit_uid'])) { ?>
 			<h3 style="white-space:normal"><?=sfiab_info("Temporarily logged in as {$_SESSION['edit_name']}. <a href=\"c_user_list.php?return=1\" data-ajax=\"false\" >Click Here</a> to return.")?></h3>
 <?php		} else { ?>
-			<h3><?=$config['fair_name']?></h3>
+			<h3><?=$config['fair_name']?> <?=$config['year']?></h3>
 <?php		} ?>
 		<a href="#help_panel_<?=$page_id?>" data-icon="info" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon">Help</a>
 

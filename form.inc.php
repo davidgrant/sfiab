@@ -383,10 +383,9 @@ function form_submit($form_id, $action, $text = "Save", $saved_text = "Informati
 
 /* This doesn't create a data-alt2 attribute, so it won't be enabled/disabled with the sfiab_form, it's always
  * enabled */
-function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check")
+function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check", $attrs='')
 {
 	global $form_disabled;
-	$attrs = '';
 	if($form_disabled) $attrs += ' disabled="disabled"';
 	
 ?>
@@ -403,16 +402,26 @@ function form_hidden($form_id, $name, $txt)
 <?php
 }
 
-function form_begin($form_id, $action, $disable_form=false)
+function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true)
 {
 	global $form_form_id, $form_disabled;
 	$form_form_id = $form_id;
 	$form_disabled = $disable_form;
 
 	/* remove sfiab class from disabled forms so the buttons don't work */
-	$cl = $form_disabled ? '' : 'sfiab_form';
+	$aj = '';
+	if($form_disabled) {
+		$cl = '';
+	} else {
+		$cl = 'sfiab_form';
+		if($enable_ajax) {
+			$cl .= ' sfiab_form_ajax';
+		} else {
+			$aj = 'data-ajax="false"';
+		}
+	} 
 ?>
-	<form action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>">
+	<form method="post" action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>" <?=$aj?> >
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php
 }

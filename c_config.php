@@ -24,6 +24,7 @@ sfiab_page_begin("Configuration", $page_id);
 	<h3>SFIAB Configuration</h3> 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_config_variables.php" data-rel="external" data-ajax="false">Configuration Variables</a></li>
+	<li><a href="c_rollover.php" data-rel="external" data-ajax="false">Rollover Fair Year</a></li>
 	</ul>
 
 	<h3>External Fairs</h3> 

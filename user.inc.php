@@ -43,6 +43,7 @@ function user_create($mysqli, $username, $email, $role, $year, &$password)
 
 function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 {
+	global $config;
 	$u = NULL;
 	if((int)$uid > 0) {
 		$id = (int)$uid;
@@ -135,15 +136,9 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool_or_null($u['j_willing_lead']);
 	filter_bool_or_null($u['j_dinner']);
 	filter_bool_or_null($u['j_mentored']);
-	if($u['j_rounds'] === NULL) 
-		$u['j_rounds'] = array(NULL,NULL);
-	else {
-		$a = explode(',',$u['j_rounds']);
-		$u['j_rounds'] = array(0,0);
-		foreach($a as $r) {
-			$u['j_rounds'][$r] = 1;
-		}
-	}
+	/* Make sure the j_rounds have the proper number of entries */
+	filter_int_list($u['j_rounds'], $config['judging_rounds']);
+
 
 	filter_languages($u['languages']);
 
@@ -169,6 +164,29 @@ function user_load_from_data($mysqli, $data)
 	return user_load($mysqli, -1, -1, NULL, $data);
 }
 
+
+function user_save_array_str(&$val, $allow_null = false)
+{
+	if($val === NULL || count($val) == 0) {
+		return NULL;
+	} else {
+		$a = array();
+		foreach($val as $index=>$id) {
+			if($id === NULL) {
+				/* Store it, or skip it? */
+				if($allow_null) {
+					$a[] = '';
+				} else {
+					continue;
+				}
+			} else {
+				$a[] = $id;
+			}
+		}
+		return implode(',', $a);
+	}
+	
+}
 
 
 function user_save($mysqli, &$u) 
@@ -202,29 +220,21 @@ function user_save($mysqli, &$u)
 				break;
 
 			case 'j_rounds':
-				$a = array();
-				foreach($val as $id=>$enabled) {
-					if($enabled == 1) $a[] = $id;
-				}
-				$v = implode(',', $a);
+				/* Create an array, but allow NULL entries, stored as ''.  When filtered on read, 
+				 * any '' element is translated back to NULL */
+			 	$v = user_save_array_str($val, true);
 				break;
 
 			default:
 				/* Join non-special arrays */
 				if(is_array($val)) {
-					if(count($val) == 0) {
-						$v = NULL;
-					} else {
-						$a = array();
-						foreach($val as $index=>$id) {
-							if($id !== NULL) $a[] = $id;
-						}
-						$v = implode(',', $a);
-					}
-				} else if(is_null($val)) 
+					/* Join an array, but filter NULLs */
+					$v = user_save_array_str($val, false);
+				} else if(is_null($val)) {
 					$v = NULL;
-				else 
+				} else {
 					$v = $val;
+				}
 				break;
 			}
 

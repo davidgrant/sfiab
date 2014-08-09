@@ -74,7 +74,7 @@ function sfiab_form_update_vals(form_id, vals)
 
 $( document ).on( "pagecreate", function( event ) {
 	// Attach a submit handler to the form
-	$( ".sfiab_form" ).submit(function( event ) {
+	$( ".sfiab_form_ajax" ).submit(function( event ) {
 
 		var form = $(event.target);
 		var form_id = form.attr('id');

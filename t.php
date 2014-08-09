@@ -11,15 +11,20 @@ sfiab_load_config($mysqli);
 // set the default timezone to use. Available since PHP 5.1
 date_default_timezone_set('PST8PDT');
 
-$t = @time(NULL);
-$now = @date( 'Y-m-d H:i:s', $t);
-print($now);
 
-$t = "18:00:00";
-$d = date_parse($t);
+$fstart = "2014-04-12";
+$s = date('Y-m-d H:i:s', strtotime($fstart));
+
+print("Fair start: $fstart, back and forth: $s\n");
+
+$fstart = "2014-04-12";
+$s = date('Y-m-d H:i:s', strtotime($fstart)+ (120 * 60)) ;
+
+print("Fair start: $fstart, back and forth: $s\n");
+
+
+$d = date_parse($fstart);
 print_r($d);
-
-print date("h:i a", strtotime($t));
 
 
 
