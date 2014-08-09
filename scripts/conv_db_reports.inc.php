@@ -1,24 +1,10 @@
 <?php
-require_once('common.inc.php');
-require_once('user.inc.php');
-require_once('form.inc.php');
-require_once('incomplete.inc.php');
-require_once('config.inc.php');
-
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
 
 require_once('reports.inc.php');
 
 
-$mysqli_old = new mysqli($dbhost, $dbuser, $dbpassword, "sfiab_gvrsf");
-
-$year = $config['year'];
-
-$users = array();
-
- function old_report_load($mysqli, $report_id)
- {
+function old_report_load($mysqli, $report_id)
+{
 	$report = array();
 
 	$q = $mysqli->query("SELECT * FROM reports WHERE id='$report_id'");
@@ -83,65 +69,76 @@ $users = array();
 				if(in_array($o, $valign_opts)) $val['face'] = $o;
 			}
 
-			print("[$t][{$val['ord']}]\n");
+//			print("[$t][{$val['ord']}]\n");
 			$report[$t][$val['ord']] = $val;
 			break;
 		}
 	}
-	print_r($report);
+//rint_r($report);
 	return $report;
 }
 
- function old_report_load_all($mysqli) 
+function old_report_load_all($mysqli) 
 {
-	print("Loading old reports...");
+	print("   - Loading old reports...");
 	$ret = array();
 	$q = $mysqli->query("SELECT id FROM reports");
 	while($r = $q->fetch_assoc()) {
 		$report = old_report_load($mysqli, $r['id']);
 		$ret[] = $report;
-		print("   {$report['name']}\n");
+		print("      - {$report['name']}\n");
 	}
 	return $ret; 
 }
 
 
-$reports = old_report_load_all($mysqli_old);
+function conv_reports($mysqli, $mysqli_old)
+{
+	$c = 0;
+	print("Converting reports\n");
+	$reports = old_report_load_all($mysqli_old);
 
-print("Deleting all new reports\n");
-$mysqli->real_query("DELETE FROM reports");
-$mysqli->real_query("DELETE FROM reports_items");
+	printf("   - Deleting all reports in new database...\n");
+	$mysqli->real_query("DELETE FROM reports");
+	$mysqli->real_query("DELETE FROM reports_items");
 
 
-print("Converting reports\n");
-foreach($reports as &$r) {
+	foreach($reports as &$r) {
 
-	foreach($r['col'] as &$i) {
-		$i['h_rows'] = (int)$i['lines'];
+		$r['use_abs_coords'] = 0;
 
-		if($i['face'] == 'bold' and !in_array('bold', $i['fontstyle'])) 
-			$i['fontstyle'][] = 'bold';
+		foreach($r['col'] as &$i) {
+			$i['h_rows'] = (int)$i['lines'];
 
+			if($i['face'] == 'bold' and !in_array('bold', $i['fontstyle'])) 
+				$i['fontstyle'][] = 'bold';
+
+		}
+
+		$r['section'] = 'Uncategorized';
+		$p = strpos($r['name'], '--');
+		if($p > 0) {
+			$r['section'] = trim(substr($r['name'], 0, $p));
+			$r['name'] = trim(substr($r['name'], $p+2));
+		}
+
+		/* Need to probably remap fields that have been renamed, but I have no idea which ones they are */
+
+
+//		print("   [{$r['section']}] {$r['name']}\n");
+
+		/* Create a report id so we can save an existing report, instead of making a new one with 
+		 * a new id */
+		$mysqli->query("INSERT INTO reports (`id`) VALUES ('{$r['id']}')");
+		report_save($mysqli, $r);
+
+		/* The report_save doesn't touch the system_report_id, so save that now too */
+		if($r['system_report_id'] > 0) {
+			$mysqli->query("UPDATE reports SET system_report_id='{$r['system_report_id']}' WHERE `id`='{$r['id']}'");
+		}
+		$c++;
 	}
-
-	$r['section'] = 'Uncategorized';
-	$p = strpos($r['name'], '--');
-	if($p > 0) {
-		$r['section'] = trim(substr($r['name'], 0, $p));
-		$r['name'] = trim(substr($r['name'], $p+2));
-	}
-
-	print("   [{$r['section']}] {$r['name']}\n");
-
-	/* Create a report id so we can save an existing report, instead of making a new one with 
-	 * a new id */
-	$mysqli->query("INSERT INTO reports (`id`) VALUES ('{$r['id']}')");
-	report_save($mysqli, $r);
-
-	/* The report_save doesn't touch the system_report_id, so save that now too */
-	if($r['system_report_id'] > 0) {
-		$mysqli->query("UPDATE reports SET system_report_id='{$r['system_report_id']}' WHERE `id`='{$r['id']}'");
-	}
+	printf("   - Converted $c reports.\n");
 }
 
 ?>

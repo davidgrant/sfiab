@@ -55,7 +55,38 @@ function filter_languages(&$val)
 		}
 	}
 }
-function filter_int_list(&$val)
+function filter_int_list(&$val, $size=0)
+{
+	if(is_array($val)) return;
+	if($val === NULL or $val == '') {
+		$val = array();
+	} else {
+		$l = explode(',', $val);
+		$val = array();
+		$x = 0;
+		foreach($l as $value) {
+			if($value === '') {
+				$val[] = NULL;
+			} else {
+				$val[] = (int)$value;
+			}
+
+			/* If we hit size, stop.  If $size == 0 we'll never hit this */
+			$x++;
+			if($x == $size) break;
+		}
+	}
+
+	/* If it's not big enough, pad it */
+	if(count($val) < $size) {
+		for($x=count($val); $x<$size; $x++) {
+			$val[] = NULL;
+		}
+	}
+
+}
+
+function filter_str_list(&$val)
 {
 	if(is_array($val)) return;
 	if($val === NULL or $val == '') {
@@ -64,72 +95,91 @@ function filter_int_list(&$val)
 		$l = explode(',', $val);
 		$val = array();
 		foreach($l as $value) {
-			$val[] = (int)$value;
+			$val[] = $value;
 		}
+	}
+}
+
+/* Return null if we can't find the var because sometimes $_POST doesn't contain
+ * form fields if they weren't filled out and/or left untouched */
+function post_get_value($var)
+{
+	if(is_array($var)) {
+		$arr = &$_POST;
+		foreach($var as $v) {
+			if(!array_key_exists($v, $arr)) {
+				return NULL;
+			}
+
+			if(is_array($arr[$v])) {
+				$arr = &$arr[$v];
+			} else {
+				return $arr[$v];
+			}
+		}
+		/* If we get all the way through the $var array, return
+		 * whatever is left, it might be an array */
+		return $arr;
+
+	} else {
+		if(!array_key_exists($var, $_POST)) 
+			return NULL;
+		return $_POST[$var];
 	}
 }
 
 function post_bool(&$val, $var)
 {
-	if(array_key_exists($var, $_POST)) {
-		$val = (int)$_POST[$var] ? 1 : 0;
+	$v = post_get_value($var);
+	if($v !== NULL) {
+		$val = (int)post_get_value($var) ? 1 : 0;
 	}
 }
 
 function post_int(&$val, $var)
 {
-	if(array_key_exists($var, $_POST)) {
-		if($_POST[$var] == '') 
-			$val = NULL;
-		else 
-			$val = (int)$_POST[$var];
+	$v = post_get_value($var);
+	if($v !== NULL) {
+		$val = ($v == '') ? NULL : (int)$v;
 	}
 }
 
-function post_float(&$val, $var, $arr=NULL)
+function post_float(&$val, $var)
 {
-	if($arr === NULL) $arr = &$_POST;
-	if(array_key_exists($var, $arr)) {
-		if($arr[$var] == '') 
-			$val = NULL;
-		else 
-			$val = (float)$arr[$var];
+	$v = post_get_value($var);
+	if($v !== NULL) {
+		$val = ($v == '') ? NULL : (float)$v;
 	}
 }
 
-function post_text(&$val, $var, $arr = NULL)
+function post_text(&$val, $var)
 {
-	if($arr === NULL) $arr = &$_POST;
-	if(array_key_exists($var, $arr)) {
-		if($arr[$var] == '') 
-			$val = NULL;
-		else 
-			$val = $arr[$var];
+	$v = post_get_value($var);
+	if($v !== NULL) {
+		$val = ($v == '') ? NULL : $v;
 	}
 }
 
-function post_array(&$val, $var, &$choices, $arr = NULL) 
+function post_array(&$val, $var, &$choices) 
 {
-	if($arr === NULL) $arr = &$_POST;
-
-	$val = array();
-	if(array_key_exists($var, $arr)) {
-		foreach($arr[$var] as $i=>$v) {
-			if(array_key_exists($v, $choices)) {
-				$val[] = $v;
+	$v = post_get_value($var);
+	if($v !== NULL) {
+		$val = array();
+		foreach($v as $idx=>$dat) {
+			if($choices === NULL || array_key_exists($dat, $choices)) {
+				$val[] = $dat;
 			}
 		}
-	}
+	} 
 }
 
-function post_int_list(&$val, $var, $arr = NULL) 
+function post_int_list(&$val, $var) 
 {
-	if($arr === NULL) $arr = &$_POST;
-
-	$val = array();
-	if(array_key_exists($var, $arr)) {
-		foreach($arr[$var] as $i=>$v) {
-			$val[(int)$i] = (int)$v;
+	$v = post_get_value($var);
+	if($v !== NULL) {
+		$val = array();
+		foreach($v as $idx=>$dat) {
+			$val[(int)$idx] = (int)$dat;
 		}
 	}
 }

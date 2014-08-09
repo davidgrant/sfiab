@@ -33,6 +33,7 @@ case 'save':
 	if($closed) exit();
 	post_text($p['title'], 'title');
 	post_text($p['language'], 'language');
+	post_text($p['short_summary'], 'short_summary');
 	post_text($p['summary'], 'summary');
 	post_int($p['challenge_id'], 'challenge_id');
 	post_int($p['isef_id'], 'isef_id');
@@ -50,12 +51,12 @@ case 'save':
 	exit();
 }
 
-$help = '
+$help = "
 <ul><li><b>Title</b> - Limited to 255 characters
 <li><b>Category</b> - The age category is chosen automatically from the maximum grade of all partners in a project.   You may register in a category at or above your grade level (not below).  If you wish to register in a different category, please contact the committee.
 <li><b>Challenge</b> - Used exclusively for floor placement and general information.  It has no effect on judging or award distribution.
 <li><b>Detailed Division</b> - Used to match qualified judges to your project.  We do not separate projects into distinct divisions any more, all projects in the same age category are judged together now (regardless of division). See the student handbook for more information about these judging changes.
-<li><b>Summary</b> - Summary just contain between 200 and 1000 words.
+<li><b>Abstract</b> - Detailed abstract.  Between {$config['s_summary_min_words']} and {$config['s_summary_max_words']} words.
 </ul>
 ';
 
@@ -90,7 +91,9 @@ sfiab_page_begin("Project Information", $page_id, $help);
 	form_select_optgroup($form_id, 'isef_id', "Detailed Division", $isef_data, $p);
 	form_lang($form_id, 'language', "Judging Language", $p);
 	form_yesno($form_id, 'req_electricity', "Electricity Needed", $p);
-	form_textbox($form_id, 'summary', "Summary", $p,
+	form_textbox($form_id, 'short_summary', "One-Sentence Summary", $p,
+			50, $config['s_summary_min_words']);
+	form_textbox($form_id, 'summary', "Abstract", $p,
 			$config['s_summary_min_words'], $config['s_summary_max_words']);
 	form_submit($form_id, 'save', 'Save', 'Project Saved');
 	form_end($form_id);

@@ -74,7 +74,7 @@ function sfiab_form_update_vals(form_id, vals)
 
 $( document ).on( "pagecreate", function( event ) {
 	// Attach a submit handler to the form
-	$( ".sfiab_form" ).submit(function( event ) {
+	$( ".sfiab_form_ajax" ).submit(function( event ) {
 
 		var form = $(event.target);
 		var form_id = form.attr('id');
@@ -94,13 +94,25 @@ $( document ).on( "pagecreate", function( event ) {
 		event.preventDefault();
 		$.post( form.attr('action'), form.serialize(), function( data ) {
 
+			/* Run a function before anything else happens.
+			 * We use this in the awards editor to catch a "New Sponsor" and insert
+			 * the new sponsor into the sponsor list before the update_vals() function
+			 * below changes the select to point to the new sponsor */
+			var pre_post_submit_fn = window[form_id + '_pre_post_submit'];
+			if(typeof pre_post_submit_fn === 'function') {
+				pre_post_submit_fn(form, data);
+			}
+
 			/* Disable the button if the status is 0, else 
 			 * leave it alone because there was an error and 
-			 * we want the user to click again */
+			 * we want the user to click again
+			 * Don't touch buttons without a data-alt2 attr */
 			if(data.status == 0) {
 				$('#'+form_id+' button').each(function(index) {
-					$(this).attr('disabled', true);
-					$(this).text($(this).attr('data-alt2'));
+					if($(this).is("[data-alt2]")) {
+						$(this).attr('disabled', true);
+						$(this).text($(this).attr('data-alt2'));
+					}
 				});
 			}
 
@@ -174,7 +186,7 @@ $( document ).on( "pagecreate", function( event ) {
 
 			var post_submit_fn = window[form_id + '_post_submit'];
 			if(typeof post_submit_fn === 'function') {
-				post_submit_fn(form);
+				post_submit_fn(form, data);
 			}
 
 			if(data.location != '') {
@@ -194,7 +206,10 @@ $( document ).on( "pagecreate", function( event ) {
 	/* Catch all button clicks in a form.  Use the button's value= to copy
 	 * into a <input type=hidden name=action, then submit the form which
 	 * basically calls the above function */
-	$( ".sfiab_form button" ).click(function(e) {
+	/* $( ".sfiab_form button" ).click(function(e) {
+	 * Use the on() notation attached to the parent so these all get called
+	 * for dynamically created children in the form */
+	$( ".sfiab_form" ).on('click','button', function(e) {
 		e.preventDefault();
 		var form = $(this).closest('form');
 		var hidden = $('#'+form.attr('id')+' input.sfiab_form_action');
@@ -202,7 +217,7 @@ $( document ).on( "pagecreate", function( event ) {
 		form.submit();
 	});
 
-	$( ".sfiab_form :input" ).change(function() {
+	$( ".sfiab_form" ).on('change',':input', function() {
 		var form_id= $(this).closest('form').attr('id');
 		$('#'+form_id+' button').each(function(index) {
 			$(this).removeAttr('disabled');
@@ -211,7 +226,7 @@ $( document ).on( "pagecreate", function( event ) {
 		update_word_count($(this));
 	});
 
-	$( ".sfiab_form :input" ).keyup(function() {
+	$( ".sfiab_form" ).on('keyup',':input', function() {
 		var form_id= $(this).closest('form').attr('id');
 		$('#'+form_id+' button').each(function(index) {
 			$(this).removeAttr('disabled');
@@ -219,7 +234,6 @@ $( document ).on( "pagecreate", function( event ) {
 		});
 		update_word_count($(this));
 	});
-
 });
 
 function update_word_count(obj) 

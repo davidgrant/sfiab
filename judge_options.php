@@ -4,6 +4,7 @@ require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('filter.inc.php');
+require_once('timeslots.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -22,13 +23,21 @@ if(array_key_exists('action', $_POST)) {
 
 $langs = array('en' => 'English', 'fr' => 'French' );
 
+$timeslots = timeslots_load_all($mysqli);
+$rounds = array();
+foreach($timeslots as &$ts) {
+	$rounds[(int)$ts['round']] = &$ts;
+}	
+
 switch($action) {
 case 'save':
 	if($closed) exit();
 	post_bool($u['j_willing_lead'], 'j_willing_lead');
 	post_bool($u['j_dinner'], 'j_dinner');
-	post_bool($u['j_rounds'][0], 'j_round0');
-	post_bool($u['j_rounds'][1], 'j_round1');
+	$u['j_rounds'] = array();
+	for($x=0;$x<$config['judging_rounds']; $x++) {
+		post_bool($u['j_rounds'][$x], 'j_rounds[$x]');
+	}
 	post_array($u['j_languages'], 'j_languages', $langs);
 	user_save($mysqli, $u);
 
@@ -81,8 +90,12 @@ sfiab_page_begin("Options", $page_id, $help);
 ?>
 	<h3>Time Availability</h3>
 	Note: You will be scheduled to judge in ALL of the judging rounds you answer 'Yes' to, not just one.
-<?php	form_yesno($form_id, 'j_round0', "Are you available to judge in Round 1 (April 10, 2-5pm)?", $u['j_rounds'][0], true);
-	form_yesno($form_id, 'j_round1', "Are you available to judge in Round 2 (April 10, 6-9pm)?", $u['j_rounds'][1], true);
+<?php	for($x=0; $x<$config['judging_rounds']; $x++) {
+		$ts = &$rounds[$x];
+		$date_str = date("F j, g:ia", $ts['start_timestamp']);
+		$date_str .= ' - '.date("g:ia", $ts['end_timestamp']);
+		form_yesno($form_id, "j_rounds[$x]", "Are you available to judge in {$ts['name']} ($date_str)?", $u['j_rounds'][1], true);
+	}
 	form_submit($form_id, 'save','Save','Information Saved');
 	form_end($form_id);
 ?>

@@ -82,6 +82,7 @@ function incomplete_check_text(&$ret, &$data, $fields)
 function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_update=false)
 {
 	global $incomplete_errors;
+	global $config;
 
 	$ret = array();
 
@@ -269,8 +270,9 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 				'city', 'province', 'language','j_psd'));
 		break;
 	case 'j_options':
-		if($u['j_rounds'][0] !== 0 && $u['j_rounds'][0] !== 1) $ret[] = 'j_round0';
-		if($u['j_rounds'][1] !== 0 && $u['j_rounds'][1] !== 1) $ret[] = 'j_round1';
+		for($x=0; $x<$config['judging_rounds']; $x++) {
+			if($u['j_rounds'][$x] !== 0 && $u['j_rounds'][0] !== 1) $ret[] = "j_rounds[$x]";
+		}
 		incomplete_check_bool($ret, $u, array('j_willing_lead','j_dinner'));
 
 		if(count($u['j_languages']) == 0) {
