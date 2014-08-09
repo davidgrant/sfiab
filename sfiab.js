@@ -106,14 +106,14 @@ $( document ).on( "pagecreate", function( event ) {
 
 			// Any error message?
 			if(data.error != '') {
-				form_error_msg.text(data.error);
+				form_error_msg.html(data.error);
 				form_error_msg.show();
 			} else {
 				form_error_msg.hide();
 			}
 			// Or a happy message ?
 			if(data.happy != '') {
-				form_happy_msg.text(data.happy);
+				form_happy_msg.html(data.happy);
 				form_happy_msg.show();
 			} else {
 				form_happy_msg.hide();
