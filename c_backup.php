@@ -57,7 +57,13 @@ case 'backup':
 		/* For each table... */
 		$table=$tr[0];
 		$dump.="#TABLE: $table\n";
-		$dump.="TRUNCATE TABLE `$table`;\n";
+
+		# Drop and create the table
+		$dump.="DROP TABLE IF EXISTS `$table`;\n";
+
+		$createq = $mysqli->query("SHOW CREATE TABLE `$table`");
+		$r = $createq->fetch_assoc();
+		$dump .= $r['Create Table'].";\n";
 
 		/* Get all the columns */
 		$columnq=$mysqli->query("SHOW COLUMNS FROM `$table`");
@@ -68,6 +74,7 @@ case 'backup':
 		}
 		$insert_str="INSERT INTO `$table` (`".join('`,`', $fields)."`) VALUES \n";
 
+		/* Create an INSERT command for all the data */
 		$dataq=$mysqli->query("SELECT * FROM `$table` ORDER BY `{$fields[0]}`");
 		$cnt = 0;
 		$cnt_total = $dataq->num_rows;
@@ -159,12 +166,7 @@ case 'restore':
 //		form_ajax_response(array('status'=>1, 'error'=>'File database version is not properly formatted'));
 		exit();
 	}
-	if($matches[1] != $config['db_version']) {
-		print("\nERROR: Database versions are incompatible.  Can't restore.  Your backup and data are not lost, just the database format (schema) has changed.  Trying to restore the backup will likely mean parts of it will fail.  The backup file needs to be reformatted to match database version {$config['db_version']}.  Contact David or James Grant, they'll know how to do it.\n");
-//		form_ajax_response(array('status'=>1, 'error'=>"Database versions are incompatible.  Can't restore.  Your backup and data are not lost, just the database format (schema) has changed.  Trying to restore the backup will likely mean parts of it will fail.  The backup file needs to be reformatted to match database version {$config['db_version']}.  Contact David or James Grant, they'll know how to do it."));
-		exit();
-	}
-	print("File database versions OK.\n");
+	print("File is DB Version {$matches[1]}\n");
 
 	print("Starting multiread restore...\n");
 	/* Go line by line, inserting everything into the database */
@@ -219,7 +221,7 @@ sfiab_page_begin("Backup and Restore", $page_id, $help);
 	<h3>Restore Database</h3>
 <?php
 	$form_id = $page_id.'_restore_form';
-	sfiab_error("WARNING: Importing a backup will completely DESTROY all data currently in the database and replace it with what is in the backup file.  This operation can't be undone.");
+	sfiab_error("WARNING: Restoring a backup will completely DESTROY all data currently in the database and replace it with what is in the backup file.  This operation can't be undone.");
 ?>
 	<p>Consider doing a database backup before restoring a different database file so you can go back the current state.
 	<p>Choose a database backup file to upload:
@@ -227,7 +229,7 @@ sfiab_page_begin("Backup and Restore", $page_id, $help);
 	<form method="post" action="c_backup.php" data-ajax="false" enctype="multipart/form-data">
 	<input type="hidden" name="action" value="restore">
 	<input type="file" name="restore">
-	<input type="submit" value="Upload Restore File">
+	<input type="submit" value="Restore Database">
 	</form>
 
 <?php

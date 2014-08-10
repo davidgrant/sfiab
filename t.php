@@ -27,8 +27,12 @@ $d = date_parse($fstart);
 print_r($d);
 
 
+$q = $mysqli->query('SHOW CREATE TABLE `users`');
+while($r = $q->fetch_assoc()) {
+print "newline\n";
+	print_r($r);
+	}
 
-//$mysqli->real_query('ALTER TABLE `projects` ADD `num_mentors` INT( 4 ) NOT NULL ');
 
 #sfiab_session_start($mysqli);
 
