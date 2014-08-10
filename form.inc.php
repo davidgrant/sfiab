@@ -90,35 +90,54 @@ function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL)
 <?php
 }
 
+$__form_label_div_label = '';
+
+function form_label_div_begin($id, $name, $label, $wide = false) 
+{
+	global $__form_label_div_label;
+	
+	$__form_label_div_label = $label;
+
+	$extra_class = $wide ? 'ui-field-contain-wide' : '';
+	if($label !== NULL) { ?>
+		<div class="ui-field-contain <?=$extra_class?>">
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+<?php 	}
+}
+
+function form_label_div_end()
+{
+	global $__form_label_div_label;
+
+	if($__form_label_div_label !== NULL) { ?>
+		</div>
+<?php	}
+}
+
 
 function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false)
 { 
 	global $form_disabled;
 
 	$id = $form_id.'_'.$name;
+
 	/* This is so we can pass $u or $p in, and use the name to index into the array */
 	$v = (is_array($value)) ? $value[$name] : $value;
-	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-	if($label !== NULL) { ?>
-	<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-<?php	} ?>
-
-		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
+	form_label_div_begin($id, $name, $label, $wide);
+?>
+	<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
 <?php
-			$x=0;
-			foreach($data as $key=>$val) {
-				$sel = ($v === $key) ? 'checked="checked"' : ''; ?>
-			        <input name="<?=$name?>" id="<?=$id.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio" <?=$d?> >
-			        <label for="<?=$id.'-'.$x?>"><?=$val?></label>
-<?php				$x++;
-			} ?>
-		</fieldset>
-<?php	if($label !== NULL) { ?>
-	</div>
-<?php	}
+		$x=0;
+		foreach($data as $key=>$val) {
+			$sel = ($v === $key) ? 'checked="checked"' : ''; ?>
+		        <input name="<?=$name?>" id="<?=$id.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio" <?=$d?> >
+		        <label for="<?=$id.'-'.$x?>"><?=$val?></label>
+<?php			$x++;
+		} ?>
+	</fieldset>
+<?php	form_label_div_end();
 }
 
 function form_check_group($form_id, $name, $label, $data, &$value, $wide = false)
@@ -137,25 +156,20 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-	if($label !== NULL) { ?>
-		<div class="ui-field-contain <?=$extra_class?>">
-			<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-<?php	} ?>
-			<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
-<?php			$x=0;
-			foreach($data as $key=>$val) {
-				if(is_array($val)) $val = $val['name'];
+	form_label_div_begin($id, $name, $label, $wide);
+?>		<fieldset id="<?=$id?>" data-role="controlgroup" data-type="horizontal" >
+<?php		$x=0;
+		foreach($data as $key=>$val) {
+			if(is_array($val)) $val = $val['name'];
 				$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
-				
-			        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox" <?=$d?> >
-			        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
-<?php				$x++;
-			} ?>
-			</fieldset>
+			
+		        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox" <?=$d?> >
+		        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
+<?php			$x++;
+		} ?>
+		</fieldset>
 
-<?php	if($label !== NULL) { ?>
-		</div>
-<?php	}
+<?php	form_label_div_end();
 }
 
 function form_checkbox($form_id, $name, $label, $data_value, &$value) 
@@ -226,10 +240,6 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	global $form_disabled;
 	$id = $page_id.'_'.$name;
 
-
-
-	$extra_class = $wide ? 'ui-field-contain-wide' : '';
-
 	$select_attrs = '';
 	if($data_role != '') $select_attrs += " data-role=\"$data_role\"";
 	if($multi) $select_attrs += ' multiple="true" data-native-menu="false"';
@@ -238,24 +248,21 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 
 	$v = form_get_value($name, $value);
 
-	if($label !== NULL) { ?>
-		<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-<?php	} ?>
-		<select name="<?=$name?>" id="<?=$id?>" <?=$select_attrs?> >
-<?php 			if($data_role == '') { ?>
-				<option value="">Choose...</option>
-<?php			}
-			foreach($data as $key=>$val) {
-				if(is_array($val)) $val = $val['name'];
-				$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
-			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
-<?php			} ?>
-		</select>
+	form_label_div_begin($id, $name, $label, $wide);
+?>
+	<select name="<?=$name?>" id="<?=$id?>" <?=$select_attrs?> >
+<?php 		if($data_role == '') { ?>
+			<option value="">Choose...</option>
+<?php		}
+		foreach($data as $key=>$val) {
+			if(is_array($val)) $val = $val['name'];
+			$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
+		        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
+<?php		} ?>
+	</select>
 
-<?php	if($label !== NULL) { ?>
-		</div>
-<?php	}
+<?php	form_label_div_end();
+
 }
 
 function form_multiselect($form_id, $name, $label, $data, &$value)
@@ -272,27 +279,22 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-	if($label !== NULL) { ?>
-		<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-<?php	} ?>
+	form_label_div_begin($id, $name, $label, false);
+?>
 	
-		<select name="<?=$name?>" id="<?=$id?>" <?=$d?> >
-		<option value="">Choose...</option>
-<?php		foreach($data as $name=>$group) { ?>
-			<optgroup label="<?=$name?>">
-<?php			foreach($group as $key=>$val) { 
-				if(is_array($val)) $val = $val['name'];
-				$sel = ($v == $key) ? 'selected="selected"' : ''; ?>
-			        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
-<?php			} ?>
-			</optgroup>
+	<select name="<?=$name?>" id="<?=$id?>" <?=$d?> >
+	<option value="">Choose...</option>
+<?php	foreach($data as $name=>$group) { ?>
+		<optgroup label="<?=$name?>">
+<?php		foreach($group as $key=>$val) { 
+			if(is_array($val)) $val = $val['name'];
+			$sel = ($v == $key) ? 'selected="selected"' : ''; ?>
+		        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php		} ?>
-		</select>
-<?php	if($label !== NULL) { ?>
-		</div>
-<?php
-	}
+		</optgroup>
+<?php	} ?>
+	</select>
+<?php	form_label_div_end();
 }
 
 function form_select_filter($page_id, $name, $label, $data, &$value)
@@ -303,23 +305,18 @@ function form_select_filter($page_id, $name, $label, $data, &$value)
 	$v = (is_array($value)) ? $value[$name] : $value;
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-	if($label !== NULL) { ?>
-		<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+	form_label_div_begin($id, $name, $label, $wide);
+?>
+	<input data-type="search" id="<?=$id?>_filter">
+	<select name="<?=$name?>" data-filter="true" data-input="#<?=$id?>_filter" id="<?=$id?>" <?=$d?> >
+	<option value="">Choose...</option>
+<?php	foreach($data as $key=>$val) {
+		if(is_array($val)) $val = $val['name'];
+		$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
+	        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php	} ?>
-		<input data-type="search" id="<?=$id?>_filter">
-		<select name="<?=$name?>" data-filter="true" data-input="#<?=$id?>_filter" id="<?=$id?>" <?=$d?> >
-		<option value="">Choose...</option>
-<?php		foreach($data as $key=>$val) {
-			if(is_array($val)) $val = $val['name'];
-			$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
-		        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
-<?php		} ?>
-		</select>
-<?php	if($label !== NULL) { ?>
-		</div>
-<?php
-	}
+	</select>
+<?php	form_label_div_end();
 }
 
 function form_lang($page_id, $name, $label, &$value)
@@ -387,9 +384,10 @@ function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check
 {
 	global $form_disabled;
 	if($form_disabled) $attrs += ' disabled="disabled"';
+	$icon_attr = ($icon != '') ? "data-icon=\"$icon\"" : '';
 	
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-icon="<?=$icon?>" data-theme="<?=$theme?>" <?=$attrs?> >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" <?=$icon_attr?> data-theme="<?=$theme?>" <?=$attrs?> >
 		<?=$text?>
 	</button>
 <?php
@@ -402,14 +400,30 @@ function form_hidden($form_id, $name, $txt)
 <?php
 }
 
-function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true)
+function form_file($form_id, $name, $label)
+{
+	global $form_disabled;
+	$d = $form_disabled ? ' disabled="disabled"': '';
+
+	$id = $form_id.'_'.$name;
+	$placeholder = $label;
+	$d = $form_disabled ? ' disabled="disabled"': '';
+	form_label_div_begin($id, $name, $label, false);
+?>
+	<input id="<?=$id?>" name="<?=$name?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="file" <?=$d?> >
+<?php
+	form_label_div_end();
+
+}
+
+function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true, $enable_files = false)
 {
 	global $form_form_id, $form_disabled;
 	$form_form_id = $form_id;
 	$form_disabled = $disable_form;
 
 	/* remove sfiab class from disabled forms so the buttons don't work */
-	$aj = '';
+	$attrs = '';
 	if($form_disabled) {
 		$cl = '';
 	} else {
@@ -417,11 +431,15 @@ function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true)
 		if($enable_ajax) {
 			$cl .= ' sfiab_form_ajax';
 		} else {
-			$aj = 'data-ajax="false"';
+			$attrs = 'data-ajax="false"';
+		}
+
+		if($enable_files) {
+			$attrs .= ' enctype="multipart/form-data"';
 		}
 	} 
 ?>
-	<form method="post" action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>" <?=$aj?> >
+	<form method="post" action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>" <?=$attrs?> >
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php
 }

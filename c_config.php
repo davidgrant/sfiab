@@ -24,12 +24,17 @@ sfiab_page_begin("Configuration", $page_id);
 	<h3>SFIAB Configuration</h3> 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_config_variables.php" data-rel="external" data-ajax="false">Configuration Variables</a></li>
-	<li><a href="c_rollover.php" data-rel="external" data-ajax="false">Rollover Fair Year</a></li>
 	</ul>
 
 	<h3>External Fairs</h3> 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_fairs.php" data-rel="external" data-ajax="false">Edit Feeder/Upstream Fairs</a></li>
+	</ul>
+
+	<h3>SFIAB Database Management</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_rollover.php" data-rel="external" data-ajax="false">Rollover Fair Year</a></li>
+	<li><a href="c_backup.php" data-rel="external" data-ajax="false">Backup / Restore Database</a></li>
 	</ul>
 
 </div></div>

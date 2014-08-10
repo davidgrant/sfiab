@@ -92,6 +92,7 @@ $( document ).on( "pagecreate", function( event ) {
 
 		// Stop form from submitting normally
 		event.preventDefault();
+
 		$.post( form.attr('action'), form.serialize(), function( data ) {
 
 			/* Run a function before anything else happens.
