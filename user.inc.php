@@ -20,7 +20,7 @@ function user_new_password()
 	return $password;
 }
 
-
+/* roles can be a single role, or a comma separated list of roles */
 function user_create($mysqli, $username, $email, $role, $year, &$password)
 {
 	if($password == '' or $password === NULL) {
@@ -31,13 +31,14 @@ function user_create($mysqli, $username, $email, $role, $year, &$password)
 
 	$u = ($username === NULL) ? 'NULL' : "'$username'";
 
-	$q = $mysqli->real_query("INSERT INTO users (`username`,`state`,`email`,`year`,`roles`,`password`,`password_expired`) 
-				VALUES($u, 'new','$email','$year','$role','$password_hash', '1')");
+	$q = $mysqli->real_query("INSERT INTO users (`username`,`new`,`enabled`,`email`,`year`,`roles`,`password`,`password_expired`) 
+				VALUES($u, '1','1','$email','$year','$role','$password_hash', '1')");
 	$uid = $mysqli->insert_id;
 	print($mysqli->error);
 	/* Since this is a new user, set the unique id == uid */
 	$mysqli->query("UPDATE users SET unique_uid=$uid WHERE uid=$uid");
 	print($mysqli->error);
+
 	return $uid;
 }
 
@@ -50,10 +51,10 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 		$r = $mysqli->query("SELECT * FROM users WHERE uid=$id LIMIT 1");
 	} else if((int)$unique_uid > 0) {
 		$id = (int)$unique_uid;
-		$r = $mysqli->query("SELECT * FROM users WHERE unique_uid=$id ORDER BY `year` DESC LIMIT 1");
+		$r = $mysqli->query("SELECT * FROM users WHERE unique_uid=$id ORDER BY `year` DESC, `enabled` DESC LIMIT 1");
 	} else if($username !== NULL) {
 		$username = $mysqli->real_escape_string($username);
-		$r = $mysqli->query("SELECT * FROM users WHERE `username`='$username' ORDER BY `year` DESC LIMIT 2");
+		$r = $mysqli->query("SELECT * FROM users WHERE `username`='$username' ORDER BY `year` DESC, `enabled` DESC LIMIT 1");
 	} else if ($data !== NULL) {
 		/* If data is specifed, skip all SQL and the fetch below, and go
 		 * right into filtering the data */
@@ -73,30 +74,28 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	}
 
 	if($u === NULL) {
+		/* Did we find a user? */
 		if($r->num_rows == 0) {
 			return NULL;
 		}
+
+		/* Load them */
 		$u = $r->fetch_assoc();
 
-		/* There can be at most 2 entries for same username in the same year.
-		 * If the entry we just loaded is 'deleted', then grab the next
-		 * one, and see if it's in the same year (results are returned
-		 * sorted by year).  If it is, return the new one since it's
-		 * the valid one */
-		if($r->num_rows == 2 && $u['state'] == 'deleted') {
-			$u2 = $r->fetch_assoc();
-			if($u2['year'] == $u['year']) 
-				$u = $u2;
-			/* If it's not the same year, return the deleted entry */
+		/* Check that the user is enabled. */
+		if(!$u['enabled']) {
+			/* Nope, there are no enabled users in the most recent year.  Therefore can't load anything */
+			return NULL;
 		}
 	}
 
 	/* Sanitize some fields */
 	$u['uid'] = (int)$u['uid'];
-	$u['name'] = ($u['firstname'] ? "{$u['firstname']} " : '').$u['lastname'];
 	$u['roles'] = explode(",", $u['roles']);
-	$u['password_expired'] = ((int)$u['password_expired'] == 1) ? true : false;
-	filter_bool($u['not_attending']);
+	filter_bool($u['password_expired']);
+	filter_bool($u['attending']);
+	filter_bool($u['new']);
+	filter_bool($u['enabled']);
 	filter_bool($u['j_complete']);
 	filter_bool($u['s_complete']);
 
@@ -124,7 +123,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool($u['s_web_lastname']);
 	filter_bool($u['s_web_photo']);
 
-
 	/* Judge filtering */
 	filter_int_list($u['j_div_pref']);
 	filter_int_or_null($u['j_cat_pref']);
@@ -150,6 +148,12 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	unset($u['original']);
 	$original = $u;
 	$u['original'] = $original;
+
+	/* After saving the original, make up some additional fields for conveinece.  Changing 
+	 * these will do nothing because they aren't in the original and we don't want to 
+	 * have to try and parse these back to fields we can save */
+	$u['name'] = ($u['firstname'] ? "{$u['firstname']} " : '').$u['lastname'];
+	
 
 	return $u;
 }
@@ -256,7 +260,7 @@ function user_save($mysqli, &$u)
 	if($set != '') {
 		$query = "UPDATE users SET $set WHERE uid='{$u['uid']}'";
 //		print($query);
-		$mysqli->query($query);
+		$mysqli->real_query($query);
 		print($mysqli->error);
 	}
 }
@@ -281,5 +285,29 @@ function user_homepage(&$u)
 		$page .= 'index.php';
 	return $page;
 }
+
+/* Copy a user to a new year.  Don't take a reference to $u because
+ * we want to return a completely new user with the original untouched
+ * mostly though, we'll do $u = user_copy($mysqli, $u, $config['year']); */
+function user_copy($mysqli, $u, $new_year) 
+{
+	global $config;
+	$new_pw = '';
+	$new_uid = user_create($mysqli, $u['username'], $u['email'], join(',',$u['roles']), $config['year'], $new_pw);
+	$new_u = user_load($mysqli, $new_uid);
+
+	/* Bring the user with all the existing data up-to-date */
+	$u['uid'] = $new_u['uid'];
+	$u['year'] = $new_u['year'];
+
+	/* Copy the new user original data into the user so that
+	 * user_save detects that  everything has changed and re-saves it
+	 * all, but saves it under the new uid from above */
+	$u['original'] = $new_u['original'];
+
+	user_save($mysqli, $u);
+	return $u;
+}
+
 
 ?>

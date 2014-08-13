@@ -208,7 +208,7 @@ sfiab_page_begin("Backup and Restore", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 	<h3>Backup Database</h3>
-	<p>This packages the entire database into a file for download.  Save it somewhere safe, it contains the contact information for every student, judge, and committee member who has ever registered at the fair.	
+	<p>This downloads a file containing your entire SFIAB database.  Save it somewhere safe, it contains student contact information, judging results, private committee information, everything.
 <?php
 	$form_id = $page_id.'_backup_form';
 

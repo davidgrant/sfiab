@@ -76,7 +76,7 @@ function sfiab_log($mysqli, $type, $data, $uid=-1)
 	$type = $mysqli->real_escape_string($type);
 	$data = $mysqli->real_escape_string($data);
 
-	$mysqli->query("INSERT INTO log (`ip`,`uid`,`time`,`type`,`data`) VALUES('$ip',$uid,NOW(),'$type','$data')");
+	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`time`,`type`,`data`) VALUES('$ip',$uid,NOW(),'$type','$data')");
 }
 
 function sfiab_session_start($mysqli = NULL, $roles = array()) 

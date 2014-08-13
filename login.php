@@ -99,8 +99,7 @@ case 'register':
 	if(!check_username($username) || !check_email($email) || !array_key_exists($as, $sfiab_roles) || array_key_exists($as, $not_allowed_roles)) {
 		/* Validation form isn't doing it's job */
 		print('');
-		$a = $mysqli->real_escape_string($as);
-		sfiab_log($mysqli, "bad register", "Invalid data username: {$username}, email: {$email}, as: $as");
+		sfiab_log($mysqli, "register bad", "Invalid data username: {$username}, email: {$email}, as: $as");
 		exit();
 	}
 
@@ -112,41 +111,21 @@ case 'register':
 	 * New users are also fair game for overwriting the username , maybe the user
 	 *  put in the wrong email 
 	 * If the latest status for a user in the latest year is anything other than
-	 *  new or deleted, t<T-F8>*/
-	$q = $mysqli->prepare("SELECT `uid`,`year`,`state` FROM users WHERE username = ? ORDER BY `year`");
-	$q->bind_param('s', $username); 
-	$q->execute(); 
-	$q->store_result();
-	$q->bind_result($db_uid, $db_year, $db_state); 
-
+	 *  new or deleted, */
+	$q_username = $mysqli->real_escape_string($username);
+ 	$q = $mysqli->query("SELECT `uid`,`year`,`enabled` FROM `users` WHERE username='$q_username' ORDER BY `year` DESC,`enabled` DESC LIMIT 1");
 	if($q->num_rows > 0) { 
-		$latest_year = 0;
-		$latest_state = NULL;
-		while($q->fetch()) {
-			$year = (int)$db_year;
-			if($year > $latest_year) {
-				$latest_year = $year;
-				$latest_status = $db_state;
-				continue;
-			} else if ($year == $db_year) {
-				if($latest_state == 'deleted' || $latest_status == 'new') {
-					$latest_state = $db_state;
-				}
-			}
-		}
-
-		if($latest_state == 'deleted' || $latest_status == 'new') {
-			/* Ok, the latest state we have is that the user was deleted or new, so
-			 * they can be overridden */
-		} else {
+		$r = $q->fetch_assoc();
+		if($r['enabled']) {
 			print('Sorry, username already exists');
 			exit();
 		}
 	}
 
-	/* Delete user, this could delete 'new' usernames from past years too, that's ok
-	 * since the registration was never finished just delete it (and maybe save some space) */
-	$q = $mysqli->real_query("DELETE FROM users WHERE `username`='$username' AND `state`='new'");
+	/* Delete user, just in case.  This could delete 'new' usernames from
+	 * past years too, that's ok * since the registration was never finished
+	 * just delete it (and maybe save some space) */
+	$q = $mysqli->real_query("DELETE FROM users WHERE `username`='$username' AND `new`='1'");
 	print($mysqli->error);
 
 	$password = NULL;
@@ -159,7 +138,7 @@ case 'register':
 	/* Send an email */
 	$result = email_send($mysqli, "New Registration", $uid, array('PASSWORD'=>$password) );
 
-	sfiab_log($mysqli, "register", "username: {$username}, email: {$email}, as: $as, email status: $result");
+	sfiab_log($mysqli, "register ok", "username: $username, email: $email, as: $as, email status: $result");
 	
 	print('0');
 	exit();
@@ -191,13 +170,7 @@ case 'login':
 	}
 
 	/* user must be active */
-	switch($u['state']) {
-	case 'active': case 'new':
-		break;
-	case 'disabled':
-		print(ajax(1, 'Sorry, invalid username or password'));
-		exit();
-	default: 
+	if(!$u['enabled']) {
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
@@ -228,11 +201,17 @@ case 'login':
 		exit();
 	}
 
-	/* User is new? */
-	if($u['state'] == 'new') {
-		$u['state'] = 'active';
+	/* If the year doesn't match, duplicate the user into the current year */
+	if($u['year'] != $config['year']) {
+		$u = user_copy($mysqli, $u, $config['year']);
 
-		/* Create a project on login for students*/
+		/* Pretend that they're new so they get a new project below if a student */
+		$u['new'] = 1;
+	}
+
+	/* Is the user a student?, if so also create a project */
+	if($u['new']) {
+		$u['new'] = 0;
 		if(in_array('student', $u['roles'])) {
 			$pid = project_create($mysqli);
 			$u['s_pid'] = $pid;
@@ -294,6 +273,7 @@ case 'change_pw':
 	exit();
 
 case 'logout':
+	$u = user_load($mysqli);
 	login_logout($mysqli, $u);
 	print(0);
 	exit();
