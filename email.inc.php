@@ -40,23 +40,19 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	global $config;
 
 	/* Lookup the ID of this email */
-	$q = $mysqli->prepare("SELECT id FROM emails WHERE name = ?");
-	$q->bind_param('s', $email_name); 
-	$q->execute(); 
-	$q->store_result();
-	$q->bind_result($db_id);
-	$q->fetch();
-
+	$q = $mysqli->query("SELECT `id` FROM `emails` WHERE `name`='$email_name'");
 	if($q->num_rows != 1) {
 		/* Not found */
 		sfiab_log($mysqli, "email error", "Email \"$email_name\" not found.");
 		return false;
 	}
+	$r = $q->fetch_assoc();
+	$db_id = $r['id'];
 
 	/* Lookup the user */
 	$u = user_load($mysqli, $uid);
 	if($u == NULL) return false;
-	if($u['state'] == 'deleted') return false;
+	if(!$u['enabled'] == 'deleted') return false;
 
 	/* Fill in additional replace vars that the email send script can't calculate, like the fair URL */
 	$additional_replace['fair_url'] = $config['fair_url'];
@@ -66,7 +62,7 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	$n = $mysqli->real_escape_string($u['name']);
 	$em = $mysqli->real_escape_string($u['email']);
 
-	$mysqli->query("INSERT INTO email_queue(`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
+	$mysqli->real_query("INSERT INTO email_queue(`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
 			($db_id,$uid,'$em','$n','$ad','queued')");
 
 	print($mysqli->error);

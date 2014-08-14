@@ -292,13 +292,14 @@ function user_homepage(&$u)
 function user_copy($mysqli, $u, $new_year) 
 {
 	global $config;
-	$new_pw = '';
+	$new_pw = NULL;
 	$new_uid = user_create($mysqli, $u['username'], $u['email'], join(',',$u['roles']), $config['year'], $new_pw);
 	$new_u = user_load($mysqli, $new_uid);
 
 	/* Bring the user with all the existing data up-to-date */
 	$u['uid'] = $new_u['uid'];
 	$u['year'] = $new_u['year'];
+	$u['s_pid'] = NULL; /* We don't copy the project */
 
 	/* Copy the new user original data into the user so that
 	 * user_save detects that  everything has changed and re-saves it

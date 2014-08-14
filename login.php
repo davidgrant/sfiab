@@ -205,7 +205,7 @@ case 'login':
 	if($u['year'] != $config['year']) {
 		$u = user_copy($mysqli, $u, $config['year']);
 
-		/* Pretend that they're new so they get a new project below if a student */
+		/* Pretend that they're new so if they're a student they get a new project */
 		$u['new'] = 1;
 	}
 
@@ -265,7 +265,7 @@ case 'change_pw':
 
 	if($_SESSION['password_expired']) {
 		$_SESSION['password_expired'] = false;
-		$u = user_load($uid);
+		$u = user_load($mysqli, $uid);
 		form_ajax_response(array('status'=>0, 'location'=> user_homepage($u)));
 	} else {
 		form_ajax_response(array('status'=>0,'happy'=>'Password changed'));
