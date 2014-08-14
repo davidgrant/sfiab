@@ -69,8 +69,8 @@ case 'invite':
 		  * partner requests sent at all (let's avoid creating accept loops) */
 		$q = $mysqli->query("SELECT uid FROM users WHERE username='$un' 
 							AND year='{$config['year']}' 
-							AND 'student' IN (roles) 
-							AND `state`='active'");
+							AND FIND_IN_SET('student',`roles`)>0
+							AND `enabled`='1' AND `new`='0'" );
 		$request_ok = true;
 		if($q->num_rows == 1) {
 

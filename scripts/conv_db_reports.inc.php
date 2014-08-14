@@ -53,6 +53,12 @@ function old_report_load($mysqli, $report_id)
 			$col_fields = array('field', 'x', 'y', 'w', 'h', 'lines', 'face', 'align', 
 						'valign', 'value', 'fontname','fontsize','on_overflow','ord');
 			foreach($col_fields as $lf) $val[$lf] = $a[$lf];
+
+			/* Remap some fields */
+			if($val['field'] == 'summary') $val['field'] = 'abstract';
+			if($val['field'] == 'title_summary') $val['field'] = 'title_tagline_abstract';
+
+			/* Set new fields, clear old ones */
 			$val['h_rows'] = NULL;
 			$val['fontstyle'] = explode(',', $a['fontstyle']);
 			/* valign, fontname, fontsize,fontstyle are unused, except in tcpdf reports 

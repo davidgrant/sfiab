@@ -106,7 +106,8 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	if($u['birthdate'] == '0000-00-00') $u['birthdate'] = NULL;
 	if($u['reg_close_override'] == '0000-00-00') $u['reg_close_override'] = NULL;
 
-	if($u['tour_id_pref'] === NULL)
+	filter_int_list($u['tour_id_pref'], 3);
+/*	if($u['tour_id_pref'] === NULL)
 		$u['tour_id_pref'] = array(NULL,NULL,NULL);
 	else {
 		$a = explode(',',$u['tour_id_pref']);
@@ -117,6 +118,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 			$i++;
 		}
 	}
+*/
 
 	filter_int_or_null($u['tour_id']);
 	filter_bool($u['s_web_firstname']);

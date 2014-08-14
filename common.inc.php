@@ -5,6 +5,7 @@ ini_set('display_startup_errors',1);
 error_reporting(-1);
 
 require_once('config.inc.php');
+require_once('filter.inc.php');
 
 date_default_timezone_set('PST8PDT');
 
@@ -499,21 +500,25 @@ function challenges_load($mysqli, $year = false) {
 }
 
 $categories = array();
-function categories_load($mysqli, $year = false) {
+function categories_load($mysqli, $year = false) 
+{
 	global $config, $categories;
 	if($year == false) $year = $config['year'];
-	$cats = array();
+	$categories = array();
 	$q = $mysqli->query("SELECT * FROM categories WHERE year='$year'");
-	while($c=$q->fetch_assoc()) $cats[$c['id']] = $c;
-	$categories = $cats;
-	return $cats;
+	while($c=$q->fetch_assoc()) {
+		filter_int($c['min_grade']);
+		filter_int($c['max_grade']);
+		$categories[$c['id']] = $c;
+	}
+	return $categories;
 }
 
 function category_get_from_grade($grade)
 {
 	global $categories;
 	foreach($categories as $cid=>&$c) {
-		if($grade >= $c['grade_min'] && $c <= $c['grade_max']) 
+		if($grade >=$c['min_grade'] && $grade <= $c['max_grade']) 
 			return $cid;
 	}
 	return false;

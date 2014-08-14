@@ -364,11 +364,11 @@ $report_students_fields = array(
 		'scalable' => true,
 		'table' => 'projects.title' ),
 
-	'shorttitle' => array(
-		'name' => 'Project -- Short Title',
-		'header' => 'Short Title',
+	'summary' => array(
+		'name' => 'Project -- Short Summary',
+		'header' => 'Short Summary',
 		'width' => 2,
-		'table' => 'projects.shorttitle' ),
+		'table' => 'projects.summary' ),
 
 	'division' =>  array(
 		'name' => 'Project -- Challenge',
@@ -424,19 +424,19 @@ $report_students_fields = array(
 		'table_sort' => 'challenges.id',
 		'table' => "CONCAT(challenges.name,' - ',categories.name)"),
 
-	'summary' => array(
-		'name' => 'Project -- Summary',
-		'header' => 'Project Summary',
+	'abstract' => array(
+		'name' => 'Project -- Abstract',
+		'header' => 'Project Abstract',
 		'width' => 4.00,
 		'scalable' => true,
-		'table' => 'projects.summary' ),
+		'table' => 'projects.abstract' ),
 
-	'title_summary' => array(
-		'name' => 'Project -- Title and Summary',
-		'header' => 'Project Title and Summary',
+	'title_tagline_abstract' => array(
+		'name' => 'Project -- Title, Tagline, and Abstract',
+		'header' => 'Project Title and Abstract',
 		'width' => 5.00,
 		'scalable' => true,
-		'table' => "CONCAT('Title: ', projects.title, '\n',projects.summary)" ),
+		'table' => "CONCAT('Title: ', projects.title, '\nSummary: ', projects.tagline', '\n', projects.abstract)" ),
 
 	'language' => array(
 		'name' => 'Project -- Language',

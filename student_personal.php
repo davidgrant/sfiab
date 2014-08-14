@@ -41,18 +41,11 @@ case 'save':
 	post_text($u['s_teacher_email'],'s_teacher_email');
 	post_text($u['medicalert'],'medicalert');
 
-	/* If the grade changed, clear the tours and the special awards, also
-	 * recompute the project category */
+	/* If the grade changed, clear the tours */
 	if($old_grade !== $u['grade']) {
 		$u['tour_id_pref'][0] = NULL;
 		$u['tour_id_pref'][2] = NULL;
 		$u['tour_id_pref'][1] = NULL;
-
-		categories_load($mysqli);
-		$p = project_load($mysqli, $u['s_pid']);
-		$p['cat_id'] = category_get_from_grade($u['grade']);
-		$p['sa_nom'] = array();
-		project_save($mysqli, $p);
 	}
 
 	/* Scrub data */
@@ -71,8 +64,15 @@ case 'save':
 			$u['birthdate'] = NULL;
 		}
 	}
-
 	user_save($mysqli, $u);
+
+	/* If the grade changed, also load/save the project, which recomputes the category (and
+	 * only does the save if something changed), but it needs the user to be updated and
+	 * saved first */
+	if($old_grade !== $u['grade']) {
+		$p = project_load($mysqli, $u['s_pid']);
+		project_save($mysqli, $p);
+	}
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
 	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'val'=>$update));

@@ -77,7 +77,7 @@ function filter_int_list(&$val, $size=0)
 		}
 	}
 
-	/* If it's not big enough, pad it */
+	/* If it's not big enough, pad it with NULLs */
 	if(count($val) < $size) {
 		for($x=count($val); $x<$size; $x++) {
 			$val[] = NULL;

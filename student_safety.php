@@ -191,13 +191,14 @@ function policy($name, $text, $link = '')
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($forms == true) {
-			questionc('agree', 'Please check the box on the right to acknowledge that you have collected the above forms or documentation and will bring them to the fair.',
-					array('Failure to bring the necessary forms could result in disqualification.',
-						'Failure to provide correct information about your project could result in disqualification.'), $answers);
+			questionc('agree', 'Please check the box on the right to acknowledge that you have collected the above forms or documentation and will bring them to the fair.  <b>Remember: Your project may be disqualified if:</b> ',
+					array(	'You don\'t bring the above forms or documentation to the fair',
+						'Your project display requirements change and you don\'t update the information information on this page',
+						'You bring a prohibited item to the fair for display'), $answers);
 		} else {
-			questionc('agree', 'Please check the box on the right to acknowledge the information here is correct and that you will only bring materials agreed to below to the fair.',
-					array('If anything about your project changes, you must adjust your answers here accordingly.',
-						'Failure to provide correct information about your project could result in disqualificaiton.'), $answers);
+			questionc('agree', 'Please check the box on the right to acknowledge the information here is correct and that you will only bring permitted materials and items to the fair. <b>Remember: Your project may be disqualified if:</b> ',
+					array('Your project display requirements change and you don\'t update the information information on this page',
+						'You bring a prohibited item to the fair for display'), $answers);
 		}
 ?>
 		</ul>
@@ -214,7 +215,23 @@ function policy($name, $text, $link = '')
 
 ?>	<h3>Safety Questions</h3>
 
-	<p>In these questions "the display", or "on display", or "at the display" refers to the entire project area.  That includes the area on the table, under the table, behind the backboard, etc.
+	<p>In these questions "the display", or "on display", or "at the
+	display" refers to the entire project area.  That includes the area on
+	the table, under the table, the backboard itself, behind the backboard,
+	etc.
+
+	<p><b>IMPORTANT: YOUR PROJECT COULD BE DISQUALIFIED</b> if you bring
+	prohibited or unsafe items to the exhibit hall.  This page is meant to
+	help you determine what the potential safety issues for your project
+	may be, so you can safely display your project in a public space with
+	potentially hundreds of people around the exhibit hall.  Your project
+	must pass a safety inspection at the fair before it is allowed to be
+	judged.  The questions on this page are the same requirements that the
+	safety-checkers will use for the safety inspection.  If you check all
+	the boxes on this page (thus agreeing that your project meets the
+	safety requirements), then show up at the fair with an item that is not
+	permitted (e.g., plants, food items for your display, or liquids other
+	than water) <b>your project could be disqualified</b>.
 
 	<ul data-role="listview" data-inset="true">
 	

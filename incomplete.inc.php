@@ -146,15 +146,21 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 
 	case 's_project':
 		$p = project_load($mysqli, $u['s_pid']);
-		incomplete_check_text($ret, $p, array('title','summary','language'));
+		incomplete_check_text($ret, $p, array('title','tagline','abstract','language'));
 		incomplete_check_bool($ret, $p, array('req_electricity'));
-		incomplete_check_gt_zero($ret, $p, array('cat_id','challenge_id','isef_id'));
+		incomplete_check_gt_zero($ret, $p, array('challenge_id','isef_id'));
 
-		/* Check words in summary */
-		$w = str_word_count(trim($p['summary']));
-		if($w < 200 || $w > 1000) {
-			$incomplete_errors += array("Project summary must contain between 200 and 1000 words");
-			$ret[] = 'summary';
+		/* Check words in one-line summary and abstract */
+		$w = str_word_count(trim($p['tagline']));
+		if($w < $config['s_tagline_min_words'] || $w > $config['s_tagline_max_words']) {
+			$incomplete_errors[] = "Project one-sentence summary must contain between {$config['s_tagline_min_words']} and {$config['s_tagline_max_words']} words";
+			$ret[] = 'tagline';
+		}
+
+		$w = str_word_count(trim($p['abstract']));
+		if($w < $config['s_abstract_min_words'] || $w > $config['s_abstract_max_words']) {
+			$incomplete_errors[] = "Project abstract must contain between {$config['s_abstract_min_words']} and {$config['s_abstract_max_words']} words";
+			$ret[] = 'abstract';
 		}
 
 		break;
@@ -277,7 +283,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 
 		if(count($u['j_languages']) == 0) {
 			$ret[] = "j_languages";
-			$incomplete_errors += array("At least one language must be selected");
+			$incomplete_errors[] = "At least one language must be selected";
 		}
 		break;
 
