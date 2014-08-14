@@ -165,17 +165,26 @@ function policy($name, $text, $link = '')
 	relevant Youth Science Canada policies regarding ethics and
 	the use of humans and animals in your project.
 
-	<p>It may tell you there are forms you should have submitted before
-	starting your project. In future years, you may be required to obtain
-	approval ahead of time (for significant-risk projects only). For this year,
-	please bring any required forms with you to the fair and keep a copy at
-	your project.  You can email any questions to ethics@gvrsf.ca.
+	<p>After answering the questions, any required policies and forms will be divided into three sections:
+	<ul><li>Before You Start Your Project: Policies and Procedures.  These are Youth Science Canada policies and procedures that must be followed while doing this project.  
+	<li>Before You Start Your Project: Forms.  These are forms that must be completed BEFORE starting your project.  Filling them out after you finish your project doesn't count because they are typically for getting ethics approval to ensure your project does no harm to any human or animal participants.
+	<li>After You Complete Your Project, but Before the Fair: Forms.  These are forms that should be completed after your project is done.
+	</ul>
+
+	<p><b>IMPORTANT: YOUR PROJECT COULD BE DISQUALIFIED</b> if the required
+	forms aren't completed and brought to the fair or if the policies and
+	procedures outlined here are not followed.  If this page says you need to do something
+	(e.g., give a letter of information to your participants before they
+	take your survey), and you haven't, you need to email our
+	ethics committee (ethics@gvrsf.ca) and explain the situation so we can
+	help. 
 	
 <?php 	if(count($incomplete_fields) == 0 || (count($incomplete_fields) == 1 && $incomplete_fields[0] == 'agree') ) {
 ?>
-		<h4>Before You Start Your Project: Policies</h4> 
+		<hr/>
+		<h3>Before You Start Your Project: Policies and Procedures</h3> 
 
-		<p>Here is a list of the Youth Science Canada policies you should be aware of for your project:
+		<p>Here is a list of the Youth Science Canada policies and procedures you must follow to do this project.  Click on any policy below for more information:
 		<ul data-role="listview" data-inset="true">
 <?php
 		$form1 = true;
@@ -251,20 +260,27 @@ function policy($name, $text, $link = '')
 ?>
 		</ul>
 
-		<h4>Before You Start Your Project: Forms</h4>
+		<h3>Before You Start Your Project: Forms</h3>
+		<p>Here is a list of the Youth Science Canada forms that must be completed before starting this project.  Click on the forms below to download them:
 		<ul data-role="listview" data-inset="true">
 <?php
 		$forms2 = false;	
 		/* Same as high-risk below */
 		if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2'])  {
 			$forms2 = true;
-			policy('Significant-Risk Projects Involving Humans', 'Youth Science Canada requires that all significant-risk projects involving humans be approved before any research starts. <b>In future years, you must complete this research plan and submit it to the GVRSF ethics committee (ethics@gvrsf.ca) BEFORE you start your research. For 2014, you are only required to complete Form 4.1B. </b>',
+			policy('Significant-Risk Projects Involving Humans', 'Youth Science Canada requires that all significant-risk projects
+							involving humans be approved before any research starts. Ethics approval may come from
+							an Ethics Committee at a university or research lab, or may come from our 
+							Ethics Committee (ethics@gvrsf.ca).  <b>Failure to recieve approval will likely result in disqualification.</b>',
 				'data/research_proposal_en.doc');
 		}
 		/* Only living animals */
 		if ($e['animal_vertebrate'] || $e['animal_ceph']) {
 			$forms2 = true;
-			policy('Animal Projects', 'Youth Science Canada requires that all projects involving vertebrate animals and cephalopods be approved before any research starts. <b>In future years, you must complete this research plan and submit it to the GVRSF ethics committee (ethics@gvrsf.ca)  BEFORE you start your research. For 2014, you are only required to complete Form 4.1C. </b>',
+			policy('Animal Projects', 'Youth Science Canada requires that all projects involving vertebrate animals and 
+							cephalopods be approved before any research starts. Ethics approval may come from
+							an Ethics Committee at a university or research lab, or may come from our
+							Ethics Committee (ethics@gvrsf.ca).  <b>Failure to recieve approval will likely result in disqualification.</b>',
 				'data/research_plan_animals_en.doc');
 		}
 		if(!$forms2) {
@@ -273,8 +289,9 @@ function policy($name, $text, $link = '')
 ?>
 		</ul>
 
-		<h4>After You Complete Your Project, but Before the Fair: Forms</h4>		
+		<h3>After You Complete Your Project, but Before the Fair: Forms</h3>
 
+		<p>Here is a list of the Youth Science Canada forms that must be completed after finishing this project.  Click on the forms below to download them:
 		<ul data-role="listview" data-inset="true">
 <?php
 //		if(!$e['human1'] && !$e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1'] && !$e['animal_vertebrate'] && !$e['animal_ceph'] && !$e['animal_tissue'] && !$e['animal_drug']) {
@@ -311,12 +328,16 @@ function policy($name, $text, $link = '')
 		<ul data-role="listview" data-inset="true">
 <?php
 		if($form1 == true || $forms2 == true) {
-			questionc('agree', 'Please check the box on the right to acknowledge that you have read the above policies and filled out the above forms and will bring them to the fair.',
-					array('Failure to bring the necessary forms could result in disqualification.',
-						'Failure to provide correct information about your project could result in disqualification.'), $e);
+			questionc('agree', 'Please check the box on the right to acknowledge that you have followed the above policies 
+						and procedures and have filled out all necessary forms and will bring them to the fair.  
+						<b>Your project may be disqualified if:</b>',
+					array('You don\'t bring the forms outlined above to the fair',
+						'You haven\'t followed the policies and procedures outline above OR haven\'t emailed our Ethics Committee (ethics@gvrsf.ca)',
+						'You provide incorrect information about your project (e.g., claiming to have given your participants a letter of information when you haven\'t)'), $e);
 		} else {
 			questionc('agree', 'Please check the box on the right to acknowledge that the information here is correct.',
-					array('If anything about your project changes, you must adjust your answers here accordingly.','Failure to provide correct information about your project could result in disqualificaiton.'), $e);
+					array('If anything about your project changes, you must adjust your answers here accordingly.',
+					'Failure to provide correct information about your project could result in disqualificaiton.'), $e);
 		}
 ?>
 		</ul>
