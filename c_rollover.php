@@ -208,8 +208,6 @@ default:
 	current year so that reports generated for past years make sense and
 	reflect the data as it was.  
 
-	<p>These lists may not be 100% up-to-date.
-
 	<p>The following data is duplicated for the new year:  Awards and Prizes,
 	Configuration, Categories, Challenges, Schools, Sponsors, Timeslots, and Tours
 

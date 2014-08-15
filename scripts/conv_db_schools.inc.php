@@ -86,6 +86,9 @@ function conv_schools($mysqli, $mysqli_old, $year)
 		$schools_map[(int)$r['id']] = $school_id;
 
 	}
+	/* Set the common ID to the school id.  Don't try to link schools across years. That's only important
+	 * on a rollover */
+	$mysqli->real_query("UPDATE `schools` SET `common_id`=`id` WHERE `year`='$year'");
 }
 
 ?>

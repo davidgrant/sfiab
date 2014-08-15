@@ -254,6 +254,7 @@ function user_save($mysqli, &$u)
 
 			/* Set the original to the unprocessed value */
 			$u['original'][$key] = $val;
+
 		}
 	}
 
@@ -265,6 +266,7 @@ function user_save($mysqli, &$u)
 		$mysqli->real_query($query);
 		print($mysqli->error);
 	}
+
 }
 
 function user_homepage(&$u) 
@@ -298,10 +300,38 @@ function user_copy($mysqli, $u, $new_year)
 	$new_uid = user_create($mysqli, $u['username'], $u['email'], join(',',$u['roles']), $config['year'], $new_pw);
 	$new_u = user_load($mysqli, $new_uid);
 
+	$old_uid = $u['uid'];
+
 	/* Bring the user with all the existing data up-to-date */
 	$u['uid'] = $new_u['uid'];
 	$u['year'] = $new_u['year'];
 	$u['s_pid'] = NULL; /* We don't copy the project */
+	$u['tour_id_pref'] = NULL; /* Tours have different IDs */
+	$u['tour_id'] = NULL; /* Tours have different IDs */
+	$u['tshirt'] = NULL; /* Force re-selection of tshirt */
+	if($u['grade'] > 0) {
+		$u['grade'] += 1; /* Normally grade is increased */
+	}
+
+	if($u['schools_id'] > 0) {
+		/* Update the school */
+		$q = $mysqli->query("SELECT `id` FROM `schools` WHERE year='$new_year' AND `common_id`=(SELECT `common_id` FROM `schools` WHERE `id`='{$u['schools_id']}')");
+		$r = $q->fetch_row();
+		$u['schools_id'] = $r[0];
+	}
+
+	$u['reg_close_override'] = NULL; /* Don't copy an existing reg override for last year */
+
+	/* Copy any emergency contacts too, and relink them to the new user */
+	$q = $mysqli->query("SELECT * FROM emergency_contacts WHERE `uid`='$old_uid'");
+	while($r = $q->fetch_assoc()) {
+		unset($r['id']);
+		$r['uid'] = $new_uid;
+		foreach($r as $k=>$v) {
+			$r[$k] = $mysqli->real_escape_string($v);
+		}
+		$mysqli->real_query("INSERT INTO emergency_contacts(`".join('`,`',array_keys($r))."`) VALUES ('".join("','", array_values($r))."')");
+	}
 
 	/* Copy the new user original data into the user so that
 	 * user_save detects that  everything has changed and re-saves it
