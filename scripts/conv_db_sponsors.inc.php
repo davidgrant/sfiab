@@ -99,6 +99,7 @@ function get_or_create_sponsor_uid_for_year($mysqli, $sponsor_id, $year)
 
 	$u['organization'] = $s['organization'];
 	$u['enabled'] = 1;
+	$u['new'] = 0;
 	$u['firstname'] = $s['firstname'];
 	$u['lastname'] = $s['lastname'];
 	$u['salutation'] = $s['salutation'];

@@ -61,6 +61,8 @@ function conv_students($mysqli, $mysqli_old, $year)
 		$u['s_web_photo'] = $old_s['webphoto'] == 'yes' ? 1 : 0;
 		$u['enabled'] = 1;
 		$u['s_complete'] = 1;
+		$u['s_accepted'] = 1;
+		$u['new'] = 0;
 
 
 		/* Convert emergency contacts */
@@ -104,11 +106,12 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$u['s_pid'] = $pid;
 			$new_p = project_load($mysqli, $pid);
 			$new_p['num_students'] += 1;
-			project_save($mysqli, $new_p);
 //			print("      Adjust project $pid to {$new_p['num_students']} students\n");
 		} else {
 			$q1 = $mysqli_old->query("SELECT * FROM projects WHERE registrations_id=$rid");
 			$p = $q1->fetch_assoc();
+
+//			print_r($p);
 
 			$pid = project_create($mysqli, $year);
 			$new_p = project_load($mysqli, $pid);
@@ -117,8 +120,8 @@ function conv_students($mysqli, $mysqli_old, $year)
 
 			$new_p['number'] = $p['projectnumber'];
 			$new_p['title'] = $p['title'];
-			$new_p['titleshort'] = $p['shorttitle'];
-			$new_p['summary'] = $p['summary'];
+			$new_p['tagline'] = $p['shorttitle'];
+			$new_p['abstract'] = $p['summary'];
 			$new_p['req_electricity'] = $p['req_electricity'] == 'yes' ? 1 : 0;
 			$new_p['language'] = $p['language'];
 			$new_p['num_students'] = 1;
@@ -130,6 +133,8 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$new_p['challenge_id'] = $p['projectdivisions_id'];
 			$new_p['accepted'] = 1;
 			$new_p['fair_id'] = $p['fairs_id'];
+
+
 
 			/* Load mentors */
 			$q2 = $mysqli_old->query("SELECT * FROM mentors WHERE registrations_id=$rid");
@@ -149,8 +154,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 
 				$new_p['num_mentors'] += 1;
 			}
-			project_save($mysqli, $new_p);
-//			print("      Save project $pid {$new_p['number']} with 1 student and {$new_p['num_mentors']} mentors\n");
+//			print("      Save project $pid {$new_p['number']} with 1 student, {$new_p['num_mentors']} mentors, cat_id={$new_p['cat_id']}\n");
 
 			$u['s_pid'] = $pid;
 		}
@@ -159,6 +163,11 @@ function conv_students($mysqli, $mysqli_old, $year)
 		$students_map[$sid] = $uid;
 
 		user_save($mysqli, $u);
+
+		/* Save the project after the student because the project_save queries the student grade to
+		 * adjust the cat_id */
+		project_save($mysqli, $new_p);
+		
 		$count += 1;
 	}
 	print("   Converted $count students\n");

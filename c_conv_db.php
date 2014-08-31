@@ -72,9 +72,9 @@ if($action == 'go') {
 
 	load_sponsors($mysqli, $mysqli_old);
 
-	conv_reports($mysqli, $mysqli_old);
-	conv_fairs($mysqli, $mysqli_old);
-	conv_emails($mysqli, $mysqli_old);
+//	conv_reports($mysqli, $mysqli_old);
+//	conv_fairs($mysqli, $mysqli_old);
+//	conv_emails($mysqli, $mysqli_old);
 
 	foreach($years as $year) {
 		conv_categories($mysqli, $mysqli_old, $year);

@@ -71,6 +71,7 @@ function conv_judges($mysqli, $mysqli_old, $year)
 		$u['j_years_regional'] = $old_u['years_regional'];
 		$u['j_years_national'] = $old_u['years_national'];
 		$u['enabled'] = 1;
+		$u['new'] = 0;
 		$u['j_rounds'] = array();
 		$u['j_complete'] = 1;
 		$u['j_cat_pref'] = 0;

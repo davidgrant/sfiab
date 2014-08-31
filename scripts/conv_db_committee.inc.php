@@ -38,6 +38,9 @@ function conv_committee($mysqli, $mysqli_old, $year)
 		$u['salutation'] = $old_u['salutation'];
 		$u['organization'] = $old_u['organization'];
 		$u['sex'] = $old_u['sex'];
+		$u['new'] = 0;
+		$u['enabled'] = 1;
+
 
 		user_save($mysqli, $u);
 		$c++;

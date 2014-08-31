@@ -104,7 +104,7 @@ $email_lists=array(
 		SELECT DISTINCT students.firstname, students.lastname, students.email 
 			FROM award_awards
 			JOIN award_prizes ON award_prizes.award_awards_id=award_awards.id
-			JOIN winners ON winners.awards_prizes_id=award_prizes.id
+			JOIN winners ON winners.award_prize_id=award_prizes.id
 			JOIN projects ON winners.projects_id=projects.id
 			JOIN registrations ON projects.registrations_id=registrations.id
 			JOIN students ON students.registrations_id=registrations.id

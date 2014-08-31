@@ -101,8 +101,8 @@ $min_year = $u['M'];
 		for($x=$config['year']; $x >= $min_year; $x--) {
 			$years[(int)$x] = $x;
 		}
-	        form_select($form_id, 'year', "Year", $years, $options);
-	        form_select($form_id, 'type', "Report Format", $report_options['type']['values'], $options);
+	        form_radio_h($form_id, 'year', "Year", $years, $options);
+	        form_radio_h($form_id, 'type', "Report Format", $report_options['type']['values'], $options);
 	        form_select($form_id, 'include_registrations', "Include Registrations", $report_options['include_registrations']['values'], $options);
 		$t = '';
 	        form_text($form_id, 'test', "test", $t);

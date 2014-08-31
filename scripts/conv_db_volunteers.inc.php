@@ -37,6 +37,8 @@ function conv_volunteers($mysqli, $mysqli_old, $year)
 		$u['sex'] = $old_u['sex'];
 		$u['city'] = $old_u['city'];
 		$u['province'] = $old_u['province'];
+		$u['new'] = 0;
+		$u['enabled'] = 1;
 
 		user_save($mysqli, $u);
 		$c++;
