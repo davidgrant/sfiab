@@ -207,28 +207,27 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 ?>		<h4>Report Data</h4>
 <?php		if(count($r['col'])) {
 			foreach($r['col'] as $index=>$d) {
-				form_select_optgroup($form_id, "col[$index][field]", 'Column '.($index+1), $report_fields, $d['field']);
-?>				<div class="ui-field-contain"> 
-					<label></label>
-<?php					form_select($form_id, "col[$index][align]", NULL, $report_col_align, $d['align'], '', false, false, true);
-					form_select($form_id, "col[$index][valign]", NULL, $report_col_valign, $d['valign'], '', false, false, true);
-					form_select($form_id, "col[$index][on_overflow]", NULL, $report_col_on_overflow, $d['on_overflow'], '', false, false, true);
+				$i = $index + 1;
+				form_select_optgroup($form_id, "col[$index][field]", "Column $i Data", $report_fields, $d['field']);
+				form_radio_h($form_id, "col[$index][align]", "Column $i Align", $report_col_align, $d['align'], '', false, false, true);
+				form_radio_h($form_id, "col[$index][valign]", "Column $i V-Align", $report_col_valign, $d['valign'], '', false, false, true);
+				form_radio_h($form_id, "col[$index][on_overflow]", "Column $i Overflow", $report_col_on_overflow, $d['on_overflow'], '', false, false, true);
 //					form_text_inline($form_id, "col_fontname[$index]", $d['fontname'], 'text', 'max-width="10"');
 //					$n = array("col_fontstyle[$index]" => $d['fontstyle']);
 //					form_select($form_id, "col_fontstyle[$index]", NULL, $report_font_styles, $n, '', false, true, true);
 //					form_text_inline($form_id, "col_fontsize[$index]", $d['fontsize']);
-					form_hidden($form_id, "col[$index][fontname]", $d['fontname']);
-					foreach($d['fontstyle'] as $s) {
-						form_hidden($form_id, "col[$index][fontstyle][]", $s);
-					}
-					form_hidden($form_id, "col[$index][fontsize]", $d['fontsize']);
-					form_hidden($form_id, "col[$index][x]", $d['x']);
-					form_hidden($form_id, "col[$index][y]", $d['y']);
-					form_hidden($form_id, "col[$index][w]", $d['w']);
-					form_hidden($form_id, "col[$index][h]", $d['h']);
-					form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
-					form_hidden($form_id, "col[$index][h_rows]", $d['h_rows']);
-?>				</div>
+				form_hidden($form_id, "col[$index][fontname]", $d['fontname']);
+				foreach($d['fontstyle'] as $s) {
+					form_hidden($form_id, "col[$index][fontstyle][]", $s);
+				}
+				form_hidden($form_id, "col[$index][fontsize]", $d['fontsize']);
+				form_hidden($form_id, "col[$index][x]", $d['x']);
+				form_hidden($form_id, "col[$index][y]", $d['y']);
+				form_hidden($form_id, "col[$index][w]", $d['w']);
+				form_hidden($form_id, "col[$index][h]", $d['h']);
+				form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
+				form_hidden($form_id, "col[$index][h_rows]", $d['h_rows']);
+?>				
 <?php			}
 		}
 
@@ -236,23 +235,20 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 		for($i = 0; $i < 3; $i++) {
 			$index = count($r['col']) + $i;
 			$v = '';
-			form_select_optgroup($form_id, "col[$index][field]", 'Column '.($index+1), $report_fields, $v);
-?>			<div class="ui-field-contain"> 
-				<label></label>
-<?php				form_select($form_id, "col[$index][align]", NULL , $report_col_align, $v, '', false, false, true);
-				form_select($form_id, "col[$index][valign]", NULL, $report_col_valign, $v, '', false, false, true);
-				form_select($form_id, "col[$index][on_overflow]", NULL, $report_col_on_overflow, $v, '', false, false, true);
-				form_hidden($form_id, "col[$index][fontname]", $v);
-				form_hidden($form_id, "col[$index][fontstyle][]", $v);
-				form_hidden($form_id, "col[$index][fontsize]", $v);
-				form_hidden($form_id, "col[$index][x]", $v);
-				form_hidden($form_id, "col[$index][y]", $v);
-				form_hidden($form_id, "col[$index][w]", $v);
-				form_hidden($form_id, "col[$index][h]", $v);
-				form_hidden($form_id, "col[$index][min_w]", $v);
-				form_hidden($form_id, "col[$index][h_rows]", $v);
-?>			</div>
-<?php		}
+			form_select_optgroup($form_id, "col[$index][field]","Column $index Data", $report_fields, $v);
+			form_radio_h($form_id, "col[$index][align]", "Column $index Align" , $report_col_align, $v, '', false, false, true);
+			form_radio_h($form_id, "col[$index][valign]", "Column $index V-Align", $report_col_valign, $v, '', false, false, true);
+			form_radio_h($form_id, "col[$index][on_overflow]", "Column $index Overflow", $report_col_on_overflow, $v, '', false, false, true);
+			form_hidden($form_id, "col[$index][fontname]", $v);
+			form_hidden($form_id, "col[$index][fontstyle][]", $v);
+			form_hidden($form_id, "col[$index][fontsize]", $v);
+			form_hidden($form_id, "col[$index][x]", $v);
+			form_hidden($form_id, "col[$index][y]", $v);
+			form_hidden($form_id, "col[$index][w]", $v);
+			form_hidden($form_id, "col[$index][h]", $v);
+			form_hidden($form_id, "col[$index][min_w]", $v);
+			form_hidden($form_id, "col[$index][h_rows]", $v);
+		}
 
 
 ?>		<h4>Sort By</h4>

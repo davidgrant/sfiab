@@ -126,7 +126,7 @@ sfiab_page_begin("User List", $page_id);
 		form_hidden($form_id, "show_filter", "1");
 
 		/* Find the full range of years */
-		$q = $mysqli->query("SELECT DISTINCT(`year`) FROM `users` ORDER BY `year`");
+		$q = $mysqli->query("SELECT DISTINCT(`year`) FROM `users` ORDER BY `year` DESC");
 		$years_sel = array();
 		while($r = $q->fetch_row()) {
 			$y = (int)$r[0];
