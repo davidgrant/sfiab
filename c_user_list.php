@@ -202,7 +202,7 @@ $query = "SELECT * FROM users u
 			AND $q_attending
 			";
 $q = $mysqli->query($query);
-print($query);
+//print($query);
 print($mysqli->error);
 
 $users = array();

@@ -907,22 +907,22 @@ html head + body .ui-body-l.ui-focus {
 
 
 
-.table_stripes thead th,
-.table_stripes tbody tr:last-child {
+.table_stripes>thead>th,
+.table_stripes>tbody>tr:last-child {
 	border-bottom: 1px solid #d6d6d6; /* non-RGBA fallback */
 	border-bottom: 1px solid rgba(0,0,0,.1);
 }
-.table_stripes tbody th,
-.table_stripes tbody td {
+.table_stripes>tbody>th,
+.table_stripes>tbody>td {
 	border-bottom: 1px solid #e6e6e6; /* non-RGBA fallback  */
 	border-bottom: 1px solid rgba(0,0,0,.05);
 }
-.table_stripes tbody tr:last-child th,
-.table_stripes tbody tr:last-child td {
+.table_stripes>tbody>tr:last-child>th,
+.table_stripes>tbody>tr:last-child>td {
 	border-bottom: 0;
 }
-.table_stripes tbody tr:nth-child(odd) td,
-.table_stripes tbody tr:nth-child(odd) th {
+.table_stripes>tbody>tr:nth-child(odd)>td,
+.table_stripes>tbody>tr:nth-child(odd)>th {
 	background-color: #eeeeee; /* non-RGBA fallback  */
 	background-color: rgba(0,0,0,.04);
 }

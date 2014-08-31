@@ -25,7 +25,7 @@ sfiab_page_begin("Awards", $page_id);
 ?>	
 	<h3>Awards</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="c_awards_list.php" data-rel="external" data-ajax="false">Award Editor</a></li>
+	<li><a href="c_awards_list.php" data-rel="external" data-ajax="false">Award List / Editor</a></li>
 	<li><a href="c_user_list.php?roles[]=sponsor" data-rel="external" data-ajax="false">Sponsor Editor</a></li>
 	</ul>
 

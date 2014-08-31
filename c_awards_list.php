@@ -6,6 +6,7 @@ require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('awards.inc.php');
+require_once('sponsors.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -70,6 +71,7 @@ case 'add':
 	exit();
 }
 
+$sponsors = sponsors_load_all($mysqli);
 
 $help = 'Use the <button data-icon="gear" data-iconpos="notext" data-inline="true"></button> button to edit the award and prizes.  Drag and drop the <button data-icon="bars" data-iconpos="notext" data-inline="true"></button> icon to reorder the awards.  Drag the [=] handle before each prize to re-order the prizes within the award.  Awards/Prizes at the top of the list will go first in the award ceremony.';
 
@@ -117,9 +119,14 @@ sfiab_page_begin("Edit Awards", $page_id, $help);
 		<td width="80%" colspan=4>
 			<table width="100%">
 				<tr><td width="75%"><b><?=$a['name']?></b>
-<?php				if($a['presenter'] != '') { ?>
-					<br/><font size="-1">Presented By: <?=$a['presenter']?></font>
-<?php				} ?>
+					<br><font size="-1">Presented By: <?=$a['presenter']?></font>
+<?php					if($a['sponsor_uid'] > 0) {
+						$s = $sponsors[$a['sponsor_uid']]['organization'];
+					} else {
+						$s = "<font color=red>NOT SET</font> -- Please set a sponsor";
+					} ?>
+					<br/><font size="-1">Sponsored By: <?=$s?></font>
+						
 				</td>
 				<td width="5%" align="center"><?=$a['include_in_script']==1 ? '<font color=green>Script</font>':'<font color=blue>No<br>Script</font>'?></td>
 				<td width="5%" align="center"><?=$a['schedule_judges']==1 ? '<font color=green>Judges</font>':'<font color=blue>No<br/>Judges</font>'?></td>
