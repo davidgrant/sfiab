@@ -19,7 +19,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 	$registration_to_project_map = array();
 
 	/* Load all students, skip "new" students. */
-	$q = $mysqli_old->query("SELECT students.* FROM students 
+	$q = $mysqli_old->query("SELECT students.*,registrations.status FROM students 
 					LEFT JOIN registrations ON students.registrations_id=registrations.id 
 					WHERE students.year='$year' AND registrations.status!='new'");
 	while($old_s = $q->fetch_assoc()) {
@@ -59,11 +59,15 @@ function conv_students($mysqli, $mysqli_old, $year)
 		$u['s_web_first'] = $old_s['webfirst'] == 'yes' ? 1 : 0;
 		$u['s_web_last'] = $old_s['weblast'] == 'yes' ? 1 : 0;
 		$u['s_web_photo'] = $old_s['webphoto'] == 'yes' ? 1 : 0;
-		$u['enabled'] = 1;
-		$u['s_complete'] = 1;
-		$u['s_accepted'] = 1;
 		$u['new'] = 0;
-
+		$u['enabled'] = 1;
+		if($old_s['status'] == 'complete') {
+			$u['s_complete'] = 1;
+			$u['s_accepted'] = 1;
+		} else {
+			$u['s_complete'] = 0;
+			$u['s_accepted'] = 0;
+		}
 
 		/* Convert emergency contacts */
 		$q1 = $mysqli_old->query("SELECT * FROM emergencycontact WHERE students_id=$sid");
@@ -106,6 +110,12 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$u['s_pid'] = $pid;
 			$new_p = project_load($mysqli, $pid);
 			$new_p['num_students'] += 1;
+
+			/* If the student isn't accepted, make sure the project isn't either (even if the other student is complete) */
+			if($u['s_accepted'] == 0) {
+				$new_p['accepted'] = 0;
+			}
+
 //			print("      Adjust project $pid to {$new_p['num_students']} students\n");
 		} else {
 			$q1 = $mysqli_old->query("SELECT * FROM projects WHERE registrations_id=$rid");
@@ -131,7 +141,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 			$new_p['year'] = $p['year'];
 			$new_p['cat_id'] = $p['projectcategories_id'];
 			$new_p['challenge_id'] = $p['projectdivisions_id'];
-			$new_p['accepted'] = 1;
+			$new_p['accepted'] = $u['s_accepted'];
 			$new_p['fair_id'] = $p['fairs_id'];
 
 
