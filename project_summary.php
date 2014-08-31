@@ -86,16 +86,16 @@ else
 <TR>
 	<td><?=$logo?></td>
 	<td><center><p><strong><font size="3" face="Verdana, Arial, Helvetica, sans-serif" color="#6699CC">
-		<?=$p['title']?><br />
-		<?=$s_names?><br />
-		<?=$s_schools?><br />
+		<?=htmlentities($p['title'], ENT_QUOTES | ENT_HTML401, "UTF-8")?><br />
+		<?=htmlentities($s_names, ENT_QUOTES | ENT_HTML401, "UTF-8")?><br />
+		<?=htmlentities($s_schools, ENT_QUOTES | ENT_HTML401, "UTF-8")?><br />
 		Floor Location : <?=$p['number']?></font></strong></center></td>
 	<td></td>
 </tr>
 </table>
 </center>
 <font size="2" face="Verdana, Arial, Helvetica, sans-serif">
-<?=nl2br(htmlentities(utf8_decode($p['summary'])))?>
+<?=nl2br(htmlentities($p['summary'], ENT_QUOTES | ENT_HTML401, "UTF-8"))?>
 </font>
 
 </body></html>

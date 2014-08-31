@@ -126,7 +126,7 @@ class pdf extends TCPDF {
 //		$width = $this->getStringWidth($txt,$fontname, $fontstyle,$fontsize,true);
 		$chars = TCPDF_FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont);
 		$width = $this->GetArrStringWidth($chars, $fontname, $fontstyle,$fontsize,true);
-		$count = count($width); // strlen(utf8_decode($txt));
+		$count = count($width); 
 
 //		$this->debug("Widths ($count): " . print_r($width, true));
 
@@ -706,8 +706,8 @@ class pdf extends TCPDF {
 			foreach($table['fields'] as $f) {
 				/* Convert all entities to HTML, even UTF characters.  Without this
 				 * TCPDF won't add a table if it has a UTF char */
-				$d = htmlentities(utf8_decode($row[$f]));
-				$d = str_replace("\n", "<br/>", $d);
+				$d = htmlentities($row[$f], ENT_QUOTES | ENT_HTML401, "UTF-8");
+				$d = nl2br($d);
 
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell

@@ -135,10 +135,6 @@ function conv_winners($mysqli, $mysqli_old, $year)
 		$mysqli->query("INSERT INTO winners (`award_prize_id`,`pid`,`year`,`fair_id`)
 				VALUES('$prize_id','$pid','$year','$fair_id')");
 
-		print("INSERT INTO winners (`award_prize_id`,`pid`,`year`,`fair_id`)
-				VALUES('$prize_id','$pid','$year','$fair_id')\n");
-
-
 	}
 }
 
