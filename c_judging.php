@@ -6,6 +6,7 @@ require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('committee/judges.inc.php');
 require_once('awards.inc.php');
+require_once('timeslots.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -26,32 +27,47 @@ sfiab_page_begin("Judging", $page_id);
 	$judges = judges_load_all($mysqli, $config['year']);
 	$jteams = jteams_load_all($mysqli);
 	$awards = award_load_all($mysqli);
+	$timeslots = timeslots_load_all($mysqli);
 
 	$j_complete = 0;
 	$j_not_attending = 0;
 	$j_incomplete = 0;
-	$j_round1 = 0;
-	$j_round2 = 0;
-	$j_round_both = 0;
+
+	$j_round = array();
+	$j_round_all = 0;
+	$jteam_count = array();
+	$jteam_judge_count = array();
+	$judges_used_in_round = array();
+	$unused_judge_count = array();
+	for($r=0; $r<$config['judging_rounds']; $r++) {
+		$j_round[$r] = 0;
+		$jteam_count[$r] = array('divisional'=>0, 'special'=>0);
+		$jteam_judge_count[$r] = array('divisional'=>0, 'special'=>0);
+		$judges_used_in_round[$r] = array();
+		$unused_judge_count[$r] = 0;
+	}
+
 	foreach($judges as &$j) {
-		if($j['not_attending']) {
+		if($j['attending'] == 0) {
 			$j_not_attending++;
 		} else {
 			if($j['j_complete']) {
-				if($j['j_rounds'][0] == 1) $j_round1++;
-				if($j['j_rounds'][1] == 1) $j_round2++;
-				if($j['j_rounds'][0] == 1 && $j['j_rounds'][1] == 1) $j_round_both++;
-				$j_complete++;
+				$all = true;
+				foreach($j['j_rounds'] as $r) {
+					if($r === NULL || $r == -1) {
+						$all = false;
+						continue;
+					}
+					$j_round[$r] += 1;
+				}
+				if($all) $j_round_all += 1;
+				$j_complete += 1;
 			} else {
-				$j_incomplete++;
+				$j_incomplete += 1;
 			}
 		}
 	}
 
-	$jteam_count = array(1=>array(), 2=>array());
-	$jteam_judge_count = array(1=>array(), 2=>array());
-	$judges_used_in_round = array(1=>array(), 2=>array());
-	$unused_judge_count = array(1=>0, 2=>0);
 
 	foreach($jteams as &$jteam) {
 		$round = $jteam['round'];
@@ -59,9 +75,6 @@ sfiab_page_begin("Judging", $page_id);
 		$n_judges = count($jteam['user_ids']);
 
 		if($type == 'grand' || $type == 'other') $type = 'special';
-
-		if(!array_key_exists($type, $jteam_count[$round])) $jteam_count[$round][$type] = 0;
-		if(!array_key_exists($type, $jteam_judge_count[$round])) $jteam_judge_count[$round][$type] = 0;
 
 		$jteam_count[$round][$type] += 1;
 		$jteam_judge_count[$round][$type] += $n_judges;
@@ -71,14 +84,12 @@ sfiab_page_begin("Judging", $page_id);
 
 	/* Count unused judges */
 	foreach($judges as &$j) {
-		if($j['j_rounds'][0] == 1 && !in_array($j['uid'], $judges_used_in_round[1])) 
-			$unused_judge_count[1]+=1;
-		if($j['j_rounds'][1] == 1 && !in_array($j['uid'], $judges_used_in_round[2])) 
-			$unused_judge_count[2]+=1;
+		for($r=0; $r<$config['judging_rounds']; $r++) {
+			if($j['j_rounds'][$r] == $r && !in_array($j['uid'], $judges_used_in_round[$r])) {
+				$unused_judge_count[$r]+=1;
+			}
+		}
 	}
-
-
-
 
 ?>	
 	<h3>Stats</h3> 
@@ -86,9 +97,11 @@ sfiab_page_begin("Judging", $page_id);
 	<tr><td valign="top">
 		<table>
 		<tr><td colspan="2" align="center"><b>Complete Judges</b></td></tr>
-		<tr><td align="center">Round 1</td><td align="center"><?=$j_round1?></td></tr>
-		<tr><td align="center">Round 2</td><td align="center"><?=$j_round2?></td></tr>
-		<tr><td align="center">Both</td><td align="center"><?=$j_round_both?></td></tr>
+<?php		foreach($timeslots as $tid=>&$t) {
+			$r = $t['round']; ?>
+			<tr><td align="center"><?=$t['name']?></td><td align="center"><?=$j_round[$r]?></td></tr>
+<?php		} ?>
+		<tr><td align="center">All</td><td align="center"><?=$j_round_all?></td></tr>
 		<tr><td align="center"><b>Total</b></td><td align="center"><b><?=$j_complete?></b></td></tr>
 		</table>
 	</td><td valign="top">
@@ -101,10 +114,11 @@ sfiab_page_begin("Judging", $page_id);
 		<table>
 		<tr><td colspan="5" align="center"><b>Judging Teams</b></td></tr>
 		<tr><td colspan="2"></td><td align="center">Divisional</td><td align="center">Special</td><td align="center">Unused</td></tr>
-		<tr><td align="center">Round 1</td><td align="center">Teams</td><td align="center"><?=$jteam_count[1]['divisional']?></td><td align="center"><?=$jteam_count[1]['special']?></td><td align="center">  </td></tr>
-		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[1]['divisional']?></td><td align="center"><?=$jteam_judge_count[1]['special']?></td><td align="center"><?=$unused_judge_count[1]?></td></tr>
-		<tr><td align="center">Round 2</td><td align="center">Teams</td><td align="center"><?=$jteam_count[2]['divisional']?></td><td align="center"><?=$jteam_count[2]['special']?></td><td align="center">  </td></tr>
-		<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[2]['divisional']?></td><td align="center"><?=$jteam_judge_count[2]['special']?></td><td align="center"><?=$unused_judge_count[2]?></td></tr>
+<?php		foreach($timeslots as $tid=>&$t) {
+			$r = $t['round']; ?>
+			<tr><td align="center"><?=$t['name']?></td><td align="center">Teams</td><td align="center"><?=$jteam_count[$r]['divisional']?></td><td align="center"><?=$jteam_count[$r]['special']?></td><td align="center">  </td></tr>
+			<tr><td align="center">       </td><td align="center">Judges</td><td align="center"><?=$jteam_judge_count[$r]['divisional']?></td><td align="center"><?=$jteam_judge_count[$r]['special']?></td><td align="center"><?=$unused_judge_count[$r]?></td></tr>
+<?php		} ?>
 		</table>
 
 	</td></tr></table>

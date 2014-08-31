@@ -43,23 +43,23 @@ sfiab_page_begin("Judging", $page_id);
 	/* Count judges */
 	$judges = volunteers_load_all($mysqli, $config['year']);
 
-	$j_complete = 0;
-	$j_not_attending = 0;
-	$j_incomplete = 0;
+	$v_complete = 0;
+	$v_not_attending = 0;
+	$v_incomplete = 0;
 	foreach($judges as &$j) {
-		if($j['not_attending']) {
-			$j_not_attending++;
+		if($j['attending'] == 0) {
+			$v_not_attending++;
 		} else {
-			if($j['j_complete']) 
-				$j_complete++;
+			if($j['v_complete']) 
+				$v_complete++;
 			else
-				$j_incomplete++;
+				$v_incomplete++;
 		}
 	}
 
 
 ?>	<h3>Volunteers</h3> 
-	<p>Complete: <b><?=$j_complete?></b> / <b><?=$j_complete+$j_incomplete?></b>,  plus not attending: <b><?=$j_not_attending?></b>.
+	<p>Complete: <b><?=$v_complete?></b> / <b><?=$v_complete+$v_incomplete?></b>,  plus not attending: <b><?=$v_not_attending?></b>.
 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_volunteers_invite.php" data-rel="external" data-ajax="false">X Invite a Volunteer</a></li>
@@ -73,15 +73,6 @@ sfiab_page_begin("Judging", $page_id);
 	<li><a href="#" data-rel="external" data-ajax="false">X Edit Assignments</a></li>
 	<li><a href="#" data-rel="external" data-ajax="false">X Run the Automatic Scheduler</a></li>
 	</ul>
-
-<?php
-/*        $form_id = 'j_attending_form';
-        form_begin($form_id, 'c_volunteers.php');
-        form_text($form_id, 'j_not_attending', "Judging at the fair", $u['not_attending']);
-        form_submit($form_id, 'save', 'Save', 'Information Saved');
-        form_end($form_id);
-*/	
-?>
 
 </div></div>
 	

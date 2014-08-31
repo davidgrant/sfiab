@@ -1,34 +1,43 @@
 <?
+/* Useful flags in the database to manipulate, we could probably turn this into a form that
+ * toggles the flags like at the top of the user list, rather than explicitly setting each
+ * one:
+ `enabled` = the user is not deleted, ==1 for both new and active users 
+ `new` = the user is still new (has never logged in, email not confirmed yet)
+ `s,j,v_complete` = the user is complete.  Implies the user is not new, but a complete user could be deleted or not-attending 
+ `attending` = the user is attending or not, students cannot set attending=0
+ `s_accepted` = the student's sig.form has been received (implies student is not new, and probably enabled, but not guaranteed)*/
+
 $email_lists=array(
 
-	'judges_all' => array(  'name' => 'Judges -- All complete and incomplete',
-					  	  'where' => "FIND_IN_SET('judge',`roles`)>0 AND `state`='active'",
+	'judges_all' => array(  'name' => 'Judges -- All complete and incomplete, includes not-attending',
+					  	  'where' => "FIND_IN_SET('judge',`roles`)>0 AND `enabled`='1' AND `new`='0'",
 						),
-	'judges_complete' => array(  'name' => 'Judges -- Complete',
-						'where' => "FIND_IN_SET('judge',`roles`)>0 AND `state`='active' AND `j_complete`='1'",
+	'judges_complete' => array(  'name' => 'Judges -- Complete (and attending)',
+						'where' => "FIND_IN_SET('judge',`roles`)>0 AND `enabled`='1' AND `j_complete`='1' AND `attending`='1'",
 						),
-	'judges_incomplete' => array(  'name' => 'Judges -- Incomplete',
-					  	  'where' => "FIND_IN_SET('judge',`roles`)>0 AND `state`='active' AND `j_complete`='0'",
+	'judges_incomplete' => array(  'name' => 'Judges -- Incomplete (and attending)',
+					  	  'where' => "FIND_IN_SET('judge',`roles`)>0 AND `enabled`='1' AND `j_complete`='0' AND `attending`='1' AND `new`='0'",
 						),
 
 	'students_accepted' => array(  'name' => 'Students -- Accepted (sig. form received)',
-					  	  'where' => "FIND_IN_SET('student',`roles`)>0 AND `s_accepted`='1'",
+					  	  'where' => "FIND_IN_SET('student',`roles`)>0 AND `s_accepted`='1' AND `enabled`='1'",
 						),
 	'students_complete' => array(  'name' => 'Students -- Complete (but no sig form yet)',
-						'where' => "FIND_IN_SET('student',`roles`)>0 AND `s_complete`='1'",
+						'where' => "FIND_IN_SET('student',`roles`)>0 AND `s_complete`='1' AND `enabled`='1'",
 						),
 	'students_incomplete' => array(  'name' => 'Students -- Incomplete',
-					  	  'where' => "FIND_IN_SET('student',`roles`)>0 AND `s_complete`='0' AND `state`='active'",
+					  	  'where' => "FIND_IN_SET('student',`roles`)>0 AND `s_complete`='0' AND `enabled`='1' AND `new`='0'",
 						),
-	'volunteers_complete' => array(  'name' => 'Volunteers -- Complete (but no sig form yet)',
-						'where' => "FIND_IN_SET('volunteer',`roles`)>0 AND `v_complete`='1'",
+	'volunteers_complete' => array(  'name' => 'Volunteers -- Complete (and attending)',
+						'where' => "FIND_IN_SET('volunteer',`roles`)>0 AND `v_complete`='1' AND `enabled`='1' AND `attending`='1' ",
 						),
 	'volunteers_incomplete' => array(  'name' => 'Volunteers -- Incomplete',
-					  	  'where' => "FIND_IN_SET('volunteer',`roles`)>0 AND `v_complete`='0' AND `state`='active'",
+					  	  'where' => "FIND_IN_SET('volunteer',`roles`)>0 AND `v_complete`='0' AND `enabled`='1' AND `attending`='1' AND `new`='0'",
 						),
 
 	'one_user' => array(  'name' => 'Send to a single (active or complete) user',
-					  	  'where' => " `state`='active'",
+					  	  'where' => " `enabled`='1' AND `new`='0'",
 						),
 	);
 

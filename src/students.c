@@ -157,7 +157,7 @@ void judges_load(struct _db_data *db, int year)
 
 	judges = g_ptr_array_new();
 	/* Load judges and tour choices */
-	result = db_query(db, "SELECT * FROM users WHERE year='%d' AND FIND_IN_SET('judge',`roles`) AND j_complete='1' AND not_attending='0' AND state='active'", year);
+	result = db_query(db, "SELECT * FROM users WHERE year='%d' AND FIND_IN_SET('judge',`roles`) AND j_complete='1' AND attending='1' AND enabled='1'", year);
 	for(x=0;x<result->rows; x++) {
 		struct _judge *j = malloc(sizeof(struct _judge));
 		char *fn, *ln;

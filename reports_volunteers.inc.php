@@ -147,7 +147,7 @@ $report_volunteers_fields = array(
 			$signup_join
 		WHERE
 			FIND_IN_SET('volunteer',`users`.`roles`)>0
-			AND state='active'
+			AND enabled='1' and attending='1'
 			AND users.year='$year'
 			$signup_where
 		";

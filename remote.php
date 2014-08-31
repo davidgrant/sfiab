@@ -280,7 +280,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 			$sid = user_create($mysqli, $username, $remote_student['email'], 'student', $year, $password);
 			$s = user_load($mysqli, $sid);
 			$s['s_pid'] = $pid;
-			$s['state'] = 'active';
+			$s['enabled'] = 1;
 			$s['year'] = $year;
 			$s['fair_id'] = $fair['id'];
 			$s['firstname'] = $remote_student['firstname'];

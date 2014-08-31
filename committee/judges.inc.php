@@ -9,8 +9,7 @@ function judges_load_all($mysqli, $year = NULL)
 	$q = $mysqli->query("SELECT * FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('judge',`roles`)>0
-					AND state != 'disabled'
-					AND state != 'deleted'");
+					AND `enabled`='1'");
 	$judges = array();
 	while($j = $q->fetch_assoc()) {
 		$judges[(int)$j['uid']] = user_load($mysqli, -1, -1, NULL, $j);

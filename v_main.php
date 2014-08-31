@@ -21,9 +21,9 @@ if(array_key_exists('action', $_POST)) {
 switch($action) {
 case 'save':
 	$attending = NULL;
-	post_bool($u['not_attending'], 'v_not_attending');
+	post_bool($u['attending'], 'v_attending');
 	user_save($mysqli, $u);
-	if($u['not_attending'] == 0) {
+	if($u['attending']) {
 		/* Do a full check, this will set the user
 		 * status to complete or incomplete and save it */
 		$fields = array();
@@ -55,7 +55,7 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_v_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
 
 <?php
-	if($u['not_attending'] == 1) {
+	if(!$u['attending']) {
 ?>
 		<h3>Registration Status: <font color="blue">Not Attending</font></h3>
 
@@ -107,11 +107,11 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 	<?php
 
 	/* This is backwards because it's "not attending" */
-	$sel = array('0'=>'Yes, I\'ll be there', '1'=>'No, I can\'t make it');
+	$sel = array('1'=>'Yes, I\'ll be there', '0'=>'No, I can\'t make it');
 
 	$form_id = 'v_attending_form';
 	form_begin($form_id, 'v_main.php');	
-	form_radio_h($form_id, 'v_not_attending', "Volunteering at the fair", $sel, $u['not_attending']);
+	form_radio_h($form_id, 'v_attending', "Volunteering at the fair", $sel, $u['attending']);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>

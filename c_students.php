@@ -91,14 +91,6 @@ sfiab_page_begin("Students", $page_id);
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_input_signature_forms.php" data-rel="external" data-ajax="false">Input Received Signature Forms</a></li>
 	</ul>
-<?php
-/*        $form_id = 'j_attending_form';
-        form_begin($form_id, 'c_student.php');
-        form_text($form_id, 'j_not_attending', "Judging at the fair", $u['not_attending']);
-        form_submit($form_id, 'save', 'Save', 'Information Saved');
-        form_end($form_id);
-*/	
-?>
 
 </div></div>
 	

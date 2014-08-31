@@ -96,8 +96,10 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool($u['attending']);
 	filter_bool($u['new']);
 	filter_bool($u['enabled']);
-	filter_bool($u['j_complete']);
 	filter_bool($u['s_complete']);
+
+	filter_languages($u['languages']);
+	
 
 	/* Student filtering */
 	filter_int_or_null($u['schools_id']);
@@ -107,18 +109,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	if($u['reg_close_override'] == '0000-00-00') $u['reg_close_override'] = NULL;
 
 	filter_int_list($u['tour_id_pref'], 3);
-/*	if($u['tour_id_pref'] === NULL)
-		$u['tour_id_pref'] = array(NULL,NULL,NULL);
-	else {
-		$a = explode(',',$u['tour_id_pref']);
-		$u['tour_id_pref'] = array(NULL, NULL, NULL);
-		$i = 0;
-		foreach($a as $id) {
-			$u['tour_id_pref'][$i] = (int)$id;
-			$i++;
-		}
-	}
-*/
 
 	filter_int_or_null($u['tour_id']);
 	filter_bool($u['s_web_firstname']);
@@ -126,6 +116,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool($u['s_web_photo']);
 
 	/* Judge filtering */
+	filter_bool($u['j_complete']);
 	filter_int_list($u['j_div_pref']);
 	filter_int_or_null($u['j_cat_pref']);
 	filter_int_or_null($u['j_years_school']);
@@ -138,9 +129,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool_or_null($u['j_mentored']);
 	filter_str_list($u['j_languages']);
 	filter_int_list($u['j_rounds']);
-
-
-	filter_languages($u['languages']);
 
 	/* Volutneer */
 	filter_bool_or_null($u['v_complete']);

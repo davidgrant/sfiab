@@ -36,7 +36,7 @@ foreach($volunteers as &$j) {
 
 	$filter_text = "{$j['name']} {$j['organization']}";
 
-	if($j['not_attending']) 
+	if(!$j['attending']) 
 		$status = '<font color="blue">Not Attending</font>';
 	else if($j['v_complete']) 
 		$status = '<font color="green">Complete</font>';

@@ -20,7 +20,7 @@ if(array_key_exists('action', $_GET)) {
 
 switch($action) {
 case 'delete':
-	$u['state'] = 'deleted';
+	$u['enabled'] = 0;
 	user_save($mysqli, $u);
 	login_logout($mysqli, $u);
 	header("Location: index.php#account_deleted");

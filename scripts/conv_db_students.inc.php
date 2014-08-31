@@ -59,7 +59,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 		$u['s_web_first'] = $old_s['webfirst'] == 'yes' ? 1 : 0;
 		$u['s_web_last'] = $old_s['weblast'] == 'yes' ? 1 : 0;
 		$u['s_web_photo'] = $old_s['webphoto'] == 'yes' ? 1 : 0;
-		$u['state'] = 'active';
+		$u['enabled'] = 1;
 		$u['s_complete'] = 1;
 
 

@@ -158,7 +158,7 @@ function l_projects_load_all($mysqli, $year)
 	$q = $mysqli->query("SELECT users.*,schools.school FROM users 
 					LEFT JOIN schools ON users.schools_id=schools.id
 				WHERE users.year='$year'
-				AND users.state = 'active'
+				AND users.enabled = '1'
 				AND FIND_IN_SET('student', users.`roles`)>0
 				");
 	$users = array();
