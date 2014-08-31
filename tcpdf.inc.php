@@ -706,7 +706,10 @@ class pdf extends TCPDF {
 			foreach($table['fields'] as $f) {
 				/* Convert all entities to HTML, even UTF characters.  Without this
 				 * TCPDF won't add a table if it has a UTF char */
-				$d = htmlentities($row[$f], ENT_QUOTES | ENT_HTML401, "UTF-8");
+				$flags = ENT_QUOTES;
+				if(PHP_VERSION_ID >= 50400) $flags |= ENT_HTML401;
+
+				$d = htmlentities($row[$f], $flags , "UTF-8");
 				$d = nl2br($d);
 
 				/* unfortunately, HTML doesn't do overflow the 

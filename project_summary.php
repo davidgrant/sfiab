@@ -74,6 +74,10 @@ if(file_exists("data/logo-100.gif"))
 else 
 	$logo = "";
 
+/* Create flags for htmlentities */
+$flags = ENT_QUOTES;
+if(PHP_VERSION_ID >= 50400) $flags |= ENT_HTML401;
+
 
 ?>
 <html><head>
@@ -86,16 +90,16 @@ else
 <TR>
 	<td><?=$logo?></td>
 	<td><center><p><strong><font size="3" face="Verdana, Arial, Helvetica, sans-serif" color="#6699CC">
-		<?=htmlentities($p['title'], ENT_QUOTES | ENT_HTML401, "UTF-8")?><br />
-		<?=htmlentities($s_names, ENT_QUOTES | ENT_HTML401, "UTF-8")?><br />
-		<?=htmlentities($s_schools, ENT_QUOTES | ENT_HTML401, "UTF-8")?><br />
+		<?=htmlentities($p['title'], $flags , "UTF-8")?><br />
+		<?=htmlentities($s_names, $flags , "UTF-8")?><br />
+		<?=htmlentities($s_schools, $flags , "UTF-8")?><br />
 		Floor Location : <?=$p['number']?></font></strong></center></td>
 	<td></td>
 </tr>
 </table>
 </center>
 <font size="2" face="Verdana, Arial, Helvetica, sans-serif">
-<?=nl2br(htmlentities($p['summary'], ENT_QUOTES | ENT_HTML401, "UTF-8"))?>
+<?=nl2br(htmlentities($p['summary'], $flags , "UTF-8"))?>
 </font>
 
 </body></html>
