@@ -18,7 +18,8 @@ $sfiab_roles = array(	'student' => array('name' => 'Student'),
 //			'teacher' => array(),
 			'judge' => array('name' => 'Judge'),
 			'committee' => array('name' => 'Committee'),
-			'volunteer' => array('name' => 'Volunteer')
+			'volunteer' => array('name' => 'Volunteer'),
+			'sponsor' => array('name' => 'Sponsor')
 		);
 
 function sfiab_db_connect()

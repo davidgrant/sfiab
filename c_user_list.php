@@ -255,9 +255,14 @@ foreach($users as &$user) {
 
 	$link = "c_user_list.php?edit={$user['uid']}";
 
+	$org = '';
+	if(in_array('sponsor', $user['roles'])) {
+		$org = $user['organization'].' - ';
+	}
+
 ?>
 	<li id="user_list_<?=$user['uid']?>" data-filtertext="<?=$filter_text?>"><a href="c_user_edit.php?uid=<?=$user['uid']?>" >
-		<h3><?=$user['name']?></h3><span class="ui-li-aside"><?=$status?></span>
+		<h3><?=$org.$user['name']?></h3><span class="ui-li-aside"><?=$status?></span>
 		<table width="100%">
 			<tr><td width="25%"><?=$user['email']?></td>
 			<td width="25%"><?=$user['username']?></td>
