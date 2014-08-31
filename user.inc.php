@@ -136,8 +136,8 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool_or_null($u['j_willing_lead']);
 	filter_bool_or_null($u['j_dinner']);
 	filter_bool_or_null($u['j_mentored']);
-	/* Make sure the j_rounds have the proper number of entries */
-	filter_int_list($u['j_rounds'], $config['judging_rounds']);
+	filter_str_list($u['j_languages']);
+	filter_int_list($u['j_rounds']);
 
 
 	filter_languages($u['languages']);
@@ -332,6 +332,18 @@ function user_copy($mysqli, $u, $new_year)
 		}
 		$mysqli->real_query("INSERT INTO emergency_contacts(`".join('`,`',array_keys($r))."`) VALUES ('".join("','", array_values($r))."')");
 	}
+	$u['s_complete'] = 0;
+	$u['s_accepted'] = 0;
+	$u['s_paid'] = 0;
+
+	$u['j_rounds'] = NULL;
+	$u['j_mentored'] = NULL;
+	$u['j_willing_lead'] = NULL;
+	$u['j_dinner'] = NULL;
+	$u['j_complete'] = 0;
+
+	$u['v_complete'] = 0;
+	
 
 	/* Copy the new user original data into the user so that
 	 * user_save detects that  everything has changed and re-saves it

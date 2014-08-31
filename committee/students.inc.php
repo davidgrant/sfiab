@@ -6,7 +6,7 @@ function students_load_all($mysqli, $year)
 	$q = $mysqli->query("SELECT * FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('student',`roles`)>0
-					AND state = 'active'
+					AND enabled = '1'
 					 ");
 	$students = array();
 	while($j = $q->fetch_assoc()) {
@@ -23,7 +23,7 @@ function students_load_all_accepted($mysqli, $year=0)
 	$q = $mysqli->query("SELECT * FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('student',`roles`)>0
-					AND state = 'active'
+					AND enabled = '1'
 					AND s_accepted = 1
 					 ");
 	$students = array();

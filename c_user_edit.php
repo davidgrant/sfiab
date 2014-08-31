@@ -43,7 +43,7 @@ case 'save_back':
 	post_text($edit_u['lastname'], 'lastname');
 	post_text($edit_u['email'], 'email');
 	post_text($edit_u['username'], 'username');
-	post_bool($edit_u['not_attending'], 'not_attending');
+	post_bool($edit_u['attending'], 'attending');
 	post_text($edit_u['reg_close_override'], 'reg_close_override');
 
 	if(in_array('student', $edit_u['roles'])) {
@@ -85,6 +85,7 @@ case 'psave_back':
 
 case 'purge':
 	if(in_array('student', $edit_u['roles'])) {
+		$mysqli->real_query("DELETE FROM emergency_contacts WHERE `uid`='$edit_uid'");
 		/* If only one student in project, delete project too */
 		$q_in_project = $mysqli->query("SELECT uid FROM users WHERE `s_pid`='{$edit_u['s_pid']}'");
 		if($q_in_project->num_rows == 1) {
@@ -101,7 +102,7 @@ case 'purge':
 
 
 case 'del':
-	$edit_u['state'] = 'deleted';
+	$edit_u['enabled'] = 0;
 	user_save($mysqli, $edit_u);
 	form_ajax_response(0);
 	exit();
@@ -152,8 +153,8 @@ form_page_begin($page_id, array());
 	form_text($form_id, 'lastname', 'Last Name', $edit_u);
 	form_text($form_id, 'email', 'Email', $edit_u, 'email');
 	form_text($form_id, 'username', 'Username', $edit_u);
-	$sel = array('0'=>'Yes, I\'ll be there', '1'=>'No, I can\'t make it');
-	form_radio_h($form_id, 'not_attending', "At the fair", $sel, $edit_u['not_attending']);
+	$sel = array('1'=>'Yes, I\'ll be there', '0'=>'No, I can\'t make it');
+	form_radio_h($form_id, 'attending', "At the fair", $sel, $edit_u['attending']);
 	form_text($form_id, 'reg_close_override', "Registration Close Override", $edit_u, 'date');
 
 	if(in_array('student', $edit_u['roles'])) { 

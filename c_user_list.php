@@ -14,17 +14,58 @@ sfiab_session_start($mysqli, array('committee'));
 $u = user_load($mysqli);
 
 $roles = array();
+$years = array();
+$status = array();
+$attending = array();
+$filter_collapsed = "true";
 
 foreach($_GET as $k=>$v) {
 	switch($k) {
 	case 'roles':
-		$g_roles = explode(',', $v);
-		foreach($g_roles as $r) {
+		if(!is_array($_GET['roles'])) exit();
+		foreach($_GET['roles'] as $r) {
 			if(!array_key_exists($r, $sfiab_roles)) exit();
 			$roles[] = $r;
 		}
 		$_SESSION['edit_return'] = $roles;
 		break;
+
+	case 'years':
+		if(!is_array($_GET['years'])) exit();
+		foreach($_GET['years'] as $y) {
+			$year = (int)$y;
+			if($year > 0 && $year < 9999) {
+				$years[] = $year;
+			} else if($year == -1) {
+				$years = array(-1);
+				break;
+			}
+		}
+		break;
+
+	case 'status':
+		if(!is_array($_GET['status'])) exit();
+		foreach($_GET['status'] as $s) {
+			if(in_array($s, array('complete', 'active','new'))) {
+				$status[] = $s;
+			}
+		}
+		break;
+
+	case 'attending':
+		if(!is_array($_GET['attending'])) exit();
+		foreach($_GET['attending'] as $s) {
+			if(in_array($s, array('attending', 'not_attending'))) {
+				$attending[] = $s;
+			}
+		}
+		break;
+
+	case 'show_filter':
+		$filter_collapsed = "false";
+		break;
+
+
 	case 'edit':
 		$uid = (int)$v;
 		$new_u = user_load($mysqli, $uid);
@@ -46,26 +87,19 @@ foreach($_GET as $k=>$v) {
 if(count($roles) == 0) {
 	$roles = array('committee');
 	$_SESSION['edit_return'] = $roles;
-	
 }
 
+if(count($years) == 0) {
+	$years[] = $config['year'];
+}
 
-function l_users_load_all($mysqli, $year, $roles)
-{
-	$q_roles = '';
-	foreach($roles as $r) 
-		$q_roles .= " AND FIND_IN_SET('$r',`roles`)>0 ";
+if(count($status) == 0) {
+	$status[] = 'complete';
+	$status[] = 'active';
+}
 
-	$q = $mysqli->query("SELECT * FROM users WHERE
-				year='$year'
-				AND state != 'deleted'
-				$q_roles
-				");
-	$users = array();
-	while($j = $q->fetch_assoc()) {
-		$users[] = user_load($mysqli, -1, -1, NULL, $j);
-	}
-	return $users;
+if(count($attending) == 0) {
+	$attending = array('attending', 'not_attending');
 }
 
 
@@ -78,30 +112,131 @@ sfiab_page_begin("User List", $page_id);
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
-	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
+	<div data-role="collapsible" data-collapsed="<?=$filter_collapsed?>" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
 		<h3>User List Options</h3>
-		Work in progress, eventually be able to select which roles to see, only complete/incomplete, year, etc.
+<?php
+		$form_id = $page_id.'_form';
+		$roles_sel = array();
+		foreach($sfiab_roles as $type=>$data) {
+			$roles_sel[$type] = $data['name'];
+		}
+
+		form_begin($form_id, "c_user_list.php", false, false, "get");
+		form_check_group($form_id, 'roles', "Show Roles", $roles_sel, $roles);
+		form_hidden($form_id, "show_filter", "1");
+
+		/* Find the full range of years */
+		$q = $mysqli->query("SELECT DISTINCT(`year`) FROM `users` ORDER BY `year`");
+		$years_sel = array();
+		while($r = $q->fetch_row()) {
+			$y = (int)$r[0];
+			$years_sel[$y] = $y;
+		}
+		$years_sel["-1"] = "Latest for each user";
+		form_check_group($form_id, 'years', "Show Years", $years_sel, $years);
+
+		$status_sel = array('complete' => 'Complete', 'active' => 'Active', 'new' => 'New');
+		form_check_group($form_id, 'status', "Show Status", $status_sel, $status);
+
+		$attending_sel = array('attending' => "Attending", 'not_attending'=>'Not Attending');
+		form_check_group($form_id, 'attending', "Show Attending", $attending_sel, $attending);
+
+
+		form_button($form_id, 'filter', 'Apply Filters');
+		form_end($form_id);
+?>
+		
 	</div>
 
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search..." data-inset="true">
 <?php
 
-$users = l_users_load_all($mysqli, $config['year'], $roles);
+$q_roles_array = array();
+foreach($roles as $r) {
+	$q_roles_array[] = "FIND_IN_SET('$r',`roles`)>0";
+}
+$q_roles = "( ".join(' OR ', $q_roles_array)." )";
 
-foreach($users as &$v) {
+if(count($status) == 0) {
+	/* Can't happen */
+	$q_status = '1';
+} else {
+	$a = array();
+	if(in_array('complete', $status)) $a[] = "(`enabled`='1' AND (`j_complete`='1' OR `s_complete`='1' OR `v_complete`='1' OR FIND_IN_SET('committee',`roles`)>0 ) )";
+	if(in_array('accepted', $status)) $a[] = "(`enabled`='1' AND `s_accepted`='1')";
+	if(in_array('active', $status)) $a[] = "`enabled`='1'";
+	if(in_array('new', $status))	$a[] = "(`new`='1' AND `enabled`='1')";
+	$q_status = "(".join(' OR ', $a).")";
+}
+$c = count($attending);
+if($c == 0 || $c == 2) {
+	/* Nothing (can't happen) or both selected, return all attending status */
+	$q_attending = '1';
+} else {
+	$q_attending = in_array('attending', $attending) ? "`attending`='1'" : "`attending`='0'";
+}
 
-	$roles_str = implode(' ', $v['roles']);
-	$filter_text = "{$v['name']} {$v['organization']} $roles_str {$v['email']}";
+if(count($years) == 0 || $years[0] == -1) {
+	/* This returns all rows that match the inner query, so if there's a deleted an non-deleted user in the max_year, 
+	 * this returns a single line, and the INNER JOIN creates two lines.  The enabled=1 filters it back down to one */
+	$q_join = "INNER JOIN (
+		    SELECT max(year) max_year, username
+		    FROM users
+		    GROUP BY username
+		) u2
+		ON `u`.username = `u2`.username
+		AND `u`.year = `u2`.max_year";
+	$q_year = "1";
+} else {
+	/* Not trying to find the max year for each user, just filter directly by year */
+	$q_year = "year IN ('".join("','", $years)."')";
+	$q_join = '';
+}
+
+$query = "SELECT * FROM users u 
+			$q_join
+		WHERE
+			$q_year
+			AND $q_roles
+			AND $q_status
+			AND $q_attending
+			";
+$q = $mysqli->query($query);
+print($query);
+print($mysqli->error);
+
+$users = array();
+while($user_data = $q->fetch_assoc()) {
+	$users[] = user_load($mysqli, -1, -1, NULL, $user_data);
+}
+
+
+?>
+
+<li>
+<table width="100%">
+	<tr><td width="25%"><b>Name / Email</b></td>
+	<td width="25%"><b>Username</b></td>
+	<td width="25%"><b>Year</b></td>
+	<td width="25%"><b>Roles / Status</b></td>
+</tr></table>
+</li>
+
+<?php
+foreach($users as &$user) {
+
+	$roles_str = implode(' ', $user['roles']);
+	$filter_text = "{$user['name']} {$user['organization']} $roles_str {$user['email']}";
 
 	$status = '';
-	foreach($v['roles'] as $r) {
+	foreach($user['roles'] as $r) {
 		if($status != '') $status .= ', ';
 		$status .= $sfiab_roles[$r]['name'];
-		if(!$v['not_attending']) {
+		if($user['attending']) {
 			switch($r) {
-			case 'judge': $complete = $v['j_complete']; break;
-			case 'student': $complete = $v['s_complete']; break;
-			case 'volunteer': $complete = $v['v_complete']; break;
+			case 'judge': $complete = $user['j_complete']; break;
+			case 'student': $complete = $user['s_complete']; break;
+			case 'volunteer': $complete = $user['v_complete']; break;
 			default: $complete = NULL;
 			}
 
@@ -114,16 +249,22 @@ foreach($users as &$v) {
 			}
 		}
 	}
-	if($v['not_attending']) {
+	if(!$user['attending']) {
 		$status .= ' - <font color="blue">Not Attending</font>';
 	}
 
-	$link = "c_user_list.php?edit={$v['uid']}";
+	$link = "c_user_list.php?edit={$user['uid']}";
 
 ?>
-	<li id="user_list_<?=$v['uid']?>" data-filtertext="<?=$filter_text?>"><a href="c_user_edit.php?uid=<?=$v['uid']?>" >
-		<h3><?=$v['name']?></h3><span class="ui-li-aside"><?=$status?></span>
-		<?=$v['email']?> - <?=$v['username']?>
+	<li id="user_list_<?=$user['uid']?>" data-filtertext="<?=$filter_text?>"><a href="c_user_edit.php?uid=<?=$user['uid']?>" >
+		<h3><?=$user['name']?></h3><span class="ui-li-aside"><?=$status?></span>
+		<table width="100%">
+			<tr><td width="25%"><?=$user['email']?></td>
+			<td width="25%"><?=$user['username']?></td>
+			<td width="25%"><?=$user['year']?></td>
+			<td width="25%"></td>
+		</tr></table>
+	
 		</a>
 		<a href="<?=$link?>" data-external="true" data-ajax="false" data-icon="gear" >Edit</a>
 <?php /*		
@@ -149,6 +290,12 @@ foreach($users as &$v) {
 			</div>
 
 		</div>
+		// Put this in the script below
+		function user_list_info_toggle(id) {
+		$('#user_list_info_'+id).toggle();
+		return false;
+	}
+
 */
 ?>
 	</li>
@@ -159,10 +306,7 @@ foreach($users as &$v) {
 </ul>
 
 <script>
-	function user_list_info_toggle(id) {
-		$('#user_list_info_'+id).toggle();
-		return false;
-	}
+
 </script>
 
 

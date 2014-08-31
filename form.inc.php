@@ -416,7 +416,7 @@ function form_file($form_id, $name, $label)
 
 }
 
-function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true, $enable_files = false)
+function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true, $method = "post")
 {
 	global $form_form_id, $form_disabled;
 	$form_form_id = $form_id;
@@ -434,12 +434,12 @@ function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true, $
 			$attrs = 'data-ajax="false"';
 		}
 
-		if($enable_files) {
+/*		if($enable_files) {
 			$attrs .= ' enctype="multipart/form-data"';
-		}
+		}*/
 	} 
 ?>
-	<form method="post" action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>" <?=$attrs?> >
+	<form method="<?=$method?>" action="<?=$action?>" id="<?=$form_id?>" class="<?=$cl?>" <?=$attrs?> >
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php
 }

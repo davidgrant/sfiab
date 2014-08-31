@@ -132,7 +132,11 @@ function post_bool(&$val, $var)
 {
 	$v = post_get_value($var);
 	if($v !== NULL) {
-		$val = (int)post_get_value($var) ? 1 : 0;
+		if($v == '') {
+			$val = NULL;
+		} else {
+			$val = ((int)$v==0) ? 0 : 1;
+		}
 	}
 }
 
@@ -176,6 +180,7 @@ function post_array(&$val, $var, &$choices)
 function post_int_list(&$val, $var) 
 {
 	$v = post_get_value($var);
+	print_r($v);
 	if($v !== NULL) {
 		$val = array();
 		foreach($v as $idx=>$dat) {

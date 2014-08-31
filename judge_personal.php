@@ -74,7 +74,7 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 	$form_id = $page_id."_form";
 	form_begin($form_id, 'judge_personal.php', $closed);
 
-	form_text($form_id, 'salutation', "Salutation<br/>(This goes on your name tag!)", $u);
+	form_text($form_id, 'salutation', "Salutation (This goes on your name tag!)", $u);
 	form_text($form_id, 'firstname', "First Name", $u);
 	form_text($form_id, 'lastname', "Last Name", $u);
 	form_radio_h($form_id, 'sex', 'Gender', array( 'male' => 'Male', 'female' => 'Female'), $u);

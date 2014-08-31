@@ -277,7 +277,10 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		break;
 	case 'j_options':
 		for($x=0; $x<$config['judging_rounds']; $x++) {
-			if($u['j_rounds'][$x] !== 0 && $u['j_rounds'][0] !== 1) $ret[] = "j_rounds[$x]";
+			if(!array_key_exists($x, $u['j_rounds']) || 
+			   ($u['j_rounds'][$x] !== -1 && $u['j_rounds'][$x] !== $x) ) {
+			   	$ret[] = "j_rounds[$x]";
+			}
 		}
 		incomplete_check_bool($ret, $u, array('j_willing_lead','j_dinner'));
 
