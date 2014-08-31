@@ -639,8 +639,10 @@ function sfiab_registration_is_closed($u, $role=NULL)
 
 	if($role !== NULL) {
 		if($role == 'student') {
+			$reg_open_date = $config['date_student_registration_opens'];
 			$reg_close_date = $config['date_student_registration_closes'];
 		} else if ($role == 'judge') {
+			$reg_open_date = $config['date_judge_registration_opens'];
 			$reg_close_date = $config['date_judge_registration_closes'];
 		} else {
 			return false;
@@ -657,6 +659,7 @@ function sfiab_registration_is_closed($u, $role=NULL)
 		 * has been accepted, disregard any reg close override and just
 		 * return that their reg is closed */
 		if(in_array('student', $u['roles'])) {
+			$reg_open_date = $config['date_student_registration_opens'];
 			$reg_close_date = $config['date_student_registration_closes'];
 
 			/* Accetped students are cannot make changes */
@@ -665,8 +668,8 @@ function sfiab_registration_is_closed($u, $role=NULL)
 			}
 
 		} else if (in_array('judge', $u['roles'])) {
+			$reg_open_date = $config['date_judge_registration_opens'];
 			$reg_close_date = $config['date_judge_registration_closes'];
-
 		} else {
 			return false;
 		}
@@ -677,7 +680,7 @@ function sfiab_registration_is_closed($u, $role=NULL)
 		} 
 	}
 
-	if($now < $reg_close_date)
+	if($reg_open_date < $now && $now < $reg_close_date)
 		return false;
 	else 
 		return true;

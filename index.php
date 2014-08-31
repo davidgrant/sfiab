@@ -77,17 +77,29 @@ $_SESSION['login_hash'] = $login_hash;
 	$s_text = '';
 	$j_disabled = '';
 	$j_text = '';
+	$now = date( 'Y-m-d H:i:s' );
+
 	if(sfiab_registration_is_closed(NULL, 'student')) {
 		/* Only disable if user is not a committeemember */
 		if(!sfiab_user_is_a('committee')) 
 			$s_disabled = 'disabled="disabled"';
-		$s_text = ' (registration closed)';
+
+		if($now < $config['date_student_registration_opens']) {
+			$s_text = ' (registration opens on '.date('F j, Y', strtotime($config['date_student_registration_opens'])).')';
+		} else {
+			$s_text = ' (registration closed)';
+		}
 	}
 	if(sfiab_registration_is_closed(NULL, 'judge')) {
 		/* Only disable if user is not a committeemember */
 		if(!sfiab_user_is_a('committee')) 
 			$j_disabled = 'disabled="disabled"';
-		$j_text = ' (registration closed)';
+
+		if($now < $config['date_judge_registration_opens']) {
+			$j_text = ' (registration opens on '.date('F j, Y', strtotime($config['date_judge_registration_opens'])).')';
+		} else {
+			$j_text = ' (registration closed)';
+		}
 	}
 ?>
 
