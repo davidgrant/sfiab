@@ -8,7 +8,7 @@ require_once('filter.inc.php');
 require_once('email.inc.php');
 
 $mysqli = sfiab_init('committee');
-:
+
 $u = user_load($mysqli);
 
 $roles = array();
@@ -307,6 +307,8 @@ foreach($users as &$user) {
 ?>
 
 </ul>
+
+<br/><br/>
 
 <script>
 

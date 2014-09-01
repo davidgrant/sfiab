@@ -29,6 +29,9 @@ require_once('reports.inc.php');
 
 $mysqli = sfiab_init('committee');
 
+/* Define all the report field globals, depends on mysqli and $config */
+report_init($mysqli);
+
 $u = user_load($mysqli);
 
 $page_id = 'c_report_editor';

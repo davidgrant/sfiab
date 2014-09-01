@@ -329,6 +329,10 @@ function report_init($mysqli)
 
 	$report_mysqli = $mysqli;
 
+	/* Define all the global report arrays, this works fine in a function.  It only gets
+	 * included when the funciton is run (specifically, after we have
+	 * defined $mysqli and loaded $config */
+
 	require_once("reports_students.inc.php");  /* $report_students_fields */
 	require_once("reports_judges.inc.php");  /* $report_students_fields */
 	require_once("reports_awards.inc.php");  /* $report_students_fields */

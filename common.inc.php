@@ -39,7 +39,6 @@ function sfiab_session_is_active()
 function sfiab_load_config($mysqli)
 {
 	global $config;
-	global $db_version;
 	$year = -1;
 	$q = $mysqli->prepare("SELECT var,val FROM config WHERE `year` = ?");
 	$q->bind_param('i', $year); /* Bind year == -1 to load system config */
