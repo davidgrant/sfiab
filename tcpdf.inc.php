@@ -86,7 +86,6 @@ class pdf extends TCPDF {
 		$this->current_label_row = 0;
 		$this->current_label_col = 0;
 
-		date_default_timezone_set('UTC');
 		$this->footer_string = date("Y-m-d h:ia").' - '.$report_name;
 
 		$this->enable_debug = false;

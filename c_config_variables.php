@@ -11,10 +11,8 @@ $u = user_load($mysqli);
 
 $timezones = array();
 foreach(timezone_identifiers_list() as $tid=>$tz) {
-	$timezones[$tz] = [$tz];
+	$timezones[$tz] = $tz;
 }
-
-
 
 $cfg = array();
 $q = $mysqli->query("SELECT * FROM config WHERE (year='{$config['year']}' OR year=-1) AND category!='system' ORDER BY category,`order`,var");
@@ -80,6 +78,7 @@ sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 			}
 			form_submit($form_id, 'save', "Save", "Saved");
 			form_end($form_id);
+
 			?>
 		</div>
 <?php	}?>
