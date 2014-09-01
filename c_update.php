@@ -27,7 +27,8 @@ require_once('user.inc.php');
 
 /* Allow anyone to run this, there may not be any committee members logged in,
  * and we can't let anyone in until applying the update */
-$mysqli = sfiab_init(NULL);
+$mysqli = sfiab_db_connect();
+sfiab_load_config($mysqli);
 
 /* See if there is an update */
 $db_version = intval(file_get_contents('updates/db_version.txt', 0, NULL, 0, 5));
@@ -70,30 +71,30 @@ for($ver = $update_start; $ver <= $update_end; $ver++) {
 
 	print("Applying update $ver...\n");
 
-	if(file_exists("updates/db.$ver.php")) {
-		include("updates/db.$ver.php");
+	if(file_exists("updates/$ver.php")) {
+		include("updates/$ver.php");
 	}
 
 	if(is_callable("pre_$ver")) {
-		print("   updates/db.$ver.php::pre_$ver() exists - running...\n");
-		call_user_func("pre_$ver");
-		print("   updates/db.$ver.php::pre_$ver() done.\n");
+		print("   updates/$ver.php::pre_$ver() exists - running...\n");
+		call_user_func("pre_$ver", $mysqli);
+		print("   updates/$ver.php::pre_$ver() done.\n");
 	}
 
-	if(file_exists("updates/db.$ver.sql")) {
-		print("   updates/db.$ver.sql detected - applying update...\n");
-		$fp = fopen("updates/db.$ver.sql", "rt");
+	if(file_exists("updates/$ver.sql")) {
+		print("   updates/$ver.sql detected - applying update...\n");
+		$fp = fopen("updates/$ver.sql", "rt");
 		apply_db($mysqli, $fp);
 		fclose($fp);
 	}
 	else {
-		print("   updates/db.$ver.sql not found, skipping\n");
+		print("   updates/$ver.sql not found, skipping\n");
 	}
 
 	if(is_callable("post_$ver")) {
-		print("   updates/db.$ver.php::post_$ver() exists - running...\n");
-		call_user_func("post_$ver");
-		print("   updates/db.$ver.php::post_$ver() done.\n");
+		print("   updates/$ver.php::post_$ver() exists - running...\n");
+		call_user_func("post_$ver", $mysqli);
+		print("   updates/$ver.php::post_$ver() done.\n");
 	}
 }
 
