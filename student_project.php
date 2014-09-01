@@ -5,10 +5,8 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('isef.inc.php');
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
 
-sfiab_session_start($mysqli, array('student'));
+$mysqli = sfiab_init('student');
 
 $u = user_load($mysqli);
 $closed = sfiab_registration_is_closed($u);

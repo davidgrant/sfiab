@@ -5,15 +5,19 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $u = user_load($mysqli);
 
+$timezones = array();
+foreach(timezone_identifiers_list() as $tid=>$tz) {
+	$timezones[$tz] = [$tz];
+}
+
+
 
 $cfg = array();
-$q = $mysqli->query("SELECT * FROM config WHERE year='{$config['year']}' ORDER BY category,var");
+$q = $mysqli->query("SELECT * FROM config WHERE (year='{$config['year']}' OR year=-1) AND category!='system' ORDER BY category,`order`,var");
 while($r = $q->fetch_assoc()) {
 	if(!array_key_exists($r['category'], $cfg)) $cfg[$r['category']] = array();
 	$cfg[$r['category']][$r['var']] = $r;
@@ -65,7 +69,14 @@ sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 <?php			$form_id = $page_id.'_'.$cfg_tab_names[$k].'_form';
 			form_begin($form_id, 'c_config_variables.php');
 			foreach($v as $var=>&$d) { 
-				form_text($form_id, 'cfg_'.$d['var'], $d['var'], $d['val']);
+				switch($d['type']) {
+				case 'timezone':
+					form_select($form_id, 'cfg_'.$d['var'], $d['var'], $timezones, $d['val']);
+					break;
+				default:
+					form_text($form_id, 'cfg_'.$d['var'], $d['var'], $d['val']);
+					break;
+				}
 			}
 			form_submit($form_id, 'save', "Save", "Saved");
 			form_end($form_id);

@@ -12,11 +12,7 @@ if(!array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
-sfiab_session_start();
-
+$mysqli = sfiab_init(NULL);
 
 function check_username($username)
 {

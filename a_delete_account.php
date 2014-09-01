@@ -4,10 +4,7 @@ require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('login.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
-sfiab_session_start();
+$mysqli = sfiab_init(NULL);
 
 /* Check access, but skip the expiry check */
 sfiab_check_access($mysqli, array(), true);

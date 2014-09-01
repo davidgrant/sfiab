@@ -3,13 +3,8 @@ require_once('common.inc.php');
 require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('incomplete.inc.php');
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
+$mysqli = sfiab_init(NULL, true);
 
-sfiab_session_start();
-
-/* Check access, but skip the expiry check */
-sfiab_check_access($mysqli, array(), true);
 $u = user_load($mysqli);
 
 sfiab_page_begin("Change Password", "a_change_password");

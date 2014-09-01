@@ -5,10 +5,7 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('awards.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
-sfiab_session_start($mysqli, array('student'));
+$mysqli = sfiab_init('student');
 
 $u = user_load($mysqli);
 $p = project_load($mysqli, $u['s_pid']);

@@ -2,10 +2,8 @@
 require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('form.inc.php');
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
 
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $page_id = "c_main";
 

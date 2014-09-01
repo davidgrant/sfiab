@@ -21,8 +21,7 @@
    the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.
 */
-?>
-<?
+
 require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('awards.inc.php');
@@ -32,8 +31,6 @@ require_once('email.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
-
-
 
 function handle_getstats(&$u, $fair,&$data, &$response)
 {

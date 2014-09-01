@@ -24,6 +24,8 @@ require_once('common.inc.php');
 require_once('project.inc.php');
 require_once('user.inc.php');
 
+global $report_mysqli;
+
 function report_students_i18n_fr($mysqli, &$report, $field, $text)
 {
 	return i18n($text, array(), array(), 'fr');

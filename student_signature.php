@@ -5,13 +5,9 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('incomplete.inc.php');
 require_once('form.inc.php');
-
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
 require_once('tcpdf.inc.php');
 
-sfiab_session_start($mysqli, array('student'));
+$mysqli = sfiab_init('student');
 
 $page_id = 's_signature';
 

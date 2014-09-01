@@ -6,10 +6,7 @@ require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('committee/volunteers.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $u = user_load($mysqli);
 

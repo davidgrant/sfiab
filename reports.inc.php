@@ -21,16 +21,6 @@
    Boston, MA 02111-1307, USA.
 */
 
-require_once("reports_students.inc.php");  /* $report_students_fields */
-require_once("reports_judges.inc.php");  /* $report_students_fields */
-require_once("reports_awards.inc.php");  /* $report_students_fields */
-require_once("reports_committee.inc.php");  /* $report_students_fields */
-require_once("reports_volunteers.inc.php"); /* $report_volunteers_fields */
-// require_once("reports_schools.inc.php");
-// require_once("reports_tours.inc.php");
-// require_once("reports_fairs.inc.php");
-// require_once("reports_fundraising.inc.php");
-
 require_once('csv.inc.php');
 require_once('tcpdf.inc.php');
 
@@ -325,6 +315,32 @@ foreach($report_stock as $n=>$v) {
 	$report_options['stock']['values'][$n] = $v['name'];
 }
 
+$report_initialized = false;
+function report_init($mysqli) 
+{
+	global $report_students_fields, $report_judges_fields, $report_awards_fields;
+	global $report_committees_fields, $report_volunteers_fields; 
+	global $report_mysqli;
+	global $report_initialized;
+	global $config;
+
+	if($report_initialized) return;
+	$report_initialized = true;
+
+	$report_mysqli = $mysqli;
+
+	require_once("reports_students.inc.php");  /* $report_students_fields */
+	require_once("reports_judges.inc.php");  /* $report_students_fields */
+	require_once("reports_awards.inc.php");  /* $report_students_fields */
+	require_once("reports_committee.inc.php");  /* $report_students_fields */
+	require_once("reports_volunteers.inc.php"); /* $report_volunteers_fields */
+	// require_once("reports_schools.inc.php");
+	// require_once("reports_tours.inc.php");
+	// require_once("reports_fairs.inc.php");
+	// require_once("reports_fundraising.inc.php");
+
+}
+
 function report_save_field($mysqli, $report, $type)
 {
 	global $report_students_fields, $report_judges_fields, $report_awards_fields;
@@ -585,6 +601,8 @@ function report_save_field($mysqli, $report, $type)
 
 //	print("<pre>");
 //	print_r($report);
+
+	report_init($mysqli);
 
 	$fieldvar = "report_{$report['type']}s_fields";
 	$fields = $$fieldvar;

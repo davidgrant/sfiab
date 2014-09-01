@@ -9,10 +9,8 @@ require_once('common.inc.php');
 require_once('form.inc.php');
 
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
 
-sfiab_session_start();
+$mysqli = sfiab_init(NULL);
 
 sfiab_page_begin('Welcome', 'welcome');
 

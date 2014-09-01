@@ -9,7 +9,9 @@ sfiab_load_config($mysqli);
 
 
 // set the default timezone to use. Available since PHP 5.1
-date_default_timezone_set('PST8PDT');
+date_default_timezone_set('America/Toronto');
+print("Now: ".date('Y-m-d H:i:s', time())."\n");
+
 
 
 $fstart = "2014-04-12";
@@ -25,13 +27,6 @@ print("Fair start: $fstart, back and forth: $s\n");
 
 $d = date_parse($fstart);
 print_r($d);
-
-
-$q = $mysqli->query('SHOW CREATE TABLE `users`');
-while($r = $q->fetch_assoc()) {
-print "newline\n";
-	print_r($r);
-	}
 
 
 #sfiab_session_start($mysqli);

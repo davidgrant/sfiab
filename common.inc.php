@@ -7,8 +7,6 @@ error_reporting(-1);
 require_once('config.inc.php');
 require_once('filter.inc.php');
 
-date_default_timezone_set('PST8PDT');
-
 /* It's kinda important that there be no blank lines BEFORE this, or they're sent as newlines.  This messes
  * up login.php */
 
@@ -41,6 +39,7 @@ function sfiab_session_is_active()
 function sfiab_load_config($mysqli)
 {
 	global $config;
+	global $db_version;
 	$year = -1;
 	$q = $mysqli->prepare("SELECT var,val FROM config WHERE `year` = ?");
 	$q->bind_param('i', $year); /* Bind year == -1 to load system config */
@@ -65,6 +64,31 @@ function sfiab_load_config($mysqli)
 	} 
 	$config['provincestate'] = 'Province';
 	$config['postalzip'] = 'Postal Code';
+
+	date_default_timezone_set($config['timezone']);
+}
+
+function sfiab_init($roles, $skip_password_expiry_check=false)
+{
+	global $config;
+	$mysqli = sfiab_db_connect();
+	sfiab_load_config($mysqli);
+
+	$db_version = intval(file_get_contents('updates/db_version.txt', 0, NULL, 0, 5));
+	if($db_version != $config['db_version']) {
+		print("The database needs to be updated (have={$config['db_version']}, latest={$db_version}).");
+		exit();
+	}
+
+	sfiab_session_start();
+
+	if($roles !== NULL) {
+		if(!is_array($roles)) {
+			$roles = array($roles);
+		}
+		sfiab_check_access($mysqli, $roles, $skip_password_expiry_check);
+	}
+	return $mysqli;
 }
 
 function sfiab_log($mysqli, $type, $data, $uid=-1)
@@ -81,7 +105,7 @@ function sfiab_log($mysqli, $type, $data, $uid=-1)
 	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`time`,`type`,`data`) VALUES('$ip',$uid,NOW(),'$type','$data')");
 }
 
-function sfiab_session_start($mysqli = NULL, $roles = array()) 
+function sfiab_session_start() 
 {
         $session_name = 'sfiab';
         $secure = false; 
@@ -93,10 +117,6 @@ function sfiab_session_start($mysqli = NULL, $roles = array())
         session_name($session_name);
         session_start(); 
         session_regenerate_id();
-
-	if($mysqli != NULL) {
-		sfiab_check_access($mysqli, $roles);
-	}
 }
 
 function sfiab_logged_in()
@@ -114,7 +134,8 @@ function sfiab_user_is_a($role)
 	return false;
 }
 
-function sfiab_check_access($mysqli, $roles = array(), $skip_expiry_check = false) 
+/* Roles is an array of roles to allow */
+function sfiab_check_access($mysqli, $roles, $skip_expiry_check) 
 {
 	global $config;
 	/* FIXME: this needs work */
@@ -525,7 +546,8 @@ function category_get_from_grade($grade)
 	return false;
 }
 
-function cms_get($mysqli, $name) {
+function cms_get($mysqli, $name) 
+{
 	$q = $mysqli->query("SELECT `text`,`use` FROM `cms` WHERE `name`='$name'");
 	print($mysqli->error);
 	$r = $q->fetch_assoc();

@@ -5,9 +5,7 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 
 /* Returns $map[old_id] = new_id */

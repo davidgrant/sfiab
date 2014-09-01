@@ -5,10 +5,7 @@ require_once('user.inc.php');
 require_once('committee/email_lists.inc.php');
 require_once('email.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $u = user_load($mysqli);
 

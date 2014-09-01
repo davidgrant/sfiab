@@ -9,9 +9,7 @@ require_once('email.inc.php');
 require_once('awards.inc.php');
 require_once('committee/judges.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $config['cusps'] = array(0.05, 0.10, 0.15, 0.20);
 

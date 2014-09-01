@@ -1,17 +1,12 @@
 <?php
-
 require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('timeslots.inc.php');
 require_once('committee/students.inc.php');
-
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
 require_once('tcpdf.inc.php');
 
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $u = user_load($mysqli);
 

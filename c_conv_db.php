@@ -15,14 +15,16 @@ if(count($_SERVER['argv']) > 1) {
         }
 }
 
-
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
 if(array_key_exists('SERVER_ADDR', $_SERVER)) {
 	/* Run from server, requires committee */
-	sfiab_session_start($mysqli, array('committee'));
+	$mysqli = sfiab_init('committee');
+} else {
+	/* From command line we dont' have to start a session or check the session, should probably
+	 * prohibit this in the future */
+	$mysqli = sfiab_db_connect();
+	sfiab_load_config($mysqli);
 }
+
 
 $old_db = "sfiab_gvrsf";
 

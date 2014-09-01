@@ -9,10 +9,8 @@ require_once('committee/judges.inc.php');
 require_once('awards.inc.php');
 
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-sfiab_session_start($mysqli, array('committee'));
-
+$mysqli = sfiab_init('committee');
+:
 $u = user_load($mysqli);
 
 $timeslots = timeslots_load_all($mysqli);

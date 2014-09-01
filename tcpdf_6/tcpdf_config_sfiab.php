@@ -117,7 +117,7 @@ define ('PDF_AUTHOR', 'SFIAB');
 /**
  * Header title.
  */
-define ('PDF_HEADER_TITLE',  $config['fair_name']);
+define ('PDF_HEADER_TITLE',  'SFIAB');
 
 /**
  * Header description string.

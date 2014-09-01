@@ -28,10 +28,7 @@ require_once('project.inc.php');
 require_once('awards.inc.php');
 require_once('form.inc.php');
 
-$mysqli = sfiab_db_connect();
-sfiab_load_config($mysqli);
-
-sfiab_session_start($mysqli, array('committee'));
+$mysqli = sfiab_init('committee');
 
 $cwsf_divisions = array(
 	1=>"Discovery",
