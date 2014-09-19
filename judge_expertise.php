@@ -87,11 +87,11 @@ sfiab_page_begin("Expertise", $page_id, $help);
 ?>
 		<h3>Sponsor Judges</h3>
 <?php
-	form_yesno($form_id, 'j_sa_only', "Do you represent the sponsor of a special award?", $u, true, true);
+	form_yesno($form_id, 'j_sa_only', "Do you represent the sponsor of a special award?", $u, false, true);
 	
 ?>
 	<div id="j_expertise_sa" <?=$sa_only ? '' : $hidden?> >
-		Note: Our chief judge will double-check with anyone who selects 'Yes' here to ensure they
+		Note: Our chief judge will double-check with all Sponsor Judges ensure they
 		are a sponsor for a special award.  If you are not sure then you are probably not a Sponsor judge.
 <?php
 
@@ -114,7 +114,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	<h3>Judging Preferences</h3>
 	Select your top three detailed divisions to judge and an age category
 	preference if you have one.  We use this to match you with projects to
-	judge.  For the divisions, we will also match you with project in the
+	judge.  For the divisions, we will also match you with projects in the
 	same general division with slightly less priority.  That means if you
 	select "Biochemistry--Medicinal", you will also be matched with
 	projects in "Biochemistry--Analytical" and all other Biochemistry

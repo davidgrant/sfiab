@@ -58,6 +58,7 @@ function post_report()
 	post_text($report['creator'], 'creator');
 	post_text($report['desc'], 'desc');
 	post_text($report['type'], 'type');
+	$report['use_abs_coords'] = 0;
 
 	/* For these, just do $report['col'][$i]['field'] = $_POST['col'][$i] */
 	foreach(array('col') as $c) {

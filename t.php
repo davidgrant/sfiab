@@ -3,6 +3,7 @@ require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('form.inc.php');
 require_once('incomplete.inc.php');
+require_once('stats.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
@@ -13,6 +14,7 @@ date_default_timezone_set('America/Toronto');
 print("Now: ".date('Y-m-d H:i:s', time())."\n");
 
 
+print_r(stats_gather($mysqli, 2014));
 
 $fstart = "2014-04-12";
 $s = date('Y-m-d H:i:s', strtotime($fstart));
