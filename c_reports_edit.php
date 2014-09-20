@@ -58,7 +58,7 @@ function post_report()
 	post_text($report['creator'], 'creator');
 	post_text($report['desc'], 'desc');
 	post_text($report['type'], 'type');
-	$report['use_abs_coords'] = 0;
+	post_bool($report['use_abs_coords'], 'use_abs_coords');
 
 	/* For these, just do $report['col'][$i]['field'] = $_POST['col'][$i] */
 	foreach(array('col') as $c) {
@@ -69,20 +69,23 @@ function post_report()
 		for($i=0; $i<$num; $i++) {
 			if(trim($_POST[$c][$i]['field']) == '') continue;
 			$report[$c][$i] = array();
-			post_float($report[$c][$i]['x'], 'x', $_POST[$c][$i]);
-			post_float($report[$c][$i]['y'], 'y', $_POST[$c][$i]);
-			post_float($report[$c][$i]['w'], 'w', $_POST[$c][$i]);
-			post_float($report[$c][$i]['h'], 'h', $_POST[$c][$i]);
-			post_float($report[$c][$i]['min_w'], 'min_w', $_POST[$c][$i]);
-			post_float($report[$c][$i]['h_rows'], 'h_rows', $_POST[$c][$i]);
-			post_text($report[$c][$i]['field'], 'field', $_POST[$c][$i]);
-			post_text($report[$c][$i]['value'], 'value', $_POST[$c][$i]);
-			post_text($report[$c][$i]['fontname'], 'fontname', $_POST[$c][$i]);
-			post_array($report[$c][$i]['fontstyle'], 'fontstyle', $report_font_styles, $_POST[$c][$i]);
-			post_float($report[$c][$i]['fontsize'], 'fontsize', $_POST[$c][$i]);
-			post_text($report[$c][$i]['align'], 'align', $_POST[$c][$i]);
-			post_text($report[$c][$i]['valign'], 'valign', $_POST[$c][$i]);
-			post_text($report[$c][$i]['on_overflow'], 'on_overflow', $_POST[$c][$i]);
+			/* post_float($var, $keys) if keys is an array, it searches for $_POST[$c][$i]['x'] here */
+			post_float($report[$c][$i]['x'], array($c, $i, 'x'));
+			post_float($report[$c][$i]['y'], array($c, $i, 'y'));
+			post_float($report[$c][$i]['w'], array($c, $i, 'w'));
+			post_float($report[$c][$i]['h'], array($c, $i, 'h'));
+			post_float($report[$c][$i]['min_w'], array($c, $i, 'min_w'));
+			post_float($report[$c][$i]['h_rows'], array($c, $i, 'h_rows'));
+			post_text($report[$c][$i]['field'], array($c, $i, 'field'));
+			post_text($report[$c][$i]['value'], array($c, $i, 'value'));
+			post_text($report[$c][$i]['fontname'], array($c, $i, 'fontname'));
+			$report[$c][$i]['fontstyle'] = array(); /* There may be no fontstyle posted, set a blank array and
+								overwrite if needed */
+			post_array($report[$c][$i]['fontstyle'], array($c, $i, 'fontstyle'), $report_font_styles);
+			post_float($report[$c][$i]['fontsize'], array($c, $i, 'fontsize'));
+			post_text($report[$c][$i]['align'], array($c, $i, 'align'));
+			post_text($report[$c][$i]['valign'], array($c, $i, 'valign'));
+			post_text($report[$c][$i]['on_overflow'], array($c, $i, 'on_overflow'));
 		}
 	}
 	foreach(array('group','sort','distinct') as $c) {
@@ -93,8 +96,7 @@ function post_report()
 		for($i=0; $i<$num; $i++) {
 			if(trim($_POST[$c][$i]) == '') continue;
 			$report[$c][$i] = array();
-			post_text($report[$c][$i]['field'], $i, $_POST[$c]);
-//			post_text($report[$c][$i]['value'], 'value', $_POST[$c][$i]);
+			post_text($report[$c][$i]['field'], array($c, $i));
 		}
 	}
 
@@ -104,13 +106,12 @@ function post_report()
 		if(!array_key_exists($c, $_POST)) continue;
 
 		$num = count($_POST[$c]);
-//		print_r($_POST);
 		for($i=0; $i<$num; $i++) {
 			if(trim($_POST[$c][$i]['field']) == '') continue;
 			$report[$c][$i] = array();
-			post_float($report[$c][$i]['x'], 'x', $_POST[$c][$i]);
-			post_text($report[$c][$i]['field'], 'field', $_POST[$c][$i]);
-			post_text($report[$c][$i]['value'], 'value', $_POST[$c][$i]);
+			post_float($report[$c][$i]['x'], array($c, $i, 'x'));
+			post_text($report[$c][$i]['field'], array($c, $i, 'field'));
+			post_text($report[$c][$i]['value'], array($c, $i, 'value'));
 		}
 	}
 
@@ -118,7 +119,7 @@ function post_report()
 	if(array_key_exists('option', $_POST)) {
 		foreach($_POST['option'] as $o=>$v) {
 			if(!array_key_exists($o, $report_options)) continue;
-			post_text($report['option'][$o], $o, $_POST['option']);
+			post_text($report['option'][$o], array('option',$o));
 		}
 	}
 	return $report;
@@ -127,6 +128,7 @@ function post_report()
 switch($action) {
 case 'save':
 	$r = post_report();
+//	print_r($r);
 	report_save($mysqli, $r);
 	form_ajax_response(array('status'=>0));
 	exit();
@@ -203,6 +205,7 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 		form_textbox($form_id, 'desc', 'Description', $r);
 		form_text($form_id, 'creator', 'Creator', $r);
 		form_select($form_id, 'type', 'Type', $report_types, $r);
+		form_yesno($form_id, 'use_abs_coords', "Use Absolute Coords on Labels", $r);
 
 ?>		<h4>Report Data</h4>
 <?php		if(count($r['col'])) {
@@ -227,6 +230,7 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 				form_hidden($form_id, "col[$index][h]", $d['h']);
 				form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
 				form_hidden($form_id, "col[$index][h_rows]", $d['h_rows']);
+				print("<br/>");
 ?>				
 <?php			}
 		}
@@ -248,6 +252,7 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 			form_hidden($form_id, "col[$index][h]", $v);
 			form_hidden($form_id, "col[$index][min_w]", $v);
 			form_hidden($form_id, "col[$index][h_rows]", $v);
+			print("<br/>");
 		}
 
 
@@ -290,7 +295,7 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 		}
 		
 
-		form_button($form_id, 'save', 'Save');
+		form_submit($form_id, 'save', 'Save', 'Saved');
 //		form_button($form_id, 'dupe', 'Duplicate');
 //		form_button($form_id, 'try', 'Try');
 //		form_button($form_id, 'delete', 'Delete');
