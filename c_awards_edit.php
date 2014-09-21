@@ -7,12 +7,13 @@ require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('awards.inc.php');
 require_once('sponsors.inc.php');
-
+require_once('fairs.inc.php');
 $mysqli = sfiab_init('committee');
 
 $u = user_load($mysqli);
 
 
+$fairs = fair_load_all($mysqli);
 
 $page_id = 'c_awards_edit';
 $form_id = $page_id."_form";
@@ -40,6 +41,7 @@ case 'save_back':
 	post_bool($a['self_nominate'],'self_nominate');
 	post_int($a['ord'],'ord');
 	post_array($a['categories'], 'categories', $cats);
+	post_array($a['feeder_fair_ids'], 'feeder_fair_ids', $fairs);
 
 	$updates = array();
 	if($a['sponsor_uid'] == 0) {
@@ -217,6 +219,18 @@ function print_prize_div($form_id, $pid, $show, &$p)
 	form_submit($form_id, 'save', 'Save Award and Prize(s)', 'Award and Prize(s) Saved');
 	form_submit($form_id, 'save_back', 'Save Award and Prize(s) and Go Back', 'Save Award and Prize(s) and Go Back');
 ?>	<a href="#" data-rel="back" data-role="button" data-icon="back" data-inline="true" data-theme="r">Cancel, Go Back</a>
+
+	<h3>Feeder Fairs</h3> 
+	<div data-role="collapsible" data-pid="<?=$pid?>" data-collapsed="true" data-collapsed-icon="carat-r" and data-expanded-icon="carat-d">
+		<h3>Feeder Fair Options</h3>
+		<p>Any fair you check below will automatically download this award and it will appear in their awards list.  If/when each fair
+		assigns winners, they will be automatically uploaded back to this fair.
+<?php	
+		print_r($a['feeder_fair_ids']);
+		form_check_list($form_id, "feeder_fair_ids", "Feeder Fairs", $fairs, $a);
+?>
+	</div>
+
 
 	<br/><hr/>
 	<a href="#" onclick="return award_delete(<?=$aid?>);" data-role="button" data-icon="delete" data-inline="true" data-theme="r">Delete Award (and Prizes)</a><br/>

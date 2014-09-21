@@ -163,7 +163,7 @@ sfiab_page_begin("Edit Awards", $page_id, $help);
 <?php	} ?>
 	</tbody>
 	</table>
-	<a href="#" onclick="return award_create();" data-role="button" data-icon="plus"  data-ajax="false" data-theme="g">New Award</a>
+	<a href="#" onclick="return award_create();" data-role="button" data-icon="plus" data-inline="true" data-ajax="false" data-theme="g">New Award</a>
 
 </div></div>
 	

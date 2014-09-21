@@ -38,6 +38,9 @@ function award_load($mysqli, $id , $data = NULL)
 	filter_bool_or_null($a['include_in_script']);
 	filter_int_or_null($a['ord']);
 	filter_int($a['sponsor_uid']);
+	filter_int($a['upstream_fair_id']);
+	filter_int($a['upstream_award_id']);
+	fitler_int_list($a['feeder_fair_ids']);
 
 	/* Make a copy for the original */
 	unset($a['original']);

@@ -172,6 +172,38 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 <?php	form_label_div_end();
 }
 
+function form_check_list($form_id, $name, $label, $data, &$value, $wide = false)
+{
+	global $form_disabled;
+	$id = $form_id.'_'.$name;
+	/* This is so we can pass $u or $p in, and use the name to index into the array */
+	if(is_array($value)) {
+		if(array_key_exists($name, $value))
+			$v = $value[$name];
+		else 
+			$v = $value;
+	} else {
+		$v = array($value);
+	}
+	$extra_class = $wide ? 'ui-field-contain-wide' : '';
+	$d = $form_disabled ? ' disabled="disabled"': '';
+
+	form_label_div_begin($id, $name, $label, $wide);
+?>		<fieldset id="<?=$id?>" data-role="controlgroup"  >
+<?php		$x=0;
+		foreach($data as $key=>$val) {
+			if(is_array($val)) $val = $val['name'];
+				$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
+			
+		        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox" <?=$d?> >
+		        <label for="<?=$name.'-'.$x?>"><?=$val?></label>
+<?php			$x++;
+		} ?>
+		</fieldset>
+
+<?php	form_label_div_end();
+}
+
 function form_checkbox($form_id, $name, $label, $data_value, &$value) 
 {
 	global $form_disabled;
