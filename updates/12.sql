@@ -1,2 +1,2 @@
-ALTER TABLE `awards` ADD `feeder_fair_ids` TINYTEXT NULL ;
+ALTER TABLE `awards` ADD `feeder_fair_ids` TINYTEXT NOT NULL ;
 

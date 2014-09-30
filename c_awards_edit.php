@@ -13,7 +13,7 @@ $mysqli = sfiab_init('committee');
 $u = user_load($mysqli);
 
 
-$fairs = fair_load_all($mysqli);
+$fairs = fair_load_all_feeder($mysqli);
 
 $page_id = 'c_awards_edit';
 $form_id = $page_id."_form";
@@ -226,7 +226,6 @@ function print_prize_div($form_id, $pid, $show, &$p)
 		<p>Any fair you check below will automatically download this award and it will appear in their awards list.  If/when each fair
 		assigns winners, they will be automatically uploaded back to this fair.
 <?php	
-		print_r($a['feeder_fair_ids']);
 		form_check_list($form_id, "feeder_fair_ids", "Feeder Fairs", $fairs, $a);
 ?>
 	</div>
