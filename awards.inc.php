@@ -138,7 +138,8 @@ function prize_load($mysqli, $pid, $data=NULL)
 	
 	filter_str_list($p['trophies']);
 	filter_int($p['id']);
-	filter_bool($p['external_register_winners']);
+	filter_bool($p['upstream_register_winners']);
+	filter_int($p['upstream_prize_id']);
 
 	unset($p['original']);
 	$original = $p;
@@ -146,11 +147,24 @@ function prize_load($mysqli, $pid, $data=NULL)
 	return $p;
 }
 
-function award_save($mysqli, $a)
+function prize_delete($mysqli, &$p)
+{
+	$mysqli->real_query("DELETE FROM award_prizes WHERE id='{$p['id']}");
+}
+
+function award_delete($mysqli, &$a)
+{
+	foreach($a['prizes'] as $pid=>&$p) {
+		prize_delete($mysqli, $p);
+	}
+	$mysqli->real_query("DELETE FROM awards WHERE id='{$a['id']}");
+}
+
+function award_save($mysqli, &$a)
 {
 	generic_save($mysqli, $a, "awards", "id");
 }
-function prize_save($mysqli, $p)
+function prize_save($mysqli, &$p)
 {
 	generic_save($mysqli, $p, "award_prizes", "id");
 }
@@ -175,6 +189,127 @@ function prize_load_winners($mysqli, &$prize)
 		project_load_students($mysqli, $projects[$pid]);
 	}
 	return $projects;
+}
+
+
+function award_sync($mysqli, $fair, $incoming_award)
+{
+	$year = intval($incoming_award['year']);
+	$incoming_award_id = intval($incoming_award['id']);
+	if($year <= 0) exit();
+	if($incoming_award_id <= 0) exit;
+
+	categories_load($mysqli, $year);
+
+
+	$q = $mysqli->query("SELECT * FROM awards WHERE upstream_fair_id='{$fair['id']}' AND upstream_award_id='$incoming_award_id' AND year='$year'");
+	if($q->num_rows > 0) {
+		/* Award exists, we can load and update */
+		$data = $q->fetch_assoc();
+		$a = award_load($mysqli, -1, $data);
+	} else {
+		/* Create a new award */
+		$aid = award_create($mysqli);
+		$a = award_load($mysqli, $aid);
+	}
+
+	if($incoming_award['delete'] == 1) {
+		award_delete($mysqli, $a);
+		return;
+	}
+
+	$a['name'] = $incoming_award['name'];
+	$a['s_desc'] = $incoming_award['s_desc'];
+	$a['j_desc'] = $incoming_award['j_desc'];
+	$a['schedule_judges'] = $incoming_award['schedule_judges'];
+	$a['include_in_script'] = $incoming_award['include_in_script'];
+	$a['self_nominate'] = $incoming_award['self_nominate'];
+	$a['type'] = $incoming_award['type'];
+	$a['upstream_fair_id'] = $fair['id'];
+	$a['upstream_award_id'] = $incoming_award_id;
+	$a['sponsor_uid'] = sponsor_create_or_get($mysqli, $incoming_award['sponsor_organization'], $year);
+
+	/* Map grades to categories */
+	$a['categories'] = array();
+	foreach($incoming_award['grades'] as $g) {
+		$cat_id = category_get_from_grade($g);
+		if(!in_array($cat_id, $a['categories'])) {
+			$a['categories'][] = $cat_id;
+		}
+	}
+
+	/* upstream prize id -> our prize id */
+	$upstream_prize_id_map = array();
+	foreach($a['prizes'] as $pid=>&$p) {
+		$upstream_prize_id_map[$p['upstream_prize_id']] = $pid;
+		$p['seen'] = false;
+	}
+
+	$seen_prize_ids = array();
+	foreach($incoming_award['prizes'] as &$incoming_prize) {
+		if(array_key_exists($incoming_prize['id'], $upstream_prize_id_map)) {
+			$prize_id = $upstream_prize_id_map[$incoming_prize['id']];
+			$p = &$a['prizes'][$prize_id];
+		} else {
+			/* Create it */
+			$prize_id = prize_create($mysqli, $a);
+			$p = prize_load($mysqli, $prize_id);
+		}
+		$p['name'] = $incoming_prize['name'];
+		$p['cash'] = $incoming_prize['cash'];
+		$p['scholarship'] = $incoming_prize['scholarship'];
+		$p['value'] = $incoming_prize['value'];
+		$p['trophies'] = $incoming_prize['trophies'];
+		$p['number'] = $incoming_prize['number'];
+		$p['upstream_register_winners'] = $incoming_prize['upstream_register_winners'];
+		prize_save($mysqli, $p);
+		$p['seen'] = true;
+	}
+
+	/* Any prizes we didn't see have been removed */
+	foreach($a['prizes'] as $pid=>&$p) {
+		if($p['seen'] == false) {
+			prize_delete($mysqli, $p);
+		}
+	}
+}
+
+/* Get a copy of an award for exporting, basically just make a copy and
+ * delete stuff we don't want or need to export */
+function award_get_export(&$a) 
+{
+	global $categories;
+	categories_load($mysqli);
+
+	/* Is this fair allowed to have this award?  if not, just send
+	 * the award id, year, and a delete flag */
+	if(in_array($fair_id, $award['feeder_fair_ids'])) {
+		$export_a = array();
+		$export_a['id'] = $a['id'];
+		$export_a['year'] = $a['year'];
+		$export_a['delete'] = 1;
+		return $export_a;
+	}
+
+	$export_a = $a;
+	foreach($export_a['prizes'] as $pid=>&$p) {
+		unset($p['original']);
+		unset($p['ord']);
+		unset($p['upstream_prize_id']);
+	}
+	unset($export_a['c_desc']);
+	unset($export_a['presenter']);
+	unset($export_a['cwsf_award']);
+
+	$export_a['grades'] = array();
+	/* Turn categories into grades */
+	foreach($a['categories'] as $cat_id) {
+		$cat = $categories['cat_id'];
+		for($g=$cat['min_grade'] ; $g<=$cat['max_grade']; $g++) {
+			$export_a['grades'][] = $g;
+		}
+	}
+	return $export_a;
 }
 
 ?>
