@@ -33,7 +33,43 @@ $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
 
-function sync_student(&$mysqli, &$remote_student
+function remote_push_award_to_fair($mysqli, &$fair, $award_id);
+{
+	/* Push an award to a single feeder fair */
+	$cmd['push_award'] = award_get_export($mysqli, $award_id);
+	$response = curl_query($fair, $cmd);
+	return $response['error'];
+}
+
+function remote_handle_push_award($mysqli, &$fair, &$data, &$response) 
+{
+	/* Handle an incoming push request, sync the award */
+	$incoming_award = &$data['push_award'];
+ 	award_sync($mysqli, $fair, $incoming_award);
+	$response['push_award'] = array('error' => 0);
+}
+
+function remote_get_award($mysqli, $award_id)
+{
+	/* Get an award from an upstream server, specified by the local award_id, but
+	 * requested by the upstream award id */
+	$a = award_load($mysqli, $award_id);
+	$fair = fair_load($mysqli, $a['upstream_fair_id'];
+	$cmd['get_award'] = $a['upstream_award_id'];
+	$response = curl_query($fair, $cmd);
+	if($response['error'] == 0) {
+		award_sync($mysqli, $fair, $response['get_award']);
+	}
+	return $response['error'];
+}
+
+function remote_handle_get_award($mysqli, &$fair, &$data, &$response)
+{
+	/* Handle a get award request from a feeder fair, return the award they ask for */
+	$award_id = $data['get_award'];
+	$response['get_award'] = award_get_export($mysqli, $award_id);
+}
+
 
 function handle_getstats(&$u, $fair,&$data, &$response)
 {
@@ -451,6 +487,9 @@ if($fair['password'] != $password) {
 
 
  $response = array();
+ if(array_key_exists('push_award', $data) {
+}
+
  if(array_key_exists('getstats', $data)) handle_getstats($u,$fair, $data, $response);
  if(array_key_exists('stats', $data)) handle_stats($u,$fair, $data, $response);
  if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$data, $response);

@@ -166,14 +166,13 @@ function generic_save($mysqli, &$p, $table, $table_key)
 			/* Key changed */
 			if($set != '') $set .= ',';
 
-			if($key == 'categories' || $key == 'trophies' || $key == 'user_ids' || 
-			   $key == 'project_ids' || $key == 'unavailable_timeslots') {
-				/* For awards */
-				$v = implode(',', $val);
+			if($key == 'ethics' || $key == 'safety') {
+				/* Serialize associative arrays */
+				$v = serialize($val);
 			} else {
-				/* Serialize any non-special arrays */
+				/* Just implode normal arrays with a comma */
 				if(is_array($val)) 
-					$v = serialize($val);
+					$v = implode(',', $val);
 				else if(is_null($val)) 
 					$v = NULL;
 				else 

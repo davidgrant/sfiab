@@ -6,6 +6,8 @@ function sponsors_load_all($mysqli, $year = NULL)
 {
 	global $config;
 	if($year === NULL) $year = $config['year'];
+	$year = intval($year);
+
 	$q = $mysqli->query("SELECT * FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('sponsor',`roles`)>0
@@ -21,6 +23,8 @@ function sponsors_load_for_select($mysqli, $year = NULL)
 {
 	global $config;
 	if($year === NULL) $year = $config['year'];
+	$year = intval($year);
+
 	$q = $mysqli->query("SELECT uid,organization FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('sponsor',`roles`)>0
@@ -37,6 +41,7 @@ function sponsor_create_or_get($mysqli, $org, $year = NULL)
 {
 	global $config;
 	if($year === NULL) $year = $config['year'];
+	$year = intval($year);
 
 	$org = $mysqli->real_escape_string($org);
 	$q = $mysqli->query("SELECT uid,organization FROM users WHERE
