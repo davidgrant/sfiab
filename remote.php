@@ -32,6 +32,9 @@ require_once('email.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+
+function sync_student(&$mysqli, &$remote_student
+
 function handle_getstats(&$u, $fair,&$data, &$response)
 {
 	$year = $data['getstats']['year'];
@@ -238,10 +241,9 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 		/* Is this remote student already attached to the project?, check by name */
 		$match = false;
 		foreach($remote_project['students'] as &$remote_student) {
-			if($remote_student['firstname'] == $ps['firstname'] && $remote_student['lastname'] == $ps['lastname']) {
+			if($remote_student['uid'] == $ps['fair_uid']) {
 				/* Already in this project */
 				$remote_student['matched'] = true;
-				$remote_student['sid'] = $ps['uid'];
 				$match = true;
 				$response['notice'][] = "      - Found existing student {$remote_student['firstname']} {$remote_student['lastname']} ";
 				break;
@@ -262,6 +264,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 
 			/* Create new student and attach to project */
 			$username = $mysqli->real_escape_string(strstr($remote_student['email'], '@', true));
+			/* Create a unique username */
 			$check_username = $username;
 			$x = 1;
 			while(1) {
@@ -278,8 +281,10 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 			$s = user_load($mysqli, $sid);
 			$s['s_pid'] = $pid;
 			$s['enabled'] = 1;
+			$s['new'] = 0;
 			$s['year'] = $year;
 			$s['fair_id'] = $fair['id'];
+			$s['fair_uid'] = $remote_student['uid'];
 			$s['firstname'] = $remote_student['firstname'];
 			$s['lastname'] = $remote_student['lastname'];
 			user_save($mysqli, $s);
@@ -403,27 +408,6 @@ function handle_get_divisions($mysqli, &$u, &$fair, &$data, &$response)
 	$response['divisions'] = $ediv;
 	$response['error'] = 0;
 }
-
-function handle_award_additional_materials(&$u, &$fair, &$data, &$response)
-{
-	$year = intval($data['award_additional_materials']['year']);
-	$external_identifier = $data['award_additional_materials']['identifier'];
-
-	$eid = mysql_real_escape_string($external_identifier);
-	$q = mysql_query("SELECT * FROM award_awards WHERE external_identifier='$eid' AND year='$year'");
-	if(mysql_num_rows($q) != 1) {
-		$response['message'] = "Unknown award identifier '$eid'";
-		$response['error'] = 1;
-		return;
-	}
-	$award = mysql_fetch_assoc($q);
-
-	$pdf = fair_additional_materials($fair, $award, $year);
-	$response['award_additional_materials']['pdf']['header'] = $pdf['header'];
-	$response['award_additional_materials']['pdf']['data64'] = base64_encode($pdf['data']);
-	$response['error'] = 0;
-}
-
 
 
 $data = json_decode($_POST['json'], true);
