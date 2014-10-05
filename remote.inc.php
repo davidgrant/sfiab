@@ -43,12 +43,12 @@ function remote_query($mysqli, &$fair, &$cmd)
 	 * token using their own fair location URL */
 	$cmd['token'] = $v;
 	$cmd['password'] = $fair['password'];
-	print("query: ".print_r($cmd, true)."\n");
+//	print("query: ".print_r($cmd, true)."\n");
 	$response = curl_query($fair, $cmd);
-	print("response: ".print_r($response, true)."\n");
+//	print("response: ".print_r($response, true)."\n");
 
 	/* Remove the token */
-//	$mysqli->real_query("UPDATE fairs SET token='' WHERE id={$fair['id']}");
+	$mysqli->real_query("UPDATE fairs SET token='' WHERE id={$fair['id']}");
 
 	return $response;
 }
@@ -76,7 +76,7 @@ function remote_check_token($mysqli, &$fair, $token)
 	$cmd['check_token'] = $token;
 	$response = remote_query($mysqli, $fair, $cmd);
 	if($response['error'] == 0) {
-		return intval($remote['check_token']) == 1 ? true : false;
+		return ($response['check_token'] == true) ? true : false;
 	}
 	return false;
 }

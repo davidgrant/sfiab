@@ -84,7 +84,7 @@
 	}
 
 	print_r($data);
-	print("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  [$str]\n");
+//	print("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  [$str]\n");
 
 	$ch = curl_init(); /// initialize a cURL session
 	curl_setopt ($ch, CURLOPT_URL, $url);
@@ -98,9 +98,9 @@
 	$datastream = curl_exec ($ch); /// execute the curl session and return the output to a variable $datastream
 	curl_close ($ch); /// close the curl session
 
-	print("\n===== Server Returned: \n");
-	print(urldecode($datastream));
-	print("===============\n");
+//	print("\n===== Server Returned: \n");
+//	print(urldecode($datastream));
+//	print("===============\n");
 
  	switch($fair['type']) {
 	case 'sfiab_feeder':

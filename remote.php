@@ -51,6 +51,7 @@ if($fair === NULL) {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed";
 	print(json_encode($response));
+	fwrite($fp, "\nresponse:".print_r($response, true));
 	exit;
 }
 /* Must have a password set */
@@ -58,6 +59,7 @@ if(!is_array($fair) || $fair['password'] == '') {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed2";
 	print(json_encode($response));
+	fwrite($fp, "\nresponse:".print_r($response, true));
 	exit;
 }
 
@@ -67,6 +69,7 @@ if(!is_array($fair) || $fair['password'] == '') {
 if(array_key_exists('check_token', $data)) {
 	remote_handle_check_token($mysqli, $fair, $data, $response);
 	print(json_encode($response));
+	fwrite($fp, "\nresponse:".print_r($response, true));
 	exit();
 }
 
@@ -75,6 +78,7 @@ if(remote_check_token($mysqli, $fair, $data['token']) == false) {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed4";
 	print(json_encode($response));
+	fwrite($fp, "\nresponse:".print_r($response, true));
 	exit();
 }
 
@@ -90,7 +94,7 @@ if(array_key_exists('award_additional_materials', $data)) handle_award_additiona
 
 $response['hi'] = 'hi';
 print(json_encode($response));
-fwrite($fp, "Success!\n");
+fwrite($fp, "\nresponse:".print_r($response, true));
 fclose($fp);
 
 ?>
