@@ -2,6 +2,7 @@
 require_once('filter.inc.php');
 require_once('project.inc.php');
 require_once('remote.inc.php');
+require_once('sponsors.inc.php');
 
 
 $award_types = array('divisional' => 'Divisional',
@@ -222,11 +223,11 @@ function award_sync($mysqli, $fair, $incoming_award)
 		$a = award_load($mysqli, -1, $data);
 	} else {
 		/* Create a new award */
-		$aid = award_create($mysqli);
+		$aid = award_create($mysqli, $year);
 		$a = award_load($mysqli, $aid);
 	}
 
-	if($incoming_award['delete'] == 1) {
+	if(array_key_exists('delete', $incoming_award)) {
 		award_delete($mysqli, $a);
 		return;
 	}
@@ -292,6 +293,7 @@ function award_sync($mysqli, $fair, $incoming_award)
 function award_get_export($mysqli, &$fair, &$a) 
 {
 	global $categories;
+	global $config;
 	categories_load($mysqli, $a['year']);
 
 	/* Is this fair allowed to have this award?  if not, just send
@@ -316,13 +318,20 @@ function award_get_export($mysqli, &$fair, &$a)
 	unset($export_a['cwsf_award']);
 	unset($export_a['original']);
 
-	$export_a['grades'] = array();
 	/* Turn categories into grades */
+	$export_a['grades'] = array();
 	foreach($a['categories'] as $cat_id) {
 		$cat = $categories[$cat_id];
 		for($g=$cat['min_grade'] ; $g<=$cat['max_grade']; $g++) {
 			$export_a['grades'][] = $g;
 		}
+	}
+
+	/* Turn any sponsor into just an organization name */
+	$export_a['sponsor_organization'] = $config['fair_abbrv']);
+	if($a['sponsor_uid'] > 0) {
+		$u_sponsor = user_load($mysqli, $a['sponsor_uid']);
+		$export_a['sponsor_organization'] = $u_sponsor['organization'];
 	}
 	return $export_a;
 }
