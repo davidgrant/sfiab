@@ -28,8 +28,10 @@ require_once('awards.inc.php');
 require_once('fairs.inc.php');
 require_once('project.inc.php');
 require_once('email.inc.php');
+require_once('committee/curl.inc.php');
 
 
+/* Send a command to a remote fair */
 function remote_query($mysqli, &$fair, &$cmd)
 {
 	/* Create a token and store it */
@@ -43,19 +45,19 @@ function remote_query($mysqli, &$fair, &$cmd)
 	return $response;
 }
 
+/* Given a token, check it to see if it matches the command that was sent */
 function remote_handle_check_token($mysqli, &$fair, &$data, &$response)
 {
-	if(strlen($fair['token'] != 128)) {
+	if(strlen($fair['token']) != 128) {
 		$response['error']  = 1;
 		return;
 	}
 
-	if(strlen($data['check_token'] != 128) {
+	if(strlen($data['check_token']) != 128) {
 		$response['error'] = 1;
 		return;
 	}
 
-	if($data['check_token'] == $fair['token']) {
 	$response['token'] = ($data['check_token'] == $fair['token']) ? 1 : 0;
 	$response['error'] = 0;
 }
@@ -83,8 +85,8 @@ function remote_push_award_to_all_fairs($mysqli, &$award)
 function remote_push_award_to_fair($mysqli, &$fair, &$award)
 {
 	/* Push an award to a single feeder fair */
-	$cmd['push_award'] = award_get_export($mysqli, $award['id']);
-	$response = curl_query($fair, $cmd);
+	$cmd['push_award'] = award_get_export($mysqli, $fair, $award);
+	$response = remote_query($mysqli, $fair, $cmd);
 	return $response['error'];
 }
 
@@ -101,9 +103,9 @@ function remote_get_award($mysqli, $award_id)
 	/* Get an award from an upstream server, specified by the local award_id, but
 	 * requested by the upstream award id */
 	$a = award_load($mysqli, $award_id);
-	$fair = fair_load($mysqli, $a['upstream_fair_id'];
+	$fair = fair_load($mysqli, $a['upstream_fair_id']);
 	$cmd['get_award'] = $a['upstream_award_id'];
-	$response = curl_query($fair, $cmd);
+	$response = remote_query($mysqli, $fair, $cmd);
 	if($response['error'] == 0) {
 		award_sync($mysqli, $fair, $response['get_award']);
 	}
@@ -114,7 +116,8 @@ function remote_handle_get_award($mysqli, &$fair, &$data, &$response)
 {
 	/* Handle a get award request from a feeder fair, return the award they ask for */
 	$award_id = $data['get_award'];
-	$response['get_award'] = award_get_export($mysqli, $award_id);
+	$a = award_load($mysqli, $award_id);
+	$response['get_award'] = award_get_export($mysqli, $fair, $a);
 }
 
 

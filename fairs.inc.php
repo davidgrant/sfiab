@@ -28,12 +28,6 @@ function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL, $hash=NULL)
 		$f = $data;
 	}
 
-	if($f['award_ids'] == '' or $f['award_ids'] === NULL) {
-		$f['award_ids'] = array();
-	} else {
-		$f['award_ids'] = explode(',', $f['award_ids']);
-	}
-
 	/* Store an original copy so save() can figure out what (if anything) needs updating */
 	unset($f['original']);
 	$original = $f;

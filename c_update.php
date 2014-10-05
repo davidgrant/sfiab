@@ -44,6 +44,8 @@ function apply_db($mysqli, $fp)
 	while(!feof($fp)) {
 		/* Multiline read support */
 		$line = trim(fgets($fp));
+		if(strlen($line) == 0) continue;
+
 		if($line[0] == '#') {
 			continue;
 		}

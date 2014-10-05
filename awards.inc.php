@@ -289,14 +289,14 @@ function award_sync($mysqli, $fair, $incoming_award)
 
 /* Get a copy of an award for exporting, basically just make a copy and
  * delete stuff we don't want or need to export */
-function award_get_export(&$a) 
+function award_get_export($mysqli, &$fair, &$a) 
 {
 	global $categories;
 	categories_load($mysqli);
 
 	/* Is this fair allowed to have this award?  if not, just send
 	 * the award id, year, and a delete flag */
-	if(in_array($fair_id, $award['feeder_fair_ids'])) {
+	if(in_array($fair['id'], $a['feeder_fair_ids'])) {
 		$export_a = array();
 		$export_a['id'] = $a['id'];
 		$export_a['year'] = $a['year'];

@@ -1,4 +1,4 @@
-<?
+<?php
 /* 
    This file is part of the 'Science Fair In A Box' project
    SFIAB Website: http://www.sfiab.ca
@@ -21,10 +21,9 @@
    Boston, MA 02111-1307, USA.
 */
 ?>
-<?
- require_once('../common.inc.php');
- require_once('../user.inc.php');
- user_auth_required('committee', 'admin');
+<?php
+ require_once('common.inc.php');
+ require_once('user.inc.php');
  require_once('xml.inc.php');
 
  function xml_dearray(&$array)
