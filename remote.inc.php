@@ -28,20 +28,28 @@ require_once('awards.inc.php');
 require_once('fairs.inc.php');
 require_once('project.inc.php');
 require_once('email.inc.php');
-require_once('committee/curl.inc.php');
+require_once('curl.inc.php');
 
 
 /* Send a command to a remote fair */
 function remote_query($mysqli, &$fair, &$cmd)
 {
-	/* Create a token and store it */
-	$v = mcrypt_create_iv(128);
+	/* Create a token and store it, this will give a 128 char token with chars
+	 * that don't need to be escaped */
+	$v = base64_encode(mcrypt_create_iv(96));
+	print(strlen($v).$v);
 	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id={$fair['id']}");
 	/* Attach to the command send send it along, the remote will query this
 	 * token using their own fair location URL */
 	$cmd['token'] = $v;
 	$cmd['password'] = $fair['password'];
+	print("query: ".print_r($cmd, true)."\n");
 	$response = curl_query($fair, $cmd);
+	print("response: ".print_r($response, true)."\n");
+
+	/* Remove the token */
+//	$mysqli->real_query("UPDATE fairs SET token='' WHERE id={$fair['id']}");
+
 	return $response;
 }
 
@@ -68,7 +76,7 @@ function remote_check_token($mysqli, &$fair, $token)
 	$cmd['token'] = $token;
 	$response = remote_query($mysqli, $fair, $cmd);
 	if($response['error'] == 0) {
-		return intval($remote['checl_token']) == 1 ? true : false;
+		return intval($remote['check_token']) == 1 ? true : false;
 	}
 	return false;
 }
@@ -78,6 +86,7 @@ function remote_push_award_to_all_fairs($mysqli, &$award)
 {
 	$fairs = fair_load_all_feeder($mysqli);
 	foreach($fairs as $fair_id=>$fair) {
+		print("push fair {$fair['name']}...\n");
 		remote_push_award_to_fair($mysqli, $fair, $award);
 	}
 }
@@ -87,6 +96,7 @@ function remote_push_award_to_fair($mysqli, &$fair, &$award)
 	/* Push an award to a single feeder fair */
 	$cmd['push_award'] = award_get_export($mysqli, $fair, $award);
 	$response = remote_query($mysqli, $fair, $cmd);
+	print("response:".print_r($response, true)."-");
 	return $response['error'];
 }
 

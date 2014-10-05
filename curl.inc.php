@@ -83,7 +83,7 @@
 		break;
 	}
 
-//	debug_("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  $str");
+	print("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  $str");
 
 	$ch = curl_init(); /// initialize a cURL session
 	curl_setopt ($ch, CURLOPT_URL, $url);
@@ -98,7 +98,7 @@
 	$datastream = curl_exec ($ch); /// execute the curl session and return the output to a variable $datastream
 	curl_close ($ch); /// close the curl session
 
-//	debug_("Server Returned: ".urldecode($datastream));
+	print("Server Returned: ".urldecode($datastream));
 
  	switch($fair['type']) {
 	case 'sfiab_feeder':

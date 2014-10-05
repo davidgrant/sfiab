@@ -71,11 +71,10 @@ if(array_key_exists('check_token', $data)) {
 }
 
 /* Check the token in the command by communicating back with the fair URL we have on record */
-$token = remote_check_token($mysqli, $fair, $data['token']);
-if(intval($data['check_token']) != 1) {
+if(remote_check_token($mysqli, $fair, $data['token']) == false) {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed4";
-	echo json_encode($response);
+	print(json_encode($response));
 	exit();
 }
 

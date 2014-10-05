@@ -292,7 +292,7 @@ function award_sync($mysqli, $fair, $incoming_award)
 function award_get_export($mysqli, &$fair, &$a) 
 {
 	global $categories;
-	categories_load($mysqli);
+	categories_load($mysqli, $a['year']);
 
 	/* Is this fair allowed to have this award?  if not, just send
 	 * the award id, year, and a delete flag */
@@ -317,7 +317,7 @@ function award_get_export($mysqli, &$fair, &$a)
 	$export_a['grades'] = array();
 	/* Turn categories into grades */
 	foreach($a['categories'] as $cat_id) {
-		$cat = $categories['cat_id'];
+		$cat = $categories[$cat_id];
 		for($g=$cat['min_grade'] ; $g<=$cat['max_grade']; $g++) {
 			$export_a['grades'][] = $g;
 		}

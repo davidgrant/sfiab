@@ -66,7 +66,7 @@ function fair_load_by_username($mysqli, $username)
 
 function fair_load_by_hash($mysqli, $hash)
 {
-	return frair_load($mysqli, NULL, NULL, NULL, $hash);
+	return fair_load($mysqli, NULL, NULL, NULL, $hash);
 }
 
 function fair_save($mysqli, &$f) 
