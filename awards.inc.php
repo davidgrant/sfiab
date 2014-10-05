@@ -167,14 +167,15 @@ function award_save($mysqli, &$a)
 {
 	$original_feeder_fairs = $a['original']['feeder_fair_ids'];
 
+	foreach($a['prizes'] as $pid=>&$p) {
+		prize_save($mysqli, $p);
+	}
 	generic_save($mysqli, $a, "awards", "id");
 
 	/* Does this award have any feeder fairs? or did the feeder fairs change? */
 	if($original_feeder_fairs != $a['feeder_fair_ids'] || count($a['feeder_fair_ids']) > 0) {
-		/* Feeder fairs changed, broadcast this award to all feeder
-		 * fairs, fairs that aren't allowed * to have it will be sent a
-		 * delete */
-		
+		/* Broadcast this award to all feeder fairs, fairs that
+		 * aren't allowed to have it will be sent a delete */
 		remote_push_award_to_all_fairs($mysqli, $a);
 	}
 }
@@ -208,6 +209,8 @@ function prize_load_winners($mysqli, &$prize)
 
 function award_sync($mysqli, $fair, $incoming_award)
 {
+	global $categories;
+	global $config;
 	$year = intval($incoming_award['year']);
 	$incoming_award_id = intval($incoming_award['id']);
 	if($year <= 0) exit();
@@ -251,6 +254,8 @@ function award_sync($mysqli, $fair, $incoming_award)
 			$a['categories'][] = $cat_id;
 		}
 	}
+
+	award_save($mysqli, $a);
 
 	/* upstream prize id -> our prize id */
 	$upstream_prize_id_map = array();

@@ -60,13 +60,13 @@ case 'save_back':
 	/* Iterate over the $_POST['prizes'][prize_id] and save data for each prize */
 	foreach($_POST['prize'] as $pid=>$p) {
 		$pid = (int)$pid;
-		if($pid == 0) {
-			/* Create new */
-			$prize = NULL;
-		} else {
-			$prize = &$a['prizes'][$pid];
+
+		if(!array_key_exists($pid, $a['prizes'])) {
+			print("Prize id not found, stop.");
+			exit();
 		}
 
+		$prize = &$a['prizes'][$pid];
 
 		post_text($prize['name'],array('prize', $pid, 'name') );
 		post_int($prize['number'],array('prize', $pid, 'number') );
@@ -75,8 +75,6 @@ case 'save_back':
 		post_float($prize['value'],array('prize', $pid, 'value'));
 		post_bool($prize['external_register_winners'],array('prize', $pid, 'external_register_winners'));
 		post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
-
-		prize_save($mysqli, $prize);
 	}
 
 	award_save($mysqli, $a);
