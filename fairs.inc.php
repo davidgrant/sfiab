@@ -2,7 +2,7 @@
 require_once('user.inc.php');
 require_once('project.inc.php');
 
-function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL) 
+function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL, $hash=NULL) 
 {
 	if($fair_id > 0) {
 		$fair_id = (int)$fair_id;
@@ -10,7 +10,10 @@ function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL)
 	} else if($username !== NULL) {
 		$username = $mysqli->real_escape_string($username);
 		$r = $mysqli->query("SELECT * FROM fairs WHERE username='$username' LIMIT 1");
-	} 
+	} else if($hash !== NULL) {
+		$hash = $mysqli->real_escape_string($hash);
+		$r = $mysqli->query("SELECT * FROM fairs WHERE password='$hash' LIMIT 1");
+	}
 
 	/* fetch the fair data from sql, or from $data if specified */
 	if($data === NULL) {
@@ -65,6 +68,11 @@ function fair_load_all_feeder($mysqli)
 function fair_load_by_username($mysqli, $username)
 {
 	return fair_load($mysqli, NULL, $username);
+}
+
+function fair_load_by_hash($mysqli, $hash)
+{
+	return frair_load($mysqli, NULL, NULL, NULL, $hash);
 }
 
 function fair_save($mysqli, &$f) 

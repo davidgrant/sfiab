@@ -63,13 +63,11 @@
  {
  	global $output;
  	switch($fair['type']) {
-	case 'sfiab':
+	case 'sfiab_feeder':
+	case 'sfiab_upstream':
 		$url = $fair['url'].'/remote.php';
 		$var = 'json';
-		$d = array();
-		$d['auth'] = array('username' => $fair['username'],
-				'password' => $fair['password']);
-		$str = json_encode(array_merge($d, $data));
+		$str = json_encode($data);
 		break;
 	case 'ysc':
 		if($ysc_url == '')
@@ -104,7 +102,8 @@
 //	debug_("Server Returned: ".urldecode($datastream));
 
  	switch($fair['type']) {
-	case 'sfiab':
+	case 'sfiab_feeder':
+	case 'sfiab_upstream':
 		$ret=json_decode(urldecode($datastream), true);
 		break;
 	case 'ysc':

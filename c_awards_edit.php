@@ -29,6 +29,7 @@ case 'save_back':
 
 	$aid = (int)$_POST['aid'];
 	$a = award_load($mysqli, $aid);
+
 	post_text($a['name'],'name');
 	post_text($a['type'],'type');
 	post_text($a['c_desc'],'c_desc');

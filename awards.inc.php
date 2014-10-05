@@ -1,6 +1,8 @@
 <?php
 require_once('filter.inc.php');
 require_once('project.inc.php');
+require_once('remote.inc.php');
+
 
 $award_types = array('divisional' => 'Divisional',
 			'special' => 'Special',
@@ -162,7 +164,18 @@ function award_delete($mysqli, &$a)
 
 function award_save($mysqli, &$a)
 {
+	$original_feeder_fairs = $a['original']['feeder_fair_ids'];
+
 	generic_save($mysqli, $a, "awards", "id");
+
+	/* Does this award have any feeder fairs? or did the feeder fairs change? */
+	if($original_feeder_fairs != $a['feeder_fair_ids'] || count($a['feeder_fair_ids']) > 0) {
+		/* Feeder fairs changed, broadcast this award to all feeder
+		 * fairs, fairs that aren't allowed * to have it will be sent a
+		 * delete */
+		
+		remote_push_award_to_all_fairs($mysqli, $a);
+	}
 }
 function prize_save($mysqli, &$p)
 {
