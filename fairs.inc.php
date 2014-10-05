@@ -4,6 +4,7 @@ require_once('project.inc.php');
 
 function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL, $hash=NULL) 
 {
+	$r = NULL;
 	if($fair_id > 0) {
 		$fair_id = (int)$fair_id;
 		$r = $mysqli->query("SELECT * FROM fairs WHERE id='$fair_id'");
@@ -17,6 +18,10 @@ function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL, $hash=NULL)
 
 	/* fetch the fair data from sql, or from $data if specified */
 	if($data === NULL) {
+		if($r === NULL) {
+			debug_print_backtrace();
+
+		}
 		print($mysqli->error);
 
 		if($r->num_rows == 0) {
@@ -61,12 +66,12 @@ function fair_load_all_feeder($mysqli)
 
 function fair_load_by_username($mysqli, $username)
 {
-	return fair_load($mysqli, NULL, $username);
+	return fair_load($mysqli, 0, $username);
 }
 
 function fair_load_by_hash($mysqli, $hash)
 {
-	return fair_load($mysqli, NULL, NULL, NULL, $hash);
+	return fair_load($mysqli, 0, NULL, NULL, $hash);
 }
 
 function fair_save($mysqli, &$f) 

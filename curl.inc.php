@@ -83,7 +83,8 @@
 		break;
 	}
 
-	print("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  $str");
+	print_r($data);
+	print("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  [$str]\n");
 
 	$ch = curl_init(); /// initialize a cURL session
 	curl_setopt ($ch, CURLOPT_URL, $url);
@@ -91,14 +92,15 @@
 	curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET
 	curl_setopt ($ch, CURLOPT_POSTFIELDS, "$var=".urlencode($str));  /// put the query string here starting with "?"
 	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); /// This allows the output to be set into a variable $datastream
-//	curl_setopt ($ch, CURLOPT_POSTFIELDSIZE, 0);
-	curl_setopt ($ch, CURLOPT_TIMEOUT, 360);
+	curl_setopt ($ch, CURLOPT_TIMEOUT, 5);
 	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
 	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
 	$datastream = curl_exec ($ch); /// execute the curl session and return the output to a variable $datastream
 	curl_close ($ch); /// close the curl session
 
-	print("Server Returned: ".urldecode($datastream));
+	print("\n===== Server Returned: \n");
+	print(urldecode($datastream));
+	print("===============\n");
 
  	switch($fair['type']) {
 	case 'sfiab_feeder':

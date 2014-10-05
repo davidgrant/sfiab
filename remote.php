@@ -31,10 +31,11 @@ sfiab_load_config($mysqli);
 
 $data = json_decode($_POST['json'], true);
 
-#echo "post:";print_r($_POST);
-#echo "json post: ".htmlspecialchars($_POST['json'])."<br>";
-#echo "stripslashes(json post): ".stripslashes($_POST['json'])."<br>";
-#echo "data:";print_r($data);
+$fp = fopen("/tmp/sfiab.log", "at");
+
+fwrite($fp, "\nFair: {$config['fair_name']}");
+fwrite($fp, "\npost:".print_r($_POST, true));
+fwrite($fp, "\ndata:".print_r($data, true));
 #echo "<br />";
 
 // exit;
@@ -90,7 +91,8 @@ if(array_key_exists('award_additional_materials', $data)) handle_award_additiona
 
 $response['hi'] = 'hi';
 print(json_encode($response));
-// echo "Success!<br />";
+fwrite($fp, "Success!\n");
+fclose($fp);
 
 ?>
 

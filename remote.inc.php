@@ -66,14 +66,14 @@ function remote_handle_check_token($mysqli, &$fair, &$data, &$response)
 		return;
 	}
 
-	$response['token'] = ($data['check_token'] == $fair['token']) ? 1 : 0;
+	$response['check_token'] = ($data['check_token'] == $fair['token']) ? 1 : 0;
 	$response['error'] = 0;
 }
 
 function remote_check_token($mysqli, &$fair, $token)
 {
 	$cmd = array();
-	$cmd['token'] = $token;
+	$cmd['check_token'] = $token;
 	$response = remote_query($mysqli, $fair, $cmd);
 	if($response['error'] == 0) {
 		return intval($remote['check_token']) == 1 ? true : false;

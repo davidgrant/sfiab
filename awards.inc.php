@@ -296,7 +296,7 @@ function award_get_export($mysqli, &$fair, &$a)
 
 	/* Is this fair allowed to have this award?  if not, just send
 	 * the award id, year, and a delete flag */
-	if(in_array($fair['id'], $a['feeder_fair_ids'])) {
+	if(!in_array($fair['id'], $a['feeder_fair_ids'])) {
 		$export_a = array();
 		$export_a['id'] = $a['id'];
 		$export_a['year'] = $a['year'];
@@ -309,10 +309,12 @@ function award_get_export($mysqli, &$fair, &$a)
 		unset($p['original']);
 		unset($p['ord']);
 		unset($p['upstream_prize_id']);
+		unset($p['award']);
 	}
 	unset($export_a['c_desc']);
 	unset($export_a['presenter']);
 	unset($export_a['cwsf_award']);
+	unset($export_a['original']);
 
 	$export_a['grades'] = array();
 	/* Turn categories into grades */
