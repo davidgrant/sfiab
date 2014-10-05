@@ -83,7 +83,6 @@
 		break;
 	}
 
-	print_r($data);
 //	print("Curl Send: (type:{$fair['type']}=>$url ysc_url=>$ysc_url)  [$str]\n");
 
 	$ch = curl_init(); /// initialize a cURL session

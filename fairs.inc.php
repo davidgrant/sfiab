@@ -81,7 +81,8 @@ function fair_save($mysqli, &$f)
 
 function fair_create($mysqli)
 {
-	$p = user_new_password();
+	/* 128 char password in base64 so no mysql funniness is necessary */
+	$p = base64_encode(mcrypt_create_iv(96));
 	$mysqli->query("INSERT INTO fairs (`password`) VALUES ('$p')");
 	$fair_id = $mysqli->insert_id;
 	return $fair_id;

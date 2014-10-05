@@ -37,7 +37,7 @@ function remote_query($mysqli, &$fair, &$cmd)
 	/* Create a token and store it, this will give a 128 char token with chars
 	 * that don't need to be escaped */
 	$v = base64_encode(mcrypt_create_iv(96));
-	print(strlen($v).$v);
+
 	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id={$fair['id']}");
 	/* Attach to the command send send it along, the remote will query this
 	 * token using their own fair location URL */
@@ -86,7 +86,6 @@ function remote_push_award_to_all_fairs($mysqli, &$award)
 {
 	$fairs = fair_load_all_feeder($mysqli);
 	foreach($fairs as $fair_id=>$fair) {
-		print("push fair {$fair['name']}...\n");
 		remote_push_award_to_fair($mysqli, $fair, $award);
 	}
 }
@@ -96,7 +95,6 @@ function remote_push_award_to_fair($mysqli, &$fair, &$award)
 	/* Push an award to a single feeder fair */
 	$cmd['push_award'] = award_get_export($mysqli, $fair, $award);
 	$response = remote_query($mysqli, $fair, $cmd);
-	print("response:".print_r($response, true)."-");
 	return $response['error'];
 }
 

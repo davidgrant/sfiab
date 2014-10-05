@@ -328,7 +328,7 @@ function award_get_export($mysqli, &$fair, &$a)
 	}
 
 	/* Turn any sponsor into just an organization name */
-	$export_a['sponsor_organization'] = $config['fair_abbrv']);
+	$export_a['sponsor_organization'] = $config['fair_abbreviation'];
 	if($a['sponsor_uid'] > 0) {
 		$u_sponsor = user_load($mysqli, $a['sponsor_uid']);
 		$export_a['sponsor_organization'] = $u_sponsor['organization'];
