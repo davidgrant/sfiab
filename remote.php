@@ -34,7 +34,6 @@ $data = json_decode($_POST['json'], true);
 $fp = fopen("/tmp/sfiab.log", "at");
 
 fwrite($fp, "\nFair: {$config['fair_name']}");
-fwrite($fp, "\npost:".print_r($_POST, true));
 fwrite($fp, "\ndata:".print_r($data, true));
 #echo "<br />";
 
