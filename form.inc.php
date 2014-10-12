@@ -273,10 +273,10 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	$id = $page_id.'_'.$name;
 
 	$select_attrs = '';
-	if($data_role != '') $select_attrs += " data-role=\"$data_role\"";
-	if($multi) $select_attrs += ' multiple="true" data-native-menu="false"';
-	if($form_disabled) $select_attrs += ' disabled="disabled"';
-	if($inline) $select_attrs += ' data-inline="true"';
+	if($data_role != '') $select_attrs .= " data-role=\"$data_role\"";
+	if($multi) $select_attrs .= ' multiple="true" data-native-menu="false"';
+	if($form_disabled) $select_attrs .= ' disabled="disabled"';
+	if($inline) $select_attrs .= ' data-inline="true"';
 
 	$v = form_get_value($name, $value);
 
@@ -415,7 +415,7 @@ function form_submit($form_id, $action, $text = "Save", $saved_text = "Informati
 function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check", $attrs='')
 {
 	global $form_disabled;
-	if($form_disabled) $attrs += ' disabled="disabled"';
+	if($form_disabled) $attrs .= ' disabled="disabled"';
 	$icon_attr = ($icon != '') ? "data-icon=\"$icon\"" : '';
 	
 ?>

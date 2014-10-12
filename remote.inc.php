@@ -39,14 +39,15 @@ function remote_query($mysqli, &$fair, &$cmd)
 	 * that don't need to be escaped */
 	$v = base64_encode(mcrypt_create_iv(96));
 
+	debug("remote_query: set token for fair {$fair['name']}, token: $v\n");
 	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id={$fair['id']}");
 	/* Attach to the command send send it along, the remote will query this
 	 * token using their own fair location URL */
 	$cmd['token'] = $v;
 	$cmd['password'] = $fair['password'];
-//	print("query: ".print_r($cmd, true)."\n");
+	debug("remote_query: curl query:".print_r($cmd, true)."\n");
 	$response = curl_query($fair, $cmd);
-//	print("response: ".print_r($response, true)."\n");
+	debug("remote_query: curl response:".print_r($response, true)."\n");
 
 	debug("remote_query: remove token for fair {$fair['name']}\n");
 	/* Remove the token */

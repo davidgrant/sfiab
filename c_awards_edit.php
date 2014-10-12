@@ -30,22 +30,28 @@ case 'save_back':
 	$aid = (int)$_POST['aid'];
 	$a = award_load($mysqli, $aid);
 
-	post_text($a['name'],'name');
-	post_text($a['type'],'type');
-	post_text($a['c_desc'],'c_desc');
-	post_text($a['j_desc'],'j_desc');
-	post_text($a['s_desc'],'s_desc');
-	post_text($a['presenter'],'presenter');
-	post_bool($a['schedule_judges'],'schedule_judges');
-	post_int($a['sponsor_uid'], 'sponsor_uid');
+	$remote_award = ($a['upstream_fair_id'] > 0) ? true : false;
+
+	if(!$remote_award) {
+		post_text($a['name'],'name');
+		post_text($a['type'],'type');
+		post_text($a['j_desc'],'j_desc');
+		post_text($a['s_desc'],'s_desc');
+		post_int($a['sponsor_uid'], 'sponsor_uid');
+		post_bool($a['self_nominate'],'self_nominate');
+		post_int($a['ord'],'ord');
+		post_array($a['categories'], 'categories', $cats);
+		post_array($a['feeder_fair_ids'], 'feeder_fair_ids', $fairs);
+	}
+
 	post_bool($a['include_in_script'],'include_in_script');
-	post_bool($a['self_nominate'],'self_nominate');
-	post_int($a['ord'],'ord');
-	post_array($a['categories'], 'categories', $cats);
-	post_array($a['feeder_fair_ids'], 'feeder_fair_ids', $fairs);
+	post_bool($a['schedule_judges'],'schedule_judges');
+	post_text($a['presenter'],'presenter');
+	post_text($a['c_desc'],'c_desc');
+
 
 	$updates = array();
-	if($a['sponsor_uid'] == 0) {
+	if(!$remote_award && $a['sponsor_uid'] == 0) {
 		/* Insert a new sponsor, provided the name doesn't already exist */
 		$updates['sponsor_uid'] = 1;
 
@@ -57,24 +63,26 @@ case 'save_back':
 		$a['sponsor_uid'] = $sponsor_uid;
 	}
 
-	/* Iterate over the $_POST['prizes'][prize_id] and save data for each prize */
-	foreach($_POST['prize'] as $pid=>$p) {
-		$pid = (int)$pid;
+	if(!$remote_award) {
+		/* Iterate over the $_POST['prizes'][prize_id] and save data for each prize */
+		foreach($_POST['prize'] as $pid=>$p) {
+			$pid = (int)$pid;
 
-		if(!array_key_exists($pid, $a['prizes'])) {
-			print("Prize id not found, stop.");
-			exit();
+			if(!array_key_exists($pid, $a['prizes'])) {
+				print("Prize id not found, stop.");
+				exit();
+			}
+
+			$prize = &$a['prizes'][$pid];
+
+			post_text($prize['name'],array('prize', $pid, 'name') );
+			post_int($prize['number'],array('prize', $pid, 'number') );
+			post_float($prize['cash'],array('prize', $pid, 'cash'));
+			post_float($prize['scholarship'],array('prize', $pid, 'scholarship'));
+			post_float($prize['value'],array('prize', $pid, 'value'));
+			post_bool($prize['external_register_winners'],array('prize', $pid, 'external_register_winners'));
+			post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
 		}
-
-		$prize = &$a['prizes'][$pid];
-
-		post_text($prize['name'],array('prize', $pid, 'name') );
-		post_int($prize['number'],array('prize', $pid, 'number') );
-		post_float($prize['cash'],array('prize', $pid, 'cash'));
-		post_float($prize['scholarship'],array('prize', $pid, 'scholarship'));
-		post_float($prize['value'],array('prize', $pid, 'value'));
-		post_bool($prize['external_register_winners'],array('prize', $pid, 'external_register_winners'));
-		post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
 	}
 
 	award_save($mysqli, $a);
@@ -92,6 +100,10 @@ case 'del':
 	$aid = (int)$_POST['aid'];
 	if($aid > 0) {
 		$a = award_load($mysqli, $aid);
+		if($a['upstream_fair_id'] > 0) {
+			/* Can't del an award with an upstream fair id, someone is trying to bypass the html? */
+			exit();
+		}
 		$mysqli->real_query("UPDATE awards SET `ord`=`ord`-1 WHERE year='{$config['year']}' AND ord > '{$a['ord']}'");
 		/* Delete prizes and awards */
 		$mysqli->real_query("DELETE FROM award_prizes WHERE award_id='$aid'");
@@ -104,9 +116,19 @@ case 'del':
 
 case 'pdel':
 	$pid = (int)$_POST['pid'];
-	if($pid > 0) {
-		/* Delete prize, short circuit so we don't have to load the award just to delete the prize */
-		$mysqli->real_query("DELETE FROM award_prizes WHERE id='$pid'");
+	if($pid) {
+		/* Load prize by pid, because that's all we have */
+		$prize = prize_load($mysqli, $pid);
+
+		/* Now load the entire award so we can modify it and push out an update */
+		$a = award_load($mysqli, $prize['award_id']);
+		if($a['upstream_fair_id'] > 0) {
+			/* Can't prize del an award with an upstream fair id, someone is trying to bypass the html? */
+			exit();
+		}
+		
+		prize_delete($mysqli, $a, $pid);
+		award_save($mysqli, $a);
 		form_ajax_response(0);
 		exit();
 	}
@@ -117,11 +139,15 @@ case 'padd':
 	$aid = (int)$_POST['aid'];
 	if($aid > 0) {
 		$a = award_load($mysqli, $aid);
+		if($a['upstream_fair_id'] > 0) {
+			/* Can't prize add an award with an upstream fair id, someone is trying to bypass the html? */
+			exit();
+		}
 		$pid = prize_create($mysqli, $a);
 		$a['prizes'][$pid]['name'] = 'New prize';
 		$a['prizes'][$pid]['number'] = 1;
 		award_save($mysqli, $a);
-		print_prize_div($form_id, $pid, true, $prize);
+		print_prize_div($form_id, $a['prizes'][$pid], true);
 	}
 	exit();
 }
@@ -132,9 +158,11 @@ $help = '<p>Edit the award';
 sfiab_page_begin("Edit Award", $page_id, $help);
 
 
-function print_prize_div($form_id, $pid, $show, &$p)
+function print_prize_div($form_id, &$p, $show)
 {
 	global $award_trophies;
+	global $form_disabled;
+	$pid = $p['id'];
 	$show_attr = $show ? 'data-collapsed="false"' : '';
 
 ?>	<div data-role="collapsible" data-pid="<?=$pid?>" <?=$show_attr?> data-collapsed-icon="carat-r" and data-expanded-icon="carat-d">
@@ -151,9 +179,11 @@ function print_prize_div($form_id, $pid, $show, &$p)
 <?php			form_yesno($form_id, "prize[$pid][external_register_winners]", "(External) Register Winners at this fair", $p['external_register_winners']); ?>
 		</div>
 
-		<div align="right">
-			<a href="#" onclick="return prize_delete(<?=$pid?>);" data-role="button" data-icon="delete" data-inline="true" data-theme="r">Delete Prize</a>
-		</div>
+<?php		if(!$form_disabled) { ?>
+			<div align="right">
+			<a href="#" onclick="return prize_delete(<?=$pid?>);" data-role="button" data-icon="delete" data-inline="true" data-theme="r" >Delete Prize</a>
+			</div>
+<?php		} ?>
 	</div>
 <?php
 }
@@ -173,6 +203,7 @@ function print_prize_div($form_id, $pid, $show, &$p)
 	$sponsor_list += sponsors_load_for_select($mysqli);
 
 	$a = award_load($mysqli, $aid);
+	$remote_award = ($a['upstream_fair_id'] != 0) ? true : false;
 
 	if($a['upstream_award_id'] != 0) {
 		$fair = fair_load($mysqli, $a['upstream_fair_id']);
@@ -181,14 +212,19 @@ function print_prize_div($form_id, $pid, $show, &$p)
 
 	form_begin($form_id, 'c_awards_edit.php');
 	form_hidden($form_id, 'aid',$a['id']);
+	
+	if($remote_award) $form_disabled = true;
 	form_text($form_id, 'name', "Name", $a);
 	form_select($form_id, 'type', "Type", $award_types, $a);
 	form_textbox($form_id, 's_desc', "Student Description (Student and Judges see this, public on website, goes in ceremony script)", $a);
 	form_textbox($form_id, 'j_desc', "Judge Description (Only judges see this)", $a);
+	if($remote_award) $form_disabled = false;
+	
 	form_textbox($form_id, 'c_desc', "Committee Notes (Only the committee sees this)", $a);
 
 	/* If a sponsor_uid of 0 gets loaded, change it to null so the select list shows a "Select..." option.
 	 * never default to "Create a New Sponsor" */
+	if($remote_award) $form_disabled = true;
 	if($a['sponsor_uid'] == 0) $a['sponsor_uid'] = NULL;
 	form_select($form_id, 'sponsor_uid', "Sponsor", $sponsor_list, $a);
 
@@ -197,8 +233,11 @@ function print_prize_div($form_id, $pid, $show, &$p)
 	</div>
 
 <?php	form_check_group($form_id, 'categories', "Categories", $cats, $a);
-	form_yesno($form_id, 'schedule_judges', 'Schedule Judges', $a);
 	form_yesno($form_id, 'self_nominate', 'Students can Self Nominate', $a);
+
+	if($remote_award) $form_disabled = false;
+
+	form_yesno($form_id, 'schedule_judges', 'Schedule Judges', $a);
 	form_yesno($form_id, 'include_in_script', 'Include in Ceremony Script', $a);
 	form_text($form_id, 'presenter', "Presenter", $a);
 	form_submit($form_id, 'save', 'Save Award and Prize(s)', 'Award and Prize(s) Saved');
@@ -208,13 +247,19 @@ function print_prize_div($form_id, $pid, $show, &$p)
 	<h3>Prizes</h3> 
 	<p>Prizes are listed in the order they will appear in the ceremony script.  To change the prize order, drag and drop the prizes in the list below (or on the Award List page).
 	<div id="prizes" >
-<?php	foreach($a['prizes_in_order'] as &$p) {
+<?php	
+	if($remote_award) $form_disabled = true;
+	foreach($a['prizes_in_order'] as &$p) {
 		$pid = $p['id'];
-		print_prize_div($form_id, $pid, false, $p);
+		print_prize_div($form_id, $p, false);
 	} ?>
 	</div>
-	<a href="#" onclick="return prize_create(<?=$aid?>);" data-role="button" data-icon="plus" data-inline="true" data-theme="g">Create a New Prize</a><br/>
-<?php
+
+<?php	if(!$remote_award) { ?>
+		<a href="#" onclick="return prize_create(<?=$aid?>);" data-role="button" data-icon="plus" data-inline="true" data-theme="g">Create a New Prize</a><br/>
+<?php	}
+
+	if($remote_award) $form_disabled = false;
 	form_submit($form_id, 'save', 'Save Award and Prize(s)', 'Award and Prize(s) Saved');
 	form_submit($form_id, 'save_back', 'Save Award and Prize(s) and Go Back', 'Save Award and Prize(s) and Go Back');
 ?>	<a href="#" data-rel="back" data-role="button" data-icon="back" data-inline="true" data-theme="r">Cancel, Go Back</a>
@@ -225,6 +270,7 @@ function print_prize_div($form_id, $pid, $show, &$p)
 		<p>Any fair you check below will automatically download this award and it will appear in their awards list.  If/when each fair
 		assigns winners, they will be automatically uploaded back to this fair.
 <?php	
+		if($remote_award) $form_disabled =  true;
 		form_check_list($form_id, "feeder_fair_ids", "Feeder Fairs", $fairs, $a);
 ?>
 	</div>

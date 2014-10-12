@@ -158,7 +158,7 @@ function prize_load($mysqli, $pid, $data=NULL)
 /* Remember to save the award after doing this */
 function prize_delete($mysqli, &$a, $pid)
 {
-	$mysqli->real_query("DELETE FROM prizes WHERE id='$pid'");
+	$mysqli->real_query("DELETE FROM award_prizes WHERE id='$pid'");
 
 	unset($a['prizes'][$pid]);
 	/* Remove it from the prizes_in_order too */
@@ -167,7 +167,7 @@ function prize_delete($mysqli, &$a, $pid)
 
 function award_delete($mysqli, &$a)
 {
-	$mysqli->real_query("DELETE FROM prizes WHERE award_id='{$a['id']}'");
+	$mysqli->real_query("DELETE FROM award_prizes WHERE award_id='{$a['id']}'");
 	$mysqli->real_query("DELETE FROM awards WHERE id='{$a['id']}'");
 }
 
