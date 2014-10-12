@@ -23,7 +23,7 @@ case 'order':
 	/* Called when awards are reordered.  awards is an array
 	 * of awards, in order, starting from ord=1 */
 	$ord = 0;
-	print_r($_POST);
+//	print_r($_POST);
 
 	foreach($_POST['awards'] as $aid) {
 		$ord++;
@@ -39,7 +39,7 @@ case 'prize_order':
 	/* Called prizes in an award are  reordered.  prizes is an array
 	 * of prizes, in order, starting from ord=1 */
 	$ord = 0;
-	print_r($_POST);
+//	print_r($_POST);
 
 	foreach($_POST['prizes'] as $prize_id) {
 		$ord++;
@@ -57,18 +57,19 @@ case 'add':
 	$mysqli->real_query("UPDATE awards SET `ord` = `ord`+1 WHERE year='{$config['year']}'");
 	$mysqli->real_query("INSERT INTO awards (`name`,`ord`,`year`) VALUES('New Award',1,'{$config['year']}')");
 	$aid = $mysqli->insert_id;
-	$pid = prize_create($mysqli, $aid);
-	$prize = prize_load($mysqli, $pid);
-	$prize['name'] = 'New prize';
-	$prize['number'] = 1;
-	$prize['ord'] = 1;
-	prize_save($mysqli, $prize);
+	$a = award_load($mysqli, $aid);
+	$pid = prize_create($mysqli, $a);
+	$a['prizes'][$pid]['name'] = 'New prize';
+	$a['prizes'][$pid]['number'] = 1;
+	$a['prizes'][$pid]['ord'] = 1;
+	award_save($mysqli, $a);
 	/* Print the award id, the js function takes this and redirects to c_awards_edit?aid=..." */
 	print("$aid");
 	exit();
 }
 
 $sponsors = sponsors_load_all($mysqli);
+$fairs = fair_load_all_upstream($mysqli);
 
 $help = 'Use the <button data-icon="gear" data-iconpos="notext" data-inline="true"></button> button to edit the award and prizes.  Drag and drop the <button data-icon="bars" data-iconpos="notext" data-inline="true"></button> icon to reorder the awards.  Drag the [=] handle before each prize to re-order the prizes within the award.  Awards/Prizes at the top of the list will go first in the award ceremony.';
 
@@ -116,7 +117,12 @@ sfiab_page_begin("Edit Awards", $page_id, $help);
 		<td width="80%" colspan=4>
 			<table width="100%">
 				<tr><td width="75%"><b><?=$a['name']?></b>
-					<br><font size="-1">Presented By: <?=$a['presenter']?></font>
+<?php					if($a['upstream_award_id'] != 0) { ?>
+						<br/><font size="-1">From Upstream Fair: <b><?=$fairs[$a['upstream_fair_id']]['name']?></b>
+<?php					} ?>
+
+					<br/><font size="-1">Presented By: <?=$a['presenter']?></font>
+
 <?php					if($a['sponsor_uid'] > 0) {
 						$s = $sponsors[$a['sponsor_uid']]['organization'];
 					} else {

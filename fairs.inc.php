@@ -63,6 +63,17 @@ function fair_load_all_feeder($mysqli)
 	return $fairs;
 }
 
+function fair_load_all_upstream($mysqli)
+{
+	global $config;
+	$q = $mysqli->query("SELECT * FROM fairs WHERE `type`='sfiab_upstream' ORDER BY name");
+	$fairs = array();
+	while($f = $q->fetch_assoc()) {
+		$fairs[(int)$f['id']] = fair_load($mysqli, 0, NULL, $f);
+	}
+	return $fairs;
+}
+
 
 function fair_load_by_username($mysqli, $username)
 {

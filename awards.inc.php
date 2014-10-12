@@ -118,7 +118,7 @@ function award_load_special_for_project_select($mysqli, &$p)
 }
 
 
-function prize_create($mysqli, $award_id)
+function prize_create($mysqli, &$a)
 {
 	$q = $mysqli->query("SELECT MAX(ord) AS c FROM award_prizes WHERE award_id='$award_id'");
 	$r = $q->fetch_assoc();
@@ -126,9 +126,12 @@ function prize_create($mysqli, $award_id)
 
 	$mysqli->query("INSERT INTO award_prizes(`award_id`,`ord`) VALUES('$award_id','$ord')");
 	$prize_id = $mysqli->insert_id;
+
+	$a[$prize_id] = prize_load($mysqli, $prize_id);
 	return $prize_id;
 }
 
+/* Can be called independently, but not a good idea, can't save a prize indepedently */
 function prize_load($mysqli, $pid, $data=NULL)
 {
 	if($data === NULL) {
@@ -150,16 +153,17 @@ function prize_load($mysqli, $pid, $data=NULL)
 	return $p;
 }
 
-function prize_delete($mysqli, &$p)
+/* Remember to save the award after doing this */
+function prize_delete($mysqli, &$a, $pid)
 {
-	$mysqli->real_query("DELETE FROM award_prizes WHERE id='{$p['id']}");
+	unset($a['prizes'][$pid]);
+	/* Remove it from the prizes_in_order too */
+
 }
 
 function award_delete($mysqli, &$a)
 {
-	foreach($a['prizes'] as $pid=>&$p) {
-		prize_delete($mysqli, $p);
-	}
+	$mysqli->real_query("DELETE FROM prizes WHERE award_id='{$a['id']}");
 	$mysqli->real_query("DELETE FROM awards WHERE id='{$a['id']}");
 }
 
@@ -168,7 +172,7 @@ function award_save($mysqli, &$a)
 	$original_feeder_fairs = $a['original']['feeder_fair_ids'];
 
 	foreach($a['prizes'] as $pid=>&$p) {
-		prize_save($mysqli, $p);
+		generic_save($mysqli, $p, "award_prizes", "id");
 	}
 	generic_save($mysqli, $a, "awards", "id");
 
@@ -179,11 +183,6 @@ function award_save($mysqli, &$a)
 		remote_push_award_to_all_fairs($mysqli, $a);
 	}
 }
-function prize_save($mysqli, &$p)
-{
-	generic_save($mysqli, $p, "award_prizes", "id");
-}
-
 
 function award_load_cwsf($mysqli)
 {
@@ -255,25 +254,25 @@ function award_sync($mysqli, $fair, $incoming_award)
 		}
 	}
 
-	award_save($mysqli, $a);
 
 	/* upstream prize id -> our prize id */
 	$upstream_prize_id_map = array();
+	$local_prizes_seen = array();
 	foreach($a['prizes'] as $pid=>&$p) {
 		$upstream_prize_id_map[$p['upstream_prize_id']] = $pid;
-		$p['seen'] = false;
+		$local_prizes_seen[$pid] = false;
 	}
 
 	$seen_prize_ids = array();
 	foreach($incoming_award['prizes'] as &$incoming_prize) {
 		if(array_key_exists($incoming_prize['id'], $upstream_prize_id_map)) {
 			$prize_id = $upstream_prize_id_map[$incoming_prize['id']];
-			$p = &$a['prizes'][$prize_id];
 		} else {
 			/* Create it */
 			$prize_id = prize_create($mysqli, $a);
-			$p = prize_load($mysqli, $prize_id);
 		}
+		$p = &$a['prizes'][$prize_id];
+
 		$p['name'] = $incoming_prize['name'];
 		$p['cash'] = $incoming_prize['cash'];
 		$p['scholarship'] = $incoming_prize['scholarship'];
@@ -281,16 +280,17 @@ function award_sync($mysqli, $fair, $incoming_award)
 		$p['trophies'] = $incoming_prize['trophies'];
 		$p['number'] = $incoming_prize['number'];
 		$p['upstream_register_winners'] = $incoming_prize['upstream_register_winners'];
-		prize_save($mysqli, $p);
-		$p['seen'] = true;
+		$local_prizes_seen[$p['pid']] = true;
 	}
 
 	/* Any prizes we didn't see have been removed */
-	foreach($a['prizes'] as $pid=>&$p) {
-		if($p['seen'] == false) {
-			prize_delete($mysqli, $p);
+	foreach($local_prizes_seen as $pid=>$seen) {
+		if($seen == false) {
+			prize_delete($mysqli, $a, $pid);	
 		}
 	}
+
+	award_save($mysqli, $a);
 }
 
 /* Get a copy of an award for exporting, basically just make a copy and
@@ -322,6 +322,7 @@ function award_get_export($mysqli, &$fair, &$a)
 	unset($export_a['presenter']);
 	unset($export_a['cwsf_award']);
 	unset($export_a['original']);
+	unset($export_a['prizes_in_order']);
 
 	/* Turn categories into grades */
 	$export_a['grades'] = array();

@@ -105,7 +105,7 @@ case 'del':
 case 'pdel':
 	$pid = (int)$_POST['pid'];
 	if($pid > 0) {
-		/* Delete prize */
+		/* Delete prize, short circuit so we don't have to load the award just to delete the prize */
 		$mysqli->real_query("DELETE FROM award_prizes WHERE id='$pid'");
 		form_ajax_response(0);
 		exit();
@@ -116,11 +116,11 @@ case 'pdel':
 case 'padd':
 	$aid = (int)$_POST['aid'];
 	if($aid > 0) {
-		$pid = prize_create($mysqli, $aid);
-		$prize = prize_load($mysqli, $pid);
-		$prize['name'] = 'New prize';
-		$prize['number'] = 1;
-		prize_save($mysqli, $prize);
+		$a = award_load($mysqli, $aid);
+		$pid = prize_create($mysqli, $a);
+		$a['prizes'][$pid]['name'] = 'New prize';
+		$a['prizes'][$pid]['number'] = 1;
+		award_save($mysqli, $a);
 		print_prize_div($form_id, $pid, true, $prize);
 	}
 	exit();
@@ -168,16 +168,16 @@ function print_prize_div($form_id, $pid, $show, &$p)
 	$aid = (int)$_GET['aid'];
 	$cats = categories_load($mysqli);
 
-/*	if($aid == 0) {
-		$mysqli->real_query("INSERT INTO awards (`name`,`year`) VALUES('New Award','{$config['year']}')");
-		$aid = $mysqli->insert_id;
-	}
-*/
 	$sponsor_list = array();
 	$sponsor_list[0] = "Create a New Sponsor (Enter Sponsor Below)";
 	$sponsor_list += sponsors_load_for_select($mysqli);
 
 	$a = award_load($mysqli, $aid);
+
+	if($a['upstream_award_id'] != 0) {
+		$fair = fair_load($mysqli, $a['upstream_fair_id']);
+?>		<p>This award was automatically downloaded from the <b><?=$fair['name']?></b>.  Because it is a downloaded award, some field cannot be changed. Upstream changes are automatically downloaded.
+<?php	}
 
 	form_begin($form_id, 'c_awards_edit.php');
 	form_hidden($form_id, 'aid',$a['id']);
