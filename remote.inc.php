@@ -29,6 +29,7 @@ require_once('fairs.inc.php');
 require_once('project.inc.php');
 require_once('email.inc.php');
 require_once('curl.inc.php');
+require_once('debug.inc.php');
 
 
 /* Send a command to a remote fair */
@@ -47,6 +48,7 @@ function remote_query($mysqli, &$fair, &$cmd)
 	$response = curl_query($fair, $cmd);
 //	print("response: ".print_r($response, true)."\n");
 
+	debug("remote_query: remove token for fair {$fair['name']}\n");
 	/* Remove the token */
 	$mysqli->real_query("UPDATE fairs SET token='' WHERE id={$fair['id']}");
 

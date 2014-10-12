@@ -3,7 +3,7 @@ require_once('filter.inc.php');
 require_once('project.inc.php');
 require_once('remote.inc.php');
 require_once('sponsors.inc.php');
-
+require_once('debug.inc.php');
 
 $award_types = array('divisional' => 'Divisional',
 			'special' => 'Special',
@@ -120,14 +120,16 @@ function award_load_special_for_project_select($mysqli, &$p)
 
 function prize_create($mysqli, &$a)
 {
-	$q = $mysqli->query("SELECT MAX(ord) AS c FROM award_prizes WHERE award_id='$award_id'");
-	$r = $q->fetch_assoc();
-	$ord = (int)$r['c'] + 1;
+	$q = $mysqli->query("SELECT MAX(ord) FROM award_prizes WHERE award_id='{$a['id']}'");
+	$r = $q->fetch_row();
+	$ord = (int)$r[0] + 1;
 
-	$mysqli->query("INSERT INTO award_prizes(`award_id`,`ord`) VALUES('$award_id','$ord')");
+	$mysqli->query("INSERT INTO award_prizes(`award_id`,`ord`) VALUES('{$a['id']}','$ord')");
 	$prize_id = $mysqli->insert_id;
 
-	$a[$prize_id] = prize_load($mysqli, $prize_id);
+	debug("prize_create: created new prize={$prize_id}, ord=$ord for award {$a['id']}\n");
+	
+	$a['prizes'][$prize_id] = prize_load($mysqli, $prize_id);
 	return $prize_id;
 }
 
@@ -156,6 +158,8 @@ function prize_load($mysqli, $pid, $data=NULL)
 /* Remember to save the award after doing this */
 function prize_delete($mysqli, &$a, $pid)
 {
+	$mysqli->real_query("DELETE FROM prizes WHERE id='$pid'");
+
 	unset($a['prizes'][$pid]);
 	/* Remove it from the prizes_in_order too */
 
@@ -163,8 +167,8 @@ function prize_delete($mysqli, &$a, $pid)
 
 function award_delete($mysqli, &$a)
 {
-	$mysqli->real_query("DELETE FROM prizes WHERE award_id='{$a['id']}");
-	$mysqli->real_query("DELETE FROM awards WHERE id='{$a['id']}");
+	$mysqli->real_query("DELETE FROM prizes WHERE award_id='{$a['id']}'");
+	$mysqli->real_query("DELETE FROM awards WHERE id='{$a['id']}'");
 }
 
 function award_save($mysqli, &$a)
@@ -217,22 +221,25 @@ function award_sync($mysqli, $fair, $incoming_award)
 
 	categories_load($mysqli, $year);
 
-
 	$q = $mysqli->query("SELECT * FROM awards WHERE upstream_fair_id='{$fair['id']}' AND upstream_award_id='$incoming_award_id' AND year='$year'");
 	if($q->num_rows > 0) {
 		/* Award exists, we can load and update */
 		$data = $q->fetch_assoc();
 		$a = award_load($mysqli, -1, $data);
+		debug("award_sync: found local award id={$a['id']}\n");
 	} else {
 		/* Create a new award */
 		$aid = award_create($mysqli, $year);
 		$a = award_load($mysqli, $aid);
+		debug("award_sync: created new award id={$a['id']}\n");
 	}
 
 	if(array_key_exists('delete', $incoming_award)) {
+		debug("award_sync: deleting award.\n");
 		award_delete($mysqli, $a);
 		return;
 	}
+
 
 	$a['name'] = $incoming_award['name'];
 	$a['s_desc'] = $incoming_award['s_desc'];
@@ -267,12 +274,15 @@ function award_sync($mysqli, $fair, $incoming_award)
 	foreach($incoming_award['prizes'] as &$incoming_prize) {
 		if(array_key_exists($incoming_prize['id'], $upstream_prize_id_map)) {
 			$prize_id = $upstream_prize_id_map[$incoming_prize['id']];
+			debug("award_sync: found existing prize={$prize_id}\n");
 		} else {
 			/* Create it */
 			$prize_id = prize_create($mysqli, $a);
+			debug("award_sync: created new prize={$prize_id}\n");
 		}
 		$p = &$a['prizes'][$prize_id];
 
+		/* Overwrite or set prize feields */
 		$p['name'] = $incoming_prize['name'];
 		$p['cash'] = $incoming_prize['cash'];
 		$p['scholarship'] = $incoming_prize['scholarship'];
@@ -280,16 +290,18 @@ function award_sync($mysqli, $fair, $incoming_award)
 		$p['trophies'] = $incoming_prize['trophies'];
 		$p['number'] = $incoming_prize['number'];
 		$p['upstream_register_winners'] = $incoming_prize['upstream_register_winners'];
-		$local_prizes_seen[$p['pid']] = true;
+		$p['upstream_prize_id'] = $incoming_prize['id'];
+		$local_prizes_seen[$prize_id] = true;
 	}
 
-	/* Any prizes we didn't see have been removed */
+	/* Any prizes we didn't see have been removed from this award */
 	foreach($local_prizes_seen as $pid=>$seen) {
 		if($seen == false) {
+			debug("award_sync: delete prize={$pid}\n");
 			prize_delete($mysqli, $a, $pid);	
 		}
 	}
-
+//	debug("award_sync: save award: ".print_r($a, true)."\n");
 	award_save($mysqli, $a);
 }
 

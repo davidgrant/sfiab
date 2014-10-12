@@ -25,25 +25,20 @@
 require_once('common.inc.php');
 require_once('fairs.inc.php');
 require_once('remote.inc.php');
+require_once('debug.inc.php');
 
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
 $data = json_decode($_POST['json'], true);
 
-$fp = fopen("/tmp/sfiab.log", "at");
 
-fwrite($fp, "\nFair: {$config['fair_name']}");
-fwrite($fp, "\ndata:".print_r($data, true));
-#echo "<br />";
-
-// exit;
- 
-#$u = user_load_by_username($mysqli, $username);
 $fair = fair_load_by_hash($mysqli, $data['password']);
 
-#print_r($fair);
-// echo "Authenticating... ";
+debug("This Fair: {$config['fair_name']}\n");
+debug("Matched password from fair: {$fair['name']}\n");
+debug("Decoded Command:".print_r($data, true)."\n");
+
 $response = array();
 
 /* Fair must exist */
@@ -51,7 +46,7 @@ if($fair === NULL) {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed";
 	print(json_encode($response));
-	fwrite($fp, "\nresponse:".print_r($response, true));
+	debug("response:".print_r($response, true)."\n");
 	exit;
 }
 /* Must have a password set */
@@ -59,7 +54,7 @@ if(!is_array($fair) || $fair['password'] == '') {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed2";
 	print(json_encode($response));
-	fwrite($fp, "\nresponse:".print_r($response, true));
+	debug("response:".print_r($response, true)."\n");
 	exit;
 }
 
@@ -69,7 +64,8 @@ if(!is_array($fair) || $fair['password'] == '') {
 if(array_key_exists('check_token', $data)) {
 	remote_handle_check_token($mysqli, $fair, $data, $response);
 	print(json_encode($response));
-	fwrite($fp, "\nresponse:".print_r($response, true));
+	debug("check token for fair:".print_r($fair, true)."\n");
+	debug("response:".print_r($response, true)."\n");
 	exit();
 }
 
@@ -78,7 +74,7 @@ if(remote_check_token($mysqli, $fair, $data['token']) == false) {
  	$response['error'] = 1;
 	$response['message'] = "Authentication Failed4";
 	print(json_encode($response));
-	fwrite($fp, "\nresponse:".print_r($response, true));
+	debug("response:".print_r($response, true)."\n");
 	exit();
 }
 
@@ -94,7 +90,7 @@ if(array_key_exists('award_additional_materials', $data)) handle_award_additiona
 
 $response['hi'] = 'hi';
 print(json_encode($response));
-fwrite($fp, "\nresponse:".print_r($response, true));
+debug("response:".print_r($response, true)."\n");
 fclose($fp);
 
 ?>
