@@ -61,7 +61,7 @@ function sfiab_load_config($mysqli)
 		$real_docroot = realpath($_SERVER['DOCUMENT_ROOT']);
 		$real_dir = realpath(__DIR__);
 		$config['fair_url'] = (array_key_exists('HTTPS', $_SERVER) ? 'https://' : 'http://')
-					.$_SERVER['HTTP_HOST'].substr($real_dir, strlen($real_root) );
+					.$_SERVER['HTTP_HOST'].substr($real_dir, strlen($real_docroot) );
 
 	} 
 	$config['provincestate'] = 'Province';
