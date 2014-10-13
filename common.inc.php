@@ -58,8 +58,11 @@ function sfiab_load_config($mysqli)
 	}
 
 	if(array_key_exists('HTTP_HOST', $_SERVER)) {
+		$real_docroot = realpath($_SERVER['DOCUMENT_ROOT']);
+		$real_dir = realpath(__DIR__);
 		$config['fair_url'] = (array_key_exists('HTTPS', $_SERVER) ? 'https://' : 'http://')
-					.$_SERVER['HTTP_HOST'].substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']) );
+					.$_SERVER['HTTP_HOST'].substr($real_dir, strlen($real_root) );
+
 	} 
 	$config['provincestate'] = 'Province';
 	$config['postalzip'] = 'Postal Code';
