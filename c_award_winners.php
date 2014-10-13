@@ -157,7 +157,7 @@ function award_li(&$a) {
 
 	global $awards, $page_id, $awards, $projects, $winners;
 
-	$filter_text = $a['type'].' '.$a['name']. ' '.$a['notes'];
+	$filter_text = $a['type'].' '.$a['name']. ' '.$a['c_desc'];
 	foreach($a['prizes'] as &$prize) { 
 		$filter_text .= ' '.$prize['name'];
 		if(array_key_exists($prize['id'], $winners)) {

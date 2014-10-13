@@ -379,5 +379,30 @@ function emergency_contact_save($mysqli, $ec)
 
 
 
+function project_sync($mysqli, $fair, $incoming_project)
+{
+
+}
+
+function project_get_export($mysqli, &$fair, &$project)
+{
+	$chals = challenges_load($mysqli, $project['year']);
+
+	debug("project_get_export: feeder fair: {$fair['id']}\n");
+
+
+
+	$export_p = array();
+
+	$export_p['title'] = $project['title'];
+	$export_p['tagline'] = $project['tagline'];
+	$export_p['abstract'] = $project['abstract'];
+	$export_p['language'] = $project['language'];
+
+
+}
+
+
+
 
 ?>

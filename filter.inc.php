@@ -180,7 +180,6 @@ function post_array(&$val, $var, &$choices)
 function post_int_list(&$val, $var) 
 {
 	$v = post_get_value($var);
-	print_r($v);
 	if($v !== NULL) {
 		$val = array();
 		foreach($v as $idx=>$dat) {

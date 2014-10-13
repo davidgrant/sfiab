@@ -337,7 +337,7 @@ function form_select_filter($page_id, $name, $label, $data, &$value)
 	$v = (is_array($value)) ? $value[$name] : $value;
 	$d = $form_disabled ? ' disabled="disabled"': '';
 
-	form_label_div_begin($id, $name, $label, $wide);
+	form_label_div_begin($id, $name, $label, false);
 ?>
 	<input data-type="search" id="<?=$id?>_filter">
 	<select name="<?=$name?>" data-filter="true" data-input="#<?=$id?>_filter" id="<?=$id?>" <?=$d?> >

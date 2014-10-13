@@ -25,11 +25,14 @@ if(array_key_exists('action', $_POST)) {
 switch($action) {
 case 'save':
 case 'save_back':
+
+	
 	$cats = categories_load($mysqli);
 
 	$aid = (int)$_POST['aid'];
 	$a = award_load($mysqli, $aid);
 
+	/* Use $remote_award to determine what we're allowed to save */
 	$remote_award = ($a['upstream_fair_id'] > 0) ? true : false;
 
 	if(!$remote_award) {
@@ -41,6 +44,7 @@ case 'save_back':
 		post_bool($a['self_nominate'],'self_nominate');
 		post_int($a['ord'],'ord');
 		post_array($a['categories'], 'categories', $cats);
+		$a['feeder_fair_ids'] = array();
 		post_array($a['feeder_fair_ids'], 'feeder_fair_ids', $fairs);
 	}
 
@@ -80,7 +84,7 @@ case 'save_back':
 			post_float($prize['cash'],array('prize', $pid, 'cash'));
 			post_float($prize['scholarship'],array('prize', $pid, 'scholarship'));
 			post_float($prize['value'],array('prize', $pid, 'value'));
-			post_bool($prize['external_register_winners'],array('prize', $pid, 'external_register_winners'));
+			post_bool($prize['upstream_register_winners'],array('prize', $pid, 'upstream_register_winners'));
 			post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
 		}
 	}
@@ -176,7 +180,7 @@ function print_prize_div($form_id, &$p, $show)
 		form_check_group($form_id, "prize[$pid][trophies]", "Trophies", $award_trophies, $p['trophies']);
 ?>
 		<div class="award_external" style="display:none;"> 
-<?php			form_yesno($form_id, "prize[$pid][external_register_winners]", "(External) Register Winners at this fair", $p['external_register_winners']); ?>
+<?php			form_yesno($form_id, "prize[$pid][upstream_register_winners]", "(Upstream) Register Winners at this fair", $p['upstream_register_winners']); ?>
 		</div>
 
 <?php		if(!$form_disabled) { ?>
@@ -204,6 +208,12 @@ function print_prize_div($form_id, &$p, $show)
 
 	$a = award_load($mysqli, $aid);
 	$remote_award = ($a['upstream_fair_id'] != 0) ? true : false;
+
+	/* Use $remote_award to determine what fields to disable.  Disable
+	 * individual fields by toggling the * global form form_disabled flags..
+	 * it's a bit hacky but it works.  The save routine above also enforces
+	 * which fields can be save if someone decides to work around the HTML for
+	 * whatever reason. */
 
 	if($a['upstream_award_id'] != 0) {
 		$fair = fair_load($mysqli, $a['upstream_fair_id']);

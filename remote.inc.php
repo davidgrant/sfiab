@@ -172,48 +172,7 @@ function handle_stats(&$u,$fair, &$data, &$response)
 
 function handle_getawards($mysqli, &$u, $fair, &$data, &$response)
 {
-	$awards = array();
-	$year = $data['getawards']['year'];
 
-	$ids = array();
-	/* Load a list of awards linked to the fair id */
-	foreach($fair['award_ids'] as $aid) {
-		$a = award_load($mysqli, $aid);	
-
-	
-		$award['identifier'] = $a['id'];
-		$award['external_additional_materials'] = '';
-		$award['year'] = $a['year'];
-		$award['name_en'] = $a['name'];
-		$award['criteria_en'] = $a['s_desc'];
-		$award['upload_winners'] = 'yes';
-		$award['self_nominate'] = $a['self_nominate'] ? "yes" : "no";
-		$award['schedule_judges'] = $a['schedule_judges'] ? "yes" : "no";
-		$award['sponsor'] = $a['sponsor'];
-
-		$external_register_winners = 0;
-		$award['prizes'] = array();
-		foreach($a['prizes'] as &$p) {
-			/* Map array keys -> local database field */
-			$prize['cash'] = $p['cash'];
-			$prize['scholarship'] = $p['scholarship'];
-			$prize['value'] = $p['value'];
-			$prize['prize_en'] = $p['name'];
-			$prize['number'] = $p['number'];
-			$prize['trophystudentkeeper'] = in_array('keeper', $p['trophies']) ? 1 : 0;
-			$prize['trophystudentreturn'] = in_array('return', $p['trophies']) ? 1 : 0;
-			$prize['trophyschoolkeeper'] = in_array('school_keeper', $p['trophies']) ? 1 : 0;
-			$prize['trophyschoolreturn'] = in_array('school_keeper', $p['trophies']) ? 1 : 0;
-			$prize['identifier'] = '';
-			if($p['external_register_winners'] == 1) $external_register_winners = 1;
-
-			$award['prizes'][] = $prize;
-		}
-		$award['external_register_winners'] = $external_register_winners;
-		$awards[] = $award;
-	}
-	$response['awards'] = $awards;
-	$response['postback'] = 'http://localhost';
 }
 
 function award_upload_update_school($mysqli, &$mysql_query, &$school, $school_id = -1)
@@ -415,7 +374,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 
 		$response['notice'][] = "      - Updated {$remote_student['firstname']} {$remote_student['lastname']}";
 		
-		if($prize['external_register_winners'] == 0) {
+		if($prize['upstream_register_winners'] == 0) {
 			/* Set to complete even if the data isn't, so we can query them */
 			$s['s_complete'] = 1;
 			$s['s_accepted'] = 1;
@@ -423,7 +382,7 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 		}
 		user_save($mysqli, $s);
 
-		if($prize['external_register_winners'] == 1 && $remote_student['matched'] == false) {
+		if($prize['upstream_register_winners'] == 1 && $remote_student['matched'] == false) {
 			/* This award is for students who are participating in this fair, we need
 			 * to get their reg number to them if this is a new registration 
 			 * Only send it if they weren't matched to a student already in this project */
@@ -438,46 +397,6 @@ function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project
 			VALUES('{$prize['id']}','$pid','$year','{$fair['id']}')");
 }
 
-function handle_awards_upload($mysqli, &$u, &$fair, &$data, &$response)
-{
-
-//	$response['debug'] = array_keys($data['awards_upload']);
-//	$response['error'] = 0;
-//	return;
-	foreach($data['awards_upload'] as $award_data) {
-		$external_identifier = (int)$award_data['external_identifier'];
-		$year = intval($award_data['year']);
-
-		$award = award_load($mysqli, $external_identifier);
-		if($award === NULL || !is_array($award)) {
-			$response['message'] = "Unknown award identifier '$external_identifier' for year $year";
-			$response['error'] = 1;
-			return;
-		}
-		$aaid = $award['id'];
-
-		$response['notice'][] = "Found award: {$award['name']}";
-
-		foreach($award['prizes'] as &$prize) {
-			$response['notice'][] = " - Prize: {$prize['name']}";
-
-			/* Clean out existing winners for this prize */
-			$mysqli->real_query("DELETE FROM winners WHERE 
-					award_prize_id='{$prize['id']}' 
-					AND fair_id='{$fair['id']}'");
-
-			/* Iterate over all prizes of the same name */
-			$ul_p =& $award_data['prizes'][$prize['name']];
-			if(!is_array($ul_p['projects'])) continue;
-
-			foreach($ul_p['projects'] as &$project) {
-				award_upload_assign($mysqli, $fair, $award, $prize, $project, $year, $response);
-			}
-		}
-	}
-	$response['notice'][] = 'All awards and winners saved';
-	$response['error'] = 0;
-}
 
 function handle_get_categories($mysqli, &$u, &$fair, &$data, &$response)
 {

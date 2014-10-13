@@ -83,7 +83,6 @@ if(array_key_exists('get_award', $data)) remote_handle_get_award($mysqli, $fair,
 if(array_key_exists('getstats', $data)) handle_getstats($u,$fair, $data, $response);
 if(array_key_exists('stats', $data)) handle_stats($u,$fair, $data, $response);
 if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$data, $response);
-if(array_key_exists('awards_upload', $data)) handle_awards_upload($mysqli, $u,$fair,$data, $response);
 if(array_key_exists('get_categories', $data)) handle_get_categories($mysqli, $u,$fair,$data, $response);
 if(array_key_exists('get_divisions', $data)) handle_get_divisions($mysqli, $u,$fair,$data, $response);
 if(array_key_exists('award_additional_materials', $data)) handle_award_additional_materials($u,$fair,$data, $response);

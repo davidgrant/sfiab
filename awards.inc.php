@@ -315,6 +315,8 @@ function award_get_export($mysqli, &$fair, &$a)
 
 	/* Is this fair allowed to have this award?  if not, just send
 	 * the award id, year, and a delete flag */
+	debug("award_get_export: feeder fair: {$fair['id']}, ids=".print_r($a['feeder_fair_ids'], true)."\n");
+
 	if(!in_array($fair['id'], $a['feeder_fair_ids'])) {
 		$export_a = array();
 		$export_a['id'] = $a['id'];
