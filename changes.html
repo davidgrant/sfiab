@@ -3,23 +3,30 @@
 <h3>Differences and Requirements for the new SFIAB</h3>
 
 <p>The new Science Fair in a Box (SFIAB) version 3 is a complete rewrite of the
-old SFIAB.  This was done for several reasons:
+old SFIAB.  This document highlights the major differences and between the new
+version (SFIAB 3) and the old version you are currently using (SFIAB 2).  This 
+rewrite was done for several reasons:
 
 <ul>
-<li>The size of the code base and the number of fair-specific features
-(hundreds of them) was making it challenging to add new features without
-breaking existing ones
+<li>The size of the code due to the number of fair-specific features
+(hundreds of them) made it challenging to add new features without
+inadvertently breaking existing ones.  SFIAB 3 removes many of the little-used
+and unused features.
 
-<li>The number of configuration options was daunting and hard to understand.
-The new version removes many little-used features to simplify and streamline
-the configuration process
+<li>The number of configuration options was daunting, hard to understand, and
+hard to maintain.  SFIAB 3 removes many of the configuration options which
+simplifies and streamlines the entire system
 
 <li>The underlying code and database architecture was hard to adapt to modern
-technology like mobile devices
+technology like mobile devices.  SFIAB 3 has full mobile support, and uses a
+database layout that is faster.  You'll notice the difference just loading the
+user list.
 
-<li>CWSF concepts like challenges and judging entire age categories were
+<li>CWSF concepts like challenges and unified judging of age categories were
 hard to fit in to the existing code.  Supporting both the new challenge
-system and the old division system would make the code even more complex and unmaintainable
+system and the old division system would make the code even more complex and
+unmaintainable.  SFIAB 3 follows the CWSF model of a fair.  Many fairs were
+already asking for challenge support.
 
 <li>We actually want to help our regional fairs, rather than use all our free
 time to maintain SFIAB.
@@ -29,10 +36,11 @@ time to maintain SFIAB.
 <p>Essentially, to use the new SFIAB, you must model your fair like the
 Canada-Wide.  Many fairs already do this. 
 
-<p>You are, of course, free to continue using the old SFIAB if the new one doesn't fit into your fair model
+<p>You are free to continue using the old SFIAB if the new one doesn't fit into
+your fair model, we just won't be adding new features to it.
 
 
-<h3>Detailed Feature Comparison, new SFIAB 3 compared to SFIAB 2 </h3>
+<h3>Detailed Feature Comparison, SFIAB 3 vs. SFIAB 2</h3>
 
 <h4>General</h4>
 <ul>
@@ -50,16 +58,16 @@ As such, the configurable effort settings are removed.  Only high-effort is avai
 
 <h4>Registration</h4>
 <ul>
-<li>Only open registration is supported (students and judges).  Password-protected and school-specific registration is not supported
+<li>Only open registration is supported.  Password-protected and school-specific registration is not supported
 	<ul>
 	<li>Registration may now be opened for a single user (student, judge) after general registration closes
 	</ul>
 <li>Registration fee is per-student (or none).  Per-project registration fee is not supported
 <li>Support for multiple users on a single email address 
 <li>Project numbers are only assigned after the signature form is received
-<li>Required vs optional information fields are no longer configurable
-<li>Configurable registration-fee items is removed
-<li>Students must register separately and one must invite the other to a project
+<li>Required/optional information fields are no longer configurable
+<li>Configurable registration-fee items are not supported
+<li>Students must register separately and one must invite the other to a project.  The signature page/registration can then be completed as a pair.
 <li>ISEF project divisions are used to match students with judges
 </ul>
 
@@ -67,23 +75,31 @@ As such, the configurable effort settings are removed.  Only high-effort is avai
 <ul>
 <li>Age categories and challenges are configurable, but each age category must be judged together.  Divisions are gone.
 <li>Maximum 2 students per project, not configurable.
+<li>Sub-categories and sub-divisions (sub-challenges) are all no longer supported
 </ul>
+
+<h4>Schools</h4>
+<ul>
+<li>School/Teacher login is not supported.  It will be added again, but currently is unavailable
+</ul>
+
 
 <h4>Judging</h4>
 <ul>
 <li>The only supported judging system is two-round CUSP judging
 	<ul>
-	<li>You don't have to use it.  You can let judges register and the judge scheduler will still assign them to teams and projects and generate forms for each judging team.
-	<ul>
+	<li>This is not a requirement.  Judges can register and the judge scheduler can assign them to teams and projects and generate forms for each judging team.  But all the scoring/winner entry must be done manually after that.
+	</ul>
 <li>The only supported judge scoring system is 3*scientific + 2*originality 1*communication.  Each of the three is scored using a number from 1-4, with low,medium,high for each number.
 	<ul>
-	<li>Again, you don't have to use this.  
-	<ul>
+	<li>This is not a requirement, but this is how the judge forms are created (not configurable).  No other form of electronic entry is available.
+	</ul>
 <li>Support added to generate judging score forms and time schedules for each judging team and project
 <li>Support added for disqualified projects and projects unavailable in specific timeslots (the judge timeslot scheduler will assign judges appropriately)
 <li>Automatic generation of second-round CUSP judging teams and projects to judge
 <li>Judge score entry system to determine winners in each category
 </ul>
+
 
 </body>
 </html>
