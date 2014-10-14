@@ -381,7 +381,61 @@ function emergency_contact_save($mysqli, $ec)
 
 function project_sync($mysqli, $fair, $incoming_project)
 {
+	/* First find the project or create one */
+	$year = intval($incoming_project['year']);
+	$incoming_pid = intval($incoming_project['pid']);
+	if($year <= 0) exit();
+	if($incoming_pid <= 0) exit();
 
+	$q = $mysqli->query("SELECT * FROM projects WHERE feeder_fair_id='{$fair['id']}' AND feeder_fair_pid='$incoming_pid' AND year='$year'");
+	if($q->num_rows > 0) {
+		/* project exists, we can load and update */
+		$data = $q->fetch_assoc();
+		$p = project_load($mysqli, -1, $data);
+		debug("project_sync: found local project id={$p['pid']}\n");
+	} else {
+		/* Create a project */
+		$pid = project_create($mysqli, $year);
+		$p = project_load($mysqli, $pid);
+	}
+	$p['feeder_fair_pid'] = $incoming_project['pid'];
+	$p['feeder_fair_id'] = $fair['id'];
+	$p['title'] = $incoming_project['title'];
+	$p['tagline'] = $incoming_project['tagline'];
+	$p['abstract'] = $incoming_project['abstract'];
+	$p['language'] = $incoming_project['language'];
+	$p['challenge'] = 1;
+	$p['req_electricity'] = $incoming_project['req_electricity'];
+
+	if(count($incoming_project['mentors']) > 0) {
+		$mysqli->real_query("DELETE FROM mentors WHERE pid='{$p['pid']}'");
+		foreach($incoming_project['mentors'] as $incoming_mid=>&$incoming_m) {
+			$mid = mentor_create($mysqli, $p['pid']);
+			$m = mentor_load($mysqli, $mid);
+			$m['firstname'] = $incoming_m['firstname'];
+			$m['lastname'] = $incoming_m['lastname'];
+			$m['relation'] = $incoming_m['relation'];
+			$m['email'] = $incoming_m['email'];
+			$m['phone1'] = $incoming_m['phone1'];
+			$m['phone2'] = $incoming_m['phone2'];
+			$m['phone3'] = $incoming_m['phone3'];
+			mentor_save($mysqli, $m);
+		}
+	}
+	$p['num_mentors'] = count($incoming_project['mentors']);
+
+	foreach($incoming_project['students'] as $incoming_sid=>&$incoming_s) {
+		$u = user_sync($mysqli, $fair, $incoming_s);
+
+		$u['s_pid'] = $p['pid'];
+
+		user_save($mysqli, $u);
+	}
+	$p['num_students'] = count($incoming_project['students']);
+	/* Update the category, requires s_pid set for each student */
+	project_update_category($mysqli, $p);
+
+	project_save($mysqli, $p);
 }
 
 function project_get_export($mysqli, &$fair, &$project)
@@ -390,16 +444,37 @@ function project_get_export($mysqli, &$fair, &$project)
 
 	debug("project_get_export: feeder fair: {$fair['id']}\n");
 
-
-
 	$export_p = array();
 
+	$export_p['pid'] = $project['pid'];
 	$export_p['title'] = $project['title'];
 	$export_p['tagline'] = $project['tagline'];
 	$export_p['abstract'] = $project['abstract'];
 	$export_p['language'] = $project['language'];
+	$export_p['challenge'] = $chals[$project['challenge_id']]['name'];
+	$export_p['req_electricity'] = $project['req_electricity'];
+	$export_p['year'] = $project['year'];
 
+	$export_p['mentors'] = array();
+	$mentors = mentor_load_all($mysqli, $project['pid']);
+	foreach($mentors as $mid=>&$m) {
+		$export_p['mentors'][$mid]['firstname'] = $m['firstname'];
+		$export_p['mentors'][$mid]['lastname'] = $m['lastname'];
+		$export_p['mentors'][$mid]['email'] = $m['email'];
+		$export_p['mentors'][$mid]['phone'] = $m['phone'];
+		$export_p['mentors'][$mid]['organization'] = $m['organization'];
+		$export_p['mentors'][$mid]['position'] = $m['position'];
+		$export_p['mentors'][$mid]['desc'] = $m['desc'];
+	}
 
+	$export_p['students'] = array();
+	$r = $mysqli->query("SELECT * FROM users WHERE s_pid={$project['pid']}");
+	while($user_data = $r->fetch_assoc()) {
+		$user = user_load($mysqli, -1, -1, NULL, $user_data);
+		$export_p['students'][$user['uid']] = user_get_export($mysqli, $user);
+	}
+
+	return $export_p;
 }
 
 

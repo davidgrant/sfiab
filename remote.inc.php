@@ -93,6 +93,16 @@ function remote_push_award_to_all_fairs($mysqli, &$award)
 	}
 }
 
+function remote_queue_push_award_to_all_fairs($mysqli, &$award) 
+{
+	$fairs = fair_load_all_feeder($mysqli);
+	foreach($fairs as $fair_id=>$fair) {
+		$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`award_id`,`result`) VALUES('push_award','$fair_id','{$award['id']}','queued')");
+	}
+	queue_start($mysqli);
+
+}
+
 function remote_push_award_to_fair($mysqli, &$fair, &$award)
 {
 	/* Push an award to a single feeder fair */
@@ -129,6 +139,67 @@ function remote_handle_get_award($mysqli, &$fair, &$data, &$response)
 	$award_id = $data['get_award'];
 	$a = award_load($mysqli, $award_id);
 	$response['get_award'] = award_get_export($mysqli, $fair, $a);
+}
+
+
+function remote_push_winner_to_fair($mysqli, &$fair, &$prize, &$project)
+{
+	$cmd['push_winner'] = array();
+	$cmd['push_winner']['prize_id'] = $prize['upstream_prize_id'];
+	$cmd['push_winner']['project'] = project_get_export($mysqli, $project);
+	$response = remote_query($mysqli, $fair, $cmd);
+	return $response['error'];
+}
+
+function remote_queue_push_winner_to_fair($mysqli, &$fair, &$prize, &$project)
+{
+	$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`award_id`,`prize_id`,`project_id`,`result`) 
+				VALUES('push_award','$fair_id','{$prize['award_id']}','{$prize['id']}','{$project['pid']}','queued')");
+	queue_start($mysqli);
+}
+
+function remote_handle_push_winner($mysqli, &$fair, &$data, &$response)
+{
+	$incoming_prize_id = $data['prize_id'];
+	$incoming_project = &$data['project'];
+	/* Sync the project */
+	$p = project_sync($mysqli, $fair, $incoming_project);
+
+	/* Make sure this fair is allowed to push winners.  incoming_prize_id should
+	 * be set to upstream_prize_id by the caller, which is the ID in our database */
+	$prize = prize_load($mysqli, $incoming_prize_id);
+	$award = award_load($mysqli, $prize['award_id']);
+	if(!in_array($fair['id'], $award['feeder_fair_ids'])) {
+		$response['error'] = 1;
+		return;
+	}
+
+	/* Insert the prize */
+	$mysqli->query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`) 
+			VALUES('$incoming_prize_id','{$p['pid']}','{$p['year']}','{$fair['id']}')");
+
+	$response['error'] = 0;
+}
+	
+
+
+function remote_push_finalize_winners()
+{
+}
+
+
+/* Called when a feeder fair wants to finalize the winners for a prize that
+ * is marked as "upstream register winners".  That means we have to iterate
+ * over all the winners, email them, and ready their accounts to login */
+function remote_handle_finalize_winners()
+{
+			/* This award is for students who are participating in this fair, we need
+			 * to get their reg number to them if this is a new registration 
+			 * Only send it if they weren't matched to a student already in this project */
+			$result = email_send($mysqli, "New Registration", $sid, array('PASSWORD'=>$password) );
+			$response['notice'][] = "         - Sent welcome registration email to: {$s['firstname']} {$s['lastname']} &lt;{$s['email']}&gt;";
+			sfiab_log($mysqli, "register", "username: {$username}, email: {$s['email']}, as: student, email status: $result");
+
 }
 
 
@@ -170,280 +241,5 @@ function handle_stats(&$u,$fair, &$data, &$response)
 	$response['error'] = 0;
 }
 
-function handle_getawards($mysqli, &$u, $fair, &$data, &$response)
-{
-
-}
-
-function award_upload_update_school($mysqli, &$mysql_query, &$school, $school_id = -1)
-{
-	if($mysql_query !== NULL) {
-		$s = $mysql_query->fetch_assoc();
-		return $s['id'];
-	}
-
-	/* transport name => mysql name */
-	$school_fields = array( //'schoolname'=>'school',
-				'schoollang'=>'schoollang',
-				'schoollevel'=>'schoollevel',
-				'board'=>'board',
-				'district'=>'district',
-				'phone'=>'phone',
-				'fax'=>'fax',
-				'address'=>'address',
-				'city'=>'city',
-				'province_code'=>'province_code',
-				'postalcode'=>'postalcode',
-				'schoolemail'=>'schoolemail');
-/*				'principal'=>'principal',
-				'sciencehead'=>'sciencehead',
-				'scienceheademail'=>'scienceheademail',
-				'scienceheadphone'=>'scienceheadphone');*/
-
-	$sid = $school_id;
-	$our_school = array();
-
-	$set = '';
-	foreach($school_fields as $t=>$m) {
-		if(array_key_exists($m, $our_school) && $our_school[$m] == $school[$t]) continue;
-		if($set != '') $set.=',';
-		$set .= "`$m`='".$mysqli->real_escape_string($school[$t])."'";
-	}
-	$mysqli->real_query("UPDATE schools SET $set WHERE id='$sid'");
-	return $sid;
-}
-
-function award_upload_school($mysqli, &$student, &$school, $year, &$response)
-{
-
-	$school_name = $mysqli->real_escape_string($school['schoolname']);
-	$school_city = $mysqli->real_escape_string($school['city']);
-	$school_phone = $mysqli->real_escape_string($school['phone']);
-	$school_addr = $mysqli->real_escape_string($school['address']);
-	$student_city = $student['city'];
-
-	/* Find school by matching name, city, phone, year */
-	$q = $mysqli->query("SELECT * FROM schools WHERE school='$school_name' AND city='$school_city' AND phone='$school_phone' AND year='$year'");
-	if($q->num_rows == 1) return award_upload_update_school($mysqli, $q, $school);
-
-	/* Find school by matching name, city, address, year */
-	$q = $mysqli->query("SELECT * FROM schools WHERE school='$school_name' AND city='$school_city' AND address='$school_addr' AND year='$year'");
-	if($q->num_rows  == 1) return award_upload_update_school($mysqli, $q, $school);
-
-	/* Find school by matching name, city, year */
-	$q = $mysqli->query("SELECT * FROM schools WHERE school='$school_name' AND city='$school_city' AND year='$year'");
-	if($q->num_rows  == 1) return award_upload_update_school($mysqli, $q, $school);
-
-	/* Find school by matching name, student city, year */
-	$q = $mysqli->query("SELECT * FROM schools WHERE school='$school_name' AND city='$student_city' AND year='$year'");
-	if($q->num_rows == 1) return award_upload_update_school($mysqli, $q, $school);
-
-	$response['notice'][] = "      - Creating new school: $school_name";
-	/* No? ok, make a new school */
-	$mysqli->query("INSERT INTO schools(`school`,`year`) VALUES ('$school_name','$year')");
-	$school_id = $mysqli->insert_id;
-	$q = NULL;
-	return award_upload_update_school($mysqli, $q, $school, $school_id);
-}
-
-function award_upload_assign($mysqli, &$fair, &$award, &$prize, &$remote_project, $year, &$response)
-{
-	$pn = $mysqli->real_escape_string($remote_project['projectnumber']);
-
-	/* Sanity check a few things */
-	if(count($remote_project['students']) > 2) {
-		$c = count($remote_project['students']);
-		$response['notice'][] = "   - ERROR uploading project : $pn, {$remote_project['title']}";
-		$response['notice'][] = "      - too many students: $c";
-		foreach($remote_project['students'] as &$remote_student) {
-			$response['notice'][] = "         - {$remote_student['firstname']} {$remote_student['lastname']}";
-		}
-		return;
-	}
-
-	/* See if this project already exists */
-	$q = $mysqli->query("SELECT * FROM projects WHERE number='$pn' AND fair_id='{$fair['id']}' AND year='$year'");
-	if($q->num_rows == 1) {
-		/* Project with this number+fairid+year already exists */
-		$p = $q->fetch_assoc();
-		$project = project_load($mysqli, $p['pid'], $p);
-		$pid = $project['pid'];
-		$response['notice'][] = "   - Found existing project: $pn, {$remote_project['title']}";
-	} else {
-		$response['notice'][] = "   - Creating new project: $pn, {$remote_project['title']}";
-
-		$pid = project_create($mysqli);
-		$project = project_load($mysqli, $pid);
-
-		$project['year'] = $year;
-		$project['number'] = $pn;
-		$project['fair_id'] = $fair['id'];
-	}
-	/* Update the project in case anything changed (besides the project number, which will trigger
-	 * a whole new registration */
-	$project['title'] = $remote_project['title'];
-	$project['summary'] = $remote_project['abstract'];
-	$project['cat_id'] = $remote_project['projectcategories_id'];
-	$project['challenge_id'] = $remote_project['projectdivisions_id'];
-	$project['num_students'] = count($remote_project['students']);
-	project_save($mysqli, $project);
-
-	project_load_students($mysqli, $project);
-
-	/* Remember if we matched remote students */
-	foreach($remote_project['students'] as &$remote_student) {
-		$remote_student['matched'] = false;
-	}
-
-	/* Check all students currently attached to the project (none if the project is new)  */
-	foreach($p['students']as &$ps) {
-		/* Is this remote student already attached to the project?, check by name */
-		$match = false;
-		foreach($remote_project['students'] as &$remote_student) {
-			if($remote_student['firstname'] == $ps['firstname'] && $remote_student['lastname'] == $ps['lastname']) {
-				/* Already in this project */
-				$remote_student['matched'] = true;
-				$remote_student['sid'] = $ps['uid'];
-				$match = true;
-				$response['notice'][] = "      - Found existing student {$remote_student['firstname']} {$remote_student['lastname']} ";
-				break;
-			}
-		}
-
-		/* If the student isn't matched, delete them from the project */
-		if($match == false) {
-			/* Delete the students attached to this project */
-			$response['notice'][] = "      - Deleted student {$ps['firstname']} {$ps['lastname']} ";
-			$mysqli->real_query("DELETE FROM users WHERE uid='{$ps['uid']}'");
-		}
-	}
-
-	/* Any unmatched remote students must be new to the project */
-	foreach($remote_project['students'] as &$remote_student) {
-		if($remote_student['matched'] == false) {
-
-			/* Create new student and attach to project */
-			$username = $mysqli->real_escape_string(strstr($remote_student['email'], '@', true));
-			$check_username = $username;
-			$x = 1;
-			while(1) {
-				$q = $mysqli->query("SELECT * FROM users WHERE username='$check_username' AND year='$year'");
-				if($q->num_rows == 0) {
-					$username = $check_username;
-					break;
-				}
-				$check_username = $username.".".$x;
-				$x++;
-			}
-			$password = NULL;
-			$sid = user_create($mysqli, $username, $remote_student['email'], 'student', $year, $password);
-			$s = user_load($mysqli, $sid);
-			$s['s_pid'] = $pid;
-			$s['enabled'] = 1;
-			$s['year'] = $year;
-			$s['fair_id'] = $fair['id'];
-			$s['firstname'] = $remote_student['firstname'];
-			$s['lastname'] = $remote_student['lastname'];
-			user_save($mysqli, $s);
-			$response['notice'][] = "      - Created new student {$remote_student['firstname']} {$remote_student['lastname']}  ($username)";
-			
-
-			$remote_student['sid'] = $sid;
-		}
-	}
-
-	/* Update the info for all students */
-	foreach($remote_project['students'] as &$remote_student) {
-
-		/* Load this student using the saved sid */
-		$s = user_load($mysqli, $remote_student['sid']);
-
-		$schools_id = award_upload_school($mysqli, $remote_student, $remote_student['school'], $year, $response);
-
-		$s['sex'] = $remote_student['gender'];
-		$s['birthdate'] = $remote_student['birthdate'];
-		$s['address'] = $remote_student['address'];
-		$s['city'] = $remote_student['city'];
-		$s['province'] = strtolower($remote_student['province']);
-		$s['postalcode'] = $remote_student['postalcode'];
-		$s['phone1'] = $remote_student['phone'];
-		$s['s_teacher'] = $remote_student['teachername'];
-		$s['s_teacher_email'] = $remote_student['teacheremail'];
-		$s['grade'] = $remote_student['grade'];
-		$s['schools_id'] = $schools_id;
-
-		$response['notice'][] = "      - Updated {$remote_student['firstname']} {$remote_student['lastname']}";
-		
-		if($prize['upstream_register_winners'] == 0) {
-			/* Set to complete even if the data isn't, so we can query them */
-			$s['s_complete'] = 1;
-			$s['s_accepted'] = 1;
-			$s['username'] = '*'.$username;
-		}
-		user_save($mysqli, $s);
-
-		if($prize['upstream_register_winners'] == 1 && $remote_student['matched'] == false) {
-			/* This award is for students who are participating in this fair, we need
-			 * to get their reg number to them if this is a new registration 
-			 * Only send it if they weren't matched to a student already in this project */
-			$result = email_send($mysqli, "New Registration", $sid, array('PASSWORD'=>$password) );
-			$response['notice'][] = "         - Sent welcome registration email to: {$s['firstname']} {$s['lastname']} &lt;{$s['email']}&gt;";
-			sfiab_log($mysqli, "register", "username: {$username}, email: {$s['email']}, as: student, email status: $result");
-		}
-	}
-
-	/* Record the winner */
-	$mysqli->real_query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`)
-			VALUES('{$prize['id']}','$pid','$year','{$fair['id']}')");
-}
-
-
-function handle_get_categories($mysqli, &$u, &$fair, &$data, &$response)
-{
-	$year = intval($data['get_categories']['year']);
-	$cats = categories_load($mysqli, $year);
-	$ecat = array();
-	foreach($cats as $c) {
-	        $ecat[$c['id']]=array('id' => $c['id'],
-				'category' => $c['name'],
-				'mingrade' => $c['min_grade'],
-				'maxgrade' => $c['max_grade']);
-	}
-	$response['categories'] = $ecat;
-	$response['error'] = 0;
-}
-
-function handle_get_divisions($mysqli, &$u, &$fair, &$data, &$response)
-{
-	$year = intval($data['get_divisions']['year']);
-	$chals = challenges_load($mysqli, $year);
-	$ediv = array();
-	foreach($chals as $c) {
-	        $ediv[$c['id']]=array('id' => $c['id'],
-				'division' => $c['name']);
-	}
-	$response['divisions'] = $ediv;
-	$response['error'] = 0;
-}
-
-function handle_award_additional_materials(&$u, &$fair, &$data, &$response)
-{
-	$year = intval($data['award_additional_materials']['year']);
-	$external_identifier = $data['award_additional_materials']['identifier'];
-
-	$eid = mysql_real_escape_string($external_identifier);
-	$q = mysql_query("SELECT * FROM award_awards WHERE external_identifier='$eid' AND year='$year'");
-	if(mysql_num_rows($q) != 1) {
-		$response['message'] = "Unknown award identifier '$eid'";
-		$response['error'] = 1;
-		return;
-	}
-	$award = mysql_fetch_assoc($q);
-
-	$pdf = fair_additional_materials($fair, $award, $year);
-	$response['award_additional_materials']['pdf']['header'] = $pdf['header'];
-	$response['award_additional_materials']['pdf']['data64'] = base64_encode($pdf['data']);
-	$response['error'] = 0;
-}
 
 ?>

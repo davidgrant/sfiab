@@ -58,6 +58,7 @@ function sfiab_load_config($mysqli)
 	}
 
 	if(array_key_exists('HTTP_HOST', $_SERVER)) {
+		/* The fair URL is http[s]://, then the HTTP host, then the real directory of this script with the real document root removed */
 		$real_docroot = realpath($_SERVER['DOCUMENT_ROOT']);
 		$real_dir = realpath(__DIR__);
 		$config['fair_url'] = (array_key_exists('HTTPS', $_SERVER) ? 'https://' : 'http://')

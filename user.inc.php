@@ -24,7 +24,6 @@ function user_new_password()
 function user_create($mysqli, $username, $email, $role, $year, &$password)
 {
 	if($password == '' or $password === NULL) {
-		
 		$password = user_new_password();
 	}
 	$password_hash = hash('sha512', $password);
@@ -339,6 +338,172 @@ function user_copy($mysqli, $u, $new_year)
 	$u['original'] = $new_u['original'];
 
 	user_save($mysqli, $u);
+	return $u;
+}
+
+function user_get_export($mysqli, &$user)
+{
+	$export_u = array();
+
+	$export_u['uid'] = $user['uid'];
+	$export_u['unique_id'] = $user['unique_id'];
+	$export_u['year'] = $user['year'];
+	$export_u['salutation'] = $user['salutation'];
+	$export_u['firstname'] = $user['firstname'];
+	$export_u['lastname'] = $user['lastname'];
+	$export_u['pronounce'] = $user['pronounce'];
+	$export_u['username'] = $user['username'];
+	$export_u['email'] = $user['email'];
+	$export_u['sex'] = $user['sex'];
+	$export_u['grade'] = $user['grade'];
+	$export_u['language'] = $user['language'];
+	$export_u['birthdate'] = $user['birthdate'];
+	$export_u['address'] = $user['address'];
+	$export_u['city'] = $user['city'];
+	$export_u['postalcode'] = $user['postalcode'];
+	$export_u['phone1'] = $user['phone1'];
+	$export_u['phone2'] = $user['phone2'];
+	$export_u['organization'] = $user['organization'];
+	$export_u['medicalert'] = $user['medicalert'];
+	$export_u['food_req'] = $user['food_req'];
+	$export_u['roles'] = $user['roles'];
+	
+	$export_u['s_teacher'] = $user['s_teacher'];
+	$export_u['s_teacher_email'] = $user['s_teacher_email'];
+	if($user['schools_id'] > 0) {
+		$q = $mysqli->query("SELECT school,city from schools WHERE id='{$user['schools_id']}' and year='{$user['year']}'");
+		$school = $q->fetch_assoc();
+		$export_u['school'] = array();
+		$export_u['school']['name'] = $school['name'];
+		$export_u['school']['city'] = $school['city'];
+	}
+
+	/* emergency contacts */
+	$es = emergency_contact_load_for_user($mysqli, $user);
+	foreach($es as $id=>$e) {
+		$export_u['emergency_contacts'][$id] = array();
+		$export_u['emergency_contacts'][$id]['firstname'] = $e['firstname'];
+		$export_u['emergency_contacts'][$id]['lastname'] = $e['lastname'];
+		$export_u['emergency_contacts'][$id]['relation'] = $e['relation'];
+		$export_u['emergency_contacts'][$id]['email'] = $e['email'];
+		$export_u['emergency_contacts'][$id]['phone1'] = $e['phone1'];
+		$export_u['emergency_contacts'][$id]['phone2'] = $e['phone2'];
+		$export_u['emergency_contacts'][$id]['phone3'] = $e['phone3'];
+	}
+
+	return $export_u;
+}
+
+/* Sync incoming_user from fair locally */
+function user_sync($mysqli, &$fair, &$incoming_user)
+{
+	/* First find the user or create one */
+	$year = intval($incoming_user['year']);
+	$incoming_user_id = intval($incoming_user['id']);
+	if($year <= 0) exit();
+	if($incoming_user_id <= 0) exit();
+
+	/* Only allow synching certain roles (not committee) */
+	$roles = array();
+	foreach($incoming_user['roles'] as $r) {
+		if(in_array($r, array('student','judge','sponsor','teacher'))) {
+			$roles[] = $r;
+		}
+	}
+	if(count($roles) == 0) exit();
+
+	$q = $mysqli->query("SELECT * FROM users WHERE fair_id='{$fair['id']}' AND fair_uid='$incoming_user_id' AND year='$year'");
+	if($q->num_rows > 0) {
+		/* User exists, we can load and update */
+		$data = $q->fetch_assoc();
+		$u = user_load_from_data($mysqli, $data);
+		debug("user_sync: found local user id={$u['uid']}\n");
+	} else {
+		/* Create a new user */
+		$username = $mysqli->real_escape_string($incoming_user['username']);
+		$check_username = $username;
+		$x = 1;
+		while(1) {
+			$q = $mysqli->query("SELECT * FROM users WHERE username='$check_username' AND year='$year'");
+			if($q->num_rows == 0) {
+				$username = $check_username;
+				break;
+			}
+			$check_username = $username.".".$x;
+			$x++;
+		}
+		$password = NULL;
+		$uid = user_create($mysqli, $username, $incoming_user['email'], $roles[0], $year, $password);
+		$u = user_load($mysqli, $uid);
+		
+		debug("user_sync: created new user id={$u['id']}\n");
+	}
+
+	$u['fair_id'] = $fair['id'];
+	$u['fair_uid'] = $incoming_user['uid'];
+	$u['fair_unique_id'] = $incoming_user['unique_id'];
+
+	$u['year'] = $incoming_user['year'];
+	$u['salutation'] = $incoming_user['salutation'];
+	$u['firstname'] = $incoming_user['firstname'];
+	$u['lastname'] = $incoming_user['lastname'];
+	$u['pronounce'] = $incoming_user['pronounce'];
+	$u['incoming_username'] = $user['username'];
+	$u['email'] = $incoming_user['email'];
+	$u['sex'] = $incoming_user['sex'];
+	$u['grade'] = $incoming_user['grade'];
+	$u['language'] = $incoming_user['language'];
+	$u['birthdate'] = $incoming_user['birthdate'];
+	$u['address'] = $incoming_user['address'];
+	$u['city'] = $incoming_user['city'];
+	$u['postalcode'] = $incoming_user['postalcode'];
+	$u['phone1'] = $incoming_user['phone1'];
+	$u['phone2'] = $incoming_user['phone2'];
+	$u['organization'] = $incoming_user['organization'];
+	$u['medicalert'] = $incoming_user['medicalert'];
+	$u['food_req'] = $incoming_user['food_req'];
+	$u['roles'] = $r;
+	
+	$u['s_teacher'] = $incoming_user['s_teacher'];
+	$u['s_teacher_email'] = $incoming_user['s_teacher_email'];
+
+
+	if(is_array($incoming_user['school'])) {
+		$school_name = $mysqli->real_escape_string($incoming_user['school']['name']);
+		$school_city = $mysqli->real_escape_string($incoming_user['school']['city']);
+		$school_province = $mysqli->real_escape_string($incoming_user['school']['province']);
+		$q = $mysqli->query("SELECT id FROM schools WHERE school='$school_name' AND city='$school_city' AND province='$school_province' AND year='$year' LIMIT 1");
+		if($q->num_rows == 1) {
+			/* Update the school, just in case */
+			$r = $q->fetch_row();
+			$school_id = (int)$r[0];
+		} else {
+			/* Create the school */
+			$mysqli->real_query("INSERT INTO schools(`school`,`city`,`province`,`year`) VALUES('$school_name','$school_city','$school_province','$year')");
+			$school_id = $mysqli->insert_id;
+			$u['schools_id'] = (int)$schools_id;
+		}
+	} else {
+		$u['schools_id'] = NULL;
+	}
+
+	if(count($incoming_user['emergency_contacts']) > 0) {
+		$mysqli->real_query("DELETE FROM emergency_contacts WHERE uid='{$u['uid']}'");
+		foreach($incoming_user['emergency_contacts'] as $id=>$e) {
+			$fn = $mysqli->real_escape_string($e['firstname']);
+			$ln = $mysqli->real_escape_string($e['lastname']);
+			$re = $mysqli->real_escape_string($e['relation']);
+			$em = $mysqli->real_escape_string($e['email']);
+			$p1 = $mysqli->real_escape_string($e['phone1']);
+			$p2 = $mysqli->real_escape_string($e['phone2']);
+			$p3 = $mysqli->real_escape_string($e['phone3']);
+			$mysqli->real_query("INSERT INTO emergency_contacts(`firstname`,`lastname`,`relation`,`phone1`,`phone2`,`phone3`)
+					VALUES('$fn','$ln','$re','$em','$p1','$p2','$p3')");
+		}
+	}
+
+	user_save($mysqli, $u);
+
 	return $u;
 }
 

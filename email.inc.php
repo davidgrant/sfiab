@@ -118,9 +118,9 @@ function email_replace_vars($text, &$u, &$additional_replacements)
 	return $text;
 }
 
-function email_queue_stopped($mysqli) 
+function queue_stopped($mysqli) 
 {
-	$qstop = $mysqli->query("SELECT val FROM config WHERE var='email_queue_stop'");
+	$qstop = $mysqli->query("SELECT val FROM config WHERE var='queue_stop'");
 	$vstop = $qstop->fetch_assoc();
 	if((int)$vstop['val'] == 1) {
 		return true;
@@ -128,22 +128,15 @@ function email_queue_stopped($mysqli)
 	return false;
 }
 
-function email_queue_stop($mysqli) 
+function queue_stop($mysqli) 
 {
-	$mysqli->query("UPDATE config SET val='1' WHERE var='email_queue_stop'");
+	$mysqli->query("UPDATE config SET val='1' WHERE var='queue_stop'");
 }
 
-function email_queue_start($mysqli) 
+function queue_start($mysqli) 
 {
-	$mysqli->query("UPDATE config SET val='0' WHERE var='email_queue_stop'");
-
- 	/* Start the queue processing */
-	if(!file_exists("logs")) {
-		mkdir("logs");
-	}
-	exec("php -q scripts/sfiab_send_email_queue.php >> logs/emailqueue.log 2>&1 &");
+	$mysqli->query("UPDATE config SET val='0' WHERE var='queue_stop'");
+	exec("php -q scripts/sfiab_queue_runner.php 1>/dev/null 2>&1 &");
 }
-
-
 
 ?>
