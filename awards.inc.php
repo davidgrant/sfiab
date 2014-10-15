@@ -182,9 +182,9 @@ function award_save($mysqli, &$a)
 
 	/* Does this award have any feeder fairs? or did the feeder fairs change? */
 	if($original_feeder_fairs != $a['feeder_fair_ids'] || count($a['feeder_fair_ids']) > 0) {
-		/* Broadcast this award to all feeder fairs, fairs that
-		 * aren't allowed to have it will be sent a delete */
-		remote_push_award_to_all_fairs($mysqli, $a);
+		/* Broadcast this award to all feeder fairs, using the queue.
+		 * Any fairs that aren't allowed to have it will be sent a delete */
+		remote_queue_push_award_to_all_fairs($mysqli, $a);
 	}
 }
 

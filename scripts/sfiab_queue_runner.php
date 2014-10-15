@@ -26,8 +26,7 @@ require_once('user.inc.php');
 require_once('fairs.inc.php');
 require_once('project.inc.php');
 require_once('user.inc.php');
-
-
+require_once('awards.inc.php');
 require_once('PHPMailer/PHPMailerAutoload.php');
 
 
@@ -52,7 +51,7 @@ if($config['queue_lock'] != '') {
 	exit();
 }
 
-$mysqli->query("UPDATE config SET val='".time(NULL)."' WHERE var='queue_lock'");
+$mysqli->real_query("UPDATE config SET val='".time(NULL)."' WHERE var='queue_lock'");
 
 
 $q = $mysqli->prepare("SELECT `id`,`command`,`fair_id`,`award_id`,`prize_id`,`project_id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`additional_replace` 
@@ -159,20 +158,19 @@ while(true) {
 		break;
 
 	case 'push_winner':
-		$fair = fair_load($mysqli, $db_fair_id);
-		$prize = prize_load($mysqli, $db_prize_id);
-		$project = project_load($mysqli, $db_project_id);
-		$result = remote_push_winner_to_fair($mysqli, $fair, $award);
-		sfiab_log($mysqli, "push winner", "Push Winner \"{$prize['name']}\" to fair \"{$fair['name']}\", result=$result");
+		print("SFIAB Queue Runner: push_winner: $db_prize_id, $db_project_id\n");
+		$result = remote_push_winner_to_fair($mysqli, $db_prize_id, $db_project_id);
+		sfiab_log($mysqli, "push winner", "Push Winner project $db_project_id for prize id $db_prize_id, result=$result");
 		if($result == 0) {
-			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+//			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		}
 		break;
 	}
 
 	sleep($sleepmin);
+	exit;
 }
-$mysqli->query("UPDATE config SET val='' WHERE var='queue_lock'");
+#$mysqli->real_query("UPDATE config SET val='' WHERE var='queue_lock'");
 
 print("SFIAB Queue Runner: Done\n");
 

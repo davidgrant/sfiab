@@ -10,9 +10,6 @@ $page_id = "s_home";
 $u = user_load($mysqli);
 $closed = sfiab_registration_is_closed($u);
 
-/* Check access, but skip the expiry check */
-sfiab_check_access($mysqli, array('student'));
-
 $help = '<p>This is the main student page.  
 Use the menu on the left to guide your registration process.  
 <p>Your registration status will change on this page when your registration is complete.';

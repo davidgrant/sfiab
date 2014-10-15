@@ -142,41 +142,99 @@ function remote_handle_get_award($mysqli, &$fair, &$data, &$response)
 }
 
 
-function remote_push_winner_to_fair($mysqli, &$fair, &$prize, &$project)
+function remote_push_winner_to_fair($mysqli, $prize_id, $project_id)
 {
+	$prize = prize_load($mysqli, $prize_id);
+	$award = award_load($mysqli, $prize['award_id']);
+	$fair = fair_load($mysqli, $award['upstream_fair_id']);
+	$project = project_load($mysqli, $project_id);
+
 	$cmd['push_winner'] = array();
 	$cmd['push_winner']['prize_id'] = $prize['upstream_prize_id'];
-	$cmd['push_winner']['project'] = project_get_export($mysqli, $project);
+	/* Is this winner attached to this prize? */
+	$q = $mysqli->query("SELECT * FROM winners WHERE pid='{$project['pid']}' AND award_prize_id='{$prize['id']}' AND year='{$project['year']}'");
+	if($q->num_rows == 0) {
+		$cmd['push_winner']['project'] = array('year'=>$project['year'], 'pid'=>$project['pid'], 'delete'=>'1');
+	} else {
+		$cmd['push_winner']['project'] = project_get_export($mysqli, $fair, $project);
+	}
 	$response = remote_query($mysqli, $fair, $cmd);
 	return $response['error'];
 }
 
-function remote_queue_push_winner_to_fair($mysqli, &$fair, &$prize, &$project)
+function remote_queue_push_winner_to_fair($mysqli, $prize_id, $project_id)
 {
 	$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`award_id`,`prize_id`,`project_id`,`result`) 
-				VALUES('push_award','$fair_id','{$prize['award_id']}','{$prize['id']}','{$project['pid']}','queued')");
+				VALUES('push_winner','','','$prize_id','$project_id','queued')");
+	print($mysqli->error);
 	queue_start($mysqli);
 }
 
 function remote_handle_push_winner($mysqli, &$fair, &$data, &$response)
 {
-	$incoming_prize_id = $data['prize_id'];
-	$incoming_project = &$data['project'];
-	/* Sync the project */
-	$p = project_sync($mysqli, $fair, $incoming_project);
+	$incoming_prize_id = (int)$data['push_winner']['prize_id'];
+	$incoming_project = &$data['push_winner']['project'];
+	$year = (int)$incoming_project['year'];
 
-	/* Make sure this fair is allowed to push winners.  incoming_prize_id should
-	 * be set to upstream_prize_id by the caller, which is the ID in our database */
+	debug("push winner: data=".print_r($data, true)."\n");
+	debug("push winner: incoming_prize_id=$incoming_prize_id, project_id={$incoming_project['pid']}, year=$year\n");
+
+	if(array_key_exists('delete', $incoming_project)) {
+		debug("push winner: delete.\n");
+		$inc_pid = (int)$incoming_project['pid'];
+		$q = $mysqli->query("SELECT pid FROM projects WHERE feeder_fair_id='{$fair['id']}' AND feeder_fair_pid='$inc_pid' AND year='$year'");
+		if($q->num_rows > 0) {
+			$r = $q->fetch_row();
+			$pid = $r[0];
+			$mysqli->real_query("DELETE FROM winners WHERE `award_prize_id`=$incoming_prize_id AND `pid`='$pid' AND year='$year'");
+		}
+		$response['error'] = 0;
+		return;
+	}
 	$prize = prize_load($mysqli, $incoming_prize_id);
 	$award = award_load($mysqli, $prize['award_id']);
+	/* Make sure this fair is allowed to push winners.  upstream_prize_id should
+	 * be set to upstream_prize_id by the caller, which is the ID in our database */
 	if(!in_array($fair['id'], $award['feeder_fair_ids'])) {
+		debug("push winner: fair id {$fair['id']} not in award feeder ids: ".print_r($award['feeder_fair_ids'], true)."\n");
 		$response['error'] = 1;
 		return;
 	}
 
+	/* If this award registers students at this fair, override the incoming
+	 * project number, otherwise * keep it */
+	if($prize['upstream_register_winners'] == 1) {
+		$incoming_project['number'] = NULL;
+	}
+
+	debug("push winner: sync project\n");
+	/* Sync the project */
+	$p = project_sync($mysqli, $fair, $incoming_project);
+
+	debug("push winner: check fair\n");
+
+	debug("push winner: insert winner\n"); 
 	/* Insert the prize */
 	$mysqli->query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`) 
 			VALUES('$incoming_prize_id','{$p['pid']}','{$p['year']}','{$fair['id']}')");
+
+	/* If this award registers students at this fair, leave the students as incomplete.  
+	 * If not, mark the student as complete and accepted.  We could modify incoming_proejct and
+	 * save this all at once, but best to let the get_export/sync be mirrors of each other, rather than
+	 * sometimes introducing new fields */
+	project_load_students($mysqli, $p);
+	if($prize['upstream_register_winners'] == 0) {
+		debug("push winner: set winner to complete/accepted because upstream_register_winners == 0\n"); 
+		$p['accepted'] = 1;
+		project_save($mysqli, $p);
+
+		foreach($p['students'] as &$u) {
+			$u['s_complete'] = 1;
+			$u['s_accepted'] = 1;
+			$u['s_paid'] = 0;
+		}
+		user_save($mysqli, $u);
+	}
 
 	$response['error'] = 0;
 }

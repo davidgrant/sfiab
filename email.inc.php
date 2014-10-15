@@ -62,12 +62,12 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	$n = $mysqli->real_escape_string($u['name']);
 	$em = $mysqli->real_escape_string($u['email']);
 
-	$mysqli->real_query("INSERT INTO email_queue(`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
-			($db_id,$uid,'$em','$n','$ad','queued')");
+	$mysqli->real_query("INSERT INTO queue(`command`,`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
+			('email',$db_id,$uid,'$em','$n','$ad','queued')");
 
 	print($mysqli->error);
 
-	email_queue_start($mysqli);
+	queue_start($mysqli);
 
 	return true;
 }

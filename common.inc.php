@@ -96,7 +96,11 @@ function sfiab_init($roles, $skip_password_expiry_check=false)
 
 function sfiab_log($mysqli, $type, $data, $uid=-1)
 {
-	$ip = $_SERVER['REMOTE_ADDR'];
+	if(array_key_exists('REMOTE_ADDR', $_SERVER)) {
+		$ip = $_SERVER['REMOTE_ADDR'];
+	} else {
+		$ip = "commandline";
+	}
 	if ($uid == -1 && sfiab_session_is_active()) {
 		if(array_key_exists('uid', $_SESSION)) {
 			$uid = $_SESSION['uid'];

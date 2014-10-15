@@ -25,16 +25,16 @@ if(array_key_exists('action', $_GET)) {
 
 switch($action) {
 case 'qdelall':
-	$mysqli->real_query("DELETE FROM email_queue WHERE result='queued'");
+	$mysqli->real_query("DELETE FROM queue WHERE command='email' AND result='queued'");
 	$action = '';
 	break;
 
 case 'qstop':
-	email_queue_stop($mysqli);
+	queue_stop($mysqli);
 	$action = '';
 	break;
 case 'qstart':
-	email_queue_start($mysqli);
+	queue_start($mysqli);
 	$action = '';
 	break;
 
@@ -48,8 +48,8 @@ sfiab_page_begin("Email Queue", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>_queue"><div data-role="main" class="sfiab_page" > 
 	<h3>Current Email Queue</h3>
 <?php
-	$qstopped = email_queue_stopped($mysqli);
-	$q = $mysqli->query("SELECT * FROM email_queue WHERE result='queued'");
+	$qstopped = queue_stopped($mysqli);
+	$q = $mysqli->query("SELECT * FROM queue WHERE command='email' AND result='queued'");
 ?>
 	<p>Current Email Queue Status is: <b>
 <?php	if($qstopped) { ?>	

@@ -1,6 +1,6 @@
 <?php
 require_once('filter.inc.php');
-
+require_once('debug.inc.php');
 
 function user_load_all_for_project($mysqli, $pid)
 {
@@ -209,7 +209,8 @@ function user_save($mysqli, &$u)
 				}
 				/* It's all ok, join it with commas so the query
 				 * looks like ='teacher,committee,judge' */
-				$v = implode(',', $r);
+				$v = implode(',', $u['roles']);
+				debug("user_save: roles=$v, ".print_r($r, true)."\n");
 				break;
 
 			case 'j_rounds':
@@ -249,7 +250,7 @@ function user_save($mysqli, &$u)
 
 	if($set != '') {
 		$query = "UPDATE users SET $set WHERE uid='{$u['uid']}'";
-//		print($query);
+		debug("user_save: $query\n");
 		$mysqli->real_query($query);
 		print($mysqli->error);
 	}
@@ -346,7 +347,7 @@ function user_get_export($mysqli, &$user)
 	$export_u = array();
 
 	$export_u['uid'] = $user['uid'];
-	$export_u['unique_id'] = $user['unique_id'];
+	$export_u['unique_uid'] = $user['unique_uid'];
 	$export_u['year'] = $user['year'];
 	$export_u['salutation'] = $user['salutation'];
 	$export_u['firstname'] = $user['firstname'];
@@ -371,11 +372,12 @@ function user_get_export($mysqli, &$user)
 	$export_u['s_teacher'] = $user['s_teacher'];
 	$export_u['s_teacher_email'] = $user['s_teacher_email'];
 	if($user['schools_id'] > 0) {
-		$q = $mysqli->query("SELECT school,city from schools WHERE id='{$user['schools_id']}' and year='{$user['year']}'");
+		$q = $mysqli->query("SELECT school,city,province from schools WHERE id='{$user['schools_id']}' and year='{$user['year']}'");
 		$school = $q->fetch_assoc();
 		$export_u['school'] = array();
-		$export_u['school']['name'] = $school['name'];
+		$export_u['school']['school'] = $school['school'];
 		$export_u['school']['city'] = $school['city'];
+		$export_u['school']['province'] = $school['province'];
 	}
 
 	/* emergency contacts */
@@ -399,7 +401,7 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 {
 	/* First find the user or create one */
 	$year = intval($incoming_user['year']);
-	$incoming_user_id = intval($incoming_user['id']);
+	$incoming_user_id = intval($incoming_user['uid']);
 	if($year <= 0) exit();
 	if($incoming_user_id <= 0) exit();
 
@@ -411,6 +413,7 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 		}
 	}
 	if(count($roles) == 0) exit();
+	debug("user_sync: roles = ".print_r($roles, true)."\n");
 
 	$q = $mysqli->query("SELECT * FROM users WHERE fair_id='{$fair['id']}' AND fair_uid='$incoming_user_id' AND year='$year'");
 	if($q->num_rows > 0) {
@@ -436,13 +439,14 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 		$uid = user_create($mysqli, $username, $incoming_user['email'], $roles[0], $year, $password);
 		$u = user_load($mysqli, $uid);
 		
-		debug("user_sync: created new user id={$u['id']}\n");
+		debug("user_sync: created new user id={$u['uid']}\n");
 	}
 
 	$u['fair_id'] = $fair['id'];
 	$u['fair_uid'] = $incoming_user['uid'];
-	$u['fair_unique_id'] = $incoming_user['unique_id'];
+	$u['fair_unique_uid'] = $incoming_user['unique_uid']; /* Currently not in db */
 
+	$u['new'] = 0;
 	$u['year'] = $incoming_user['year'];
 	$u['salutation'] = $incoming_user['salutation'];
 	$u['firstname'] = $incoming_user['firstname'];
@@ -462,14 +466,14 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 	$u['organization'] = $incoming_user['organization'];
 	$u['medicalert'] = $incoming_user['medicalert'];
 	$u['food_req'] = $incoming_user['food_req'];
-	$u['roles'] = $r;
+	$u['roles'] = $roles;
 	
 	$u['s_teacher'] = $incoming_user['s_teacher'];
 	$u['s_teacher_email'] = $incoming_user['s_teacher_email'];
 
 
 	if(is_array($incoming_user['school'])) {
-		$school_name = $mysqli->real_escape_string($incoming_user['school']['name']);
+		$school_name = $mysqli->real_escape_string($incoming_user['school']['school']);
 		$school_city = $mysqli->real_escape_string($incoming_user['school']['city']);
 		$school_province = $mysqli->real_escape_string($incoming_user['school']['province']);
 		$q = $mysqli->query("SELECT id FROM schools WHERE school='$school_name' AND city='$school_city' AND province='$school_province' AND year='$year' LIMIT 1");
@@ -477,12 +481,15 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 			/* Update the school, just in case */
 			$r = $q->fetch_row();
 			$school_id = (int)$r[0];
+			debug("sync_user: found school id $school_id\n");
 		} else {
 			/* Create the school */
 			$mysqli->real_query("INSERT INTO schools(`school`,`city`,`province`,`year`) VALUES('$school_name','$school_city','$school_province','$year')");
 			$school_id = $mysqli->insert_id;
 			$u['schools_id'] = (int)$schools_id;
+			debug("sync_user: created new shcool id $school_id\n");
 		}
+		$u['schools_id'] = $school_id;
 	} else {
 		$u['schools_id'] = NULL;
 	}

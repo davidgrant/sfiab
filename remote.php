@@ -78,14 +78,17 @@ if(remote_check_token($mysqli, $fair, $data['token']) == false) {
 	exit();
 }
 
+/* Working */
 if(array_key_exists('push_award', $data)) remote_handle_push_award($mysqli, $fair, $data, $response);
+if(array_key_exists('push_winner', $data)) remote_handle_push_winner($mysqli, $fair, $data, $response);
+
+/* Should work */
 if(array_key_exists('get_award', $data)) remote_handle_get_award($mysqli, $fair, $data, $response);
+
+/* Unknown */
 if(array_key_exists('getstats', $data)) handle_getstats($u,$fair, $data, $response);
 if(array_key_exists('stats', $data)) handle_stats($u,$fair, $data, $response);
 if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$data, $response);
-if(array_key_exists('get_categories', $data)) handle_get_categories($mysqli, $u,$fair,$data, $response);
-if(array_key_exists('get_divisions', $data)) handle_get_divisions($mysqli, $u,$fair,$data, $response);
-if(array_key_exists('award_additional_materials', $data)) handle_award_additional_materials($u,$fair,$data, $response);
 
 $response['hi'] = 'hi';
 print(json_encode($response));

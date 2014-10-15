@@ -41,6 +41,14 @@ case 'pdel':
 	$prize = prize_load($mysqli, $prize_id);
 	$pid = (int)$_POST['pid'];
 	$mysqli->query("DELETE FROM winners WHERE `award_prize_id`='$prize_id' AND `pid`='$pid'");
+
+	if($prize['upstream_prize_id'] > 0) {
+		/* Push the winner normally, this will query the winners table
+		 * to see if they're attached to the prize or not * and send the
+		 * appropriate delete */
+		remote_queue_push_winner_to_fair($mysqli, $prize['id'], $pid);
+	}
+
 	form_ajax_response(array('status'=>0, 'happy'=>get_prize_count($prize) ));
 	exit();
 
@@ -54,8 +62,15 @@ case 'padd':
 	 * successful */
 	$mysqli->query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`) 
 			VALUES('$prize_id','$pid','{$config['year']}','0')");
-	
-	$error = ($mysqli->errno == 0) ? 0 : 1;
+
+	if($mysqli->errno == 0) {
+		$error = 0;
+		if($prize['upstream_prize_id'] > 0) {
+			remote_queue_push_winner_to_fair($mysqli, $prize['id'], $pid);
+		}
+	} else {
+		$error = 1;
+	}
 	form_ajax_response(array('status'=>$error, 'happy'=>get_prize_count($prize) ));
 	exit();
 }
