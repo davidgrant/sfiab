@@ -1,7 +1,7 @@
 <?php
 function pre_15($mysqli)
 {
-	global $config;
+/*	global $config;
 
 	$config = array(
 	    "digest_alg" => "sha512",
@@ -21,4 +21,5 @@ function pre_15($mysqli)
 
 
 	$mysqli->real_query("ALTER TABLE `fairs` CHANGE `token` `public_key` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
+	*/
 }

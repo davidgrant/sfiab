@@ -28,35 +28,55 @@ require_once('awards.inc.php');
 require_once('fairs.inc.php');
 require_once('project.inc.php');
 require_once('email.inc.php');
-require_once('curl.inc.php');
 require_once('debug.inc.php');
 
 
 /* Send a command to a remote fair */
 function remote_query($mysqli, &$fair, &$cmd)
 {
-	/* Create a token and store it, this will give a 128 char token with chars
-	 * that don't need to be escaped */
-	$v = base64_encode(mcrypt_create_iv(96));
+	/* Create a token, 128 chars */
+	$v = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
+	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id='{$fair['id']}'");
 
-	debug("remote_query: set token for fair {$fair['name']}, token: $v\n");
-	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id={$fair['id']}");
-	/* Attach to the command send send it along, the remote will query this
-	 * token using their own fair location URL */
 	$cmd['token'] = $v;
 	$cmd['password'] = $fair['password'];
-	debug("remote_query: curl query:".print_r($cmd, true)."\n");
-	$response = curl_query($fair, $cmd);
-	debug("remote_query: curl response:".print_r($response, true)."\n");
 
-	debug("remote_query: remove token for fair {$fair['name']}\n");
+	debug("remote_query: curl to {$fair['url']}/remote.php  query:".print_r($cmd, true)."\n");
+
+	
+	$post_fields = "d=".urlencode(json_encode($cmd));
+
+	$ch = curl_init(); /// initialize a cURL session
+	curl_setopt ($ch, CURLOPT_URL, $fair['url'].'/remote.php');
+	curl_setopt ($ch, CURLOPT_HEADER, 0); // Header control
+	curl_setopt ($ch, CURLOPT_POST, 1);  // tell it to make a POST, not a GET
+	curl_setopt ($ch, CURLOPT_POSTFIELDS, $post_fields);  // put the query string here starting with "?"
+	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); // This allows the output to be set into a variable $datastream
+	curl_setopt ($ch, CURLOPT_TIMEOUT, 10);
+	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+	$remote_response = curl_exec ($ch); 
+	$c_errno = curl_errno($ch);
+	$c_error = curl_error($ch);
+	curl_close ($ch); 
+
+	debug("raw response: $remote_response\n");
+
+	if($c_errno > 0) {
+		debug("curl error: [$c_errno] $c_error\n");
+		$response = array('error'=>1);
+	} else {
+		$response = json_decode($remote_response, true);
+	}
+	debug("remote_query: curl response:".print_r($response, true)."\n");
+	debug("remote_query: remove token for {$fair['name']}\n");
 	/* Remove the token */
 	$mysqli->real_query("UPDATE fairs SET token='' WHERE id={$fair['id']}");
 
 	return $response;
 }
 
-/* Given a token, check it to see if it matches the command that was sent */
+
 function remote_handle_check_token($mysqli, &$fair, &$data, &$response)
 {
 	if(strlen($fair['token']) != 128) {
@@ -68,7 +88,6 @@ function remote_handle_check_token($mysqli, &$fair, &$data, &$response)
 		$response['error'] = 1;
 		return;
 	}
-
 	$response['check_token'] = ($data['check_token'] == $fair['token']) ? 1 : 0;
 	$response['error'] = 0;
 }
@@ -82,6 +101,52 @@ function remote_check_token($mysqli, &$fair, $token)
 		return ($response['check_token'] == true) ? true : false;
 	}
 	return false;
+}
+
+function remote_encrypt(&$fair, $text)
+{
+	global $config;
+
+	$v = mcrypt_create_iv(96, MCRYPT_DEV_URANDOM);
+
+	/* encrypt the password with our private key, then the remote's public key */
+	if(!openssl_private_encrypt($v, $enc1, $config['private_key'])) {
+		debug("priv encrypt failed\n");
+		print("local privatekey encrypt failed.  Key={$config['private_key']}\n");
+		print("error: ".openssl_error_string()."\n");
+		return NULL;
+	}
+	if(!openssl_public_encrypt($enc1, $signed_password, $fair['public_key'])) {
+		debug("pub encrypt failed\n");
+		print("remote publickey encrypt failed.  Key=\n{$fair['public_key']}\n");
+		print("error: ".openssl_error_string()."\n");
+		return NULL;
+	}
+
+	/* Encrypt the text */
+	$encrypted_text = openssl_encrypt($text, "aes-256-cbc", $v);
+	return $signed_password.$encrypted_text;
+}
+
+function remote_decrypt(&$fair, $encrypted_text) 
+{
+	global $config;
+
+	$encrypted_password = substr($encrypted_text, 0, 512);
+
+	/* Decrypt the command with our private key, then their public key */
+	if(!openssl_private_decrypt($encrypted_password, $de1, $config['private_key'])) {
+		debug("   private decrypt failed\n");
+		return NULL;
+	}
+	if(!openssl_public_decrypt($de1, $password, $fair['public_key'])) {
+		debug("   public decrypt failed.\n");
+		return NULL;
+	}
+
+	$text = openssl_decrypt($substr($encrypted_text, 512), "aes-256-cbc", $password);
+
+	return $text;
 }
 
 
@@ -258,7 +323,7 @@ function remote_handle_finalize_winners()
 			 * to get their reg number to them if this is a new registration 
 			 * Only send it if they weren't matched to a student already in this project */
 			$result = email_send($mysqli, "New Registration", $sid, array('PASSWORD'=>$password) );
-			$response['notice'][] = "         - Sent welcome registration email to: {$s['firstname']} {$s['lastname']} &lt;{$s['email']}&gt;";
+			$response['notice'][] = "	 - Sent welcome registration email to: {$s['firstname']} {$s['lastname']} &lt;{$s['email']}&gt;";
 			sfiab_log($mysqli, "register", "username: {$username}, email: {$s['email']}, as: student, email status: $result");
 
 }

@@ -26,6 +26,7 @@
  require_once('user.inc.php');
  require_once('xml.inc.php');
  require_once('debug.inc.php');
+ require_once('remote.inc.php');
 
  function xml_dearray(&$array)
  {
@@ -68,21 +69,18 @@
 	case 'sfiab_feeder':
 	case 'sfiab_upstream':
 		$url = $fair['url'].'/remote.php';
-		$var = 'json';
 		$text = json_encode($data);
-		/* encrypt with their pubkey, then our privkey */
-		openssl_public_encrypt($text, $enc1, $fair['public_key']);
-		openssl_private_encrypt($enc1, $str, $config['private_key']);
+		$encrypted_cmd = remote_encrypt($fair, $text);
+		$post_fields = "cmd=".urlencode($encrypted_cmd)."&password=".urlencode($data['password']);
 		break;
 	case 'ysc':
 		if($ysc_url == '')
 			$url = $fair['url'];
 		else 
 			$url = $ysc_url;
-		$var = 'xml';
 		$output="";
 		xmlCreateRecurse($data);
-		$str = $output;
+		$post_fields = "xml=".urlencode($output);
 		break;
 	default:
 		echo "Unknown fair type {$fair['type']}";
@@ -95,7 +93,7 @@
 	curl_setopt ($ch, CURLOPT_URL, $url);
 	curl_setopt ($ch, CURLOPT_HEADER, 0); /// Header control
 	curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET
-	curl_setopt ($ch, CURLOPT_POSTFIELDS, "$var=".urlencode($str));  /// put the query string here starting with "?"
+	curl_setopt ($ch, CURLOPT_POSTFIELDS, $post_fields);  /// put the query string here starting with "?"
 	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); /// This allows the output to be set into a variable $datastream
 	curl_setopt ($ch, CURLOPT_TIMEOUT, 10);
 	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
@@ -104,8 +102,6 @@
 	$c_errno = curl_errno($ch);
 	$c_error = curl_error($ch);
 	curl_close ($ch); /// close the curl session
-
-
 
 //	print("\n===== Server Returned: \n");
 	debug("curl error: [$c_errno] $c_error\n");
@@ -118,8 +114,7 @@
 	case 'sfiab_feeder':
 	case 'sfiab_upstream':
 		/* Decode with our private key, then their public key */
-		openssl_private_decrypt($de1, urldecode($datastream), $config['private_key']);
-		openssl_public_decrypt($de2, $de1, $fair['public_key']);
+		$de2 = remote_decrypt($fair, $datastream);
 		$ret=json_decode($de2, true);
 		debug("urldecode stream: ".print_r($ret, true)."\n");
 		break;
