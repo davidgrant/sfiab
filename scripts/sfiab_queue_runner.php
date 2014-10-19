@@ -162,15 +162,14 @@ while(true) {
 		$result = remote_push_winner_to_fair($mysqli, $db_prize_id, $db_project_id);
 		sfiab_log($mysqli, "push winner", "Push Winner project $db_project_id for prize id $db_prize_id, result=$result");
 		if($result == 0) {
-//			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		}
 		break;
 	}
 
 	sleep($sleepmin);
-	exit;
 }
-#$mysqli->real_query("UPDATE config SET val='' WHERE var='queue_lock'");
+$mysqli->real_query("UPDATE config SET val='' WHERE var='queue_lock'");
 
 print("SFIAB Queue Runner: Done\n");
 

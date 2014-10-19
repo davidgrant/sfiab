@@ -452,7 +452,6 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 	$u['firstname'] = $incoming_user['firstname'];
 	$u['lastname'] = $incoming_user['lastname'];
 	$u['pronounce'] = $incoming_user['pronounce'];
-	$u['incoming_username'] = $user['username'];
 	$u['email'] = $incoming_user['email'];
 	$u['sex'] = $incoming_user['sex'];
 	$u['grade'] = $incoming_user['grade'];

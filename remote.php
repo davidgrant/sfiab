@@ -93,7 +93,6 @@ if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$dat
 $response['hi'] = 'hi';
 print(json_encode($response));
 debug("response:".print_r($response, true)."\n");
-fclose($fp);
 
 ?>
 

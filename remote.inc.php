@@ -149,6 +149,8 @@ function remote_push_winner_to_fair($mysqli, $prize_id, $project_id)
 	$fair = fair_load($mysqli, $award['upstream_fair_id']);
 	$project = project_load($mysqli, $project_id);
 
+	debug("remote_push_winner_to_fair ======================================\n");
+
 	$cmd['push_winner'] = array();
 	$cmd['push_winner']['prize_id'] = $prize['upstream_prize_id'];
 	/* Is this winner attached to this prize? */
@@ -159,6 +161,7 @@ function remote_push_winner_to_fair($mysqli, $prize_id, $project_id)
 		$cmd['push_winner']['project'] = project_get_export($mysqli, $fair, $project);
 	}
 	$response = remote_query($mysqli, $fair, $cmd);
+	debug("remote_push_winner_to_fair: response=".print_r($response, true)."\n");
 	return $response['error'];
 }
 

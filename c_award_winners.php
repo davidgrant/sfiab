@@ -316,7 +316,7 @@ function prize_padd()
 	$.post('c_award_winners.php', { action: "padd", prize_id: current_prize_id, pid: id }, function(data) {
 		if(data.status == 0) {
 			/* Add to award list */
-			$('#p_tr tr[id="'+id+'"]').appendTo('#prize_'+current_prize_id);
+			$('#p_tr tr[id="'+id+'"]').clone().appendTo('#prize_'+current_prize_id);
 			/* Append the [X] to the new tr in the award table */
 			$( "#prize_"+current_prize_id+' tr[id="'+id+'"]').append("<td id='X'><a href=\"#\" onclick=\"prize_pdel("+id+");\">[X]</a></td>");
 			$("#prize_count_"+current_prize_id).html(data.happy);

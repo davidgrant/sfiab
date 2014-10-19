@@ -25,6 +25,7 @@
  require_once('common.inc.php');
  require_once('user.inc.php');
  require_once('xml.inc.php');
+ require_once('debug.inc.php');
 
  function xml_dearray(&$array)
  {
@@ -95,11 +96,17 @@
 	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
 	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
 	$datastream = curl_exec ($ch); /// execute the curl session and return the output to a variable $datastream
+	$c_errno = curl_errno($ch);
+	$c_error = curl_error($ch);
 	curl_close ($ch); /// close the curl session
 
 //	print("\n===== Server Returned: \n");
-//	print(urldecode($datastream));
+	debug("curl error: [$c_errno] $c_error\n");
+	debug("urldecode stream: ".urldecode($datastream)."\n");
 //	print("===============\n");
+	if($c_errno > 0) {
+		return(array('error'=>1));
+	}
 
  	switch($fair['type']) {
 	case 'sfiab_feeder':
