@@ -62,12 +62,17 @@
  function curl_query($fair, $data, $ysc_url='')
  {
  	global $output;
+	global $config;
+
  	switch($fair['type']) {
 	case 'sfiab_feeder':
 	case 'sfiab_upstream':
 		$url = $fair['url'].'/remote.php';
 		$var = 'json';
-		$str = json_encode($data);
+		$text = json_encode($data);
+		/* encrypt with their pubkey, then our privkey */
+		openssl_public_encrypt($text, $enc1, $fair['public_key']);
+		openssl_private_encrypt($enc1, $str, $config['private_key']);
 		break;
 	case 'ysc':
 		if($ysc_url == '')
@@ -100,9 +105,10 @@
 	$c_error = curl_error($ch);
 	curl_close ($ch); /// close the curl session
 
+
+
 //	print("\n===== Server Returned: \n");
 	debug("curl error: [$c_errno] $c_error\n");
-	debug("urldecode stream: ".urldecode($datastream)."\n");
 //	print("===============\n");
 	if($c_errno > 0) {
 		return(array('error'=>1));
@@ -111,7 +117,11 @@
  	switch($fair['type']) {
 	case 'sfiab_feeder':
 	case 'sfiab_upstream':
-		$ret=json_decode(urldecode($datastream), true);
+		/* Decode with our private key, then their public key */
+		openssl_private_decrypt($de1, urldecode($datastream), $config['private_key']);
+		openssl_public_decrypt($de2, $de1, $fair['public_key']);
+		$ret=json_decode($de2, true);
+		debug("urldecode stream: ".print_r($ret, true)."\n");
 		break;
 	case 'ysc':
 		$datastream = str_replace(" standalone=\"yes\"","",$datastream);

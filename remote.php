@@ -30,70 +30,65 @@ require_once('debug.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
-$data = json_decode($_POST['json'], true);
+$encrypted_command = urldecode($_POST['cmd']);
+$password = urldecode($_POST['password']);
 
+$fair = fair_load_by_hash($mysqli, $password);
 
-$fair = fair_load_by_hash($mysqli, $data['password']);
+debug("Incoming command matched password for fair: {$fair['name']}\n");
 
-debug("This Fair: {$config['fair_name']}\n");
-debug("Matched password from fair: {$fair['name']}\n");
+/* Decrypt the command with our private key, then their pulblic key */
+if(!openssl_private_decrypt($encrypted_command, $de1, $config['private_key'])) exit();
+if(!openssl_public_decrypt($de1, $decrypted_cmd, $fair['public_key'])) exit();
+$data = json_decode($decrypted_cmd, true);
+
 debug("Decoded Command:".print_r($data, true)."\n");
 
-$response = array();
+$response = remote_handle_cmd($fair, $data);
 
-/* Fair must exist */
-if($fair === NULL) {
- 	$response['error'] = 1;
-	$response['message'] = "Authentication Failed";
-	print(json_encode($response));
+/* Encrypt the response with our privkey, then their pubkey */
+if(!openssl_private_encrypt($json_encode($response), $enc1, $config['private_key'])) exit();
+if(!openssl_public_encrypt($enc1, $encrypted_response, $fair['public_key'])) exit();
+
+/* Send it back */
+print($encrypted_response);
+exit();
+
+
+function remote_handle_cmd(&$fair, &$cmd) 
+{
+	$response = array();
+	/* Fair must exist */
+	if($fair === NULL) {
+		$response['error'] = 1;
+		$response['message'] = "Authentication Failed";
+		debug("response:".print_r($response, true)."\n");
+		return $response;
+	}
+	/* Must have a password set */
+	if(!is_array($fair) || $fair['password'] == '') {
+		$response['error'] = 1;
+		$response['message'] = "Authentication Failed2";
+		debug("response:".print_r($response, true)."\n");
+		return $response;
+	}
+
+	/* Working */
+	if(array_key_exists('push_award', $data)) remote_handle_push_award($mysqli, $fair, $data, $response);
+	if(array_key_exists('push_winner', $data)) remote_handle_push_winner($mysqli, $fair, $data, $response);
+
+	/* Should work */
+	if(array_key_exists('get_award', $data)) remote_handle_get_award($mysqli, $fair, $data, $response);
+
+	/* Unknown */
+	if(array_key_exists('getstats', $data)) handle_getstats($u,$fair, $data, $response);
+	if(array_key_exists('stats', $data)) handle_stats($u,$fair, $data, $response);
+	if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$data, $response);
+
+	$response['hi'] = 'hi';
 	debug("response:".print_r($response, true)."\n");
-	exit;
-}
-/* Must have a password set */
-if(!is_array($fair) || $fair['password'] == '') {
- 	$response['error'] = 1;
-	$response['message'] = "Authentication Failed2";
-	print(json_encode($response));
-	debug("response:".print_r($response, true)."\n");
-	exit;
+	return $response;
 }
 
-/* Process a check token before checking a token back, we don't want to bounce
- * back and forth checking tokens, but a check_token is the only command we will
- * process without checking a token */
-if(array_key_exists('check_token', $data)) {
-	remote_handle_check_token($mysqli, $fair, $data, $response);
-	print(json_encode($response));
-	debug("check token for fair:".print_r($fair, true)."\n");
-	debug("response:".print_r($response, true)."\n");
-	exit();
-}
-
-/* Check the token in the command by communicating back with the fair URL we have on record */
-if(remote_check_token($mysqli, $fair, $data['token']) == false) {
- 	$response['error'] = 1;
-	$response['message'] = "Authentication Failed4";
-	print(json_encode($response));
-	debug("response:".print_r($response, true)."\n");
-	exit();
-}
-
-/* Working */
-if(array_key_exists('push_award', $data)) remote_handle_push_award($mysqli, $fair, $data, $response);
-if(array_key_exists('push_winner', $data)) remote_handle_push_winner($mysqli, $fair, $data, $response);
-
-/* Should work */
-if(array_key_exists('get_award', $data)) remote_handle_get_award($mysqli, $fair, $data, $response);
-
-/* Unknown */
-if(array_key_exists('getstats', $data)) handle_getstats($u,$fair, $data, $response);
-if(array_key_exists('stats', $data)) handle_stats($u,$fair, $data, $response);
-if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$data, $response);
-
-$response['hi'] = 'hi';
-print(json_encode($response));
-debug("response:".print_r($response, true)."\n");
 
 ?>
-
-
