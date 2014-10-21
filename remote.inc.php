@@ -29,6 +29,7 @@ require_once('fairs.inc.php');
 require_once('project.inc.php');
 require_once('email.inc.php');
 require_once('debug.inc.php');
+require_once('stats.inc.php');
 
 
 /* Send a command to a remote fair */
@@ -76,7 +77,8 @@ function remote_query($mysqli, &$fair, &$cmd)
 	return $response;
 }
 
-
+/* Handle a check token request.  Compares the request token to the
+ *  last token from a fair. */
 function remote_handle_check_token($mysqli, &$fair, &$data, &$response)
 {
 	if(strlen($fair['token']) != 128) {
@@ -92,6 +94,7 @@ function remote_handle_check_token($mysqli, &$fair, &$data, &$response)
 	$response['error'] = 0;
 }
 
+/* Call to check a token, returns true if the token is valid for $fair */
 function remote_check_token($mysqli, &$fair, $token)
 {
 	$cmd = array();
@@ -103,6 +106,7 @@ function remote_check_token($mysqli, &$fair, $token)
 	return false;
 }
 
+/* Unused */
 function remote_encrypt(&$fair, $text)
 {
 	global $config;
@@ -128,6 +132,7 @@ function remote_encrypt(&$fair, $text)
 	return $signed_password.$encrypted_text;
 }
 
+/* Unused */
 function remote_decrypt(&$fair, $encrypted_text) 
 {
 	global $config;
@@ -149,7 +154,7 @@ function remote_decrypt(&$fair, $encrypted_text)
 	return $text;
 }
 
-
+/* Push the given award to all fairs, and delete it from ones who aren't allowed to have it */
 function remote_push_award_to_all_fairs($mysqli, &$award)
 {
 	$fairs = fair_load_all_feeder($mysqli);
@@ -158,6 +163,7 @@ function remote_push_award_to_all_fairs($mysqli, &$award)
 	}
 }
 
+/* Queue a command to push the given given award to all fairs, then start the queue runner. */
 function remote_queue_push_award_to_all_fairs($mysqli, &$award) 
 {
 	$fairs = fair_load_all_feeder($mysqli);
@@ -165,20 +171,19 @@ function remote_queue_push_award_to_all_fairs($mysqli, &$award)
 		$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`award_id`,`result`) VALUES('push_award','$fair_id','{$award['id']}','queued')");
 	}
 	queue_start($mysqli);
-
 }
 
+/* Call to actually push the award to a remote fair */
 function remote_push_award_to_fair($mysqli, &$fair, &$award)
 {
-	/* Push an award to a single feeder fair */
 	$cmd['push_award'] = award_get_export($mysqli, $fair, $award);
 	$response = remote_query($mysqli, $fair, $cmd);
 	return $response['error'];
 }
 
+/* Handle an award push request from an upstream fair pushing an award to us */
 function remote_handle_push_award($mysqli, &$fair, &$data, &$response) 
 {
-	/* Handle an incoming push request, sync the award */
 	$incoming_award = &$data['push_award'];
  	award_sync($mysqli, $fair, $incoming_award);
 	$response['push_award'] = array('error' => 0);
@@ -329,43 +334,41 @@ function remote_handle_finalize_winners()
 }
 
 
-
-
-
-function handle_getstats(&$u, $fair,&$data, &$response)
+/* Fair $fair has requested our stats */
+function handle_get_stats($mysqli, &$fair, &$data, &$response) 
 {
-	$year = $data['getstats']['year'];
-
-	/* Send back the stats we'd like to collect */
-	$response['statconfig'] = split(',', $fair['gather_stats']);
-
-	/* Send back the stats we currently have */
-	$q = mysql_query("SELECT * FROM fairs_stats WHERE fair_id='{$u['fair_id']}'
-				AND year='$year'");
-	$response['stats'] = mysql_fetch_assoc($q);
-	unset($response['stats']['id']);
+	$year = (int)$data['get_stats']['year'];
+	$response['get_stats'] = stats_get_export($mysqli, $fair, $year);
 	$response['error'] = 0;
+	return true;
 }
 
-function handle_stats(&$u,$fair, &$data, &$response)
+/* Queue a command to get stats from all fairs */
+function remote_queue_get_stats_from_all_fairs($mysqli, $year) 
 {
-	$stats = $data['stats'];
-	foreach($stats as $k=>$v) {
-		$stats[$k] = mysql_escape_string($stats[$k]);
+	$fairs = fair_load_all_feeder($mysqli);
+	foreach($fairs as $fair_id=>$fair) {
+		$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`award_id`,`result`) VALUES('get_stats','$fair_id','$year','queued')");
 	}
-
-//	$str = join(',',$stats);
-	$keys = '`fair_id`,`'.join('`,`', array_keys($stats)).'`';
-	$vals = "'{$u['fair_id']}','".join("','", array_values($stats))."'";
-	mysql_query("DELETE FROM fairs_stats WHERE fair_id='{$u['fair_id']}'
-		AND year='{$stats['year']}'");
-	echo mysql_error();
-	mysql_query("INSERT INTO fairs_stats (`id`,$keys) VALUES ('',$vals)");
-	echo mysql_error();
-
-	$response['message'] = 'Stats saved';
-	$response['error'] = 0;
+	queue_start($mysqli);
 }
+
+/* Ask $fair for their stats and sync the result */
+function remote_get_stats_from_fair($mysqli, &$fair, $year)
+{
+	/* Year is stored in award_id */
+	$cmd['get_stats'] = array();
+	$cmd['get_stats']['year'] = $year;
+	$response = remote_query($mysqli, $fair, $cmd);
+
+	if($response['error'] == 0) {
+		if(is_array($response['get_stats'])) {
+			stats_sync($mysqli, $fair, $response['get_stats']);
+		}
+	}
+	return $response['error'];
+}
+
 
 
 ?>

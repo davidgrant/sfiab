@@ -83,14 +83,10 @@ function remote_handle_cmd($mysqli, &$fair, &$data)
 	/* Working */
 	if(array_key_exists('push_award', $data)) remote_handle_push_award($mysqli, $fair, $data, $response);
 	if(array_key_exists('push_winner', $data)) remote_handle_push_winner($mysqli, $fair, $data, $response);
+	if(array_key_exists('get_stats', $data)) handle_get_stats($mysqli,$fair, $data, $response);
 
 	/* Should work */
 	if(array_key_exists('get_award', $data)) remote_handle_get_award($mysqli, $fair, $data, $response);
-
-	/* Unknown */
-	if(array_key_exists('getstats', $data)) handle_getstats($u,$fair, $data, $response);
-	if(array_key_exists('stats', $data)) handle_stats($u,$fair, $data, $response);
-	if(array_key_exists('getawards', $data)) handle_getawards($mysqli, $u,$fair,$data, $response);
 
 	$response['hi'] = 'hi';
 	return $response;

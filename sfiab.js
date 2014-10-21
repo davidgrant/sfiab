@@ -63,6 +63,25 @@ function sfiab_form_update_vals(form_id, vals)
 		} else if(type == 'select-one') {
 			e.val(v[1]);
 			e.selectmenu("refresh");
+		} else if(type == 'fieldset') {
+			// radio buttons or check group
+			var handled = false;
+			e.find('input').each(function(index) {
+				// prop checks active state
+				// attr checks html state on load
+				$(this).prop('checked', false);
+				if($(this).attr('type') == 'radio') {
+					var checked = ($(this).val() == v[1]) ? true : false;
+					$(this).prop('checked', checked);
+					handled = true;
+				}
+			});
+			if(!handled) {
+				alert("implement check group update_vals");
+			}
+			e.find('input').each(function(index) {
+				$(this).checkboxradio("refresh");
+			});
 		} else if(e.prop('tagName') == 'SPAN') {
 			e.html(v[1]);
 		} else {

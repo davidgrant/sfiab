@@ -319,7 +319,7 @@ $report_initialized = false;
 function report_init($mysqli) 
 {
 	global $report_students_fields, $report_judges_fields, $report_awards_fields;
-	global $report_committees_fields, $report_volunteers_fields; 
+	global $report_committees_fields, $report_volunteers_fields, $report_fairs_fields;
 	global $report_mysqli;
 	global $report_initialized;
 	global $config;
@@ -340,7 +340,7 @@ function report_init($mysqli)
 	require_once("reports_volunteers.inc.php"); /* $report_volunteers_fields */
 	// require_once("reports_schools.inc.php");
 	// require_once("reports_tours.inc.php");
-	// require_once("reports_fairs.inc.php");
+	require_once("reports_fairs.inc.php");
 	// require_once("reports_fundraising.inc.php");
 
 }
@@ -348,8 +348,8 @@ function report_init($mysqli)
 function report_save_field($mysqli, $report, $type)
 {
 	global $report_students_fields, $report_judges_fields, $report_awards_fields;
-	global $report_committees_fields, $report_volunteers_fields; /*$report_schools_fields;
-	global $report_fairs_fields;
+	global $report_committees_fields, $report_volunteers_fields, $report_fairs_fields;
+	/*$report_schools_fields; lobal $report_fairs_fields;
 	global $report_tours_fields, $report_fundraisings_fields;
 */	
 

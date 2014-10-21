@@ -94,8 +94,10 @@ function sfiab_init($roles, $skip_password_expiry_check=false)
 	return $mysqli;
 }
 
-function sfiab_log($mysqli, $type, $data, $uid=-1)
+function sfiab_log($mysqli, $type, $data, $uid=-1, $fair_id=-1, $result=0)
 {
+	global $config;
+
 	if(array_key_exists('REMOTE_ADDR', $_SERVER)) {
 		$ip = $_SERVER['REMOTE_ADDR'];
 	} else {
@@ -108,8 +110,17 @@ function sfiab_log($mysqli, $type, $data, $uid=-1)
 	}
 	$type = $mysqli->real_escape_string($type);
 	$data = $mysqli->real_escape_string($data);
+	$year = $config['year'];
+	$fair_id = (int)$fair_id;
+	$result = (int)$result;
 
-	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`time`,`type`,`data`) VALUES('$ip',$uid,NOW(),'$type','$data')");
+	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`fair_id`,`year`,`time`,`type`,`data`,`result`) 
+				VALUES('$ip',$uid,$fair_id,$year,NOW(),'$type','$data',$result)");
+}
+
+function sfiab_log_sync_stats($mysqli, $fair_id, $result)
+{
+	sfiab_log($mysqli, "sync_stats", "", -1, $fair_id, $result);
 }
 
 function sfiab_session_start() 

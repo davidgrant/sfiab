@@ -2,6 +2,10 @@
 require_once('user.inc.php');
 require_once('project.inc.php');
 
+$fair_types = array('sfiab_feeder' => "Feeder Fair",
+		    'sfiab_upstream' => 'Upstream Fair',
+		    'ysc' => 'Youth Science Canada (Upstream)' );
+
 function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL, $hash=NULL) 
 {
 	$r = NULL;

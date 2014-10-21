@@ -165,7 +165,19 @@ while(true) {
 			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		}
 		break;
+
+	case 'get_stats':
+		$fair = fair_load($mysqli, $db_fair_id);
+		$year = $db_award_id; /* Repurpose the award_id for the year */
+		print("SFIAB Queue Runner: get_stats: $year\n");
+		$result = remote_get_stats_from_fair($mysqli, $fair, $year);
+		sfiab_log($mysqli, "sync stats", "Sync Stats for fair {$fair['id']} for $year, result=$result");
+		if($result == 0) {
+			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+		}
+		break;
 	}
+
 
 	sleep($sleepmin);
 }
