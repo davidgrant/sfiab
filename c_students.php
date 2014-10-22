@@ -84,9 +84,11 @@ sfiab_page_begin("Students", $page_id);
 	<h3>Projects</h3> 
 	<p>FIXME: coming soon.
 
-	<h3>Projects</h3> 
+	<h3>Signature Forms and Project Numbers</h3> 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_input_signature_forms.php" data-rel="external" data-ajax="false">Input Received Signature Forms</a></li>
+	<li><a href="" data-rel="external" data-ajax="false">Assign Project Numbers and Email Students</a></li>
+	<li><a href="" data-rel="external" data-ajax="false">Floorplanning</a></li>
 	</ul>
 
 </div></div>
