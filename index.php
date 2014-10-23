@@ -1,5 +1,6 @@
 <?php
 
+/* Redirect so we can shortlink summary pages */
 if(array_key_exists('p', $_GET)) {
 	header("location: project_summary.php?p={$_GET['p']}");
 	exit();
@@ -9,8 +10,8 @@ require_once('common.inc.php');
 require_once('form.inc.php');
 
 
-
 $mysqli = sfiab_init(NULL);
+sfiab_load_config($mysqli);
 
 sfiab_page_begin('Welcome', 'welcome');
 
@@ -35,12 +36,20 @@ $_SESSION['login_hash'] = $login_hash;
 <div data-role="page"  id="important_dates" class="menu_main">
 	<div data-role="main" class="sfiab_page" > 
 		<table>
-		<tr><td>Student Registration Opens:</td><td>January 28, 2014</td></tr>
-		<tr><td>Judge Registration Opens:</td><td>January 28, 2014</td></tr>
-		<tr><td>Student Registration Closes:</td><td>March 11, 2014</td></tr>
-		<tr><td>Judge Registration Closes:</td><td>March 31, 2014</td></tr>
-		<tr><td>Days of the Fair:</td><td>April 10-12, 2014</td></tr>
-		<tr><td>Winners Posted on Website:</td><td>April 13, 2014</td></tr>
+		<tr><td>Student Registration:</td><td><?=date('F d, Y', strtotime($config['date_student_registration_opens']))?></td>
+			<td>-</td><td><?=date('F d, Y', strtotime($config['date_student_registration_closes']))?></td>
+		</tr>
+		<tr><td>Judge Registration:</td><td><?=date('F d, Y', strtotime($config['date_judge_registration_opens']))?></td>
+			<td>-</td><td><?=date('F d, Y', strtotime($config['date_judge_registration_closes']))?></td>
+		</tr>
+<?php		if($config['date_fair_begins'] == $config['date_fair_ends']) { ?>
+			<tr><td>Day of the Fair:</td><td><?=date('F d, Y', strtotime($config['date_fair_begins']))?></td></tr>
+<?php		} else { ?>
+			<tr><td>Days of the Fair:</td><td><?=date('F d, Y', strtotime($config['date_fair_begins']))?></td>
+				<td>-</td><td><?=date('F d, Y', strtotime($config['date_fair_ends']))?></td>
+			</tr>
+<?php		} ?>			
+		<tr><td>Winners Posted:</td><td><?=date('F d, Y', strtotime($config['date_fair_ends'])+24*60*60)?></td></tr>
 		</table>
 	</div>
 </div>
@@ -180,7 +189,7 @@ $_SESSION['login_hash'] = $login_hash;
 
 	<p>If the email doesn't appear in a few minutes, be sure to check your 
 	Junk or Spam mail folder too.  We have recent reports that quite a few emails
-	to Hotmail MSN  email addresses are going to spam folders.
+	to Hotmail MSN email addresses are going to spam folders.
 
 	<p>If you think your email address is wrong, register again with
 	the same Username and your old registration email address
@@ -228,7 +237,7 @@ $_SESSION['login_hash'] = $login_hash;
 
 <div data-role="page" id="contact">
 	<div data-role="main" class="sfiab_page" > 
-		Under construction, coming soon.  In the meantime, just email our committee chair.  Brian Le (chair@gvrsf.ca).
+		<?=cms_get($mysqli, 'contact_us');?>
 	</div>
 </div>
 

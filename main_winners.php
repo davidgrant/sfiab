@@ -27,11 +27,23 @@ if(array_key_exists('type', $_GET)) {
 <div data-role="page" id="winners"><div data-role="main" class="sfiab_page" > 
 
 <?php
+	/* Figure out the latest year to show */
+	$now = date('Y-m-d', time(NULL));
+	$fair_ends = date('Y-m-d', strtotime($config['date_fair_ends']));
+	if($now <= $fair_ends) {
+		$last_year_to_show = $config['year'] - 1;
+	} else {
+		$last_year_to_show = $config['year'];
+	}
+
 	if($year == 0) {
 		/* Get all years and types */
 		$q = $mysqli->query("SELECT DISTINCT(year) FROM winners ORDER BY year DESC");
 		while($r = $q->fetch_assoc()) {
 			$year = (int)$r['year'];
+
+			/* Don't print anything for the current year unless we're on the day after the fair */
+			if($year > $last_year_to_show) continue;
 ?>
 			<h3><?=$year?></h3>
 			<ul>
@@ -47,6 +59,12 @@ if(array_key_exists('type', $_GET)) {
 	} else {
 ?>		<h3><?=$year?> <?=$award_types[$type]?> Awards</h3>
 <?php
+		if($year > $last_year_to_show) {
+			/* Shouldn't be able to get here unless someone is fudging with URLs and manually inserting dates.
+			 * I bet students will try to do this. */
+			print("Crystal Ball Error: Go to the award ceremony to find out who wins.<br/>");
+			exit();
+		}
 		/* Load the winners list for the specific type */
 		$q = $mysqli->query("SELECT `awards`.`name` AS award_name,
 						`awards`.`s_desc`,
