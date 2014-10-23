@@ -727,6 +727,28 @@ function sfiab_registration_is_closed($u, $role=NULL)
 }
 
 
+/* antispambot like from wordpress */
+function antispambot($email) 
+{
+	$result = '';
+	for($x=0; $x < strlen($email); $x++ ) {
+		$c = $email[$x];
+		if($c == '@' || rand(0,1) == 0 ) {
+			$result .= '&#'.ord($c).';';
+		} else {
+			$result .= $c;
+		}
+	}
+	return $result;
+}
+
+function mailto($email)
+{	?>
+	<a href="mailto:<?=antispambot($email)?>"><?=antispambot($email)?></a>
+<?php
+}
+
+
 
 /* It's kinda important that there be no blank lines AFTER this, or they're sent as newlines.  This messes
  * up login.php */

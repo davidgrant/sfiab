@@ -100,12 +100,11 @@ for($ver = $update_start; $ver <= $update_end; $ver++) {
 	}
 }
 
-print("Done.");
-
+print("Done.\n");
 
 $mysqli->real_query("UPDATE config SET val='$update_end' WHERE var='db_version'");
 
-print("</pre>");
+print("</pre>\n");
 
 
 ?>

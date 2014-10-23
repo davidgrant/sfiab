@@ -33,15 +33,20 @@ sfiab_page_begin("Student Main", 's_home', $help);
 
 	if($u['s_accepted'] == 1) { ?>
 		<h3>Registration Status: <font color="green">Forms Received</font></h3>
-		<p>All your registration forms have been received and processed.  No further changes to registration data are allowed.  If something in your registration needs changing, please contact the committee.  
+		<p>All your registration forms have been received and
+		processed.  No further changes to registration data are
+		allowed.  If something in your registration needs changing,
+		please contact the committee.  
 
 		<p>Please bring your project number to the fair with you.  The
 		number is your floor location.  At the fair, you can proceed
 		directly to your floor location (we can help you find it, there
 		will be maps posted) and setup your project before signing in.
 
-		<p>For safety reasons we are required to provide tour assignments to UBC and emergency contact information to the tour guides.  
-		For this reason, we are unable to change your tour.
+		<p>For safety reasons we are required to provide tour
+		assignments to UBC and emergency contact information to the
+		tour guides.  For this reason, we are unable to change your
+		tour.
 
 <?php		$p = project_load($mysqli, $u['s_pid']);
 		$tours = tour_load_all($mysqli);

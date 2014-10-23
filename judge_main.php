@@ -48,7 +48,7 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 ?>
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
-	<p> Welcome to the new GVRSF registration system.  
+	<p> Welcome to the new <?=$config['fair_abbreviation']?> registration system.  
 	
 	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_j_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
 
@@ -71,7 +71,7 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 			<p>If your plans change for this year, just indicate below that
 			you are able to judge at the fair again, and finish the registration
 			process.  If the registration deadline has passed, please contact
-			the chief judges (leonard@gvrsf.ca or ceddy@gvrsf.ca)
+			our chief judge <?=mailto($config['email_chiefjudge'])?>.
 <?php		} ?>
 		
 		<p>Thank you.	
@@ -103,10 +103,10 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 			<p>Registration is now closed.
 <?php		} else { ?>
 			<p>The red numbers in the menu on the left indicate which sections
-			have missing data.  Registration closes on March 30, 2014.  You
-			have until this day to complete your registration.  After this
-			date, the registration system closes and you will not be
-			assigned to a judging team.
+			have missing data.  Registration closes on <b><?=date('F d, Y', strtotime($config['date_judge_registration_closes']))?></b>.
+			You have until this day to complete your registration.
+			After this date, the registration system closes and you
+			will not be assigned to a judging team.
 <?php		}
 	}
 ?>
@@ -116,13 +116,13 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 
 	<h3>Cancelling</h3>
 	If you are regrettably unable to judge at the fair this year, just flip
-	the switch below to let us know.  This helps us re-organize judging teams if 
-	judging assignments have already been made.  You can always flip the switch back again.
+	the switch below to let us know.  This helps us organize judging teams
+	and numbers.  You can always flip the switch back again.
 <?php
 	if($closed) { ?>
-		<p>Since registration is closed and judging teams have been
-		assigned, if you indicate you're not able to attend you will be
-		removed from any judging teams you're on.  If you later change
+		<p>Registration is closed and judging teams have been assigned.
+		If you indicate below that you're not attending, you will be
+		removed from any judging team you were on.  If you later change
 		your status back to attending, you may not be assigned to the
 		same judging team.  Last minute judging changes are all done
 		manually by the chief judge. 
