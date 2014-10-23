@@ -13,6 +13,7 @@ function conv_awards($mysqli, $mysqli_old, $year)
 	$mysqli->query("DELETE FROM award_prizes WHERE award_id IN ( SELECT id FROM awards WHERE year='$year' )");
 	$mysqli->query("DELETE FROM awards WHERE year='$year'");
 
+	$awards = array();
 
 	/* Load the old awards, and save to a new award array */
 	$q = $mysqli_old->query("SELECT * FROM award_awards WHERE year='$year'");
@@ -68,8 +69,9 @@ function conv_awards($mysqli, $mysqli_old, $year)
 		$a['type'] = $type_map[(int)$old_a['award_types_id']];
 
 		foreach($old_a['prizes'] as &$old_p) {
-			$pid = prize_create($mysqli, $aid);
-			$p = prize_load($mysqli, $pid);
+			$pid = prize_create($mysqli, $a);
+			$a['prizes'][$pid] = prize_load($mysqli, $pid);
+			$p = &$a['prizes'][$pid];
 
 			$p['name'] = $old_p['prize'];
 //			print("   ".$p['name'] . "\n");
@@ -88,7 +90,6 @@ function conv_awards($mysqli, $mysqli_old, $year)
 //			print_r($old_p);
 			if($old_p['excludefromac'] == 0) $a['include_in_script'] = 1;
 
-			prize_save($mysqli, $p);
 			$prizes_map[(int)$old_p['id']] = $pid;
 		}
 
