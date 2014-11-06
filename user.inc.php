@@ -289,6 +289,7 @@ function user_copy($mysqli, $u, $new_year)
 	$new_u = user_load($mysqli, $new_uid);
 
 	$old_uid = $u['uid'];
+	$old_year = $u['year'];
 
 	/* Bring the user with all the existing data up-to-date */
 	$u['uid'] = $new_u['uid'];
@@ -298,7 +299,7 @@ function user_copy($mysqli, $u, $new_year)
 	$u['tour_id'] = NULL; /* Tours have different IDs */
 	$u['tshirt'] = NULL; /* Force re-selection of tshirt */
 	if($u['grade'] > 0) {
-		$u['grade'] += 1; /* Normally grade is increased */
+		$u['grade'] += ($new_year - $old_year); /* Normally grade is increased one per year*/
 	}
 
 	if($u['schools_id'] > 0) {
@@ -342,6 +343,7 @@ function user_copy($mysqli, $u, $new_year)
 	return $u;
 }
 
+/* Export a user for remote transmission */
 function user_get_export($mysqli, &$user)
 {
 	$export_u = array();

@@ -17,6 +17,7 @@ $cms_pages = array('exhibitordeclaration' => "Signature Form: Exhibitor Declarat
 		   'postamble'=> "Signature Form: Post-Amble",
 		   'main'=> "Page: Main Page",
 		   'contact_us'=> "Page: Contact Us"
+		   'v_main'=> "Page: Volunteer Main Page"
 		   );
 
 $action = '';

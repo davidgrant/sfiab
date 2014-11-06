@@ -179,8 +179,8 @@ case 'login':
 		exit();
 	}
 
-	/* Wipe out the salt so the same hash can't be used twice */
-//	$mysqli->query("UPDATE users SET salt='0' WHERE uid={$u['uid']}");
+	/* Wipe out the challenge hash so the same hash can't be used twice */
+//	$mysqli->query("UPDATE users SET challenge_hash='0' WHERE uid={$u['uid']}");
 
 	/* Check for too many login attempts */
 	if(check_attempts($mysqli, $u['uid']) == true) { 
@@ -190,6 +190,10 @@ case 'login':
 	}
 
 	/* Passwords match? */
+	/* user provides:       hash(hash(p).login_hash) 
+	 * we compute   : hash( hash(hash(p).login_hash) . salt ) and see if it matches the hash in our db 
+	 * we store:  salt, hash(salt.hash(p),  */
+
 	$password_hash = hash('sha512', $u['password'].$login_hash); // hash the password with the session login hash.
 	if($password_hash != $hash) {
 		sfiab_log($mysqli, 'login bad pass', $username, $u['uid']);

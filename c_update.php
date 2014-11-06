@@ -73,13 +73,13 @@ function update_config($mysqli, $year)
 
 	$c_0 = array();
 	$q = $mysqli->query("SELECT * FROM config WHERE `year`='0'");
-	while($r = $q=>fetch_assoc()) {
+	while($r = $q->fetch_assoc()) {
 		unset($r['year']);
 		$c_0[$r['var']] = $r;
 	}
 
 	$q = $mysqli->query("SELECT * FROM config WHERE `year`='$year'");
-	while($r = $q=>fetch_assoc()) {
+	while($r = $q->fetch_assoc()) {
 		$var = $r['var'];
 		if(!array_key_exists($var, $c_0)) {
 			$data=array();
