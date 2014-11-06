@@ -399,12 +399,14 @@ function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwor
 }
 
 /* This has a data-alt2 attribute so it is enabled/disabled with the sfiab_form */
-function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g')
+function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g', $icon="check", $confirm='')
 {
 	global $form_disabled;
-	$d = $form_disabled ? ' disabled="disabled"': '';
+	$attrs = $form_disabled ? ' disabled="disabled"': '';
+	if($confirm != '') $attrs .= " data-confirm=\"$confirm\"";
+	if($icon != '') $attrs .= " data-icon=\"$icon\"";
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-icon="check" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" <?=$d?> >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" <?=$attrs?> >
 		<?=$text?>
 	</button>
 <?php
@@ -412,14 +414,14 @@ function form_submit($form_id, $action, $text = "Save", $saved_text = "Informati
 
 /* This doesn't create a data-alt2 attribute, so it won't be enabled/disabled with the sfiab_form, it's always
  * enabled */
-function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check", $attrs='')
+function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check", $confirm='', $attrs='')
 {
 	global $form_disabled;
 	if($form_disabled) $attrs .= ' disabled="disabled"';
-	$icon_attr = ($icon != '') ? "data-icon=\"$icon\"" : '';
-	
+	if($icon != '') $attrs .= " data-icon=\"$icon\"";
+	if($confirm != '') $attrs .= " data-confirm=\"$confirm\"";
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" <?=$icon_attr?> data-theme="<?=$theme?>" <?=$attrs?> >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-theme="<?=$theme?>" <?=$attrs?> >
 		<?=$text?>
 	</button>
 <?php

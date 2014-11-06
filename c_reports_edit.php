@@ -132,6 +132,17 @@ case 'save':
 	report_save($mysqli, $r);
 	form_ajax_response(array('status'=>0));
 	exit();
+
+case 'load':
+	$rid = (int)$_POST['rid'];
+	form_ajax_response(array('status'=>0, 'location'=>"c_reports_edit.php?rid=$rid"));
+	exit();
+
+case 'delete':
+	$rid = (int)$_POST['rid'];
+	report_delete($mysqli, $rid);
+	form_ajax_response(array('status'=>0, 'location'=>'c_reports_edit.php'));
+	exit();
 }
 
 
@@ -154,15 +165,13 @@ sfiab_page_begin("Edit Reports", $page_id, $help);
 	}
 
 	$val = '';
-?>
-	<form action="c_reports_edit.php" id="<?=$form_id?>" method="GET" data-ajax="false" >
-	<input type="hidden" name="action" value="" class="sfiab_form_action" />
-<?php
+
+	form_begin($form_id, "c_reports_edit.php");
 	form_select_optgroup($form_id, 'rid', 'Report', $report_sec, $rid);
 	form_button($form_id, 'load', 'Load');
 //	form_button($form_id, 'dupe', 'Duplicate');
 //	form_button($form_id, 'try', 'Try');
-//	form_button($form_id, 'delete', 'Delete');
+	form_button($form_id, 'delete', 'Delete', 'r', 'delete', 'Are you sure you want to delete this report?');
 
 	form_end($form_id);
 

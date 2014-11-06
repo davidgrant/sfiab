@@ -62,6 +62,36 @@ function apply_db($mysqli, $fp)
 	}
 }
 
+/* Copy any year=0 config values forward to the current year if they don't exist */
+function update_config($mysqli, $year)
+{
+	$year = (int)$year;
+
+	if($year <= 0) return;
+
+	/* Load all values with year=0 */
+
+	$c_0 = array();
+	$q = $mysqli->query("SELECT * FROM config WHERE `year`='0'");
+	while($r = $q=>fetch_assoc()) {
+		unset($r['year']);
+		$c_0[$r['var']] = $r;
+	}
+
+	$q = $mysqli->query("SELECT * FROM config WHERE `year`='$year'");
+	while($r = $q=>fetch_assoc()) {
+		$var = $r['var'];
+		if(!array_key_exists($var, $c_0)) {
+			$data=array();
+			foreach($c_0[$var] as $k=>$v) {
+				$vals[] = "'".$mysqli->real_escape_string($v)."'";
+			}
+			$mysqli->real_query("INSERT INTO config(`year`,`".join('`,`',array_keys($c_0[$var]))."`) VALUES
+						('$year',".join(',', $vals).")");
+		}
+	}
+}
+
 $update_start = $config['db_version'] + 1;
 $update_end = $db_version;
 
@@ -98,6 +128,8 @@ for($ver = $update_start; $ver <= $update_end; $ver++) {
 		call_user_func("post_$ver", $mysqli);
 		print("   updates/$ver.php::post_$ver() done.\n");
 	}
+
+//	update_config($mysqli, $config['year']);
 }
 
 print("Done.\n");

@@ -39,22 +39,9 @@ function sfiab_session_is_active()
 function sfiab_load_config($mysqli)
 {
 	global $config;
-	$year = -1;
-	$q = $mysqli->prepare("SELECT var,val FROM config WHERE `year` = ?");
-	$q->bind_param('i', $year); /* Bind year == -1 to load system config */
-	$q->execute(); 
-	$q->store_result();
-	$q->bind_result($db_var,$db_val); 
-	while($q->fetch()) {
-		$config[$db_var] = $db_val;
-	}
-
-	$q->bind_param('i', $config['year']); /* Now bind with the newly loaded fair year */
-	$q->execute(); 
-	$q->store_result();
-	$q->bind_result($db_var,$db_val); 
-	while($q->fetch()) {
-		$config[$db_var] = $db_val;
+	$q = $mysqli->query("SELECT var,val FROM config WHERE 1");
+	while($r = $q->fetch_row()) {
+		$config[$r[0]] = $r[1];
 	}
 
 	if(array_key_exists('HTTP_HOST', $_SERVER)) {
@@ -684,6 +671,10 @@ function sfiab_registration_is_closed($u, $role=NULL)
 		} else if ($role == 'judge') {
 			$reg_open_date = $config['date_judge_registration_opens'];
 			$reg_close_date = $config['date_judge_registration_closes'];
+		} else if ($role == 'volunteer') {
+			/* Use judge registration */
+			$reg_open_date = $config['date_judge_registration_opens'];
+			$reg_close_date = $config['date_judge_registration_closes'];
 		} else {
 			return false;
 		}
@@ -708,6 +699,10 @@ function sfiab_registration_is_closed($u, $role=NULL)
 			}
 
 		} else if (in_array('judge', $u['roles'])) {
+			$reg_open_date = $config['date_judge_registration_opens'];
+			$reg_close_date = $config['date_judge_registration_closes'];
+		} else if (in_array('volunteer', $u['roles'])) {
+			/* Use judge registration */
 			$reg_open_date = $config['date_judge_registration_opens'];
 			$reg_close_date = $config['date_judge_registration_closes'];
 		} else {

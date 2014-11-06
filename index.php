@@ -84,6 +84,8 @@ $_SESSION['login_hash'] = $login_hash;
 	$s_text = '';
 	$j_disabled = '';
 	$j_text = '';
+	$v_disabled = '';
+	$v_text = '';
 	$now = date( 'Y-m-d H:i:s' );
 
 	if(sfiab_registration_is_closed(NULL, 'student')) {
@@ -108,6 +110,18 @@ $_SESSION['login_hash'] = $login_hash;
 			$j_text = ' (registration closed)';
 		}
 	}
+
+	if(sfiab_registration_is_closed(NULL, 'volunteer')) {
+		/* Only disable if user is not a committeemember */
+		if(!sfiab_user_is_a('committee')) 
+			$v_disabled = 'disabled="disabled"';
+
+		if($now < $config['date_judge_registration_opens']) {
+			$v_text = ' (registration opens on '.date('F j, Y', strtotime($config['date_judge_registration_opens'])).')';
+		} else {
+			$v_text = ' (registration closed)';
+		}
+	}
 ?>
 
 	<div data-role="fieldcontain">
@@ -115,7 +129,7 @@ $_SESSION['login_hash'] = $login_hash;
 		<select name="register_as" id="register_as" >
 		    <option value="student" <?=$s_disabled?> >Student<?=$s_text?></option>
 		    <option value="judge" <?=$j_disabled?> >Judge<?=$j_text?></option>
-		    <option value="volunteer">Volunteer</option>
+		    <option value="volunteer" <?=$v_disabled?> >Volunteer<?=$v_text?></option>
 <?php		 if(sfiab_user_is_a('committee')) { 
 //		    <option value="teacher">Teacher</option>
 ?>

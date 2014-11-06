@@ -578,21 +578,8 @@ function report_save_field($mysqli, $report, $type)
  function report_delete($mysqli, $report_id)
  {
  	$r = intval($report_id);
-	/* if the report['id'] is not zero, see if this is a
-	 * systeim report before doing anything. */
-	$q = mysql_query("SELECT system_report_id FROM reports WHERE id='$r'");
-	$i = mysql_fetch_assoc($q);
-	if(intval($i['system_report_id']) != 0) {
-		/* This is a system report, the editor (should)
-		 * properly setup the editor pages so that the user
-		 * cannot delete this report.  The only way to get here
-		 * is by directly modifying the POST variables.. so..
-		 * we don't have to worry about being user friendly. */
-		echo "ERROR: attempt to delete a system report (reports.id=$r)";
-		exit;
-	}
- 	mysql_query("DELETE FROM reports WHERE `id`=$r");
-	mysql_query("DELETE FROM reports_items WHERE `reports_id`=$r");
+ 	$mysqli->real_query("DELETE FROM reports WHERE `id`='$r'");
+	$mysqli->real_query("DELETE FROM reports_items WHERE `report_id`='$r'");
  }
 
  function report_gen($mysqli, $report) 

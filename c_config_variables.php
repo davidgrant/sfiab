@@ -15,7 +15,7 @@ foreach(timezone_identifiers_list() as $tid=>$tz) {
 }
 
 $cfg = array();
-$q = $mysqli->query("SELECT * FROM config WHERE (year='{$config['year']}' OR year=-1) AND category!='system' ORDER BY category,`order`,var");
+$q = $mysqli->query("SELECT * FROM config WHERE category!='system' ORDER BY category,`order`,var");
 while($r = $q->fetch_assoc()) {
 	if(!array_key_exists($r['category'], $cfg)) $cfg[$r['category']] = array();
 	$cfg[$r['category']][$r['var']] = $r;
@@ -36,7 +36,7 @@ case 'save':
 		if(substr($p, 0, 4) == 'cfg_') {
 			$var = substr($p, 4);
 			$val = $mysqli->real_escape_string($v);
-			$mysqli->query("UPDATE config SET `val`='$val' WHERE `var`='$var' AND year='{$config['year']}'");
+			$mysqli->query("UPDATE config SET `val`='$val' WHERE `var`='$var'");
 		}
 	}
 	form_ajax_response(0);

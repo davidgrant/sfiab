@@ -143,8 +143,6 @@ case 'rollover':
 
 	if($new_year <= $current_year) exit();
 
-	print("Rolling Configuration...<br/>\n");
-	roll($mysqli, $current_year, $new_year, "config");
 	print("Rolling Categories...<br/>\n");
 	roll($mysqli, $current_year, $new_year, "categories");
 	print("Rolling Challenges...<br/>\n");
@@ -227,7 +225,7 @@ default:
 	form_hidden($form_id, 'current_year', $config['year']);
 	form_int($form_id, 'year', "New Fair Year", $new_year, $new_year, 9999);
 
-	form_button($form_id, 'rollover', 'Rollover Fair Year', 'g', 'check', 'onclick="return confirm(\'Really rollover? This cannot be undone\');"' );
+	form_button($form_id, 'rollover', 'Rollover Fair Year', 'g', 'check', 'Really rollover? This cannot be undone' );
 	form_end($form_id);
 	break;
 

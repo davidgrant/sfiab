@@ -95,6 +95,9 @@ $( document ).on( "pagecreate", function( event ) {
 	// Attach a submit handler to the form
 	$( ".sfiab_form_ajax" ).submit(function( event ) {
 
+		// Stop form from submitting normally
+		event.preventDefault();
+
 		var form = $(event.target);
 		var form_id = form.attr('id');
 		var form_button = $("#"+form_id+"_submit");
@@ -103,14 +106,12 @@ $( document ).on( "pagecreate", function( event ) {
 		var form_missing_msg = $("#"+page_id+"_missing_msg");
 		var form_error_msg = $("#"+page_id+"_error_msg");
 		var form_happy_msg = $("#"+page_id+"_happy_msg");
+		var submit_value = $('#'+form_id+' input.sfiab_form_action').attr('value');
 
 		var pre_submit_fn = window[form_id + '_pre_submit'];
 		if(typeof pre_submit_fn === 'function') {
 			pre_submit_fn(form);
 		}
-
-		// Stop form from submitting normally
-		event.preventDefault();
 
 		$.post( form.attr('action'), form.serialize(), function( data ) {
 
@@ -128,9 +129,17 @@ $( document ).on( "pagecreate", function( event ) {
 			 * we want the user to click again
 			 * Don't touch buttons without a data-alt2 attr */
 			if(data.status == 0) {
-				$('#'+form_id+' button').each(function(index) {
+				/* Disable all buttons with a data-alt2 attribute */
+				$('#'+form_id+' button[data-alt2]').attr('disabled', true);
+
+				/* Set the text of the buttons that match the
+				 * submit value (ie., only the button that was
+				 * pressed, or all identical to it) to the alt2
+				 * text */
+				$('#'+form_id+' button[value="'+submit_value+'"]').each(function(index) {
 					if($(this).is("[data-alt2]")) {
-						$(this).attr('disabled', true);
+						/* Only change the text to alt2 if it is the same
+						 * as the submit value on the hidden item */
 						$(this).text($(this).attr('data-alt2'));
 					}
 				});
@@ -233,6 +242,13 @@ $( document ).on( "pagecreate", function( event ) {
 		e.preventDefault();
 		var form = $(this).closest('form');
 		var hidden = $('#'+form.attr('id')+' input.sfiab_form_action');
+
+		/* If there is a data-confirm attribute, print that as a confirm
+		 * message, and cancel the submit if that returns false */
+		if($(this).is("[data-confirm]")) {
+			c = confirm($(this).attr('data-confirm'));
+			if(c == false) return;
+		}
 		hidden.attr('value', $(this).attr('value'));
 		form.submit();
 	});

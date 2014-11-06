@@ -48,9 +48,9 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 ?>
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
-	<p> Welcome to the new GVRSF registration system.  
-	
 	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_v_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
+
+	<p><?=cms_get($mysqli, 'v_main');?>
 
 <?php
 	if(!$u['attending']) {
@@ -85,13 +85,10 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
 		
 		The red numbers in the menu on the left indicate which sections
-		have missing data.  Registration closes on April 5, 2014.  You
-		have until this day to complete your registration.  After this
+		have missing data.  Registration closes on <b><?=date('F d, Y', strtotime($config['date_judge_registration_closes']))?></b>.
+		You have until this day to complete your registration.  After this
 		date, the registration system closes and you will not be
 		assigned to a volunteer position.
-
-		Currently we are only accepting fair volunteers for help with 
-		tours.  Please see the tour menu on the left.
 <?php
 	}
 ?>
