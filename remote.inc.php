@@ -327,7 +327,7 @@ function remote_handle_finalize_winners()
 			/* This award is for students who are participating in this fair, we need
 			 * to get their reg number to them if this is a new registration 
 			 * Only send it if they weren't matched to a student already in this project */
-			$result = email_send($mysqli, "New Registration", $sid, array('PASSWORD'=>$password) );
+			$result = email_send($mysqli, "New Registration", $sid, array('password'=>$password) );
 			$response['notice'][] = "	 - Sent welcome registration email to: {$s['firstname']} {$s['lastname']} &lt;{$s['email']}&gt;";
 			sfiab_log($mysqli, "register", "username: {$username}, email: {$s['email']}, as: student, email status: $result");
 

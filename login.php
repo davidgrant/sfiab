@@ -132,7 +132,7 @@ case 'register':
 	user_save($mysqli, $u);
 
 	/* Send an email */
-	$result = email_send($mysqli, "New Registration", $uid, array('PASSWORD'=>$password) );
+	$result = email_send($mysqli, "New Registration", $uid, array('password'=>$password) );
 
 	sfiab_log($mysqli, "register ok", "username: $username, email: $email, as: $as, email status: $result");
 	

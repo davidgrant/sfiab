@@ -22,7 +22,7 @@ case 'pw':
 		$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
 	        $password_hash = hash('sha512', $password);
 		$mysqli->real_query("UPDATE users SET password='$password_hash',password_expired='1' WHERE uid='{$uid}'");
-		email_send($mysqli, "Forgot Password", $uid, array('PASSWORD'=>$password) );
+		email_send($mysqli, "Forgot Password", $uid, array('password'=>$password) );
 		sfiab_log($mysqli, 'reset pw', "", $uid);
 		
 	}

@@ -110,7 +110,7 @@ case 'resend':
 	$edit_u['password_expired'] = 1;
 	user_save($mysqli, $edit_u);
 
-	$result = email_send($mysqli, "New Registration", $edit_u['uid'], array('PASSWORD'=>$password) );
+	$result = email_send($mysqli, "New Registration", $edit_u['uid'], array('password'=>$password) );
 	form_ajax_response(0);
 	exit();
 
