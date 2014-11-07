@@ -575,8 +575,8 @@ function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false
 			);
 
 		/* Optional replacements */
-		if(array_key_exists('password', $additional_vars)) {
-			$rep['/\[PASSWORD\]/'] = $additional_vars['password'];
+		if(array_key_exists('PASSWORD', $additional_vars)) {
+			$rep['/\[PASSWORD\]/'] = $additional_vars['PASSWORD'];
 		}
 	}
 
