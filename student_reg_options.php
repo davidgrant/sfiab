@@ -50,16 +50,28 @@ sfiab_page_begin("Student Registration Options", $page_id, $help);
 	form_page_begin($page_id, $fields);
 	form_disable_message($page_id, $closed, $u['s_accepted']);
 
-?>
-	<h3>T-Shirt</h3>
-	<p>The cost of each T-Shirt is $<?=$config['tshirt_cost']?>, sizes are Adult sizes.
-<?php
-	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_reg_options.php', $closed);
-	form_select($form_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $u);
-	form_submit($form_id, 'save', 'Save', 'Information Saved');
-	form_end($form_id);
-?>
+	$options = 0;
+
+	if($config['tshirt_enable']) { 
+		$options += 1; ?>
+
+		<h3>T-Shirt</h3>
+<?php		if($config['tshirt_cost'] == 0) { ?>
+			<p>T-Shirts are provided free of charge, sizes are Adult sizes. </p>
+<?php		} else { ?>
+			<p>The cost of each T-Shirt is $<?=$config['tshirt_cost']?>, sizes are Adult sizes. </p>
+<?php		}
+		$form_id = $page_id.'_form';
+		form_begin($form_id, 'student_reg_options.php', $closed);
+		form_select($form_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $u);
+		form_submit($form_id, 'save', 'Save', 'Information Saved');
+		form_end($form_id);
+	}
+
+	if($options == 0) {
+?>		<p>No options to select.  This page is for options not applicable to your fair.  </p>
+<?php	} ?>
+
 </div></div>
 
 <?php

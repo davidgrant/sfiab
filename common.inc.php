@@ -287,6 +287,9 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			      's_awards' => array('Award Selection', 'student_awards.php'),
 			      's_signature' => array('Signature Form', 'student_signature.php'),
 			      );
+	if(!$config['tours_enable']) {
+		unset($student_menu['s_tours']);
+	}
 
 	$judge_menu = array('j_home' => array('Judge Home', 'judge_main.php'),
 			    'j_personal' => array('Personal Info', 'judge_personal.php'),
@@ -301,6 +304,9 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 				'v_options' => array('Options', 'v_options.php'),
 				'v_tours' => array('Tours', 'v_tours.php'),
 		);
+	if(!$config['tours_enable']) {
+		unset($volunteer_menu['v_tours']);
+	}
 
 	$committee_menu = array('c_main' => array('Committee Home', 'c_main.php'),
 			    'c_awards' => array('Awards', 'c_awards.php'),
@@ -551,13 +557,52 @@ function category_get_from_grade($grade)
 	return false;
 }
 
-function cms_get($mysqli, $name) 
+function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false)
+{
+	global $config;
+	$rep = array(	'/\[FAIRNAME\]/' => $config['fair_name'],
+			'/\[FAIRABBR\]/' => $config['fair_abbreviation'],
+			'/\[YEAR\]/' => $config['year'],
+			'/\[CHAIR_EMAIL\]/' => $html ? mailto($config['email_chair']) : $config['email_chair'],
+			'/\[DATE_FORMS_DUE\]/' => date('F d, Y', strtotime($config['date_student_registration_closes']) + 60*60*24),
+
+			);
+
+	if(count($additional_vars) > 0) {
+		$rep += array(
+			'/\[LOGIN_LINK\]/' => $additional_vars['fair_url'].'/index.php#login',
+			'/\[FAIR_URL\]/' => $additional_vars['fair_url'],
+			);
+
+		/* Optional replacements */
+		if(array_key_exists('password', $additional_vars)) {
+			$rep['/\[PASSWORD\]/'] = $additional_vars['password'];
+		}
+	}
+
+	if(is_array($u)) {
+		/* Replacements that depend on a user */
+		$rep += array(
+			'/\[NAME\]/' => $u['name'],
+			'/\[EMAIL\]/' => $html ? mailto($u['email']) : $u['email'],
+			'/\[USERNAME\]/' => $u['username'],
+			'/\[SALUTATION\]/' => $u['salutation'],
+			'/\[FIRSTNAME\]/' => $u['firstname'],
+			'/\[LASTNAME\]/' => $u['lastname'],
+			'/\[ORGANIZATION\]/' => $u['organization'],
+			);
+	}
+
+	return preg_replace(array_keys($rep), array_values($rep), $text);
+}
+
+function cms_get($mysqli, $name, &$u = NULL) 
 {
 	$q = $mysqli->query("SELECT `text`,`use` FROM `cms` WHERE `name`='$name'");
 	print($mysqli->error);
 	$r = $q->fetch_assoc();
 	if($r['use'] == 1) {
-		return $r['text'];
+		return replace_vars($r['text'], $u, array(), true);
 	}
 	return NULL;
 }
@@ -580,7 +625,7 @@ function compute_registration_fee($mysqli, &$p, &$users)
 	$n_tshirts = 0;
 	$sel = array();
 	foreach($users as $u) {
-		if($u['tshirt'] != 'none') $n_tshirts++;
+		if($u['tshirt'] != 'none' && $config['tshirt_enable']) $n_tshirts++;
 
 		/* Check their regfee items too */
 /*		if($config['participant_regfee_items_enable'] != 'yes') continue;
@@ -609,7 +654,7 @@ function compute_registration_fee($mysqli, &$p, &$users)
 		$regfee += $config['regfee'];
 	}
 
-	if(1) { /* Tshirts enabled */
+	if($config['tshirt_enable']) {
 		$tsc = floatval($config['tshirt_cost']);
 		if($tsc != 0.0) {
 			$f = $n_tshirts * $tsc;
@@ -738,9 +783,8 @@ function antispambot($email)
 }
 
 function mailto($email)
-{	?>
-	<a href="mailto:<?=antispambot($email)?>"><?=antispambot($email)?></a>
-<?php
+{
+	return '<a href="mailto:'.antispambot($email).'">'.antispambot($email).'</a>';
 }
 
 

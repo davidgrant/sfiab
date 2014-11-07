@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 
 $mysqli = sfiab_init('volunteer');
+$closed = sfiab_registration_is_closed($u);
 
 $u = user_load($mysqli);
 
@@ -17,6 +18,8 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
+
 	post_text($u['salutation'], 'salutation');
 	post_text($u['firstname'], 'firstname');
 	post_text($u['lastname'], 'lastname');
@@ -65,6 +68,7 @@ sfiab_page_begin("Volunteer Personal", $page_id, $help);
 
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed);
 
 	$form_id = $page_id."_form";
 	form_begin($form_id, 'v_personal.php');

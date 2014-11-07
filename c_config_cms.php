@@ -14,6 +14,7 @@ $page_id = 'c_config_cms';
 $cms_pages = array('exhibitordeclaration' => "Signature Form: Exhibitor Declaration", 
 		   'parentdeclaration'=> "Signature Form: Parent Declaration",
 		   'teacherdeclaration'=> "Signature Form: Teacher Declaration",
+		   'regfee'=> "Signature Form: Registration Fee Description",
 		   'postamble'=> "Signature Form: Post-Amble",
 		   'main'=> "Page: Main Page",
 		   'contact_us'=> "Page: Contact Us",

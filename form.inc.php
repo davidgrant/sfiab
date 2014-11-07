@@ -228,10 +228,11 @@ function form_checkbox($form_id, $name, $label, $data_value, &$value)
 function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false) 
 { 
 	$data = array(0 => 'No', 1 => 'Yes');
+	$v = (int)$value;
 	if(!$slider ) {
-		form_radio_h($form_id, $name, $label, $data, $value, $wide);
+		form_radio_h($form_id, $name, $label, $data, $v, $wide);
 	} else {
-	        form_select($form_id, $name, $label, $data, $value, 'slider', $wide);
+	        form_select($form_id, $name, $label, $data, $v, 'slider', $wide);
 	}
 }
 

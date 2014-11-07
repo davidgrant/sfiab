@@ -54,9 +54,9 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	if($u == NULL) return false;
 	if(!$u['enabled'] == 'deleted') return false;
 
-	/* Fill in additional replace vars that the email send script can't calculate, like the fair URL */
+	/* Fill in additional replace vars that the email send script can't
+	 * calculate from the command line, like the fair URL */
 	$additional_replace['fair_url'] = $config['fair_url'];
-
 
 	$ad = $mysqli->real_escape_string(serialize($additional_replace));
 	$n = $mysqli->real_escape_string($u['name']);
@@ -70,52 +70,6 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	queue_start($mysqli);
 
 	return true;
-}
-
-function email_get_user_replacements(&$u, &$additional_replacements) 
-{
-	global $config;
-	/* Replacements that depend on the configuration or must be specified */
-	$rep = array(	'FAIRNAME' => $config['fair_name'],
-			'FAIRABBR' => $config['fair_abbreviation'],
-			'YEAR' => $config['year'],
-			'LOGIN_LINK' => $additional_replacements['FAIR_URL'].'/index.php#login',
-			'FAIR_URL' => $additional_replacements['FAIR_URL'],
-		);
-
-	/* Optional replacements */
-	if(array_key_exists('PASSWORD', $additional_replacements)) {
-		$rep['PASSWORD'] = $additional_replacements['PASSWORD'];
-	}
-
-	if(is_array($u)) {
-		/* Replacements that depend on a user */
-		$rep['NAME'] = $u['name'];
-		$rep['EMAIL'] = $u['email'];
-		$rep['USERNAME'] = $u['username'];
-		$rep['SALUTATION'] = $u['salutation'];
-		$rep['FIRSTNAME'] = $u['firstname'];
-		$rep['LASTNAME'] = $u['lastname'];
-		$rep['ORGANIZATION'] = $u['organization'];
-	}
-	return $rep;
-}
-
-/* This is only called from the send email script */
-function email_replace_vars($text, &$u, &$additional_replacements) 
-{
-	global $config;
-
-	$rep=email_get_user_replacements($u, $additional_replacements);
-
-	$pats = array();
-	$reps = array();
-	foreach($rep AS $k=>$v) {
-		$pats[] = "/\[$k\]/";
-		$reps[] = $v;
-	}
-	$text=preg_replace($pats, $reps, $text);
-	return $text;
 }
 
 function queue_stopped($mysqli) 

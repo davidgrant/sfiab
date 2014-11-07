@@ -190,7 +190,7 @@ function sig($pdf, $text)
 	$pdf->Cell(60, $height_font, i18n('Date'), 'T', 1, 'C');
 }
 
-$e_decl = cms_get($mysqli, 'exhibitordeclaration');
+$e_decl = cms_get($mysqli, 'exhibitordeclaration', $u);
 if($e_decl !== NULL) {
 	$t = nl2br($e_decl);
 	$pdf->WriteHTML("<h3>".i18n('Exhibitor Declaration')."</h3>$t");
@@ -201,7 +201,7 @@ if($e_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");
  }
 
-$p_decl = cms_get($mysqli, 'parentdeclaration');
+$p_decl = cms_get($mysqli, 'parentdeclaration', $u);
 if($p_decl !== NULL) {
  	$t = nl2br($p_decl);
 	$pdf->WriteHTML("<h3>".i18n('Parent/Guardian Declaration')."</h3>$t");
@@ -212,7 +212,7 @@ if($p_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");
  }
 
-$t_decl = cms_get($mysqli, 'teacherdeclaration');
+$t_decl = cms_get($mysqli, 'teacherdeclaration', $u);
 if($t_decl !== NULL) {
  	$t = nl2br($t_decl);
 	$pdf->WriteHTML("<h3>".i18n('Teacher Declaration')."</h3>$t");
@@ -220,7 +220,7 @@ if($t_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");	
  }
 
-$r_decl = cms_get($mysqli, 'regfee');
+$r_decl = cms_get($mysqli, 'regfee', $u);
 if($r_decl !== NULL) {
 	$pdf->WriteHTML("<h3>".i18n('Registration Fee Summary')."</h3><br>");
 
@@ -249,7 +249,7 @@ if($r_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");	
 }
 
-$p_decl = cms_get($mysqli, 'postamble');
+$p_decl = cms_get($mysqli, 'postamble', $u);
 if($p_decl !== NULL) {
  	$t = nl2br($p_decl);
 	$pdf->WriteHTML("<h3>".i18n('Additional Information')."</h3>$t");

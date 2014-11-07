@@ -48,8 +48,6 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 ?>
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
-	<p> Welcome to the new <?=$config['fair_abbreviation']?> registration system.  
-	
 	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_j_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
 
 <?php

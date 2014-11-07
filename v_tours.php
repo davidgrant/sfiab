@@ -7,6 +7,7 @@ require_once('incomplete.inc.php');
 $mysqli = sfiab_init('volunteer');
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 'v_tours';
 
@@ -17,6 +18,7 @@ if(array_key_exists('action', $_POST)) {
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	$u['v_tour_username'] = NULL;
 	if($u['v_relation'] == 'parent') {
 		post_bool($u['v_tour_match_username'], 'v_tour_match_username');
@@ -62,6 +64,7 @@ sfiab_page_begin("Volunteer Tour Selection", $page_id, $help);
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed);
 
 ?>
 	<h3>Tour Selection</h3>

@@ -127,13 +127,16 @@ $_SESSION['login_hash'] = $login_hash;
 	<div data-role="fieldcontain">
 		<label for="register_as" class="select">Register as a:</label>
 		<select name="register_as" id="register_as" >
-		    <option value="student" <?=$s_disabled?> >Student<?=$s_text?></option>
-		    <option value="judge" <?=$j_disabled?> >Judge<?=$j_text?></option>
-		    <option value="volunteer" <?=$v_disabled?> >Volunteer<?=$v_text?></option>
-<?php		 if(sfiab_user_is_a('committee')) { 
-//		    <option value="teacher">Teacher</option>
+			<option value="student" <?=$s_disabled?> >Student<?=$s_text?></option>
+			<option value="judge" <?=$j_disabled?> >Judge<?=$j_text?></option>
+<?php			if($config['volunteers_enable']) { ?>
+				<option value="volunteer" <?=$v_disabled?> >Volunteer<?=$v_text?></option>
+<?php			} 
+
+		 	if(sfiab_user_is_a('committee')) { 
+//				<option value="teacher">Teacher</option>
 ?>
-		    	<option value="committee">Committee Member</option>
+				<option value="committee">Committee Member</option>
 <?php		} ?>
 		
 		</select>

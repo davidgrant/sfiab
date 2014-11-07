@@ -102,10 +102,10 @@ while(true) {
 		/* Load additional replacements */
 		$rep = unserialize($db_rep);
 
-		$subject = email_replace_vars($db_email_subject, $u, $rep);
-		$body = email_replace_vars($db_email_body, $u, $rep);
+		$subject = replace_vars($db_email_subject, $u, $rep);
+		$body = replace_vars($db_email_body, $u, $rep);
 		if($db_email_body_html != '') {
-			$body_html = email_replace_vars($db_email_body_html, $u, $rep);
+			$body_html = replace_vars($db_email_body_html, $u, $rep, true);
 		} else {
 			$body_html = '';
 		}

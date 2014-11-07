@@ -10,6 +10,7 @@ $page_id = "v_home";
 
 /* Load the logged in user or the one being editted */
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $action = '';
 if(array_key_exists('action', $_POST)) {
@@ -50,7 +51,7 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 
 	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_v_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
 
-	<p><?=cms_get($mysqli, 'v_main');?>
+	<p><?=cms_get($mysqli, 'v_main', $u);?>
 
 <?php
 	if(!$u['attending']) {
@@ -65,12 +66,18 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 		<p>Your registration will still be here next year if you are
 		able to volunteer again.  
 		
-		<p>If your plans change for this year, just indicate below that
-		you are able to volunteer at the fair again, and finish the registration
-		process.  If the registration deadline has passed, please contact
-		our registration coordinator at registration@gvrsf.ca.
+<?php		if($closed) { ?>
+			<p>Registration is now closed for this year.
+<?php		} else { ?>
+			<p>If your plans change for this year, just indicate below that
+			you are able to volunteer at the fair again, and finish the registration
+			process.  If the registration deadline has passed, please contact
+			our registration coordinator at <?=mailto($config['email_registration'])?>
+<?php		} ?>
 		
 		<p>Thank you.	
+
+			
 <?php
 	} else if($u['v_complete'] == 1) {
 ?>
@@ -84,12 +91,15 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
 		
-		The red numbers in the menu on the left indicate which sections
-		have missing data.  Registration closes on <b><?=date('F d, Y', strtotime($config['date_judge_registration_closes']))?></b>.
-		You have until this day to complete your registration.  After this
-		date, the registration system closes and you will not be
-		assigned to a volunteer position.
-<?php
+<?php		if($closed) { ?>
+			<p>Registration is now closed.
+<?php		} else { ?>
+			<p>The red numbers in the menu on the left indicate which sections
+			have missing data.  Registration closes on <b><?=date('F d, Y', strtotime($config['date_judge_registration_closes']))?></b>.
+			You have until this day to complete your registration.  After this
+			date, the registration system closes and you will not be
+			assigned to a volunteer position.
+<?php		}
 	}
 ?>
 		
@@ -100,6 +110,13 @@ sfiab_page_begin("Volunteer Main", $page_id, $help);
 	the switch below to let us know.  This helps us re-organize volunteers if 
 	assignments have already been made.  You can always flip the switch back again.
 	<?php
+	if($closed) { ?>
+		<p>Registration is closed and volunteer assignments have been made.
+		If you indicate below that you're not attending, you will be
+		removed from your volunteer assignments.  If you later change
+		your status back to attending, you may not get the same
+		assignment.
+<?php	} 
 
 	/* This is backwards because it's "not attending" */
 	$sel = array('1'=>'Yes, I\'ll be there', '0'=>'No, I can\'t make it');

@@ -7,6 +7,7 @@ require_once('incomplete.inc.php');
 $mysqli = sfiab_init('volunteer');
 
 $u = user_load($mysqli);
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 'v_options';
 
@@ -25,6 +26,7 @@ $tshirt_sizes = array(//'none' => 'None',
 
 switch($action) {
 case 'save':
+	if($closed) exit();
 	post_text($u['tshirt'], 'tshirt');
 	if(!array_key_exists($u['tshirt'], $tshirt_sizes)) {
 		$u['tshirt'] = NULL;
@@ -46,6 +48,7 @@ sfiab_page_begin("Volunteer Registration Options", $page_id, $help);
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
+	form_disable_message($page_id, $closed);
 
 ?>
 	<h3>T-Shirt</h3>

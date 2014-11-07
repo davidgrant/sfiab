@@ -68,6 +68,9 @@ sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 			form_begin($form_id, 'c_config_variables.php');
 			foreach($v as $var=>&$d) { 
 				switch($d['type']) {
+				case 'yesno':
+					form_yesno($form_id, 'cfg_'.$d['var'], $d['var'], $d['val']);
+					break;
 				case 'timezone':
 					form_select($form_id, 'cfg_'.$d['var'], $d['var'], $timezones, $d['val']);
 					break;
@@ -80,6 +83,15 @@ sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 			form_end($form_id);
 
 			?>
+
+			<br/><hr/><br/>
+			<h3>Help</h3>
+			<table>
+<?php			foreach($v as $var=>&$d) {  ?>
+				<tr><td><b><?=$d['var']?></b></td><td>:</td><td><?=$d['description']?></td></tr>
+<?php			} ?>
+			</table>
+
 		</div>
 <?php	}?>
 
@@ -102,3 +114,5 @@ sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 <?php
 sfiab_page_end();
 ?>
+
+

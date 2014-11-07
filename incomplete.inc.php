@@ -125,10 +125,17 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		}
 		break;
 	case 's_reg_options':
-		incomplete_check_text($ret, $u, array('tshirt'));
+		if($config['tshirt_enable']) {
+			incomplete_check_text($ret, $u, array('tshirt'));
+		}
 		break;
 
 	case 's_tours':
+
+		if(!$config['tours_enable']) {
+			break;
+		}
+
 		if(count($u['tour_id_pref']) > 0) {
 			$x = 0;
 			foreach($u['tour_id_pref'] as $tid) {
@@ -322,6 +329,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		break;
 
 	case 'v_tours':
+		
 		if($u['v_relation'] == 'parent') {
 			incomplete_check_bool($ret, $u, array('v_tour_match_username'));
 		} 
