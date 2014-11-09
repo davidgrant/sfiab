@@ -50,6 +50,8 @@ function apply_db($mysqli, $fp)
 			continue;
 		}
 
+		/* Fixme add support for -- and C-style slash-star star-slash comments  */
+
 		$sql .= $line;
 		if($line[strlen($line)-1] == ';') {
 			$mysqli->real_query($sql);

@@ -14,5 +14,13 @@ function pre_16($mysqli)
 	}
 	print("Salted $c passwords.\n");
 
+	print("Removing year from config...\n");
+
+	$q = $mysqli->query("SELECT val FROM `config` WHERE `var`='year'");
+	$r = $q->fetch_row();
+	$year = (int)$r[0];
+
+	$mysqli->real_query("DELETE FROM `config` WHERE `year`>=0 AND `year`!='$year'");
+	$mysqli->real_query("ALTER TABLE `config` DROP `year`");
 }
 ?>
