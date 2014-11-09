@@ -144,6 +144,7 @@ while(true) {
 			sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id}: {$mail->ErrorInfo}");
 		} else {
 			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+			sfiab_log($mysqli, "email send", "Sent email with emails_id {$db_emails_id} to $db_email");
 		}
 		break;
 
