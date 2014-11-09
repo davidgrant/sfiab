@@ -124,15 +124,13 @@ case 'register':
 	$q = $mysqli->real_query("DELETE FROM users WHERE `username`='$username' AND `new`='1'");
 	print($mysqli->error);
 
-	$password = NULL;
-	$uid = user_create($mysqli, $username, $email, $as, $config['year'], $password);
-	$u = user_load($mysqli, $uid);
+	$u = user_create($mysqli, $username, $email, $as, $config['year']);
 	$u['firstname'] = $fn;
 	$u['lastname'] = $ln;
 	user_save($mysqli, $u);
 
 	/* Send an email */
-	$result = email_send($mysqli, "New Registration", $uid, array('password'=>$password) );
+	$result = email_send($mysqli, "New Registration", $u['uid'], array('password'=>$u['scrambled_password']) );
 
 	sfiab_log($mysqli, "register ok", "username: $username, email: $email, as: $as, email status: $result");
 	
@@ -141,15 +139,9 @@ case 'register':
 
 	
 case 'login':
-	if(!array_key_exists('login_hash', $_SESSION)) {
-		sfiab_log($mysqli, 'login no user', $username);
-		print(ajax(1, 'Sorry, invalid username or password'));
-		exit();
-	}
-	$login_hash = $_SESSION['login_hash'];
 	
 	$username = strtolower($mysqli->real_escape_string($_POST['username']));
-	$hash = $mysqli->real_escape_string(filter_hash($_POST['password']));
+	$hashed_pw = $mysqli->real_escape_string(filter_hash($_POST['password']));
 
 	if(!check_username($username)) {
 		print(ajax(1, 'Sorry, invalid username or password'));
@@ -173,7 +165,7 @@ case 'login':
 
 	/* Hash must be valid, it gets read from the $_SESSION, so there's no 
 	 * reason for it not to be valid*/
-	if(strlen($login_hash) != 128) {
+	if(strlen($u['salt']) != 128) {
 		sfiab_log($mysqli, 'login bad salt', $username);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
@@ -194,8 +186,10 @@ case 'login':
 	 * we compute   : hash( hash(hash(p).login_hash) . salt ) and see if it matches the hash in our db 
 	 * we store:  salt, hash(salt.hash(p),  */
 
-	$password_hash = hash('sha512', $u['password'].$login_hash); // hash the password with the session login hash.
-	if($password_hash != $hash) {
+	/* Take the user's provided password hash (hash(p), and hash it with the salt, then see if that's what is in the
+	 * database */
+	$salted_hash = hash('sha512', $hashed_pw.$u['salt']);
+	if($salted_hash != $u['password']) {
 		sfiab_log($mysqli, 'login bad pass', $username, $u['uid']);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
@@ -226,10 +220,6 @@ case 'login':
 	$_SESSION['roles'] = $u['roles'];
 	$_SESSION['password_expired'] = $u['password_expired'];
 	$_SESSION['u'] = $u;
-
-	/* Hash the passwd with the browser, the browser shouldn't change. we can check
-	 * it every page load */
-	$_SESSION['session_hash'] = hash('sha512', $password_hash.$_SERVER['HTTP_USER_AGENT']);
 
 	/* Populate the complete status of all fields */
 	$_SESSION['incomplete'] = array();

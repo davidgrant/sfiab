@@ -120,13 +120,24 @@ function sfiab_session_start()
         $cookieParams = session_get_cookie_params(); 
         session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $secure, $httponly); 
         session_name($session_name);
-        session_start(); 
-        session_regenerate_id();
+        session_start();
+
+	$session_hash = hash('sha512', 'X'.$_SERVER['REMOTE_ADDR'].'X'.$_SERVER['HTTP_USER_AGENT']);
+		/* Hash the passwd with the browser, the browser shouldn't change. we can check
+	 * it every page load */
+	if(array_key_exists('session_hash', $_SESSION)) {
+		if($_SESSION['session_hash'] != $session_hash) {
+			/* Something changed, user is trying to session hijack? start a new session */
+			session_regenerate_id();
+			session_unset();
+		}
+	}
+	$_SESSION['session_hash'] = $session_hash;
 }
 
 function sfiab_logged_in()
 {
-	if(!isset($_SESSION['unique_uid'], $_SESSION['username'], $_SESSION['session_hash'])) 
+	if(!isset($_SESSION['unique_uid'], $_SESSION['username'])) 
 		return false;
 	return true;
 }
@@ -163,9 +174,7 @@ function sfiab_check_access($mysqli, $roles, $skip_expiry_check)
 
 	$uid = $_SESSION['uid'];
 	$unique_id = $_SESSION['unique_uid'];
-	$session_hash = $_SESSION['session_hash'];
 	$username = $_SESSION['username'];
-	$user_browser = $_SERVER['HTTP_USER_AGENT']; 
  
 	$q = $mysqli->prepare("SELECT roles,password FROM users WHERE uid = ? LIMIT 1");
 	$q->bind_param('i', $uid);
@@ -177,15 +186,6 @@ function sfiab_check_access($mysqli, $roles, $skip_expiry_check)
 	}
 	$q->bind_result($db_roles, $db_password); // get variables from result.
 	$q->fetch();
-
-	$hash_check = hash('sha512', $db_password.$user_browser);
-	if($hash_check != $session_hash) {
-//		print("Access Denied2<br/>");
-//		print_r($_SESSION);
-//		print("But computed hash $hash_check<br/>");
-
-//		exit();
-	}
 
 	/* If editting another user, enforce committee no mater what
 	 * the page asked for */
@@ -315,6 +315,8 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_award_winners' => NULL,
 			    'c_backup' => NULL,
 			    'c_config' => array('Configuration', 'c_config.php'),
+			    'c_config_variables' => NULL,
+			    'c_config_cms' => NULL,
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_judge_sanity' => NULL,
 			    'c_judge_score_entry' => NULL,

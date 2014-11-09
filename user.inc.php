@@ -13,32 +13,39 @@ function user_load_all_for_project($mysqli, $pid)
 	return $us;
 }
 
-function user_new_password()
+function user_scramble_and_expire_password($mysqli, &$u)
 {
-	/* Create new 9 character scrambled password */
-	$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
-	return $password;
+	/* Scramble the user's password.  Save the plaintext password in $u['scrambled_password'] which doesn't get saved anywhere or reloaded.  THings like the mailer
+	 * need it to send to the user after a password reste */
+
+	/* Get a new salt and password */
+	$u['salt'] = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
+	$u['scrambled_password'] = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
+	/* Hash it with the salt for database storage */
+	$u['password'] = hash('sha512', hash('sha512', $u['scrambled_password']).$u['salt']);
+	$u['password_expired'] = 1;
+	user_save($mysqli, $u);
 }
 
 /* roles can be a single role, or a comma separated list of roles */
-function user_create($mysqli, $username, $email, $role, $year, &$password)
+function user_create($mysqli, $username, $email, $role, $year)
 {
-	if($password == '' or $password === NULL) {
-		$password = user_new_password();
-	}
-	$password_hash = hash('sha512', $password);
-
 	$u = ($username === NULL) ? 'NULL' : "'$username'";
 
-	$q = $mysqli->real_query("INSERT INTO users (`username`,`new`,`enabled`,`email`,`year`,`roles`,`password`,`password_expired`) 
-				VALUES($u, '1','1','$email','$year','$role','$password_hash', '1')");
+	$q = $mysqli->real_query("INSERT INTO users (`username`,`new`,`enabled`,`email`,`year`,`roles`,`password`,`salt`,`password_expired`) 
+				VALUES($u, '1','1','$email','$year','$role','','', '1')");
 	$uid = $mysqli->insert_id;
 	print($mysqli->error);
 	/* Since this is a new user, set the unique id == uid */
 	$mysqli->query("UPDATE users SET unique_uid=$uid WHERE uid=$uid");
 	print($mysqli->error);
 
-	return $uid;
+	$u = user_load($mysqli, $uid);
+
+	/* Scramble password, set $u['scrambled_assword'] */
+	user_scramble_and_expire_password($mysqli, $u);
+
+	return $u;
 }
 
 function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
@@ -284,9 +291,8 @@ function user_homepage(&$u)
 function user_copy($mysqli, $u, $new_year) 
 {
 	global $config;
-	$new_pw = NULL;
-	$new_uid = user_create($mysqli, $u['username'], $u['email'], join(',',$u['roles']), $config['year'], $new_pw);
-	$new_u = user_load($mysqli, $new_uid);
+	$new_u = user_create($mysqli, $u['username'], $u['email'], join(',',$u['roles']), $config['year']);
+	$new_uid = $new_u['uid'];
 
 	$old_uid = $u['uid'];
 	$old_year = $u['year'];
@@ -437,10 +443,7 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 			$check_username = $username.".".$x;
 			$x++;
 		}
-		$password = NULL;
-		$uid = user_create($mysqli, $username, $incoming_user['email'], $roles[0], $year, $password);
-		$u = user_load($mysqli, $uid);
-		
+		$u = user_create($mysqli, $username, $incoming_user['email'], $roles[0], $year);
 		debug("user_sync: created new user id={$u['uid']}\n");
 	}
 

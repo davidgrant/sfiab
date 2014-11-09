@@ -105,12 +105,8 @@ case 'del':
 	exit();
 
 case 'resend':
-	$password = user_new_password();
-	$edit_u['password'] = hash('sha512', $password);
-	$edit_u['password_expired'] = 1;
-	user_save($mysqli, $edit_u);
-
-	$result = email_send($mysqli, "New Registration", $edit_u['uid'], array('password'=>$password) );
+	user_scramble_and_expire_password($mysqli, $edit_u);
+	$result = email_send($mysqli, "New Registration", $edit_u['uid'], array('password'=>$edit_u['scrambled_password']) );
 	form_ajax_response(0);
 	exit();
 

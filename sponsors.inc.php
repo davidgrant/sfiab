@@ -55,10 +55,11 @@ function sponsor_create_or_get($mysqli, $org, $year = NULL)
 		return (int)$sp['uid'];
 	}
 
-	$pass = NULL;
-	$sponsor_uid = user_create($mysqli, NULL, '', 'sponsor', $year, $pass);
-	$mysqli->query("UPDATE users SET `enabled`='1', organization='$org' WHERE uid='$sponsor_uid'");
-	return $sponsor_uid;
+	$sponsor_u = user_create($mysqli, NULL, '', 'sponsor', $year);
+	$sponsor_u['enabled'] = 1;
+	$sponsor_u['organization'] = $org;
+	user_save($mysqli, $sponsor_u);
+	return $sponsor_u['uid'];
 }
 
 ?>

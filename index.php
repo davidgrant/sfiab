@@ -15,8 +15,8 @@ sfiab_load_config($mysqli);
 
 sfiab_page_begin('Welcome', 'welcome');
 
-$login_hash = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
-$_SESSION['login_hash'] = $login_hash;
+//$login_hash = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
+//$_SESSION['login_hash'] = $login_hash;
 
 
 
@@ -286,12 +286,11 @@ $_SESSION['login_hash'] = $login_hash;
 			$('#login_msg').addClass("error_hidden");
 			var u = $('#un').val();
 			var p = $('#pw').val();
-			var h = $('#hash').val();
 
-			var hash = hex_sha512(hex_sha512(p) + h);
+			var hashed_pw = hex_sha512(p);
 
 			// Send the data using post
-			$.post( "login.php", { username: u, password: hash, action: "login" }, function( data ) {
+			$.post( "login.php", { username: u, password: hashed_pw, action: "login" }, function( data ) {
 				if(data.s == '0') {
 					/* Success */
 					window.location.replace(data.m);
