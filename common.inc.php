@@ -173,20 +173,17 @@ function sfiab_check_access($mysqli, $roles, $skip_expiry_check)
 	}
 
 	$uid = $_SESSION['uid'];
-	$unique_id = $_SESSION['unique_uid'];
-	$username = $_SESSION['username'];
- 
-	$q = $mysqli->prepare("SELECT roles,password FROM users WHERE uid = ? LIMIT 1");
-	$q->bind_param('i', $uid);
-	$q->execute(); 
-	$q->store_result();
+//	$unique_id = $_SESSION['unique_uid'];
+//	$username = $_SESSION['username'];
+
+	$q = $mysqli->query("SELECT roles FROM users WHERE `uid`='$uid' LIMIT 1");
 	if($q->num_rows != 1) {
 		print("Access Denied<br/>");
 		exit();
 	}
-	$q->bind_result($db_roles, $db_password); // get variables from result.
-	$q->fetch();
-
+	$r = $q->fetch_row();
+	$db_roles = $r[0];
+	
 	/* If editting another user, enforce committee no mater what
 	 * the page asked for */
 	if(array_key_exists('edit_uid', $_SESSION)) {

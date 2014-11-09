@@ -82,7 +82,7 @@ sfiab_page_begin("Judging", $page_id);
 	/* Count unused judges */
 	foreach($judges as &$j) {
 		for($r=0; $r<$config['judging_rounds']; $r++) {
-			if($j['j_rounds'][$r] == $r && !in_array($j['uid'], $judges_used_in_round[$r])) {
+			if(in_array($r, $j['j_rounds']) && !in_array($j['uid'], $judges_used_in_round[$r])) {
 				$unused_judge_count[$r]+=1;
 			}
 		}

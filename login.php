@@ -234,6 +234,7 @@ case 'login':
 	exit();
 
 case 'change_pw':
+	/* The password goes through a hash, so we can let them do whatever they want */
 	$pw1 = $_POST['pw1'];
 	$pw2 = $_POST['pw2'];
 	$letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -242,16 +243,20 @@ case 'change_pw':
 		form_ajax_response_error(1, 'Passwords must be at least 8 characters long and contain at least one letter, one number, and one non-alphanumberic character (something other than a letter and a number)');
 		exit();
 	}
+	if(strlen($pw1) > 256) {
+		/* Is the user typing a novel? */
+		form_ajax_response_error(1, 'Bad Password.');
+		exit();
+	}
 
 	if($pw1 != $pw2) {
 		form_ajax_response_error(1, 'Passwords don\'t match');
 		exit();
 	}
 
-	$hash = hash('sha512', $pw1);
-	$uid = $_SESSION['uid'];
-	$mysqli->query("UPDATE users SET password='$hash', password_expired='0' WHERE uid=$uid");
-	sfiab_log($mysqli, 'change pw', "");
+	/* Auto-load the user from the session */
+	$u = user_load($mysqli);
+	user_change_password($myslqi, $u, $pw1);
 
 	if($_SESSION['password_expired']) {
 		$_SESSION['password_expired'] = false;

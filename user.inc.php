@@ -13,19 +13,32 @@ function user_load_all_for_project($mysqli, $pid)
 	return $us;
 }
 
+function user_change_password($mysqli, &$u, $new_password)
+{
+	$u['salt'] = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
+	$hashed_pw = hash('sha512', $new_password);
+	$u['password'] = hash('sha512', $hashed_pw.$salt);
+	$u['password_expired'] = 0;
+	sfiab_log($mysqli, 'change pw', "");
+	user_save($u);
+}
+
 function user_scramble_and_expire_password($mysqli, &$u)
 {
 	/* Scramble the user's password.  Save the plaintext password in $u['scrambled_password'] which doesn't get saved anywhere or reloaded.  THings like the mailer
 	 * need it to send to the user after a password reste */
 
+	sfiab_log($mysqli, 'scramble pw', "");
 	/* Get a new salt and password */
-	$u['salt'] = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
 	$u['scrambled_password'] = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
-	/* Hash it with the salt for database storage */
-	$u['password'] = hash('sha512', hash('sha512', $u['scrambled_password']).$u['salt']);
+	user_change_password($mysqli, $u, $u['scrambled_password']);
+
+	/* changing the password unexpires it, we want it expired */
 	$u['password_expired'] = 1;
 	user_save($mysqli, $u);
 }
+
+
 
 /* roles can be a single role, or a comma separated list of roles */
 function user_create($mysqli, $username, $email, $role, $year)

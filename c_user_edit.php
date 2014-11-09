@@ -117,9 +117,7 @@ case 'change_pw':
 		form_ajax_response_error(1, 'Passwords don\'t match');
 		exit();
 	}
-	$hash = hash('sha512', $pw1);
-	$mysqli->query("UPDATE users SET password='$hash', password_expired='0' WHERE uid=$edit_uid");
-	sfiab_log($mysqli, 'change pw', "");
+	user_change_password($mysqli, $edit_u, $pw1);
 	form_ajax_response(0);
 	exit();
 }

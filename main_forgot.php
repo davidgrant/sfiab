@@ -18,13 +18,8 @@ case 'pw':
 	/* Send password */
 	$u = user_load_by_username($mysqli, $username);
 	if($u != NULL) {
-		$uid = $u['uid'];
-		$password = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
-	        $password_hash = hash('sha512', $password);
-		$mysqli->real_query("UPDATE users SET password='$password_hash',password_expired='1' WHERE uid='{$uid}'");
-		email_send($mysqli, "Forgot Password", $uid, array('password'=>$password) );
-		sfiab_log($mysqli, 'reset pw', "", $uid);
-		
+		user_scramble_and_expire_password($mysqli, $u);
+		email_send($mysqli, "Forgot Password", $u['uid'], array('password'=>$password) );
 	}
 	/* Always send the user to the page even if nothing was sent.. we dont' want
 	 * people checking for valid usernames this way */
