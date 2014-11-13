@@ -29,6 +29,7 @@ require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('committee/email_lists.inc.php');
 require_once('email.inc.php');
+require_once('update.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -165,25 +166,7 @@ case 'restore':
 	print("File is DB Version {$matches[1]}\n");
 
 	print("Starting multiread restore...\n");
-	/* Go line by line, inserting everything into the database */
-	$sql = '';
-	while(!feof($fp)) {
-		/* Multiline read support */
-		$line = trim(fgets($fp));
-		if($line[0] == '#') {
-			continue;
-		}
-
-		$sql .= $line;
-		if($line[strlen($line)-1] == ';') {
-			$mysqli->real_query($sql);
-//			print("$sql\n");
-			if($mysqli->error != '') {
-				print($mysqli->error."\n");
-			}
-			$sql = '';
-		}
-	}
+	update_apply_db($mysqli, $fp);
 	gzclose($fp);
 	unlink($_FILES['restore']['tmp_name']);
 
