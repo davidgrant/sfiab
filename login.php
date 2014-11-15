@@ -256,11 +256,10 @@ case 'change_pw':
 
 	/* Auto-load the user from the session */
 	$u = user_load($mysqli);
-	user_change_password($myslqi, $u, $pw1);
+	user_change_password($mysqli, $u, $pw1);
 
 	if($_SESSION['password_expired']) {
 		$_SESSION['password_expired'] = false;
-		$u = user_load($mysqli, $uid);
 		form_ajax_response(array('status'=>0, 'location'=> user_homepage($u)));
 	} else {
 		form_ajax_response(array('status'=>0,'happy'=>'Password changed'));
