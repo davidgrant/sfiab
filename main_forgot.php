@@ -19,7 +19,7 @@ case 'pw':
 	$u = user_load_by_username($mysqli, $username);
 	if($u != NULL) {
 		user_scramble_and_expire_password($mysqli, $u);
-		email_send($mysqli, "Forgot Password", $u['uid'], array('password'=>$password) );
+		email_send($mysqli, "Forgot Password", $u['uid'], array('password'=>$u['scrambled_password']) );
 	}
 	/* Always send the user to the page even if nothing was sent.. we dont' want
 	 * people checking for valid usernames this way */
