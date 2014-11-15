@@ -283,7 +283,9 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 				'city', 'province', 'language','j_psd'));
 		break;
 	case 'j_options':
-		for($x=0; $x<$config['judging_rounds']; $x++) {
+		$ts = timeslots_load_all($mysqli);
+		$num_rounds = count($ts);
+		for($x=0; $x<$num_rounds; $x++) {
 			if(!array_key_exists($x, $u['j_rounds']) || 
 			   ($u['j_rounds'][$x] !== -1 && $u['j_rounds'][$x] !== $x) ) {
 			   	$ret[] = "j_rounds[$x]";

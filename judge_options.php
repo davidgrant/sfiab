@@ -24,7 +24,9 @@ $timeslots = timeslots_load_all($mysqli);
 $rounds = array();
 foreach($timeslots as &$ts) {
 	$rounds[(int)$ts['round']] = &$ts;
-}	
+}
+
+$num_rounds = count($rounds);
 
 switch($action) {
 case 'save':
@@ -33,8 +35,8 @@ case 'save':
 	post_bool($u['j_dinner'], 'j_dinner');
 
 	$u['j_rounds'] = array();
-	for($x = 0; $x<$config['judging_rounds']; $x++) {
-		post_int($u['j_rounds'][$x], array('j_rounds', $x) );
+	for($r = 0; $r<$num_rounds; $r++) {
+		post_int($u['j_rounds'][$r], array('j_rounds', $r) );
 	}
 	
 	$u['j_languages'] = NULL;
@@ -91,17 +93,16 @@ sfiab_page_begin("Options", $page_id, $help);
 	<h3>Time Availability</h3>
 	Note: You will be scheduled to judge in ALL of the judging rounds you answer 'Yes' to, not just one.
 	
-<?php	for($x=0; $x<$config['judging_rounds']; $x++) {
-		$ts = &$rounds[$x];
+<?php	for($r=0; $r<$num_rounds; $r++) {
+		$ts = &$rounds[$r];
 		$date_str = date("F j, g:ia", $ts['start_timestamp']);
 		$date_str .= ' - '.date("g:ia", $ts['end_timestamp']);
 
-		$data_values = array(-1 => 'No', $x => 'Yes');
+		$data_values = array(-1 => 'No', $r => 'Yes');
 
-		$v = array_key_exists($x, $u['j_rounds']) ?  $u['j_rounds'][$x] : '';
-		form_radio_h($form_id, "j_rounds[$x]", "Are you available to judge in {$ts['name']} ($date_str)?", $data_values, $u['j_rounds'][$x], true);
+		$v = array_key_exists($r, $u['j_rounds']) ?  $u['j_rounds'][$r] : '';
+		form_radio_h($form_id, "j_rounds[$r]", "Are you available to judge in {$ts['name']} ($date_str)?", $data_values, $u['j_rounds'][$r], true);
 	}
-	$x=0;
 	form_submit($form_id, 'save','Save','Information Saved');
 	form_end($form_id);
 ?>

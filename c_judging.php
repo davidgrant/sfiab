@@ -14,6 +14,9 @@ $u = user_load($mysqli);
 
 $page_id = 'c_judging';
 
+$timeslots = timeslots_load_all($mysqli);
+$num_rounds = count($timeslots);
+
 sfiab_page_begin("Judging", $page_id);
 ?>
 
@@ -36,7 +39,7 @@ sfiab_page_begin("Judging", $page_id);
 	$jteam_judge_count = array();
 	$judges_used_in_round = array();
 	$unused_judge_count = array();
-	for($r=0; $r<$config['judging_rounds']; $r++) {
+	for($r=0; $r<$num_rounds; $r++) {
 		$j_round[$r] = 0;
 		$jteam_count[$r] = array('divisional'=>0, 'special'=>0);
 		$jteam_judge_count[$r] = array('divisional'=>0, 'special'=>0);
@@ -81,7 +84,7 @@ sfiab_page_begin("Judging", $page_id);
 
 	/* Count unused judges */
 	foreach($judges as &$j) {
-		for($r=0; $r<$config['judging_rounds']; $r++) {
+		for($r=0; $r<$num_rounds; $r++) {
 			if(in_array($r, $j['j_rounds']) && !in_array($j['uid'], $judges_used_in_round[$r])) {
 				$unused_judge_count[$r]+=1;
 			}

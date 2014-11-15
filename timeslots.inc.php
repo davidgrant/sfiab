@@ -46,10 +46,13 @@ function timeslot_load($mysqli, $id , $data = NULL)
 function timeslots_load_all($mysqli)
 {
 	global $config;
-	$q = $mysqli->query("SELECT * FROM timeslots WHERE year='{$config['year']}' ORDER BY `round`");
-	$timeslots = array();
-	while($d = $q->fetch_assoc()) {
-		$timeslots[(int)$d['id']] = timeslot_load($mysqli, 0, $d);
+	static $timeslots = NULL;
+	if($timeslots === NULL) {
+		$q = $mysqli->query("SELECT * FROM timeslots WHERE year='{$config['year']}' ORDER BY `round`");
+		$timeslots = array();
+		while($d = $q->fetch_assoc()) {
+			$timeslots[(int)$d['id']] = timeslot_load($mysqli, 0, $d);
+		}
 	}
 	return $timeslots;
 }
@@ -61,7 +64,6 @@ function timeslot_create($mysqli)
 	$q = $mysqli->query("SELECT COUNT(`id`) AS c FROM timeslots WHERE year='{$config['year']}'");
 	$r = $q->fetch_assoc();
 	$c = (int)$r['c'] + 1;
-	$mysqli->query("UPDATE config SET judging_rounds='$c' WHERE year='{$config['year']}'");
 	$mysqli->query("INSERT INTO timeslots(`year`,`round`,`name`) VALUES ('{$config['year']}','{$r['c']}','Round $c')");
 	return $mysqli->insert_id;
 }
@@ -77,6 +79,5 @@ function timeslot_delete($mysqli, $id)
 	$ts = timeslot_load($mysqli, $id);
 	$mysqli->real_query("UPDATE timeslots SET `round`=`round`-1 WHERE `round`>{$ts['round']} AND year='{$config['year']}'");
 	$mysqli->real_query("DELETE FROM timeslots WHERE id='$id'");
-	$mysqli->real_query("UPDATE config SET judging_rounds=`judging_rounds`-1 WHERE year='{$config['year']}'");
 }
 ?>

@@ -3,7 +3,7 @@ INSERT INTO `cms` (`id` , `name` , `type` , `text` , `language` , `use`) VALUES
 	(NULL, 'v_main', 'pagetext', 'Currently we are only accepting fair volunteers for help with tours.  Please see the tour menu on the left.', 'en', '1');
 
 # This complains about out-of-date data in the updater, probably because we execute each command separately
-# We'll do this in php for now
+# Well do this in php for now
 #SELECT @year:=val FROM `config` WHERE `var`='year';
 #DELETE FROM `config` WHERE `year`>=0 AND `year`!=@year;
 #ALTER TABLE `config` DROP `year` ;
@@ -18,4 +18,7 @@ INSERT INTO `config` ( `var` , `val` , `category` , `type` , `type_values` , `or
 	('volunteers_enable', '1', 'Volunteers', 'yesno', '', 0, 'If volunteers should be allowed to register');
 
 ALTER TABLE `config` ADD `name` TINYTEXT NOT NULL AFTER `order` ;
+
+DELETE FROM `config` WHERE `var`='judging_rounds';
+
 
