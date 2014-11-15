@@ -455,8 +455,8 @@ function output_start($title = '')
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <title><?=$title?></title>
-  <link rel="stylesheet" href="scripts/jquery.mobile-1.4.2.min.css" />
-  <script src="scripts/jquery-1.9.1.min.js"></script>
+  <link rel="stylesheet" href="jquery/jquery.mobile-1.4.2.min.css" />
+  <script src="jquery/jquery-1.9.1.min.js"></script>
 <?php /* This allows the same page to be reloaded by default... it must be done before jquerymobile is loaded */ ?>
   <script>
     $(document).on("mobileinit", function(){ 
@@ -465,9 +465,9 @@ function output_start($title = '')
 //    	$.mobile.changePage.defaults.reloadPage = true; 
 	});
   </script>
-  <script src="scripts/jquery.mobile-1.4.2.min.js"></script>
-  <script src="scripts/jquery-ui.min.js"></script>
-  <script src="scripts/jquery.ui.touch-punch.min.js"></script>
+  <script src="jquery/jquery.mobile-1.4.2.min.js"></script>
+  <script src="jquery/jquery-ui.min.js"></script>
+  <script src="jquery/jquery.ui.touch-punch.min.js"></script>
   <link rel="stylesheet" href="sfiab.css">
   <script src="sfiab.js"></script>
 </head>

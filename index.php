@@ -277,7 +277,7 @@ sfiab_page_begin('Welcome', 'welcome');
 	</form>
 
 	<p>If you can't remember your username or password, <a href="<?=$config['fair_url']?>/main_forgot.php" data-ajax="false">click here</a> to recover them.
-	<script src="scripts/sha512.js"></script>
+	<script src="sha512.js"></script>
 	<script>
 		// Attach a submit handler to the form
 		$( "#login_form" ).submit(function( event ) {
