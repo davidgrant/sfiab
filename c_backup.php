@@ -29,7 +29,7 @@ require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('committee/email_lists.inc.php');
 require_once('email.inc.php');
-require_once('update.inc.php');
+require_once('db.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -166,7 +166,7 @@ case 'restore':
 	print("File is DB Version {$matches[1]}\n");
 
 	print("Starting multiread restore...\n");
-	update_apply_db($mysqli, $fp);
+	db_apply_update($mysqli, $fp);
 	gzclose($fp);
 	unlink($_FILES['restore']['tmp_name']);
 

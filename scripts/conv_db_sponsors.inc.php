@@ -89,7 +89,8 @@ function get_or_create_sponsor_uid_for_year($mysqli, $sponsor_id, $year)
 	}
 
 	$p = '';
-	$uid = user_create($mysqli, NULL, $s['email'], 'sponsor', $year, $p);
+	$u = user_create($mysqli, NULL, $s['email'], 'sponsor', $year, $p);
+	$uid = $u['uid'];
 	print("   Created new sponsor {$s['organization']} for year $year  ({$s['firstname']} {$s['lastname']}) (uid=$uid)\n");
 	
 	/* Old => New map */

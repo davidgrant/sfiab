@@ -29,8 +29,7 @@ function conv_judges($mysqli, $old_prefix, $year)
 
 		/* Create a new user */
 		$password = NULL;
-		$uid = user_create($mysqli, NULL, $old_u['email'], 'judge', $year, $password);
-		$u = user_load($mysqli, $uid);
+		$u = user_create($mysqli, NULL, $old_u['email'], 'judge', $year, $password);
 
 		$u['phone1'] = $old_u['phonehome'];
 		$u['phone2'] = $old_u['phonecell'];

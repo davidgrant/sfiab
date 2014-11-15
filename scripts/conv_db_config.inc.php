@@ -47,7 +47,7 @@ function conv_config($mysqli, $old_prefix)
 		$old_val = $old_c['val'];
 		$old_category = $old_c['category'];
 		$old_type = $old_c['type'];
-		$old_typevalues = $old_c['typevalues'];
+		$old_typevalues = $old_c['type_values'];
 		$old_ord = $old_c['ord'];
 		$old_description = $old_c['description'];
 

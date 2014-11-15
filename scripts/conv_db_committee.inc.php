@@ -24,8 +24,7 @@ function conv_committee($mysqli, $old_prefix, $year)
 		$password = NULL;
 		$username = strstr($old_u['email'], '@', true);
 
-		$uid = user_create($mysqli, NULL, $old_u['email'], 'committee', $year, $password);
-		$u = user_load($mysqli, $uid);
+		$u = user_create($mysqli, NULL, $old_u['email'], 'committee', $year, $password);
 
 		$u['phone1'] = $old_u['phonehome'];
 		$u['phone2'] = $old_u['phonecell'];

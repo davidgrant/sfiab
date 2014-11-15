@@ -29,8 +29,8 @@ function conv_students($mysqli, $old_prefix, $year)
 
 		/* Create a new user */
 		$password = NULL;
-		$uid = user_create($mysqli, NULL, $old_s['email'], 'student', $year, $password);
-		$u = user_load($mysqli, $uid);
+		$u = user_create($mysqli, NULL, $old_s['email'], 'student', $year, $password);
+		$uid = $u['uid'];
 
 		$u['phone1'] = $old_s['phone'];
 		filter_phone($u['phone1']);

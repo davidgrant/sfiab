@@ -1,4 +1,5 @@
 <?php
+require_once('awards.inc.php');
 
 $awards_map = array();
 $prizes_map = array();

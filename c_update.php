@@ -24,7 +24,7 @@
 
 require_once('common.inc.php');
 require_once('user.inc.php');
-require_once('update.inc.php');
+require_once('db.inc.php');
 
 /* Allow anyone to run this, there may not be any committee members logged in,
  * and we can't let anyone in until applying the update */
@@ -91,7 +91,7 @@ for($ver = $update_start; $ver <= $update_end; $ver++) {
 	if(file_exists("updates/$ver.sql")) {
 		print("   updates/$ver.sql detected - applying update...\n");
 		$fp = fopen("updates/$ver.sql", "rt");
-		upate_apply_db($mysqli, $fp);
+		db_apply_update($mysqli, $fp);
 		fclose($fp);
 	}
 	else {
