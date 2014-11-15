@@ -4,7 +4,7 @@
 $students_map = array();
 $projects_map = array();
 
-function conv_students($mysqli, $mysqli_old, $year)
+function conv_students($mysqli, $old_prefix, $year)
 {
 	global $schools_map, $tours_map;
 	global $students_map, $projects_map;
@@ -19,9 +19,9 @@ function conv_students($mysqli, $mysqli_old, $year)
 	$registration_to_project_map = array();
 
 	/* Load all students, skip "new" students. */
-	$q = $mysqli_old->query("SELECT students.*,registrations.status FROM students 
-					LEFT JOIN registrations ON students.registrations_id=registrations.id 
-					WHERE students.year='$year' AND registrations.status!='new'");
+	$q = $mysqli->query("SELECT {$old_prefix}students.*,{$old_prefix}registrations.status FROM {$old_prefix}students 
+					LEFT JOIN {$old_prefix}registrations ON {$old_prefix}students.registrations_id={$old_prefix}registrations.id 
+					WHERE {$old_prefix}students.year='$year' AND {$old_prefix}registrations.status!='new'");
 	while($old_s = $q->fetch_assoc()) {
 
 		$sid = $old_s['id'];
@@ -70,7 +70,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 		}
 
 		/* Convert emergency contacts */
-		$q1 = $mysqli_old->query("SELECT * FROM emergencycontact WHERE students_id=$sid");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}emergencycontact WHERE students_id=$sid");
 		$x = 1;
 		while($e = $q1->fetch_assoc()) {
 			$fn = $mysqli->real_escape_string($e['firstname']);
@@ -87,7 +87,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 
 		/* Attach tour selections */
 		$u['tour_id_pref'] = array();
-		$q1 = $mysqli_old->query("SELECT * FROM tours_choice WHERE year='$year' AND students_id=$sid AND rank>0 ORDER BY rank");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}tours_choice WHERE year='$year' AND students_id=$sid AND rank>0 ORDER BY rank");
 		while($t = $q1->fetch_assoc()) {
 			$tid = (int)$t['tour_id'];
 			if(!array_key_exists($tid, $tours_map)) {
@@ -98,7 +98,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 		}
 
 		/* Should only be one tour assignment */
-		$q1 = $mysqli_old->query("SELECT * FROM tours_choice WHERE year='$year' AND students_id=$sid AND rank=0");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}tours_choice WHERE year='$year' AND students_id=$sid AND rank=0");
 		while($t = $q1->fetch_assoc()) {
 			$tid = $t['tour_id'];
 			$u['tour_id'] = $tours_map[(int)$tid];
@@ -118,7 +118,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 
 //			print("      Adjust project $pid to {$new_p['num_students']} students\n");
 		} else {
-			$q1 = $mysqli_old->query("SELECT * FROM projects WHERE registrations_id=$rid");
+			$q1 = $mysqli->query("SELECT * FROM {$old_prefix}projects WHERE registrations_id=$rid");
 			$p = $q1->fetch_assoc();
 
 //			print_r($p);
@@ -147,7 +147,7 @@ function conv_students($mysqli, $mysqli_old, $year)
 
 
 			/* Load mentors */
-			$q2 = $mysqli_old->query("SELECT * FROM mentors WHERE registrations_id=$rid");
+			$q2 = $mysqli->query("SELECT * FROM {$old_prefix}mentors WHERE registrations_id=$rid");
 			while($m = $q2->fetch_assoc()) {
 				$mid = mentor_create($mysqli, $pid);
 				$new_m = mentor_load($mysqli, $mid);

@@ -1,18 +1,18 @@
 <?php
 
 
-function conv_committee($mysqli, $mysqli_old, $year)
+function conv_committee($mysqli, $old_prefix, $year)
 {
 	print("Converting Committee Members for $year...\n");
 
 	$mysqli->real_query("DELETE FROM users WHERE FIND_IN_SET('committee',`roles`)>0 AND year='$year'");
 
-	$q = $mysqli_old->query("SELECT * FROM users WHERE FIND_IN_SET('committee',`types`)>0 AND deleted='no' AND year='$year'");
-	print($mysqli_old->error);
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}users WHERE FIND_IN_SET('committee',`types`)>0 AND deleted='no' AND year='$year'");
+	print($mysqli->error);
 	$c = 0;
 	while($old_u = $q->fetch_assoc()) {
 
-		$q1 = $mysqli_old->query("SELECT * FROM users_committee WHERE users_id='{$old_u['id']}'");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}users_committee WHERE users_id='{$old_u['id']}'");
 		$r = $q1->fetch_assoc();
 		$old_u = array_merge($old_u, $r);
 

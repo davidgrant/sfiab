@@ -2,7 +2,7 @@
 
 
 $tours_map = array();
-function conv_tours($mysqli, $mysqli_old, $year)
+function conv_tours($mysqli, $old_prefix, $year)
 {
 	global $tours_map;
 	print("Convert Tours for $year...\n");
@@ -10,7 +10,7 @@ function conv_tours($mysqli, $mysqli_old, $year)
 	/* Delete existing */
 	$mysqli->query("DELETE FROM tours WHERE year='$year' )");
 
-	$q=$mysqli_old->query("SELECT * FROM tours WHERE year='$year'");
+	$q=$mysqli->query("SELECT * FROM {$old_prefix}tours WHERE year='$year'");
 	while($r=$q->fetch_assoc()) {
 
 		$tid = tour_create($mysqli, $year);

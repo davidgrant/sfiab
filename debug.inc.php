@@ -1,6 +1,6 @@
 <?php
 
-$debug_enable = true;
+$debug_enable = false;
 
 function debug($str) 
 {

@@ -3,11 +3,11 @@
 require_once('reports.inc.php');
 
 
-function old_report_load($mysqli, $report_id)
+function old_report_load($mysqli, $old_prefix, $report_id)
 {
 	$report = array();
 
-	$q = $mysqli->query("SELECT * FROM reports WHERE id='$report_id'");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}reports WHERE id='$report_id'");
 	$r = $q->fetch_assoc();
 	$report['name'] = $r['name'];
 	$report['id'] = $r['id'];
@@ -24,7 +24,7 @@ function old_report_load($mysqli, $report_id)
 	$report['filter'] = array();
 	$report['loc'] = array();
 
- 	$q = $mysqli->query("SELECT * FROM reports_items 
+ 	$q = $mysqli->query("SELECT * FROM {$old_prefix}reports_items 
 			WHERE reports_id='{$report['id']}' 
 			ORDER BY `ord`");
 #	print($q->error);
@@ -84,13 +84,13 @@ function old_report_load($mysqli, $report_id)
 	return $report;
 }
 
-function old_report_load_all($mysqli) 
+function old_report_load_all($mysqli, $old_prefix) 
 {
 	print("   - Loading old reports...");
 	$ret = array();
-	$q = $mysqli->query("SELECT id FROM reports");
+	$q = $mysqli->query("SELECT id FROM {$old_prefix}reports");
 	while($r = $q->fetch_assoc()) {
-		$report = old_report_load($mysqli, $r['id']);
+		$report = old_report_load($mysqli, $old_prefix, $r['id']);
 		$ret[] = $report;
 		print("      - {$report['name']}\n");
 	}
@@ -98,11 +98,11 @@ function old_report_load_all($mysqli)
 }
 
 
-function conv_reports($mysqli, $mysqli_old)
+function conv_reports($mysqli, $old_prefix)
 {
 	$c = 0;
 	print("Converting reports\n");
-	$reports = old_report_load_all($mysqli_old);
+	$reports = old_report_load_all($mysqli, $old_prefix);
 
 	printf("   - Deleting all reports in new database...\n");
 	$mysqli->real_query("DELETE FROM reports");

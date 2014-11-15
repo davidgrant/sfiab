@@ -7,7 +7,7 @@
  * we go */
 
 $sponsors_map = array();
-function load_sponsors($mysqli, $mysqli_old)
+function load_sponsors($mysqli, $old_prefix)
 {
 
 	global $sponsors_map;
@@ -18,13 +18,13 @@ function load_sponsors($mysqli, $mysqli_old)
 	/* Load sponsors by ID */
 	$sponsors_map[0] = array();
 
-	$q = $mysqli_old->query("SELECT * FROM sponsors");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}sponsors");
 	while($s = $q->fetch_assoc()) {
 		$sponsor_id = (int)$s['id'];
 		/* Find them in the users databse */
-		$q2 = $mysqli_old->query("SELECT * FROM users LEFT JOIN users_sponsor ON users_sponsor.users_id = users.id 
-						WHERE users_sponsor.sponsors_id='$sponsor_id' AND users_sponsor.primary='yes'");
-		print($mysqli_old->error);
+		$q2 = $mysqli->query("SELECT * FROM {$old_prefix}users LEFT JOIN {$old_prefix}users_sponsor ON {$old_prefix}users_sponsor.users_id = {$old_prefix}users.id 
+						WHERE {$old_prefix}users_sponsor.sponsors_id='$sponsor_id' AND {$old_prefix}users_sponsor.primary='yes'");
+		print($mysqli->error);
 		if($q2->num_rows > 0) {
 			$r2 = $q2->fetch_assoc();
 			$fn = $r2['firstname'];

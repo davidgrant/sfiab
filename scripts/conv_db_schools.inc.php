@@ -3,9 +3,9 @@
 
 $schools_map = array();
 
-function conv_schools_user($mysqli_old, $id, &$na, &$em, &$ph)
+function conv_schools_user($mysqli, $old_prefix, $id, &$na, &$em, &$ph)
 {
-	$q = $mysqli_old->query("SELECT * FROM users WHERE id='$id'");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}users WHERE id='$id'");
 	$na = '';
 	$em = '';
 	$ph = '';
@@ -26,7 +26,7 @@ function conv_schools_filter_sql_text($mysqli, $text)
 		return "'".$mysqli->real_escape_string($text)."'";
 }
 
-function conv_schools($mysqli, $mysqli_old, $year)
+function conv_schools($mysqli, $old_prefix, $year)
 {
 	global $schools_map;
 	print("Convert Schools for $year...\n");
@@ -34,7 +34,7 @@ function conv_schools($mysqli, $mysqli_old, $year)
 	/* Delete existing */
 	$mysqli->query("DELETE FROM schools WHERE year='$year' )");
 
-	$q=$mysqli_old->query("SELECT * FROM schools WHERE year='$year'");
+	$q=$mysqli->query("SELECT * FROM {$old_prefix}schools WHERE year='$year'");
 	while($r=$q->fetch_assoc()) {
 
 		$p_na = '';
@@ -45,9 +45,9 @@ function conv_schools($mysqli, $mysqli_old, $year)
 		$sh_ph= '';
 
 		if($r['principal_uid'] > 0) 
-			conv_schools_user($mysqli_old, $r['principal_uid'], $p_na, $p_em, $p_ph);
+			conv_schools_user($mysqli, $old_prefix, $r['principal_uid'], $p_na, $p_em, $p_ph);
 		if($r['sciencehead_uid'] > 0) 
-			conv_schools_user($mysqli_old, $r['sciencehead_uid'], $sh_na, $sh_em, $sh_ph);
+			conv_schools_user($mysqli, $old_prefix, $r['sciencehead_uid'], $sh_na, $sh_em, $sh_ph);
 
 		
 		$mysqli->query("INSERT INTO schools (school,schoollang,schoollevel,board,district,phone,fax,email,

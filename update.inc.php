@@ -12,6 +12,9 @@ function update_apply_db($mysqli, $fp)
 		if($line[0] == '#') {
 			continue;
 		}
+		if($line[0] == '-' && $line[1] == '-') {
+			continue;
+		}
 
 		/* Fixme add support for -- and C-style slash-star star-slash comments  */
 
@@ -20,7 +23,8 @@ function update_apply_db($mysqli, $fp)
 			$mysqli->real_query($sql);
 //			print("$sql\n");
 			if($mysqli->error != '') {
-				print($mysqli->error."\n");
+				print("SQL command failed.  SQL: $sql\n");
+				print("Error: {$mysqli->error}\n");
 			}
 			$sql = '';
 		}

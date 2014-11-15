@@ -17,10 +17,10 @@ function user_change_password($mysqli, &$u, $new_password)
 {
 	$u['salt'] = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
 	$hashed_pw = hash('sha512', $new_password);
-	$u['password'] = hash('sha512', $hashed_pw.$salt);
+	$u['password'] = hash('sha512', $hashed_pw.$u['salt']);
 	$u['password_expired'] = 0;
 	sfiab_log($mysqli, 'change pw', "");
-	user_save($u);
+	user_save($mysqli, $u);
 }
 
 function user_scramble_and_expire_password($mysqli, &$u)

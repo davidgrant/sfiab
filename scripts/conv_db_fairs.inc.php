@@ -5,7 +5,7 @@ require_once('fairs.inc.php');
 $fairs_map = array();
 
 
-function conv_fairs($mysqli, $mysqli_old)
+function conv_fairs($mysqli, $old_prefix)
 {
 	global $awards_map, $awards_prizes_map;
 
@@ -15,8 +15,8 @@ function conv_fairs($mysqli, $mysqli_old)
 
 	/* */
 
-	$q = $mysqli_old->query("SELECT * FROM fairs");
-	print($mysqli_old->error);
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}fairs");
+	print($mysqli->error);
 	$c = 0;
 	while($old_f = $q->fetch_assoc()) {
 

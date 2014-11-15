@@ -4,7 +4,7 @@
 $judges_map = array();
 
 
-function conv_judges($mysqli, $mysqli_old, $year) 
+function conv_judges($mysqli, $old_prefix, $year) 
 {
 	global $awards_map, $awards_prizes_map;
 
@@ -14,12 +14,12 @@ function conv_judges($mysqli, $mysqli_old, $year)
 
 	/* */
 
-	$q = $mysqli_old->query("SELECT * FROM users WHERE FIND_IN_SET('judge',`types`)>0 AND deleted='no' AND year='$year'");
-	print($mysqli_old->error);
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}users WHERE FIND_IN_SET('judge',`types`)>0 AND deleted='no' AND year='$year'");
+	print($mysqli->error);
 	$c = 0;
 	while($old_u = $q->fetch_assoc()) {
 
-		$q1 = $mysqli_old->query("SELECT * FROM users_judge WHERE users_id='{$old_u['id']}'");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}users_judge WHERE users_id='{$old_u['id']}'");
 		$r = $q1->fetch_assoc();
 		$old_u = array_merge($old_u, $r);
 

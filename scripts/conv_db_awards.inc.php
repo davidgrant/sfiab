@@ -3,7 +3,7 @@
 $awards_map = array();
 $prizes_map = array();
 
-function conv_awards($mysqli, $mysqli_old, $year) 
+function conv_awards($mysqli, $old_prefix, $year) 
 {
 	global $sponsors_map, $awards_map, $prizes_map;
 
@@ -16,16 +16,16 @@ function conv_awards($mysqli, $mysqli_old, $year)
 	$awards = array();
 
 	/* Load the old awards, and save to a new award array */
-	$q = $mysqli_old->query("SELECT * FROM award_awards WHERE year='$year'");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}award_awards WHERE year='$year'");
 	while($a = $q->fetch_assoc()) {
 		$a['prizes'] = array();
 		$aid = $a['id'];
-		$q1 = $mysqli_old->query("SELECT * FROM award_prizes WHERE award_awards_id='$aid'");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}award_prizes WHERE award_awards_id='$aid'");
 		while($p = $q1->fetch_assoc()) {
 			$a['prizes'][] = $p;
 		}
 		$a['categories'] = array();
-		$q1 = $mysqli_old->query("SELECT * FROM award_awards_projectcategories WHERE award_awards_id='$aid'");
+		$q1 = $mysqli->query("SELECT * FROM {$old_prefix}award_awards_projectcategories WHERE award_awards_id='$aid'");
 		while($c =$q1->fetch_assoc()) {
 			$a['categories'][] = $c['projectcategories_id'];
 		}
@@ -34,7 +34,7 @@ function conv_awards($mysqli, $mysqli_old, $year)
 
 	$award_types = array('divisional','special','grand','other');
 	/* Load award types and try to map to the static types */
-	$q = $mysqli_old->query("SELECT * FROM award_types WHERE year='$year'");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}award_types WHERE year='$year'");
 	while($t = $q->fetch_assoc()) {
 		$n = strtolower($t['type']);
 		$type_map[(int)$t['id']] = 'other';
@@ -101,7 +101,7 @@ function conv_awards($mysqli, $mysqli_old, $year)
 
 
 
-function conv_winners($mysqli, $mysqli_old, $year) 
+function conv_winners($mysqli, $old_prefix, $year) 
 {
 	global $prizes_map, $projects_map, $fairs_map;
 
@@ -113,11 +113,11 @@ function conv_winners($mysqli, $mysqli_old, $year)
 	$mysqli->query("DELETE FROM winners WHERE year='$year'");
 
 	/* Load the old awards, and save to a new award array */
-	$q = $mysqli_old->query("SELECT * FROM winners WHERE year='$year'");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}winners WHERE year='$year'");
 	while($w = $q->fetch_assoc()) {
 		$prize_id = (int)$w['awards_prizes_id'];
 		if(!array_key_exists($prize_id, $prizes_map)) {
-			$q1 = $mysqli_old->query("SELECT * FROM award_prizes WHERE id=$prize_id");
+			$q1 = $mysqli->query("SELECT * FROM {$old_prefix}award_prizes WHERE id=$prize_id");
 			if($q1->num_rows == 0) {
 				print("   Old Prize ID $prize_id doesn't exist, but is awarded.  Skipping.\n");
 				continue;

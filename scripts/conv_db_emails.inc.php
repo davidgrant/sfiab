@@ -2,7 +2,7 @@
 
 require_once('email.inc.php');
 
-function conv_emails($mysqli, $mysqli_old)
+function conv_emails($mysqli, $old_prefix)
 {
 	print("Converting Emails...\n");
 
@@ -10,7 +10,7 @@ function conv_emails($mysqli, $mysqli_old)
 	$mysqli->real_query("DELETE FROM emails WHERE Section != 'System'");
 
 	$c = 0;
-	$q = $mysqli_old->query("SELECT * FROM emails WHERE type='user'");
+	$q = $mysqli->query("SELECT * FROM {$old_prefix}emails WHERE type='user'");
 	print("   - Importing Emails...\n");
 	while($e = $q->fetch_assoc()) {
 

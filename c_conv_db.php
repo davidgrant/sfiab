@@ -6,6 +6,8 @@ require_once('incomplete.inc.php');
 require_once('config.inc.php');
 require_once('awards.inc.php');
 
+exit();
+
 $action = 'check';
 if(count($_SERVER['argv']) > 1) {
         switch($_SERVER['argv'][1]) {
