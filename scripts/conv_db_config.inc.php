@@ -10,6 +10,10 @@ function conv_config($mysqli, $old_prefix)
 	$year = (int)$r[0];
 	print("   Latest Year = $year\n");
 
+	/* Save the current year */
+	$mysqli->real_query("UPDATE config SET `val`='$year' WHERE `var`='year'");
+
+	/* Convert dates */
 	$q = $mysqli->query("SELECT * FROM {$old_prefix}dates WHERE year='$year'");
 	print($mysqli->error);
 	$c = 0;
@@ -39,6 +43,7 @@ function conv_config($mysqli, $old_prefix)
 		}
 	}
 
+	/* Convert the rest of the config */
 	$q = $mysqli->query("SELECT * FROM {$old_prefix}config WHERE year='$year'");
 	print($mysqli->error);
 	$c = 0;
