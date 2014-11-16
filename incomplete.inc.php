@@ -1,5 +1,6 @@
 <?php
 require_once('project.inc.php');
+require_once('timeslots.inc.php');
 
 $incomplete_errors = array();
 

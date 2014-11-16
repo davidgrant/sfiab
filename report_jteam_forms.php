@@ -14,18 +14,10 @@ $mysqli = sfiab_init('committee');
 $u = user_load($mysqli);
 
 $projects = projects_load_all($mysqli);
-$timeslots = timeslots_load_all($mysqli);
 $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
 $judges = judges_load_all($mysqli);
 
-foreach($jteams as &$jteam) {
-	$jteam['timeslots'] = array();
-}
-
-foreach($projects as &$project) {
-	$project['timeslots'] = array();
-}
 //print("<pre>");
 
 $filter_jteam = 0;

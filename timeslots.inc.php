@@ -57,6 +57,22 @@ function timeslots_load_all($mysqli)
 	return $timeslots;
 }
 
+/* Returns an array indexed by round (starting at 0) instead of by timeslot_id */
+function timeslots_load_rounds($mysqli)
+{
+	global $config;
+	static $rounds = NULL;
+	if($rounds === NULL) {
+		$q = $mysqli->query("SELECT * FROM timeslots WHERE year='{$config['year']}' ORDER BY `round`");
+		$rounds = array();
+		while($d = $q->fetch_assoc()) {
+			$rounds[(int)$d['round']] = timeslot_load($mysqli, 0, $d);
+		}
+	}
+	return $rounds;
+}
+
+
 function timeslot_create($mysqli)
 {
 	global $config;

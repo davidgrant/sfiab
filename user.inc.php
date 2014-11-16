@@ -147,7 +147,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool_or_null($u['j_dinner']);
 	filter_bool_or_null($u['j_mentored']);
 	filter_str_list($u['j_languages']);
-	filter_int_list($u['j_rounds']); /* each index is the round, NULL=not answered yet, 0 for not available, round number(1,2,...) for available, this
+	filter_int_list($u['j_rounds']); /* each index is the round, NULL=not answered yet, -1 for not available, round number(0,1,2,...) for available, this
 					  * means you can say in_array($round_number, $u['j_rounds']) to see if the judge is available in that round, it is safer
 					  * than saying $j['j_rounds'][$round_number] because that array key may not exist.  Only the judge round selection
 					  * code needs to be smart this way.*/

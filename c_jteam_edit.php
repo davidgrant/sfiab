@@ -9,6 +9,7 @@ require_once('email.inc.php');
 require_once('awards.inc.php');
 require_once('committee/judges.inc.php');
 require_once('isef.inc.php');
+require_once('timeslots.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -68,7 +69,7 @@ case 'jadd_smart':
 
 	$j_uid = false;
 	foreach($judges as $uid=>&$j) {
-		if($j['j_round'][$jteam['round']-1] != 1) continue;
+//		if($j['j_round'][$jteam['round']-1] != 1) continue;
 
 	}
 
@@ -114,6 +115,7 @@ case 'padd':
 
 $projects = projects_load_all($mysqli, $config['year']);
 $jteams = jteams_load_all($mysqli, $config['year']);
+$rounds = timeslots_load_rounds($mysqli);
 
 
 $page_id = 'c_jteam_list';
@@ -135,13 +137,13 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
+	<h3>Unused Judges</h3>
 
-
-<?php	/* Fixme, next year, cleanup this round0/round1 numbering nonsense */
-	for($round=0; $round <=1;$round++) {
+<?php	
+	foreach($rounds as $round=>&$r) {
 		$judge_list = array();
 		foreach($judges as &$j) {
-			if($j['j_rounds'][$round] == 1 && $j['j_complete'] == 1 && $j['not_attending'] == 0) {
+			if(in_array($round, $j['j_rounds']) && $j['j_complete'] == 1 && $j['attending']) {
 				/* Is this judge on a jteam in ths round? */
 				$found = false;
 				foreach($jteams as &$jteam) {
@@ -162,15 +164,14 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 		}
 ?>
 		<div data-role=collapsible data-collapsed=true>
-			<h3>Round <?=$round+1?> - <span id="j_unused_<?=$round+1?>_count"><?=count($judge_list)?></span> Unused Judges</h3>
+			<h3><?=$r['name']?> - <span id="j_unused_<?=$round?>_count"><?=count($judge_list)?></span> Unused Judges</h3>
 
 			<div class="ui-grid-a">
 			<div class="ui-block-a">
-			<table id="j_unused_<?=$round+1?>">
+			<table id="j_unused_<?=$round?>">
 <?php			judge_header();
 			$c = 0;
 			foreach($judge_list as &$j) {
-				$r = $round+1;
 				judge_row($j);
 				$c++;
 				if($c > count($judge_list)/2 ) {
@@ -189,14 +190,16 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 <?php	}
 ?>
 					
+	<h3>Judging Teams</h3>
 
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search..." data-inset="true">
 
 <?php
-	for($round=1; $round <= 2; $round++) {
+
+	foreach($rounds as $round=>&$r) {
 		foreach(array('Divisional','Special','Other') as $t) {
 
-?>			<li data-role="list-divider" data-filtertext="round <?=$round?>" ><h3><font size=+1>Round <?=$round?> - <?=$t?></font></h3></li>
+?>			<li data-role="list-divider" data-filtertext="round <?=$round+1?> <?=$r['name']?>" ><h3><font size=+1><?=$r['name']?> - <?=$t?></font></h3></li>
 
 <?php			foreach($jteams as &$jteam) {
 				/* Match round */
@@ -232,7 +235,7 @@ function judge_header()
 <?php
 }
 
-/* Print a table row for a judge, including the delte button */
+/* Print a table row for a judge, including the delete button */
 function judge_row(&$j, $tr = true)
 {
 	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
@@ -320,20 +323,21 @@ function project_row(&$p, $tr = true)
 
 function jteam_li(&$jteam) {
 
-	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects;
+	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects, $rounds;
 
 	$filter_text = $jteam['num'] . ' '. $jteam['name'] . ' round '.$jteam['round'];
 	foreach($jteam['user_ids'] as $uid) {
 		$j =& $judges[$uid]; 
 		$filter_text .= ' '.$j['name'];
 	}
+	$r = &$rounds[$jteam['round']];
 ?>
 	<li id="jteam_list_<?=$jteam['id']?>" data-filtertext="<?=$filter_text?>">
 		<h3>#<?=$jteam['num']?> - <?=$jteam['name']?></h3>
 		<div class="ui-grid-a">
 		<div class="ui-block-a">
 		Award: <b><?=$jteam['award_id']?>: <?=$awards[$jteam['award_id']]['name']?></b><br/>
-		Round: <b><?=$jteam['round']?></b><br/>
+		Round: <b><?=$r['name']?></b><br/>
 		<table id="j_jteam_<?=$jteam['id']?>">
 
 <?php		judge_header();
@@ -406,7 +410,17 @@ function jteam_li(&$jteam) {
   </div>
   <div id="jteam_jadd_unused" class="ui-body-d ">
 <?php
-	form_select("jteam_jadd_unused", "jsel", NULL, array(0=>'Does not work yet', 1=>'Does not work yet'), $val);
+	/* Build a list of all jduges.. round1, round2 special */
+	$optlist = array();
+	foreach($rounds as $round=>&$r) {
+		$optlist[$r['name']][] = array();
+		foreach($judges as $jid=>&$j) {
+			if(in_array($round, $j['j_rounds'])) {
+				$optlist[$r['name']][$jid] = judge_row($j, false);
+			}
+		}
+	}
+	form_select_optgroup("jteam_jadd_all", "jsel", NULL, $optlist, $val);
 ?>
 	<button type="submit" data-role="button" onclick="jteam_jadd();" data-inline="true" data-icon="check" data-theme="g" >Add</button>
 	<button type="submit" data-role="button" onclick="jteam_cancel_edit();" data-inline="true" data-icon="delete">Done</button>
@@ -415,11 +429,11 @@ function jteam_li(&$jteam) {
 <?php
 	/* Build a list of all jduges.. round1, round2 special */
 	$optlist = array();
-	for($round=1;$round<=2;$round++) {
-		$optlist["Round $round"][] = array();
+	foreach($rounds as $round=>&$r) {
+		$optlist[$r['name']][] = array();
 		foreach($judges as $jid=>&$j) {
-			if($j['j_rounds'][$round-1] == 1) {
-				$optlist["Round $round"][$jid] = judge_row($j, false);
+			if(in_array($round, $j['j_rounds'])) {
+				$optlist[$r['name']][$jid] = judge_row($j, false);
 			}
 		}
 	}

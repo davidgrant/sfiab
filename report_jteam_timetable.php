@@ -19,6 +19,8 @@ $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
 $judges = judges_load_all($mysqli);
 
+$num_rounds = count($timeslots);
+
 foreach($jteams as &$jteam) {
 	$jteam['timeslots'] = array();
 }
@@ -58,7 +60,7 @@ if (array_key_exists('id', $_GET)) {
 
 $pdf=new pdf( "Judging Team Schedule", $config['year'] );
 
-for($round=1;$round <=2; $round++) {
+for($round=0;$round<$num_rounds; $round++) {
 	foreach($jteams as $jteam_id=>&$jteam) {
 		if($jteam['round'] != $round) continue;
 
@@ -105,7 +107,7 @@ for($round=1;$round <=2; $round++) {
 		$table['total'] = 0;
 		$table['data'] = array();
 
-		if($award['type'] == 'divisional' && $round == 1) {
+		if($award['type'] == 'divisional' && $round == 0) {
 
 			$x = 0;
 			foreach($jteam['user_ids'] as $judge_id) {
@@ -150,7 +152,7 @@ for($round=1;$round <=2; $round++) {
 
 		} else {
 			/* Use the same logic for cusp and SA teams, except query a different slot type */
-			if($award['type'] == 'divisional' && $round == 2) 
+			if($award['type'] == 'divisional' && $round == 1) 
 				$slot_type = 'divisional';
 			else 
 				$slot_type = 'special';
@@ -158,7 +160,7 @@ for($round=1;$round <=2; $round++) {
 
 			$table['header']['time'] = 'Project';
 			for($x = 0; $x < 9; $x++) {
-				$num  = ($round == 1) ? ($x+1) : ($x + 10);
+				$num  = ($round == 0) ? ($x+1) : ($x + 10);
 				$ts = $timeslots[$num];
 
 				$table['fields'][] = "T$x";
@@ -184,7 +186,7 @@ for($round=1;$round <=2; $round++) {
 
 				$x = 0;
 				for($x = 0; $x < 9; $x++) {
-					$num  = ($round == 1) ? ($x+1) : ($x + 10);
+					$num  = ($round == 0) ? ($x+1) : ($x + 10);
 
 					if(!array_key_exists($num, $project['timeslots'])) {
 						

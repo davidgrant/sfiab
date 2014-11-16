@@ -141,9 +141,7 @@ if(count($roles) == 0) {
 function l_projects_load_all($mysqli, $year)
 {
 	/* Load projects first */
-	$q = $mysqli->query("SELECT * FROM projects WHERE
-				year='$year'
-				");
+	$q = $mysqli->query("SELECT * FROM projects WHERE year='$year' ");
 	$projects_tmp = array();
 	while($p = $q->fetch_assoc()) {
 		$p_temp = project_load($mysqli, $p['pid'], $p);
@@ -157,6 +155,7 @@ function l_projects_load_all($mysqli, $year)
 					LEFT JOIN schools ON users.schools_id=schools.id
 				WHERE users.year='$year'
 				AND users.enabled = '1'
+				AND users.new = '0'
 				AND FIND_IN_SET('student', users.`roles`)>0
 				");
 	$users = array();
@@ -164,11 +163,16 @@ function l_projects_load_all($mysqli, $year)
 		$p_user = user_load($mysqli, -1, -1, NULL, $j);
 		$pid = $p_user['s_pid'];
 
+		if($pid == 0) {
+			print("No project for student uid={$p_user['uid']}<br/>");
+		}
+
 		if(!array_key_exists($pid, $projects)) {
 			$projects[$pid] = $projects_tmp[$pid];
 			$projects[$pid]['students'] = array();
 			$projects[$pid]['s_complete'] = true;
 		}
+
 		$projects[$pid]['students'][] = $p_user;
 		if($p_user['s_complete'] == 0) {
 			$projects[$pid]['s_complete'] = false;

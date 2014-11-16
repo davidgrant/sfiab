@@ -20,12 +20,7 @@ if(array_key_exists('action', $_POST)) {
 
 $langs = array('en' => 'English', 'fr' => 'French' );
 
-$timeslots = timeslots_load_all($mysqli);
-$rounds = array();
-foreach($timeslots as &$ts) {
-	$rounds[(int)$ts['round']] = &$ts;
-}
-
+$rounds = timeslots_load_rounds($mysqli);
 $num_rounds = count($rounds);
 
 switch($action) {
