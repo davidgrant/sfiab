@@ -132,15 +132,10 @@ function project_create($mysqli, $year = NULL)
  * If different from the current one, clears any special award selections too */
 function project_update_category($mysqli, &$p)
 {
-	global $categories;
-	if(count($categories) == 0) {
-		categories_load($mysqli);
-	}
-
 	$q = $mysqli->query("SELECT MAX(`grade`) FROM `users` WHERE `s_pid`='{$p['pid']}'");
 	if($q->num_rows > 0) {
 		$r = $q->fetch_row();
-		$cat_id = category_get_from_grade((int)$r[0]);
+		$cat_id = category_get_from_grade($mysqli, (int)$r[0]);
 	} else {
 		$cat_id = 0;
 	}

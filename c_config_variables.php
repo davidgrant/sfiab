@@ -74,6 +74,21 @@ sfiab_page_begin("SFIAB Configuration", $page_id, $help);
 				case 'timezone':
 					form_select($form_id, 'cfg_'.$d['var'], $d['var'], $timezones, $d['val']);
 					break;
+				case 'select':
+					$l = explode('|', $d['type_values']);
+					$opts = array();
+					foreach($l as $item) {
+						$item_l = explode('=', $item, 2);
+						if(count($item_l) == 2) {
+							$opts[$item_l[0]] = $item_l[1];
+						} else {
+							$opts[$item_l[0]] = $item_l[0];
+						}
+					}
+//					print_r($opts);
+					form_select($form_id, 'cfg_'.$d['var'], $d['var'], $opts, $d['val']);
+					break;
+					
 				default:
 					form_text($form_id, 'cfg_'.$d['var'], $d['var'], $d['val']);
 					break;

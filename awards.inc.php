@@ -212,14 +212,11 @@ function prize_load_winners($mysqli, &$prize)
 
 function award_sync($mysqli, $fair, $incoming_award)
 {
-	global $categories;
 	global $config;
 	$year = intval($incoming_award['year']);
 	$incoming_award_id = intval($incoming_award['id']);
 	if($year <= 0) exit();
 	if($incoming_award_id <= 0) exit;
-
-	categories_load($mysqli, $year);
 
 	$q = $mysqli->query("SELECT * FROM awards WHERE upstream_fair_id='{$fair['id']}' AND upstream_award_id='$incoming_award_id' AND year='$year'");
 	if($q->num_rows > 0) {
@@ -255,7 +252,7 @@ function award_sync($mysqli, $fair, $incoming_award)
 	/* Map grades to categories */
 	$a['categories'] = array();
 	foreach($incoming_award['grades'] as $g) {
-		$cat_id = category_get_from_grade($g);
+		$cat_id = category_get_from_grade($mysqli, $g);
 		if(!in_array($cat_id, $a['categories'])) {
 			$a['categories'][] = $cat_id;
 		}
@@ -309,9 +306,8 @@ function award_sync($mysqli, $fair, $incoming_award)
  * delete stuff we don't want or need to export */
 function award_get_export($mysqli, &$fair, &$a) 
 {
-	global $categories;
 	global $config;
-	categories_load($mysqli, $a['year']);
+	$categories = categories_load($mysqli, $a['year']);
 
 	/* Is this fair allowed to have this award?  if not, just send
 	 * the award id, year, and a delete flag */

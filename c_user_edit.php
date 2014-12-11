@@ -5,6 +5,8 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('email.inc.php');
+require_once('project_number.inc.php');
+
 
 $mysqli = sfiab_init('committee');
 
@@ -71,12 +73,32 @@ case 'psave_back':
 		post_int($edit_p['floor_number'], 'floor_number');
 		post_text($edit_p['number'], 'number');
 		project_save($mysqli, $edit_p);
+
+
 		if($action == 'psave') {
 			form_ajax_response(array('status'=>0));
 		} else {
 			form_ajax_response(array('status'=>0, 'location'=>'back'));
 		}
 	}
+	exit();
+
+case 'assign_project_number':
+	$result = project_number_assign($mysqli, $edit_p);
+	if($result != true) {
+		form_ajax_response(array('status'=>1));
+	} else {
+		$updates = array('number' => $edit_p['number'], 'floor_number'=>$edit_p['floor_number'], 'number_sort'=>$edit_p['number_sort']);
+		form_ajax_response(array('status'=>0, 'val'=>$updates));
+	}
+	project_save($mysqli, $edit_p);
+	exit();
+
+case 'delete_project_number':
+	project_number_clear($mysqli, $edit_p);
+	project_save($mysqli, $edit_p);
+	$updates = array('number' => '', 'floor_number'=>'', 'number_sort'=>'');
+	form_ajax_response(array('status'=>0, 'val'=>$updates));
 	exit();
 
 
@@ -164,10 +186,22 @@ if(in_array('student', $edit_u['roles'])) { ?>
 <?php	$form_id = $page_id.'_project_form';
 	form_begin($form_id, 'c_user_edit.php');
 	form_hidden($form_id, 'uid', $edit_u['uid']);
-	form_text($form_id, 'number', 'Project Number', $edit_p);
-	form_text($form_id, 'number_sort', 'Numeric Project Number for Sorting', $edit_p);
-	form_text($form_id, 'floor_number', 'Floor Location Number', $edit_p);
 	form_yesno($form_id, 'disqualified_from_awards', 'Project Disqualifed from Awards', $edit_p);
+	form_text($form_id, 'number', 'Project Number', $edit_p);
+	$ns = ($edit_p['number_sort'] == 0) ? '' : $edit_p['number_sort'];
+	$fn = ($edit_p['floor_number'] == 0) ? '' : $edit_p['floor_number'];
+
+	form_text($form_id, 'number_sort', 'Numeric Project Number for Sorting', $ns);
+	form_text($form_id, 'floor_number', 'Floor Location Number', $fn);
+
+	$attrs = '';
+	if(!$edit_p['accepted']) {
+		$attrs = "disabled='disabled'";
+	}
+	form_button($form_id, 'assign_project_number', 'Automatically Assign Project Number', 'g', 'check','', $attrs);
+	form_button($form_id, 'delete_project_number', 'Remove Assigned Project Number', 'r', 'delete', '', $attrs);
+?>	</br>
+<?php
 	form_submit($form_id, 'psave', 'Save', 'Project Saved');
 	form_submit($form_id, 'psave_back', 'Save and Go Back', 'Project Saved');
 	form_end($form_id); 

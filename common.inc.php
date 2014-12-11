@@ -321,6 +321,8 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_reports' => array('Reports', 'c_reports.php'),
 			    'c_communication' => array('Send Emails', 'c_communication.php'),
 			    'c_students' => array('Students / Projects', 'c_students.php'),
+			    'c_assign_project_numbers' => NULL,
+			    'c_input_signature_forms' => NULL,
 			    'c_tours' => array('Tours', 'c_tours.php'),
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
 			    'c_user_list' => NULL,
@@ -522,33 +524,47 @@ function sfiab_info($text)
 <?php
 }
 
-function challenges_load($mysqli, $year = false) {
+function challenges_load($mysqli, $year = false) 
+{
 	global $config;
+	static $challenges = NULL;
 	if($year == false) $year = $config['year'];
-	$chals = array();
-	$q = $mysqli->query("SELECT * FROM challenges WHERE year='$year'");
-	while($c=$q->fetch_assoc()) $chals[$c['id']] = $c;
-	return $chals;
+
+	if($challenges === NULL) {
+		$challenges = array();
+		$q = $mysqli->query("SELECT * FROM challenges WHERE year='$year'");
+		while($c=$q->fetch_assoc()) {
+			$challenges[$c['id']] = $c;
+		}
+	}
+	return $challenges;
 }
 
-$categories = array();
 function categories_load($mysqli, $year = false) 
 {
-	global $config, $categories;
+	global $config;
+	static $categories = NULL;
+
 	if($year == false) $year = $config['year'];
-	$categories = array();
-	$q = $mysqli->query("SELECT * FROM categories WHERE year='$year'");
-	while($c=$q->fetch_assoc()) {
-		filter_int($c['min_grade']);
-		filter_int($c['max_grade']);
-		$categories[$c['id']] = $c;
+
+	if($categories === NULL) {
+		$categories = array();
+		$q = $mysqli->query("SELECT * FROM categories WHERE year='$year'");
+		while($c=$q->fetch_assoc()) {
+			filter_int($c['min_grade']);
+			filter_int($c['max_grade']);
+			$categories[$c['id']] = $c;
+		}
 	}
 	return $categories;
 }
 
-function category_get_from_grade($grade)
+function category_get_from_grade($mysqli, $grade)
 {
-	global $categories;
+	/* Note: to category_get_from_grade for a different year, just call categories_load first to cache
+	 * another year */
+	$categories = categories_load($mysqli);
+
 	foreach($categories as $cid=>&$c) {
 		if($grade >=$c['min_grade'] && $grade <= $c['max_grade']) 
 			return $cid;

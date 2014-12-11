@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
+require_once('project_number.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -56,6 +57,7 @@ case 'i':
 		project_load_students($mysqli, $p);
 
 		$p['accepted'] = 0;
+		project_number_clear($mysqli, $p);
 		project_save($mysqli, $p);
 
 		foreach($p['students'] as &$u) {
@@ -214,6 +216,16 @@ sfiab_page_begin("Input Signature Forms", $page_id, $help);
 	so you can find all the complete ones.  When the green <font
 	color=green>Mark as Incomplete</font> button is showing, it means the
 	project has been marked as complete.
+
+	<p>Marking a project as Incomplete also clears the project number.  If
+	you mark a project as incomplete, then mark it as complete again, you
+	will need to re-assign the project numbers.
+
+	<p>After most or all projects are complete, proceed to <a
+	href="c_assign_project_numbers.php" data-ajax="false">Assign Project Numbers</a>.
+	Project numbers can be safely assigned more than once without
+	overwriting numbers already assigned.
+
 
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search by project number, project title, student name, school name..." data-inset="true">
 
