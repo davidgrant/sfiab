@@ -43,22 +43,26 @@ sfiab_page_begin("Student Main", 's_home', $help);
 		directly to your floor location (we can help you find it, there
 		will be maps posted) and setup your project before signing in.
 
-		<p>For safety reasons we are required to provide tour
-		assignments to UBC and emergency contact information to the
-		tour guides.  For this reason, we are unable to change your
-		tour.
+<?php		if($config['tours_enable']) {?>
+			<p>For safety reasons we are required to provide tour
+			assignments and emergency contact information to the
+			tour guides.  For this reason, we are unable to change your
+			tour.
+<?php		}
 
-<?php		$p = project_load($mysqli, $u['s_pid']);
-		$tours = tour_load_all($mysqli);
+		$p = project_load($mysqli, $u['s_pid']);
 		if($p['number'] != '') { ?>
 			<p>Project Number: <b><font size=+3><?=$p['number']?></font></b>
 <?php		} 
-		if($u['tour_id'] > 0) {
-			$tour =& $tours[$u['tour_id']];
-?>			<p>Tour: <b>#<?=$tour['num']?> - <?=$tour['name']?></b>
-<?php		} else {
-?>			<p>Tour: Not Assigned Yet
-<?php		} 
+		if($config['tours_enable']) {
+			$tours = tour_load_all($mysqli);
+			if($u['tour_id'] > 0) {
+				$tour =& $tours[$u['tour_id']];
+?>				<p>Tour: <b>#<?=$tour['num']?> - <?=$tour['name']?></b>
+<?php			} else {
+?>				<p>Tour: Not Assigned Yet
+<?php			} 
+		}
 
 	} else if($u['s_complete'] == 0) { ?>
 		<h3>Registration Status: <font color="red">Incomplete</font></h3>
@@ -94,34 +98,17 @@ sfiab_page_begin("Student Main", 's_home', $help);
 			<p>Note: After we process your signature form, no further changes to your registration account will be allowed.
 <?php		}
 	}
+
 ?>
-
-	<h3>Information For Fair Days</h3>
-<?php	
-	$files = array();
-	foreach(array('schedule', 'ubcmap', 'safety_checklist','ballroom','partyroom','judgeform') as $f) {
-		if(file_exists("data/{$config['year']}_$f.pdf")) {
-			$files[$f] = "<a data-ajax=\"false\" href=\"data/{$config['year']}_$f.pdf\">.pdf</a>";
-		} else {
-			$files[$f] = "Coming Soon";
-		}
-	} ?>
-
-	The schedule of events: <?=$files['schedule']?><br/>
- 	A map of the UBC campus: <?=$files['ubcmap']?><br/>
-	A safety checklist for your project display: <?=$files['safety_checklist']?><br/>
-	Project Floor Plan for the Student Union Building (Ballroom): <?=$files['ballroom']?><br/>
-	Project Floor Plan for the Student Union Building (Party room): <?=$files['partyroom']?><br/>
-	The judging form that will be used by the judges: <?=$files['judgeform']?><br/>
-
+	<p><?=cms_get($mysqli, 's_main', $u);?>
 
 	<h3>More Information:</h3>
 
 	<p>If you get stuck and aren't sure what to do:
 	<ul>
 	<li>First, try the help menu by pressing the information icon <a href="#help_panel_s_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.  All pages have a help menu.
-	<li>Second, please contact the Science Fair Committee.  Registration issues can be sent to: registration@gvrsf.ca.
-	General inquires sent to: chair@gvrsf.ca.  If you're not sure, send an
+	<li>Second, please contact the Science Fair Committee.  Registration issues can be sent to: <?=mailto($config['email_registration'])?>
+	General inquires sent to: <?=mailto($config['email_chair'])?>. If you're not sure, send an
 	email to both, we're all friendly people.
 	</ul>
 
