@@ -147,7 +147,7 @@ sfiab_page_begin("Enter Judging Scores", $page_id, $help);
 		$form_id = $page_id.'_'.$pid;
 
 		if(!array_key_exists('round_1_jteam', $project)) {
-			print("coulnd't find round 1 jteam for proejct: ".print_r($project));
+			print("coulnd't find round 1 jteam for project: ".print_r($project));
 			continue;
 		}
 		$jteam = &$project['round_1_jteam'];

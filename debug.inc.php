@@ -1,11 +1,11 @@
 <?php
 
-$debug_enable = true;
-
 function debug($str) 
 {
 	global $debug_enable;
 	global $config;
+
+	if(!isset($debug_enable)) return;
 
 	if($debug_enable !== true) return;
 

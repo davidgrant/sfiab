@@ -8,22 +8,28 @@ require_once('filter.inc.php');
 require_once('email.inc.php');
 require_once('awards.inc.php');
 require_once('committee/judges.inc.php');
+require_once('debug.inc.php');
 
 $mysqli = sfiab_init('committee');
 
 $config['cusps'] = array(0.05, 0.10, 0.15, 0.20);
+$config['projects_per_cusp'] = 6;
 
 $u = user_load($mysqli);
 
 $cats = categories_load($mysqli);
 $awards = award_load_all($mysqli);
-$projects = projects_load_all($mysqli);
+$projects = projects_load_all($mysqli, true); /* Only accepted projects */
 $jteams = jteams_load_all($mysqli);
 
 /* Link div1 jteams to projects */
 foreach($jteams as &$jteam) {
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		foreach($jteam['project_ids'] as $pid) {
+			if(!array_key_exists($pid, $projects)) {
+				/* Project $pid is assigned to a jteam but the project isn't complete */
+				continue;
+			}
 			$projects[$pid]['round_1_jteam'] = &$jteam;
 		}
 	}
@@ -67,98 +73,231 @@ foreach($cats as $cid=>$c) {
 
 foreach($projects as $pid=>&$project) {
 	$projects_sorted[$project['cat_id']][$pid] = &$project;	
+	$project['cusp_index'] = 8; /* Start at 'nothing' */
+
+	if(!array_key_exists('cat_id', $project)) {
+		print("<pre>cat id is missing from project $pid: ".print_r($project, true));
+	}
 }
 function score_cmp($a, $b) {
 	return (int)$b['jscore']['total'] - (int)$a['jscore']['total'];
 }
+
+/* Reindex array so the highest score is at index 0 */
 foreach($cats as $cid=>$c) {
 	uasort($projects_sorted[$cid], 'score_cmp');
+
+	$n = array();
+	$i = 0;
+	foreach($projects_sorted[$cid] as $pid=>&$p) {
+		$n[$i] = &$p;
+		$i++;
+	}
+	$projects_sorted[$cid] = $n;
 }
 
 $cusp_sections = array('gold','gold_cusp','silver','silver_cusp','bronze','bronze_cusp','hm','hm_cusp','nothing');
+
+/* Desired number of projects at each index, adjusted for cusp teams */
+$target_projects_at_cusp = array();
+/* Actual number of projects at each inded */
+$n_projects_at_cusp = array();
+/* Medal distribution (even indexes), and the number of projects that are assined up to the previous index (odd indexes)
+ *  actual number[odd index] - medal distribution[odd index] = number of projects to assign down to the next index */
+$medal_distribution = array();
 
 /* Sort out which projects get what */
 foreach($cats as $cid=>$c) {
 	$total_projects = count($projects_sorted[$cid]);
 
+	debug("\n".$c['name']."- $total_projects projects \n");
 
+	$n_projects_at_cusp[$cid] = array_fill(0, count($config['cusps'])*2, 0);
+	$target_projects_at_cusp[$cid] = array_fill(0, count($config['cusps'])*2, 0);
+	$medal_distribution[$cid] = array_fill(0, count($config['cusps'])*2, 0);
+	/* Build an array of fractions for each div award and cusp team 
+	 * even indexes = div award (not rejudged)
+	 * odd indexes = cusp team (rejudged) */
 
-//	print("<br/>".$c['name']."- $total_projects projects <br/>");
-
-	/* Adjust config cusp percentages so we don't have to compute +3 from each side, isntead
-	 * we'd just like to take 6 projects from the bottom of each category */
-	$half_cusp_threshold = 3;
-		
-	$n_projects_at_cusp = array();
+	$half_projects_per_cusp = (int)($config['projects_per_cusp'] / 2);
 	$index = 0;
-	foreach($config['cusps'] as $c) {	
-		$n_at = (int)round($c * $total_projects);
+	foreach($config['cusps'] as $c) {
+		$n = (int)round($c * $total_projects);
+		$medal_distribution[$cid][$index] = $n;
+		/* Each cusp has 3 parts:
+		 * - top $config['projects_per_cusp']/2 projects that are assigned to [$index - 1] (unless $index=0)
+		 * - middle $n - $config['projects_per_cusp'] that are assiendt to [$index]
+		 * - bottom $config['projects_per_cusp']/2 projects that are assigned to [$index + 1]
+		 * We are not allowed to distribute more than $n projects, top and bottom are split
+		 *  evenly (ties to bottom), the middle could be zero 
+		 * By calculating the split this way, the CUSP judging teams can just assign 
+		 *  half the projects to the div above, and half to the div below.  Although that will
+		 *  change below */
 
-//		print("index=$index, n-at=$n_at<br/>");
+		/* There is no cusp above gold (index == 0) so just remove the top cusp/2 projects completely */
+		$top = ($index == 0) ? 0 : $half_projects_per_cusp;
+		$bot = $half_projects_per_cusp;
 
-		if($index == 0) {
-			/* Ideally $half_cusp_threshold of these are cusp projects */
-			$n_cusp_below = $half_cusp_threshold;
-			$n_cusp_above = 0;
+		if($top + $bot > $n) {
+			/* If there are more cusp projects for judging than actual projects in this cusp
+			 * recalculate top/bot as a ratio of the projects that are available.
+			 *  This either computes a 50/50 split, or a 0/100 if top==0, but it is written to
+			 *  handle any ratio */
+			$top = (int)($n * ($top / ($top + $bot) ));
+			$bot = $n - $top;
+			$mid = 0;
 		} else {
-			$n_cusp_below = $half_cusp_threshold;
-			$n_cusp_above = $half_cusp_threshold;
+			/* There are enough projects for a 3-way split, so assign mid whatever is left */
+			$mid = $n - ($top + $bot);
 		}
 
-		/* Is there enough projcts? */
-		if($n_at < $n_cusp_above + $n_cusp_below) {
-			/* Nope, divide them up according to current distribution */
-			$n_cusp_below = floor($n_at * ($n_cusp_below / ($n_cusp_above + $n_cusp_below)));
-			/* Paranoia for rounding errors */
-			if($n_cusp_above >  0) {
-				$n_cusp_above = $n_at - $n_cusp_below;
-			}
-		}
-
-		/* Recalculate */
-		$n_middle = $n_at - ($n_cusp_above + $n_cusp_below);
-
-//		print("$n_cusp_above, $n_middle, $n_cusp_below<br/>");
-
-		/* Store */
-		if($n_cusp_above > 0) $n_projects_at_cusp[$index-1] += $n_cusp_above;
-		$n_projects_at_cusp[$index] = $n_middle;
-		$n_projects_at_cusp[$index+1] = $n_cusp_below;
+		/* Add top, mid, bot to the right project target counts */
+		if($index > 0) 	$target_projects_at_cusp[$cid][$index - 1] += $top;
+		$target_projects_at_cusp[$cid][$index] += $mid;
+		$target_projects_at_cusp[$cid][$index + 1] += $bot;
 		$index += 2;
 	}
+	/* Add another half to the projects at the last cusp so the HM-nothing cusp doesn't get a target 
+	 * of just three projects, want it to be six */
+	$target_projects_at_cusp[$cid][7] += $half_projects_per_cusp;
 
-	/* Add the last few nothing projects */
-	$n_projects_at_cusp[7] += $half_cusp_threshold;
+	debug("CUSP: target project counts:\n");
+	for($index=0; $index<count($target_projects_at_cusp[$cid]); $index++) {
+		debug("CUSP: {$cusp_sections[$index]}: {$target_projects_at_cusp[$cid][$index]} projects\n");
+		$n_projects_at_cusp[$cid][$index] = 0;
+	}
 
-//	print_r($n_projects_at_cusp);
+	/* Now adjust the actual number of projects on each CUSP team that will be rejudged:
+	 *  - Take the current cusp location, and go back until there is a project with a different jscore
+	 *  - Assign all those projects to the cusp and out of the previous index
+	 *    (e.g., move from gold to gold-silver) */
 
-	$current_cusp_index = 0; 
-	$current_cusp_project_count = 0;
+	$index = 0; 
+	$pcount = count($projects_sorted[$cid]);
+	$total_n = 0;
+	$total_target = 0;
+	$p_start = 0;
 
-	foreach($projects_sorted[$cid] as $pid=>&$project) {
-		if($current_cusp_index < 8 && $current_cusp_project_count == $n_projects_at_cusp[$current_cusp_index]) {
-			$current_cusp_project_count = 0;
-			while(1) {
-				$current_cusp_index += 1;
-				if($current_cusp_index >= 8 ) break;
-				if($n_projects_at_cusp[$current_cusp_index] > 0) break;
+	for($index=0; $index<count($target_projects_at_cusp[$cid]); $index++) {
+		debug("CUSP: adjust project counts for {$cusp_sections[$index]}:\n");
+
+		/* Take the number we should assign, and subtract the number we've assigned to account for
+		 * overages */
+		$total_target += $target_projects_at_cusp[$cid][$index];
+		$assigned_so_far = $total_n - $n_projects_at_cusp[$cid][$index];
+		$target_n = $total_target - $assigned_so_far;
+
+		debug("CUSP:    target is $target_n projects: total_target=$total_target -  assigned so far=$assigned_so_far (this cusp target added {$target_projects_at_cusp[$cid][$index]} to total_target)\n");
+		/* No projects here, continue to next cusp */
+		if($target_n <= 0) {
+			debug("CUSP:    target is <= zero, skip.\n");
+			continue;
+		}
+		
+		$current_jscore = -1;
+//		debug(print_r($projects_sorted[$cid][$p_start], true));
+
+		debug("CUSP:    starting iteration at sorted index $p_start, up to $pcount, score = $current_jscore\n");
+		for($project_index = $p_start; $project_index < $pcount; $project_index++) {
+			$project = &$projects_sorted[$cid][$project_index];
+
+			debug("CUSP:      Project {$project['pid']}: jscore={$project['jscore']['total']}\n");
+
+			if($current_jscore != -1 && $project['jscore']['total'] != $current_jscore) {
+				print("Your algorithm is broken.\n");
+				exit();
+			}
+			$current_jscore = $project['jscore']['total'];
+
+			/* Peek at the next entry, should we continue or assign what we've got */
+			if($project_index + 1 < $pcount) {
+				$p2 = &$projects_sorted[$cid][$project_index + 1];
+				if($p2['jscore']['total'] == $current_jscore) {
+					/* The next project will have the same jscore, so loop and include it */
+					continue;
+				}
+			}
+
+			$p_end = $project_index;
+
+			/* Add projects[p_start .. p_end ] somewhere:
+			 * - if the current index is a div (even)
+			 *   - add it if it fits, otherwise unconditiontally add it to the cusp team at index+1
+			 * - if the current index is a cusp team
+			 *   - add it always even if it doesn't fit */
+
+			$add_to_index = $index;
+			$n_to_add = $p_end - $p_start + 1;
+			$force_change_index = false;
+
+			debug("CUSP:      n_to_add = $n_to_add, total_n = $total_n\n");
+
+
+			if($index % 2 == 0) {
+				debug("CUSP:      div check {$n_projects_at_cusp[$cid][$index]} + $n_to_add > $target_n?\n");
+				/* Div section */
+				if($n_projects_at_cusp[$cid][$index] + $n_to_add > $target_n) {
+					/* Won't fit */
+					debug("CUSP         add to next index\n");
+					$add_to_index = $index + 1;
+					$force_change_index = true;
+				} else {
+					debug("CUSP         add to current index\n");
+					$add_to_index = $index;
+				}
+			} else {
+				/* Current index is a cusp team */
+				$add_to_index = $index;
+			}
+
+			/* Add it */
+			for($j = $p_start; $j <= $p_end; $j++) {
+				$projects_sorted[$cid][$j]['cusp_index'] = $add_to_index;
+			}
+			$n_projects_at_cusp[$cid][$add_to_index] += $n_to_add;
+			$total_n += $n_to_add;
+
+			/* Adjust the next start and reset the score */
+			$p_start = $project_index + 1;
+			$current_jscore = -1;
+
+			debug("CUSP:      cusp[{$cusp_sections[$index]}] now has {$n_projects_at_cusp[$cid][$index]}/{$target_n} projects\n");
+			/* Stop adding to this index if it's now full */
+			if($force_change_index || $n_projects_at_cusp[$cid][$index] >= $target_n) {
+				break;
 			}
 		}
-		$current_cusp_project_count += 1;
-		$project['cusp_index'] = $current_cusp_index;
+	}
+
+	/* Calculate the up/down just for printing */
+	for($index=0; $index<count($target_projects_at_cusp[$cid]); $index++) {
+		if($index %2 == 0) {
+			/* How many projects are coming down from a previous index */
+			if($index == 0) {
+				$from_last = 0;
+			} else {
+				$from_last = $n_projects_at_cusp[$cid][$index-1] - $medal_distribution[$cid][$index-1];
+			}
+
+			/* Number of projects here at this index (from last cusp team + default awarded) */
+			$here = $from_last + $n_projects_at_cusp[$cid][$index];
+			/* Calculate number we need to bring up from the next cusp team */
+			$up = $medal_distribution[$cid][$index] - $here;
+			/* Assign so we can print it later */
+			$medal_distribution[$cid][$index + 1] = $up;
+		}
 	}
 }
 
 
+/* Should load these out of prizes */
+$plist = array('Gold', 'Silver','Bronze','Honourable Mention','Nothing');
 
 
 switch($action) {
 case 'assign':
 	/* Add a project to a prize */
 	$cid = (int)$_POST['cid'];
-
-	/* Should load these out of prizes */
-	$plist = array('Gold', 'Silver','Bronze','Honourable Mention','Nothing');
 
 	/* Identify the jteams involved */
 	$cusp_jteams = array();
@@ -224,8 +363,6 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 
 	<p>Choose a category below, review the Cusp projects, then assign the projects to Cusp judging teams.
 
-	<p>The algorithm doesn't take ties into account, so two projects with the same score may be in different Cusp sections.  They have to be
-	manually moved around for now 
 	<div data-role="tabs">
 		<div data-role="navbar" >
 		<ul data-inset="true">
@@ -246,7 +383,14 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 			form_hidden($form_id, 'cid', $cid);
 			form_button($form_id, 'assign',"Assign {$c['name']} Projects to Cusp Judging Teams");
 			form_end($form_id);
+			
 ?>
+			<p><?=$c['name']?> Medal Allocations:
+			<ul><li>Gold: <?=$medal_distribution[$cid][0]?> project(s)
+			<li>Silver: <?=$medal_distribution[$cid][2]?> project(s)
+			<li>Bronze: <?=$medal_distribution[$cid][4]?> project(s)
+			<li>Honourable Mention: <?=$medal_distribution[$cid][6]?> project(s)
+			</ul>
 
 			<table data_role="table" data-mode="columntoggle" >
 			<thead>
@@ -263,9 +407,10 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 <?php			foreach($projects_sorted[$cid] as $pid=>&$project) { 
 				$x++;
 				if($current_section != $project['cusp_index']) { 
-					$current_section = $project['cusp_index']; ?>
+					$index = $project['cusp_index'];
+					$current_section = $index; ?>
 					<tr><td colspan="7"><hr/><b>
-<?php					switch($cusp_sections[$project['cusp_index']]) {
+<?php					switch($cusp_sections[$index]) {
 					case 'gold': print("Gold"); break;
 					case 'gold_cusp': print("Gold-Silver Cusp"); break;
 					case 'silver': print("Silver"); break;
@@ -279,7 +424,23 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 						print("ERROR");
 						exit();
 					}  ?>
-					</b></td></tr>
+					</b>
+<?php					
+
+					if($index %2 == 1) {
+						$up = $medal_distribution[$cid][$index];
+						$down = $n_projects_at_cusp[$cid][$index] - $up;
+						print(", <b>Assign $up {$plist[($index-1)/2]}, $down {$plist[($index+1)/2]}</b>");
+						
+					}
+
+					if($project['cusp_index'] < 8) {
+						print(" - target: {$n_projects_at_cusp[$cid][$index]} / {$target_projects_at_cusp[$cid][$index]} project(s)");
+					} 
+					
+					
+					?>
+					</td></tr>
 <?php				} ?>
 
 				<tr>
