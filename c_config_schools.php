@@ -21,7 +21,7 @@ switch($action) {
 case 'add':
 	$school_id = school_create($mysqli);	
 	/* Print the id so the caller can jump to the edit page with the right id */
-	print("$id");
+	print("$school_id");
 	exit();
 
 case 'save':
