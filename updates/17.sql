@@ -6,4 +6,12 @@ INSERT INTO `config` ( `var` , `val` , `category` , `type` , `type_values` , `or
 INSERT INTO `cms` (`id` , `name` , `type` , `text` , `language` , `use`) VALUES 
 	(NULL , 's_main', 'pagetext', 'Extra information for the student main page', 'en', '1');
 
+ALTER TABLE `categories` CHANGE `id` `cat_id` INT( 10 ) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `categories` DROP PRIMARY KEY;
+ALTER TABLE `categories` ADD `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST ;
+
+ALTER TABLE `challenges` CHANGE `id` `chal_id` INT( 10 ) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `challenges` DROP PRIMARY KEY;
+ALTER TABLE `challenges` ADD `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST ;
+
 

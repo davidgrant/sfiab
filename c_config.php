@@ -22,6 +22,9 @@ sfiab_page_begin("Configuration", $page_id);
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_config_variables.php" data-rel="external" data-ajax="false">Configuration Variables</a></li>
 	<li><a href="c_config_cms.php" data-rel="external" data-ajax="false">Page Text and Signature Form</a></li>
+	<li><a href="c_config_categories.php" data-rel="external" data-ajax="false">Age Categories and Grades</a></li>
+	<li><a href="c_config_challenges.php" data-rel="external" data-ajax="false">Challenges</a></li>
+	<li><a href="c_config_schools.php" data-rel="external" data-ajax="false">Schools</a></li>
 	</ul>
 
 	<h3>External Fairs</h3> 

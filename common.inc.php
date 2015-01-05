@@ -313,6 +313,8 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_backup' => NULL,
 			    'c_config' => array('Configuration', 'c_config.php'),
 			    'c_config_variables' => NULL,
+			    'c_config_categories' => NULL,
+			    'c_config_challenges' => NULL,
 			    'c_config_cms' => NULL,
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_judge_sanity' => NULL,
@@ -534,7 +536,7 @@ function challenges_load($mysqli, $year = false)
 		$challenges = array();
 		$q = $mysqli->query("SELECT * FROM challenges WHERE year='$year'");
 		while($c=$q->fetch_assoc()) {
-			$challenges[$c['id']] = $c;
+			$challenges[$c['chal_id']] = $c;
 		}
 	}
 	return $challenges;
@@ -549,11 +551,11 @@ function categories_load($mysqli, $year = false)
 
 	if($categories === NULL) {
 		$categories = array();
-		$q = $mysqli->query("SELECT * FROM categories WHERE year='$year'");
+		$q = $mysqli->query("SELECT * FROM categories WHERE year='$year' ORDER BY cat_id");
 		while($c=$q->fetch_assoc()) {
 			filter_int($c['min_grade']);
 			filter_int($c['max_grade']);
-			$categories[$c['id']] = $c;
+			$categories[$c['cat_id']] = $c;
 		}
 	}
 	return $categories;

@@ -168,6 +168,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	$u['name'] = ($u['firstname'] ? "{$u['firstname']} " : '').$u['lastname'];
 	
 
+//	print_r($u);
 	return $u;
 }
 

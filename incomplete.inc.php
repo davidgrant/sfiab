@@ -286,6 +286,9 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 	case 'j_options':
 		$ts = timeslots_load_all($mysqli);
 		$num_rounds = count($ts);
+		if($u['j_rounds'] === NULL) {
+			debug_print_backtrace();
+			}
 		for($x=0; $x<$num_rounds; $x++) {
 			if(!array_key_exists($x, $u['j_rounds']) || 
 			   ($u['j_rounds'][$x] !== -1 && $u['j_rounds'][$x] !== $x) ) {

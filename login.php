@@ -197,6 +197,7 @@ case 'login':
 
 	/* If the year doesn't match, duplicate the user into the current year */
 	if($u['year'] != $config['year']) {
+			
 		$u = user_copy($mysqli, $u, $config['year']);
 
 		/* Pretend that they're new so if they're a student they get a new project */
