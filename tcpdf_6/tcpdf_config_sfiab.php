@@ -47,7 +47,7 @@ if (!defined('K_TCPDF_EXTERNAL_CONFIG')) {
 	/* TCPDF wants all directories to end with '/' */
 	$k_sfiab_tcpdf_path = __DIR__.'/';
 	$k_sfiab_tcpdf_url = substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT'])).'/';
-	$k_sfiab_data_path = realpath(__DIR__.'/../data').'/';
+	$k_sfiab_data_path = realpath(__DIR__.'/../files').'/';
 	
 /**
  * Installation path (/var/www/tcpdf/).
@@ -77,7 +77,7 @@ define ('K_PATH_IMAGES', $k_sfiab_data_path);
  * Deafult image logo used be the default Header() method.
  * Please set here your own logo or an empty string to disable it.
  */
-define ('PDF_HEADER_LOGO', 'logo.png');
+define ('PDF_HEADER_LOGO', 'logo.jpg');
 
 /**
  * Header logo image width in user units.

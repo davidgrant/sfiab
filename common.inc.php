@@ -315,6 +315,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_config_variables' => NULL,
 			    'c_config_categories' => NULL,
 			    'c_config_challenges' => NULL,
+			    'c_config_logo' => NULL,
 			    'c_config_cms' => NULL,
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_judge_sanity' => NULL,

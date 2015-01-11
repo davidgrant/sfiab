@@ -25,6 +25,7 @@ sfiab_page_begin("Configuration", $page_id);
 	<li><a href="c_config_categories.php" data-rel="external" data-ajax="false">Age Categories and Grades</a></li>
 	<li><a href="c_config_challenges.php" data-rel="external" data-ajax="false">Challenges</a></li>
 	<li><a href="c_config_schools.php" data-rel="external" data-ajax="false">Schools</a></li>
+	<li><a href="c_config_logo.php" data-rel="external" data-ajax="false">Fair Logo</a></li>
 	</ul>
 
 	<h3>External Fairs</h3> 

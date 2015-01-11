@@ -441,7 +441,7 @@ class pdf extends TCPDF {
 		if($this->label_show_logo) {
 			/* Logo at 10% label height */
 			$logo_width = $header_height;
-			$this->Image("data/logo.png", $this->lMargin + 0.5, $this->tMargin + 0.5, 
+			$this->Image("files/logo.jpg", $this->lMargin + 0.5, $this->tMargin + 0.5, 
 				$logo_width, $logo_width, '', '', '', true, 300, '', false, false, 0, true);
 			$logo_width += 1;
 		}
