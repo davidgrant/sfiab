@@ -130,14 +130,17 @@ case 'addimage':
 	break;
 }
 
-$page_id = "c_backup";
-$help = "<p>Backup and Restore";
-sfiab_page_begin("Backup and Restore", $page_id, $help);
+$page_id = "c_fair_logo";
+$help = "<p>Fair Logo - upload any PNG, GIF, or JPG.";
+sfiab_page_begin("Fair Logo", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 	<h3>Fair Logo</h3>
-	<p>
+	<p>Upload any PNG, GIF, or JPG.  It works better if it's square-ish.
+	The fair logo is added to all generated reports and the student
+	signature page.
+
 
 <?php
 
