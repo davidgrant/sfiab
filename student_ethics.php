@@ -270,7 +270,7 @@ function policy($name, $text, $link = '')
 							involving humans be approved before any research starts. Ethics approval may come from
 							an Ethics Committee at a university or research lab, or may come from our 
 							Ethics Committee (ethics@gvrsf.ca).  <b>Failure to recieve approval will likely result in disqualification.</b>',
-				'data/research_proposal_en.doc');
+				'files/research_proposal_en.doc');
 		}
 		/* Only living animals */
 		if ($e['animal_vertebrate'] || $e['animal_ceph']) {
@@ -279,7 +279,7 @@ function policy($name, $text, $link = '')
 							cephalopods be approved before any research starts. Ethics approval may come from
 							an Ethics Committee at a university or research lab, or may come from our
 							Ethics Committee (ethics@gvrsf.ca).  <b>Failure to recieve approval will likely result in disqualification.</b>',
-				'data/research_plan_animals_en.doc');
+				'files/research_plan_animals_en.doc');
 		}
 		if(!$forms2) {
 			policy('None', 'It does not appear that you require any ethics approval before starting your project.');
@@ -301,17 +301,17 @@ function policy($name, $text, $link = '')
 				|| ($e['humansurvey1'] && !$e['humanfood1'] && !$e['humanfood2'] && !$e['humantest1']) ) {
 			$forms2 = true;
 			policy('Form 4.1A - Participation of Humans (Low Risk)', 'You will need to complete YSC Form 4.1A "Participation of Humans - Low Risk". This form can be found here', 
-				'data/4.1A_Humans_Low_Risk_0-2.pdf');
+				'files/4.1A_Humans_Low_Risk_0-2.pdf');
 		}
 		if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) {
 			$forms2 = true;
 			policy('Form 4.1B - Participation of Humans (Significant Risk)', 'You will need to complete YSC Form 4.1B "Participation of Humans - Significant Risk". This form can be found here.  <i>A complete version of Form 4.1B should be emailed to ethics@gvrsf.ca as soon as you complete your registration, so that it can be reviewed by the GVRSF ethics committee before you present at the fair.</i>', 
-				'data/4.1B_Humans_Significant_Risk_0.pdf');
+				'files/4.1B_Humans_Significant_Risk_0.pdf');
 		}
 		if ($e['animal_vertebrate'] || $e['animal_ceph'] || $e['animal_tissue'] ) {
 			$forms2 = true;
 			policy('Form 4.1C - Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, and the Scientific Supervisor. This form can be found here. <i>A complete version of Form 4.1C should be emailed to ethics@gvrsf.ca as soon as you complete your registration, so that it can be reviewed by the GVRSF ethics committee before you present at the fair</i>.',
-				'data/4.1C_Animals_0-2.pdf');
+				'files/4.1C_Animals_0-2.pdf');
 		}
 		if(!$forms2) {
 			policy('None', 'It does not appear that you require any ethics or scientific review forms for your project.');
