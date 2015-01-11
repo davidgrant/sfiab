@@ -139,7 +139,8 @@ sfiab_page_begin("Fair Logo", $page_id, $help);
 	<h3>Fair Logo</h3>
 	<p>Upload any PNG, GIF, or JPG.  It works better if it's square-ish.
 	The fair logo is added to all generated reports and the student
-	signature page.
+	signature page. <br/>
+
 
 
 <?php
