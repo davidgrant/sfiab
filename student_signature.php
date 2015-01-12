@@ -256,26 +256,27 @@ if($p_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");	
 }
 
-foreach($users AS $user) {
-    if($user['grade'] <= 10) continue;
+if($config['sig_enable_senior_marks_form']) {
+	foreach($users AS $user) {
+		if($user['grade'] <= 10) continue;
 
-    $pdf->AddPage();
-    $page = "<h3>SENIOR MARKS VALIDATION FORM</h3><br>
-The Greater Vancouver Regional Science Fair may distribute awards to students
-who have demonstrated excellence at the Greater Vancouver Regional Science
-Fair.  Some of the awards that are applicable to the Senior Category entrants
-require verification of excellence in academic subjects.<br>
+		$pdf->AddPage();
+		$page = "<h3>Senior Marks Validation Form</h3><br>
+The [FAIRNAME] may distribute awards to students who have demonstrated
+excellence at the [FAIRNAME].  Some of the awards that are applicable to the
+Senior Category entrants require verification of excellence in academic
+subjects.<br> 
 <br>
 To help us in distributing these awards, please complete the following.  This information is needed for senior category entrants only.<br>
 <br>
 <table border=\"0\" cellpadding=\"2\">
 <tr>
     <td align=\"right\" width=\"100\">Full Name:</td>
-    <td ><b>{$user['name']}</b></td>
+    <td ><b>[NAME]</b></td>
 </tr>
 <tr>
     <td align=\"right\" width=\"100\">Grade:</td>
-    <td><b>{$user['grade']}</b></td>
+    <td><b>[GRADE]</b></td>
 </tr>
 <tr>
     <td align=\"right\" width=\"100\">School:</td>
@@ -332,53 +333,24 @@ NOTE: If you are a Grade 11 student, please complete Question 1, Question 2 for 
 <br>
 Verification of Mark Status by an Official (a Counsellor or School Administrator)
 ";
-    $pdf->WriteHTML($page, true, false, false, false, '');
+		$page = replace_vars($page, $user, array(), true);
 
-    sig($pdf, "Official's Signature", "Official's Name (PRINTED)");
+ 		$pdf->WriteHTML($page, true, false, false, false, '');
+
+		sig($pdf, "Official's Signature", "Official's Name (PRINTED)");
+	}
 }
 
-foreach($users AS $user) {
-	$pdf->AddPage();
-	if($user['sex'] == 'male') {
-		$h = 'his';
-		$m = 'him';
-	} else if($user['sex'] == 'female') {
-		$h = 'her';
-		$m = 'her';
-	} else {
-		$h = 'his / her';
-		$m = 'him / her';
-    }
+if($config['sig_enable_release_of_information']) {
+	foreach($users AS $user) {
+		$pdf->AddPage();
+		$rel_of_info = cms_get($mysqli, 'sig_release_of_information', $user);
+	 	$t = nl2br($rel_of_info);
+		$pdf->WriteHTML("<h3>".i18n('Release of Information Form')."</h3>$t");
 
-	$page = "<h3>RELEASE OF INFORMATION FORM</h3><br>
-Pursuant to the freedom of information and protection of privacy, I, as the parent or legal guardian of:
-<br>
-<br>
-<table border=\"0\" cellpadding=\"2\">
-<tr>
-	<td align=\"right\" width=\"100\">Participant Name:</td>
-	<td ><b>{$user['name']}</b></td>
-</tr>
-</table><br>
-do hereby grant my permission to take, retain, and publish $h photograph and written
-materials about $m and $h {$config['year']} Greater Vancouver
-Regional Science Fair project to be displayed on print materials and on
-the Internet through the Greater Vancouver Regional Science Fair,
-Science Fair Foundation of British Columbia, and award sponsor websites.
-I hereby give permission to use the materials to promote the Science
-Fair Program. This would include media, various social media sites, award sponsors, potential
-sponsors.  I understand that materials on social media sites are in the public
-domain and these online services may be located outside of Canada.
-
-";
-
-
-	$pdf->WriteHTML($page, true, false, false, false, '');
-	sig($pdf, "Signature of Parent or Guardian", "Name of Parent or Guardian (PRINTED)");
-	sig($pdf, "Signature of  {$user['name']}");
-
-	$page="<br><br>Please SIGN and return this form, along with other forms in this package, to the Greater Vancouver Regional Science Fair.<br>";
-	$pdf->WriteHTML($page, true, false, false, false, '');
+		sig($pdf, "Signature of Parent or Guardian", "Name of Parent or Guardian (PRINTED)");
+		sig($pdf, "Signature of  {$user['name']}");
+	}
 }
 
 /*

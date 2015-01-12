@@ -607,8 +607,20 @@ function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false
 			'/\[SALUTATION\]/' => $u['salutation'],
 			'/\[FIRSTNAME\]/' => $u['firstname'],
 			'/\[LASTNAME\]/' => $u['lastname'],
+			'/\[GRADE\]/' => $u['grade'],
 			'/\[ORGANIZATION\]/' => $u['organization'],
 			);
+
+		if($u['sex'] == 'male') {
+			$rep['/\[HISHER\]/'] = 'his';
+			$rep['/\[HIMHER\]/'] = 'him';
+		} else if($u['sex'] == 'female') {
+			$rep['/\[HISHER\]/'] = 'her';
+			$rep['/\[HIMHER\]/'] = 'her';
+		} else {
+			$rep['/\[HISHER\]/'] = 'his / her';
+			$rep['/\[HIMHER\]/'] = 'him / her';
+		}
 	}
 
 	return preg_replace(array_keys($rep), array_values($rep), $text);

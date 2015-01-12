@@ -16,6 +16,7 @@ $cms_pages = array('exhibitordeclaration' => "Signature Form: Exhibitor Declarat
 		   'teacherdeclaration'=> "Signature Form: Teacher Declaration",
 		   'regfee'=> "Signature Form: Registration Fee Description",
 		   'postamble'=> "Signature Form: Post-Amble",
+		   'sig_release_of_information'=> "Signature Form: Release of Information Form",
 		   'main'=> "Page: Main Page",
 		   'contact_us'=> "Page: Contact Us",
 		   'v_main'=> "Page: Volunteer Main Page",
