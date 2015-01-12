@@ -1,4 +1,4 @@
-INSERT INTO `sfiab_new`.`cms` (`id`, `name`, `type`, `text`, `language`, `use`) VALUES (NULL, 'sig_release_of_information', 'signaturepage', 'Pursuant to the freedom of information and protection of privacy, I, as the parent or legal guardian of:
+INSERT INTO `cms` (`id`, `name`, `type`, `text`, `language`, `use`) VALUES (NULL, 'sig_release_of_information', 'signaturepage', 'Pursuant to the freedom of information and protection of privacy, I, as the parent or legal guardian of:
 <br>
 <br>
 <table border="0" cellpadding="2">
