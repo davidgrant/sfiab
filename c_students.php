@@ -32,7 +32,7 @@ sfiab_page_begin("Students", $page_id);
 
 	$stats = array();
 	foreach($cats as $c)
-		$stats[$c['id']] = array('students'=>$stats_line, 'projects'=>$stats_line);
+		$stats[$c['cat_id']] = array('students'=>$stats_line, 'projects'=>$stats_line);
 	$stats['total'] = array('students'=>$stats_line, 'projects'=>$stats_line);
 	
 	foreach($students as &$s) {
@@ -81,8 +81,11 @@ sfiab_page_begin("Students", $page_id);
 	<li><a href="c_user_list.php?roles[]=student" data-rel="external" data-ajax="false">Student List / Editor</a></li>
 	</ul>
 
+<?php /*
 	<h3>Projects</h3> 
 	<p>FIXME: coming soon.
+*/
+?>
 
 	<h3>Signature Forms and Project Numbers</h3> 
 	<ul data-role="listview" data-inset="true">
