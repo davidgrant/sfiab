@@ -22,7 +22,6 @@ switch($action) {
 case 'save':
 	if($closed) exit();
 
-//	print_r($_POST);
 	$vals = array();
 
 	for($i=1; $i<=2; $i++) {
@@ -32,6 +31,7 @@ case 'save':
 			$mysqli->query("INSERT INTO emergency_contacts(`uid`) VALUES ('{$u['uid']}')");
 			$id = $mysqli->insert_id;
 			$ecs[$id] = emergency_contact_load($mysqli, $id);
+			$vals["emerg{$i}_id"] = $id;
 		}
 
 		post_text($ecs[$id]["firstname"], "emerg{$i}_firstname");

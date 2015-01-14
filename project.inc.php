@@ -359,7 +359,7 @@ function emergency_contact_load($mysqli, $id, $data=NULL)
 
 function emergency_contact_load_for_user($mysqli, &$u)
 {
-	$q = $mysqli->query("SELECT * FROM emergency_contacts WHERE uid='{$u['uid']}'");
+	$q = $mysqli->query("SELECT * FROM emergency_contacts WHERE uid='{$u['uid']}' LIMIT 2");
 	$contacts = array();
 	while($d = $q->fetch_assoc()) {
 		$contacts[(int)$d['id']] = emergency_contact_load($mysqli, -1, $d);
