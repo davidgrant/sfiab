@@ -31,14 +31,20 @@ sfiab_page_begin("Students", $page_id);
 	$stats_line = array('accepted' => 0);
 
 	$stats = array();
-	foreach($cats as $c)
+	foreach($cats as $c) {
 		$stats[$c['cat_id']] = array('students'=>$stats_line, 'projects'=>$stats_line);
+	}
 	$stats['total'] = array('students'=>$stats_line, 'projects'=>$stats_line);
 	
 	foreach($students as &$s) {
 		if($s['s_accepted'] == 1) {
 			$p =& $projects[$s['s_pid']];
 			$stats['total']['students']['accepted']+=1;
+			if(!array_key_exists($p['cat_id'], $stats)) {
+				print("array key doesn't exist for cat_id=[{$p['cat_id']}]<br/>");
+				print_r($p);
+				print_r(array_keys($stats));
+			}
 			$stats[$p['cat_id']]['students']['accepted']+=1;
 		}
 	}

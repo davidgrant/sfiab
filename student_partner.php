@@ -130,7 +130,9 @@ case 'invite':
 		}
 	}
 
-	form_ajax_response_error(0, $invite_error);
+	incomplete_check($mysqli, $ret, $u, $page_id, true);
+	form_ajax_response(array('status'=>0, 'error'=>$invite_error, 'missing'=>$ret));
+
 	exit();
 
 case 'cancel':
@@ -146,24 +148,20 @@ case 'cancel':
 case 'remove':
 	if($closed) exit();
 	$uid = (int)$_POST['uid'];
+
+	$new_pid = project_remove_student($mysqli, $p, $uid);
+	if($new_pid === NULL) {
+		/* Remove unsuccessful */
+		break;
+	}
+
+	$need_missing_reload = true;
+
 	if($uid == $u['uid']) {
-		/* Remove us from the project - create a new project and link that to us */
-		$new_pid = project_create($mysqli);
-		$u['s_pid'] = $new_pid;
-		user_save($mysqli, $u);
+		/* Remove us from the project - reload our new project into $p and update our copy of the
+		 * pid in $u so we don't have to reload the entire user from SQL */
 		$p = project_load($mysqli, $new_pid);
-		$need_missing_reload = true;
-	} else {
-		/* Remove a UID from the project */
-		$this_u = user_load($mysqli, $uid);
-		/* Make sure they're in this project */
-		if($this_u['s_pid'] == $p['pid']) {
-			/* Create a new project and set that to be the user's project */
-			$new_pid = project_create($mysqli);
-			$this_u['s_pid'] = $new_pid;
-			user_save($mysqli, $this_u);
-			$need_missing_reload = true;
-		}
+		$u['s_pid'] = $new_pid;
 	}
 	break;
 

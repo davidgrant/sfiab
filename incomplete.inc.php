@@ -180,7 +180,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		if($q->num_rows != $p['num_students']) {
 			/* Missing students */
 			for($i=$q->num_rows+1; $i<= $p['num_students']; $i++) {
-				$ret[] = "invite_$i";
+				$ret[] = "un";
 			}
 		}
 		/* Check for incoming requests, each one gets an incomplete */

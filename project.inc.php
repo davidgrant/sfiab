@@ -146,6 +146,26 @@ function project_update_category($mysqli, &$p)
 	}
 }
 
+/* Removes student uid from project P, creates them a new project, and sync's the project cat_id.
+ * Returns the new project id for the student that was removed */
+function project_remove_student($mysqli, &$p, $uid)
+{
+	$remove_u = user_load($mysqli, $uid);
+	if($remove_u['s_pid'] == $p['pid']) {
+		/* Create a new project and set that to be the user's project */
+		$new_pid = project_create($mysqli);
+		$remove_u['s_pid'] = $new_pid;
+		user_save($mysqli, $remove_u);
+
+		/* Load the new project, and try to set the project cat id */
+		$new_p = project_load($mysqli, $new_pid);
+		project_update_category($mysqli, $new_p);
+		project_save($mysqli, $new_p);
+		return $new_pid;
+	}
+	return NULL;
+}
+
 function generic_save($mysqli, &$p, $table, $table_key) 
 {
 
