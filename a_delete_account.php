@@ -37,13 +37,14 @@ sfiab_page_begin("Delete Account", $page_id);
 ?>
 	<p>Really delete your account?  This action cannot be undone.
 
-	<div class="ui-grid-a">
-	<div class="ui-block-a"> 
-	<a href="<?=$homepage?>" data-role="button" data-icon="check" data-theme="g">No, Cancel</a>
-	</div>
-	<div class="ui-block-b"> 
-	<a href="a_delete_account.php?action=delete" data-role="button" data-icon="delete" data-ajax="false" data-theme="r">Yes, Delete Account</a>
-	</div></div>
+	<table width="50%">
+	<tr><td>
+	<a href="a_delete_account.php?action=delete" data-role="button" data-icon="delete" data-ajax="false" data-theme="l">Yes, Delete Account</a><br/>
+	</td></tr>
+	<tr><td>
+	<a href="<?=$homepage?>" data-role="button" data-icon="back" >No, Cancel</a>
+	</td></tr>
+	</table>
 
 </div></div>
 
