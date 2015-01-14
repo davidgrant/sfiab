@@ -152,7 +152,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 					  * than saying $j['j_rounds'][$round_number] because that array key may not exist.  Only the judge round selection
 					  * code needs to be smart this way.*/
 
-
+//	print_r($u);
 	/* Volutneer */
 	filter_bool_or_null($u['v_complete']);
 	filter_bool_or_null($u['v_tour_match_username']);

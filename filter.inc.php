@@ -13,7 +13,7 @@ function filter_int_or_null(&$val)
 function filter_bool_or_null(&$val)
 {
 	if(is_null($val)) return;
-	$val = (int)$val;
+	$val = ((int)$val == 0) ? 0 : 1;
 }
 
 function filter_bool(&$val)

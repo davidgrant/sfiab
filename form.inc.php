@@ -227,12 +227,18 @@ function form_checkbox($form_id, $name, $label, $data_value, &$value)
 
 function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false) 
 { 
-	$data = array(0 => 'No', 1 => 'Yes');
-	$v = (int)$value;
+	$choices = array(0 => 'No', 1 => 'Yes');
+	/* v is usually 0 or 1, but could be NULL (no selection yet) */
+	$v = (is_array($value)) ? $value[$name] : $value;
+
+	if($v !== 0 && $v !== 1 && $v !== NULL) {
+		$v = NULL;
+	}
+
 	if(!$slider ) {
-		form_radio_h($form_id, $name, $label, $data, $v, $wide);
+		form_radio_h($form_id, $name, $label, $choices, $v, $wide);
 	} else {
-	        form_select($form_id, $name, $label, $data, $v, 'slider', $wide);
+	        form_select($form_id, $name, $label, $choices, $v, 'slider', $wide);
 	}
 }
 

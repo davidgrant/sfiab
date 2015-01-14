@@ -87,7 +87,8 @@ sfiab_page_begin("Expertise", $page_id, $help);
 ?>
 		<h3>Sponsor Judges</h3>
 <?php
-	form_yesno($form_id, 'j_sa_only', "Do you represent the sponsor of a special award?", $u, false, true);
+
+	form_yesno($form_id, 'j_sa_only', "Do you represent the sponsor of a special award?", $u, false);
 	
 ?>
 	<div id="j_expertise_sa" <?=$sa_only ? '' : $hidden?> >
@@ -137,7 +138,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 
 	<script>
 		$( "#<?=$form_id?>_j_sa_only" ).change(function() {
-			var sa_only = $("#<?=$form_id?>_j_sa_only option:selected").val();
+			var sa_only = $('input[name="j_sa_only"]:checked').val();
 			if(sa_only == '0') {
 				$('#j_expertise_sa').hide();
 				$('#j_expertise_normal').show();
