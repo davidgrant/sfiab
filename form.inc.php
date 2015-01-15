@@ -231,7 +231,11 @@ function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false
 	/* v is usually 0 or 1, but could be NULL (no selection yet) */
 	$v = (is_array($value)) ? $value[$name] : $value;
 
-	if($v !== 0 && $v !== 1 && $v !== NULL) {
+	if(is_null($v)) {
+		/* Ok */
+	} else if ((int)$v == 0 || (int)$v == 1) {
+		$v = (int)$v;
+	} else {
 		$v = NULL;
 	}
 
