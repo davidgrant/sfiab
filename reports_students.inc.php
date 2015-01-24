@@ -393,7 +393,7 @@ $report_students_fields = array(
 		'name' => 'Project -- Category',
 		'header' => 'Category',
 		'width' => 1,
-		'table_sort' => 'categories.id',
+		'table_sort' => 'categories.cat_id',
 		'table' => 'categories.name' ),
 
 	'cat' => array(
@@ -406,7 +406,7 @@ $report_students_fields = array(
 		'name' => 'Project -- Category (French)',
 		'header' => 'Category',
 		'width' => 1,
-		'table_sort' => 'categories.id',
+		'table_sort' => 'categories.cat_id',
 		'table' => 'categories.name',
 		'exec_function' => 'report_students_i18n_fr'),
 
@@ -414,14 +414,14 @@ $report_students_fields = array(
 		'name' => 'Project -- Category and Challenge',
 		'header' => 'Category/Challenge',
 		'width' => 3.5,
-		'table_sort' => 'categories.id',
+		'table_sort' => 'categories.cat_id',
 		'table' => "CONCAT(categories.name,' - ', challenges.name)"),
 
 	'divisioncategory' => array(
 		'name' => 'Project -- Challenge and Category',
 		'header' => 'Challenge/Category',
 		'width' => 3.5,
-		'table_sort' => 'challenges.id',
+		'table_sort' => 'challenges.chal_id',
 		'table' => "CONCAT(challenges.name,' - ',categories.name)"),
 
 	'abstract' => array(
@@ -1090,8 +1090,8 @@ $report_students_fields = array(
 	$q = "	FROM  users 
 			LEFT JOIN schools ON schools.id=users.schools_id
 			LEFT JOIN projects ON projects.pid=users.s_pid
-			LEFT JOIN challenges ON challenges.id=projects.challenge_id
-			LEFT JOIN categories ON categories.id=projects.cat_id
+			LEFT JOIN challenges ON challenges.chal_id=projects.challenge_id
+			LEFT JOIN categories ON categories.cat_id=projects.cat_id
 			$partner_join
 			$mentor_join
 			$awards_join

@@ -807,9 +807,8 @@ function report_save_field($mysqli, $report, $type)
 	$q = "SELECT $sel  $q  $filter_query $group_query ORDER BY $order";
 	$r = $mysqli->query($q);
 
-//	print("<pre>");
-//	print_r($report);
-//	echo "$q";
+	debug("Report Input: ".print_r($report, true));
+	debug("Report Query: $q\n");
 
 	if($r == false) {
 		echo "The report database query has failed.  This is
