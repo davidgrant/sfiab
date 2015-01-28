@@ -45,8 +45,10 @@ case 'save_back':
 	post_bool($edit_u['attending'], 'attending');
 	post_text($edit_u['reg_close_override'], 'reg_close_override');
 
-	if(in_array('student', $edit_u['roles'])) {
-		post_int($edit_u['tour_id'], 'tour_id');
+	if($config['tours_enable']) {
+		if(in_array('student', $edit_u['roles'])) {
+			post_int($edit_u['tour_id'], 'tour_id');
+		}
 	}
 
 	if($edit_u['reg_close_override'] !== NULL) {
@@ -170,11 +172,12 @@ form_page_begin($page_id, array());
 	form_radio_h($form_id, 'attending', "At the fair", $sel, $edit_u['attending']);
 	form_text($form_id, 'reg_close_override', "Registration Close Override", $edit_u, 'date');
 
-	if(in_array('student', $edit_u['roles'])) { 
-		$tours = tour_get_for_student_select($mysqli, $edit_u);
-		form_select($form_id, 'tour_id', 'Assigned Tour', $tours, $edit_u['tour_id']);
+	if($config['tours_enable']) {
+		if(in_array('student', $edit_u['roles'])) { 
+			$tours = tour_get_for_student_select($mysqli, $edit_u);
+			form_select($form_id, 'tour_id', 'Assigned Tour', $tours, $edit_u['tour_id']);
+		}
 	}
-
 	form_submit($form_id, 'save', 'Save', 'User Saved');
 	form_submit($form_id, 'save_back', 'Save and Go Back', 'User Saved');
 	form_end($form_id); 
