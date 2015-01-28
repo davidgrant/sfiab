@@ -242,6 +242,8 @@ foreach($users as &$user) {
 				; // Nothing.
 			} else if($complete == true) {
 				$status .= ' (<font color="green">Complete</font>)';
+			} else if($user['new'] == 1) {
+				$status .= ' (<font color="blue">New</font>)';
 			} else {
 				$status .= ' (<font color="red">Incomplete</font>)';
 			}
