@@ -36,11 +36,7 @@ function stats_get_export($mysqli, &$fair, $year)
 	$stats['start_date'] = $config['date_fair_begins'];
 	$stats['end_date'] = $config['date_fair_ends'];
 
-
-	$q = $mysqli->query("SELECT MIN(min_grade),MAX(max_grade) FROM categories WHERE year='$year'");
-	$r = $q->fetch_row();
-	$min_grade = $r[0];
-	$max_grade = $r[1];
+	list($min_grade, $max_grade) = categories_grade_range($mysqli, $year);
 
 	for($g=$min_grade; $g<=$max_grade; $g++) {
 		$stats['male'][$g] = 0;
