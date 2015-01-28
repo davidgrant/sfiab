@@ -102,8 +102,8 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 		$schools[$r['id']] = "{$r['city']} - {$r['school']}";
 	}
 
-	$grades = array();
-	for($x=7;$x<=12;$x++) $grades[$x] = $x;
+	list($min_grade, $max_grade) = categories_grade_range($mysqli);
+	for($x=$min_grade;$x<=$max_grade;$x++) $grades[$x] = $x;
 
 	form_begin($form_id, 'student_personal.php', $closed);
 	form_text($form_id, 'firstname', "First Name", $u);

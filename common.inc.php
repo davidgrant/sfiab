@@ -575,6 +575,19 @@ function category_get_from_grade($mysqli, $grade)
 	return false;
 }
 
+function categories_grade_range($mysqli, $year = false)
+{
+	global $config;
+
+	if($year == false) $year = $config['year'];
+	$q = $mysqli->query("SELECT MIN(min_grade),MAX(max_grade) FROM categories WHERE year='$year'");
+	$r = $q->fetch_row();
+	$min_grade = $r[0];
+	$max_grade = $r[1];
+
+	return array($min_grade, $max_grade);
+}
+
 function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false)
 {
 	global $config;
