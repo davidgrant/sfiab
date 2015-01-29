@@ -58,6 +58,33 @@ $opts = getopt("nphu", array("db_name::", "db_pass::", "db_host::", "db_user::",
 			"convert", "force", "old_config::") );
 
 /* Check args */
+if(count($_SERVER['argv']) == 1 || array_key_exists('h', $opts) || array_key_exists('help', $opts)) {
+?>
+Help:
+Must use '=' for option values, that's how PHP's argument parser works
+
+To create a new configuration, specify database information with:
+--db_name=[db name] --db_user=[username] --db_pass-[password] --db_host=[server]
+OR, create a configuration from an existing old config file:
+--old_config=[path/to/config.inc.php]
+
+Specify new fair parameters with (create a new fair and admin account):
+--admin_name=[name] --admin_user=[user] --admin_pass=[password] --fair_name=[fair name]
+OR, convert from an existing database:
+--convert
+
+To convert from a previous sfiab install, just use --old_config --convert.
+That will rename all the tables in the database and prefix them with "zold_",
+then it will import a new database and fill it.  After doing this, upgrade 
+to the latest SFIAB3 version and run the update script.
+
+<?php
+exit();
+}
+
+
+
+
 $convert = array_key_exists('convert', $opts) ? true : false;
 
 $dbuser = NULL;
@@ -151,7 +178,7 @@ print("Checking database `$dbdatabase` state...\n");
 
 
 require_once('scripts/conv_db.inc.php');
-require_once('update.inc.php');
+require_once('db.inc.php');
 
 
 /* See if the database is old/new/or empty */
@@ -192,7 +219,7 @@ if(!$q || !$q->num_rows) {
 	print("   New SFIAB database not found, installing...\n");
 	/* Install the new database */
 	$fp = gzopen('updates/full_16.sql.gz', 'r');
-	update_apply_db($mysqli, $fp);
+	db_apply_update($mysqli, $fp);
 	gzclose($fp);
 } else {
 	$r = $q->fetch_row();
@@ -203,7 +230,6 @@ if(!$q || !$q->num_rows) {
 
 require_once('common.inc.php');
 require_once('user.inc.php');
-require_once('db.inc.php');
 
 sfiab_load_config($mysqli);
 
@@ -269,7 +295,14 @@ if($convert) {
 }
 
 
+/* Copy logos */
 
+print("Creating a blank logo...\n");
+system("cp files/logo-original-blank.png files/logo-original.png");
+system("cp files/logo-blank.jpg files/logo.jpg");
+system("cp files/logo-100-blank.jpg files/logo-100.jpg");
+system("cp files/logo-500-blank.jpg files/logo-500.jpg");
 
+print("All Done.\n");
 
 ?>
