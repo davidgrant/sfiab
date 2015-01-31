@@ -49,9 +49,6 @@ void students_load(struct _db_data *db, int year)
 			assert(0);
 		}
 
-		prefs = db_fetch_row_field(result, x, "s_sa_nom");
-		s->num_sa_nom = split_int_list(s->sa_nom, prefs);
-
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", s->name, s->grade, s->schools_id, s->tour_id_pref[0], s->tour_id_pref[1], s->tour_id_pref[2], s->id);
 		g_ptr_array_add(students, s);
 
@@ -77,6 +74,7 @@ void projects_load(struct _db_data *db, int year)
 	for(x=0;x<result->rows; x++) {
 		struct _project *p = malloc(sizeof(struct _project));
 		int pid, count;
+		char *prefs;
 		int num_students;
 
 		pid = atoi(db_fetch_row_field(result, x, "pid"));
@@ -110,8 +108,11 @@ void projects_load(struct _db_data *db, int year)
 		}
 		p->students = NULL;
 
+		prefs = db_fetch_row_field(result, x, "sa_nom");
+		p->num_sa_nom = split_int_list(p->sa_nom, prefs);
+
+
 		p->index = projects->len;
-		p->num_sa_nom = 0;
 		g_ptr_array_add(projects, p);
 
 	}
@@ -122,7 +123,7 @@ void projects_load(struct _db_data *db, int year)
 
 void projects_crosslink_students(void)
 {
-	int i,x, j;
+	int i,x;
 	for(x=0;x<projects->len;x++) {
 		struct _project *p = g_ptr_array_index(projects, x);
 		int c = 0;
@@ -132,17 +133,8 @@ void projects_crosslink_students(void)
 			if(s->pid == p->pid) {
 				s->project = p;
 				p->students[c++] = s;
-
-				for(j=0;j<s->num_sa_nom;j++) {
-					int sa = s->sa_nom[j];
-					if(list_contains_int(p->sa_nom, p->num_sa_nom, sa)) continue;
-
-					p->sa_nom[p->num_sa_nom] = sa;
-					p->num_sa_nom++;
-				}
 			}
 		}
-		if(p->num_sa_nom > 4) p->num_sa_nom = 4;
 	}
 }
 
@@ -172,7 +164,7 @@ void judges_load(struct _db_data *db, int year)
 		j->index = x;
 		j->sa_only = atoi(db_fetch_row_field(result, x, "j_sa_only"));
 		if(j->sa_only) {
-			printf("%s\n", db_fetch_row_field(result, x, "j_sa"));
+//			printf("%s\n", db_fetch_row_field(result, x, "j_sa"));
 			j->num_sa = split_int_list(j->sa, db_fetch_row_field(result, x, "j_sa"));
 			if(j->num_sa > 16) {
 				printf("ERROR: judge %s managed to select more than 16 (=%d) j_sa awards\n", j->name, i);

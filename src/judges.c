@@ -32,14 +32,9 @@ struct _jteam {
 
 
 
+/* Scratch memory for the jteam cost calculation so we dont' have to reallocate
+ * it every time */
 struct _judging_data {
-	int min_projects_per_judge;
-	int max_projects_per_judge;
-	int min_judges_per_team;
-	int max_judges_per_team;
-	int min_judges_per_cusp_team;
-	int max_judges_per_cusp_team;
-	int projects_per_sa_judge;
 	int *tmp_isef_div;
 	int *tmp_lang;
 } judging_data;
@@ -107,13 +102,13 @@ float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *
 	cost += (unique_langs - 1) * 75;
 	
 	/* Cost over limit */
-	if(bucket->len > judging_data.max_projects_per_judge) {
-		cost += (bucket->len - judging_data.max_projects_per_judge) * 100;
+	if(bucket->len > config.max_projects_per_judge) {
+		cost += (bucket->len - config.max_projects_per_judge) * 100;
 	}
 
 	/* Cost each project over 3/4 the max, just to break ties */
-	if(bucket->len > (judging_data.max_projects_per_judge * 3 / 4)) {
-		cost += bucket->len - (judging_data.max_projects_per_judge * 3 / 4);
+	if(bucket->len > (config.max_projects_per_judge * 3 / 4)) {
+		cost += bucket->len - (config.max_projects_per_judge * 3 / 4);
 	}
 
 	/* Score +200 pts for each duplicate project this team is judging, we
@@ -160,11 +155,11 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 		int min, max;
 
 		if(jteam->round == 1) {
-			min = (bucket->len < judging_data.min_judges_per_team) ? (judging_data.min_judges_per_team - bucket->len) : 0;
-			max = (bucket->len > judging_data.max_judges_per_team) ? (bucket->len - judging_data.max_judges_per_team) : 0;
+			min = (bucket->len < config.min_judges_per_team) ? (config.min_judges_per_team - bucket->len) : 0;
+			max = (bucket->len > config.max_judges_per_team) ? (bucket->len - config.max_judges_per_team) : 0;
 		} else {
-			min = (bucket->len < judging_data.min_judges_per_cusp_team) ? (judging_data.min_judges_per_cusp_team - bucket->len) : 0;
-			max = (bucket->len > judging_data.max_judges_per_cusp_team) ? (bucket->len - judging_data.max_judges_per_cusp_team) : 0;
+			min = (bucket->len < config.min_judges_per_cusp_team) ? (config.min_judges_per_cusp_team - bucket->len) : 0;
+			max = (bucket->len > config.max_judges_per_cusp_team) ? (bucket->len - config.max_judges_per_cusp_team) : 0;
 		}
 		cost += min * 1000;
 		cost += max * 1000;
@@ -402,7 +397,6 @@ void jteam_print(struct _jteam *jteam)
 void judges_anneal(struct _db_data *db, int year)
 {
 	int x, y, i;
-	struct _db_result *result;
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
 	GPtrArray **judge_jteam_assignments = NULL;
@@ -411,33 +405,6 @@ void judges_anneal(struct _db_data *db, int year)
 	current_year = year;
 
 	jteams = g_ptr_array_new();
-
-	result = db_query(db, "SELECT * FROM config WHERE year='%d'", year);
-	for(x=0;x<result->rows; x++) {
-		char *ptr = db_fetch_row_field(result, x, "var");
-		int val = atoi(db_fetch_row_field(result, x, "val"));
-		if(strcmp(ptr, "judge_div_min_projects") == 0)
-			judging_data.min_projects_per_judge = val;
-		if(strcmp(ptr, "judge_div_max_projects") == 0)
-			judging_data.max_projects_per_judge = val;
-		if(strcmp(ptr, "judge_div_min_team") == 0)
-			judging_data.min_judges_per_team = val;
-		if(strcmp(ptr, "judge_div_max_team") == 0)
-			judging_data.max_judges_per_team = val;
-		if(strcmp(ptr, "judge_cusp_min_team") == 0)
-			judging_data.min_judges_per_cusp_team = val;
-		if(strcmp(ptr, "judge_cusp_max_team") == 0)
-			judging_data.max_judges_per_cusp_team = val;
-		if(strcmp(ptr, "judge_sa_max_projects") == 0)
-			judging_data.projects_per_sa_judge = val;
-	}
-	db_free_result(result);
-
-	printf("Configuration: \n");
-	printf("   => Projects per Div judge: %d -> %d\n", judging_data.min_projects_per_judge, judging_data.max_projects_per_judge);
-	printf("   => Projects per SA judge: up to %d\n", judging_data.projects_per_sa_judge);
-	printf("   => Judges per Div Team: %d -> %d\n", judging_data.min_judges_per_team, judging_data.max_judges_per_team);
-	printf("   => Judges per Cusp Team: %d -> %d\n", judging_data.min_judges_per_cusp_team, judging_data.max_judges_per_cusp_team);
 
 	students_load(db, year);
 	projects_load(db, year);
@@ -480,6 +447,11 @@ void judges_anneal(struct _db_data *db, int year)
 		int num_jteams;
 		GPtrArray **project_jteam_assignments = NULL;
 
+		if(a->num_cats == 0) {
+			printf("Award %s has no categories, skipping.\n", a->name);
+			continue;
+		}
+
 		if(a->is_divisional) {
 			if(a->num_cats != 1) {
 				printf("ERROR: divisional award %s has %d cats, not 1.\n", a->name, a->num_cats);
@@ -504,7 +476,7 @@ void judges_anneal(struct _db_data *db, int year)
 
 			/* Calculate number of jteams needed for round1 */
 			/* 0/8 = 0, 1/8 ... 8/8 = 1,  9/8 = 2, etc.. */
-			num_jteams = ((a->projects->len - 1) / judging_data.max_projects_per_judge) + 1;
+			num_jteams = ((a->projects->len - 1) / config.max_projects_per_judge) + 1;
 			printf("   => %d projects, %d jteams\n", a->projects->len, num_jteams);
 
 			/* Create teams */
@@ -793,7 +765,7 @@ void judges_anneal(struct _db_data *db, int year)
 
 		/* Assign judges randomly */
 		if(jteam->projects->len > 0) 
-			judges_required = (jteam->projects->len - 1) / judging_data.projects_per_sa_judge + 1;
+			judges_required = (jteam->projects->len - 1) / config.projects_per_sa_judge + 1;
 		else 
 			judges_required = 0;
 		printf("         => %d judges are required.\n", judges_required);

@@ -11,20 +11,28 @@
 #include "db.h"
 #include "sfiab.h"
 
-
 GPtrArray *categories = NULL, *challenges = NULL;
 GPtrArray *isef_divisions = NULL;
+struct _config config;
 
 
 int split_int_list(int *list, char *str)
 {
 	int i = 0;
 	char *p;
+
+	/* Special case, return nothing if the string is empty */
+	if(str[0] == 0) {
+		list[0] = 0;
+		return 0;
+	}
+
 	while(1) {
 		/* Find a comma and null it out */
 		p = strchr(str, ',');
 		if(p) *p = 0;
-		/* Convert everythign up to the comma(or everything if comma not found */
+
+		/* Convert everything up to the comma(or everything if comma not found) */
 		list[i] = atoi(str);
 		i++;
 
@@ -45,6 +53,46 @@ int list_contains_int(int *list, int len, int val)
 }
 
 
+void config_load(struct _db_data *db)
+{
+	struct _db_result *result;
+	int x;
+
+	result = db_query(db, "SELECT * FROM config");
+	for(x=0;x<result->rows; x++) {
+		char *var, *val;
+		var = db_fetch_row_field(result, x, "var");
+		val = db_fetch_row_field(result, x, "val"); 
+
+		if(strcmp(var, "year") == 0)
+			config.year = atoi(val);
+		if(strcmp(var, "judge_div_min_projects") == 0)
+			config.min_projects_per_judge = atoi(val);
+		if(strcmp(var, "judge_div_max_projects") == 0)
+			config.max_projects_per_judge = atoi(val);
+		if(strcmp(var, "judge_div_min_team") == 0)
+			config.min_judges_per_team = atoi(val);
+		if(strcmp(var, "judge_div_max_team") == 0)
+			config.max_judges_per_team = atoi(val);
+		if(strcmp(var, "judge_cusp_min_team") == 0)
+			config.min_judges_per_cusp_team = atoi(val);
+		if(strcmp(var, "judge_cusp_max_team") == 0)
+			config.max_judges_per_cusp_team = atoi(val);
+		if(strcmp(var, "judge_sa_max_projects") == 0)
+			config.projects_per_sa_judge = atoi(val);
+
+	}
+	printf("Loaded SFIAB Config:\n");
+	printf("   year: %d\n", config.year);
+	printf("   Projects per Div judge: %d -> %d\n", config.min_projects_per_judge, config.max_projects_per_judge);
+	printf("   Projects per SA judge: up to %d\n", config.projects_per_sa_judge);
+	printf("   Judges per Div Team: %d -> %d\n", config.min_judges_per_team, config.max_judges_per_team);
+	printf("   Judges per Cusp Team: %d -> %d\n", config.min_judges_per_cusp_team, config.max_judges_per_cusp_team);
+	
+	db_free_result(result);
+}
+
+
 void categories_load(struct _db_data *db, int year)
 {
 	int x;
@@ -55,7 +103,7 @@ void categories_load(struct _db_data *db, int year)
 	for(x=0;x<result->rows; x++) {
 		struct _category *c = malloc(sizeof(struct _category));
 		c->name = strdup(db_fetch_row_field(result, x, "name"));
-		c->id = atoi(db_fetch_row_field(result, x, "id"));
+		c->id = atoi(db_fetch_row_field(result, x, "cat_id"));
 		c->shortform = strdup(db_fetch_row_field(result, x, "shortform"));
 		printf("%d: %s %s\n", 
 			c->id, c->shortform, c->name);
@@ -83,7 +131,7 @@ void challenges_load(struct _db_data *db, int year)
 	for(x=0;x<result->rows; x++) {
 		struct _challenge *c = malloc(sizeof(struct _challenge));
 		c->name = strdup(db_fetch_row_field(result, x, "name"));
-		c->id = atoi(db_fetch_row_field(result, x, "id"));
+		c->id = atoi(db_fetch_row_field(result, x, "chal_id"));
 		c->shortform = strdup(db_fetch_row_field(result, x, "shortform"));
 		printf("%d: %s %s\n", 
 			c->id, c->shortform, c->name);

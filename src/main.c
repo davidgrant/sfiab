@@ -12,24 +12,25 @@
 #include "students.h"
 #include "judges.h"
 #include "exhibithall.h"
+#include "sfiab.h"
 
 int main(int argc, char **argv) 
 {
-	int year = 2014;
 	struct _db_data *db;
 
 	db = db_connect();
 
+	config_load(db);
 
 	if(strcmp(argv[1], "tours") == 0) {
 		printf("Tours\n");
-		tours_anneal(db, year);
+		tours_anneal(db, config.year);
 	} else if(strcmp(argv[1], "judges") == 0) {
 		printf("Judges\n");
-		judges_anneal(db, year);
+		judges_anneal(db, config.year);
 	} else if(strcmp(argv[1], "eh") == 0) {
 		printf("Exhibit Hall\n");
-		exhibithall_anneal(db, year);
+		exhibithall_anneal(db, config.year);
 	}
 
 	db_close(db);

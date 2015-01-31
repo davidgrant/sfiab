@@ -3,17 +3,48 @@
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
+#include <regex.h>
 
 #include "db.h"
 
-const char *db_host = "127.0.0.1";
-const char *db_user = "sfiab";
-const char *db_pass = "gvrsf2013";
-const char *db_db   = "sfiab_new";
+static char db_host[128] = "";
+static char db_user[128] = "";
+static char db_pass[128] = "";
+static char db_db[128] = "";
+
+static int read_config_setting(char *line, char *result)
+{
+	regex_t regex;
+	regmatch_t group[2];
+
+	regcomp(&regex, "=.*\"([^\"]*)\";", REG_EXTENDED);
+	if(regexec(&regex, line, 2, group, 0) == 0) {
+		strncpy(result, &line[group[1].rm_so], group[1].rm_eo - group[1].rm_so);
+		return 1;
+	}
+	return 0;
+}
 
 int db_init(struct _db_data *db)
 {
+	FILE *fp;
+	char line[128];
+
 	mysql_init(&db->mysql);
+
+	printf("Reading config.inc.php\n");
+
+	fp = fopen("../config.inc.php", "rt");
+	while(!feof(fp)) {
+		fgets(line, 127, fp);
+		if(strstr(line, "$dbhost")) read_config_setting(line, db_host);
+		if(strstr(line, "$dbuser")) read_config_setting(line, db_user);
+		if(strstr(line, "$dbpassword")) read_config_setting(line, db_pass);
+		if(strstr(line, "$dbdatabase")) read_config_setting(line, db_db);
+	}
+	fclose(fp);
+
+
 	return 1;
 }
 
@@ -21,7 +52,11 @@ struct _db_data *db_connect(void)
 {
 	struct _db_data *ret;
 	ret = malloc(sizeof(struct _db_data));
-	mysql_init(&ret->mysql);
+
+	db_init(ret);
+
+	printf("Connect to: %s@%s/%s\n", db_user, db_host, db_db);
+
 	if(!mysql_real_connect(&ret->mysql, db_host, db_user, 
 				db_pass, db_db, 0, NULL, 0)) {
 		fprintf(stderr, "Failed to connect to database: Error: %s\n",

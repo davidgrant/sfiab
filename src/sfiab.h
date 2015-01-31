@@ -5,6 +5,18 @@
 
 #include "db.h"
 
+
+struct _config {
+        int year;
+	int min_projects_per_judge;
+	int max_projects_per_judge;
+	int min_judges_per_team;
+	int max_judges_per_team;
+	int min_judges_per_cusp_team;
+	int max_judges_per_cusp_team;
+	int projects_per_sa_judge;
+};
+
 struct _category
 {
 	int id;
@@ -32,8 +44,12 @@ struct _isef_division
 	char *div;
 };
 
+extern struct _config config;
 extern GPtrArray *categories, *challenges;
 extern GPtrArray *isef_divisions;
+
+
+void config_load(struct _db_data *db);
 
 void categories_load(struct _db_data *db, int year);
 struct _category *category_find(int cat_id);

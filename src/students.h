@@ -15,9 +15,6 @@ struct _student {
 	int index;
 	int pid;
 	struct _project *project;
-
-	int sa_nom[16];
-	int num_sa_nom;
 };
 
 
