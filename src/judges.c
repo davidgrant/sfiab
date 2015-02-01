@@ -769,7 +769,7 @@ void judges_anneal(struct _db_data *db, int year)
 				round = 1;
 		}
 
-		printf("   JTeam %d: %s assigned to round %d.  (sum[0]=%d, sum[1]=%d, in[0]=%d, in[1]=%d)\n", jteam->id, jteam->name, round+1,
+		printf("   JTeam %d: %s assigned to round %d.  (sum[0]=%d, sum[1]=%d, in[0]=%d, in[1]=%d)\n", jteam->id, jteam->name, round,
 				round_sum[0], round_sum[1], on_jteams_in[0], on_jteams_in[1]);
 		jteam->round = round;
 		for(i=0;i<jteam->judges->len;i++) {
@@ -838,8 +838,8 @@ void judges_anneal(struct _db_data *db, int year)
 
 
 		ideal_projects_in_round[round] -= jteam->projects->len;
-		jteam->round = round + 1;
-		printf("\n   JTeam %d: %s assigned to round %d.  has %d projects, ideal is now [0]=%d, [1]=%d\n", jteam->id, jteam->name, round+1,
+		jteam->round = round;
+		printf("\n   JTeam %d: %s assigned to round %d.  has %d projects, ideal is now [0]=%d, [1]=%d\n", jteam->id, jteam->name, round,
 				jteam->projects->len, ideal_projects_in_round[0], ideal_projects_in_round[1]);
 
 		/* Assign judges randomly */
@@ -874,30 +874,28 @@ void judges_anneal(struct _db_data *db, int year)
 	printf("Saving changes to JTeams...\n");
 	for(i=1;i<jteams->len;i++) {
 		struct _jteam *jteam = g_ptr_array_index(jteams, i);
-		char ids[2048];
+		char judge_ids[2048];
+		char project_ids[2048];
 		char *ptr;
-		db_query(db, "UPDATE judging_teams SET round='%d' WHERE id='%d'", jteam->round, jteam->id);
 
-
-		ids[0] = 0;
-		ptr = &ids[0];
+		judge_ids[0] = 0;
+		ptr = &judge_ids[0];
 		for(x=0;x<jteam->judges->len;x++) {
 			struct _judge *j = g_ptr_array_index(jteam->judges, x);
-			if(ptr != &ids[0]) 
+			if(ptr != &judge_ids[0]) 
 				ptr += sprintf(ptr, ",");
 			ptr += sprintf(ptr, "%d", j->id);
 		}
-		db_query(db, "UPDATE judging_teams SET user_ids='%s' WHERE id='%d'", ids, jteam->id);
 
-		ids[0] = 0;
-		ptr = &ids[0];
+		project_ids[0] = 0;
+		ptr = &project_ids[0];
 		for(iproject=0;iproject<jteam->projects->len;iproject++) {
 			struct _project *p = g_ptr_array_index(jteam->projects, iproject);
-			if(ptr != &ids[0]) 
+			if(ptr != &project_ids[0]) 
 				ptr += sprintf(ptr, ",");
 			ptr += sprintf(ptr, "%d", p->pid);
 		}
-		db_query(db, "UPDATE judging_teams SET project_ids='%s' WHERE id='%d'", ids, jteam->id);
+		db_query(db, "UPDATE judging_teams SET round='%d',user_ids='%s',project_ids='%s' WHERE id='%d'", jteam->round, judge_ids, project_ids, jteam->id);
 	}
 
 	/* ====================================================================*/
