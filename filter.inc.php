@@ -164,7 +164,7 @@ function post_text(&$val, $var)
 	}
 }
 
-function post_array(&$val, $var, &$choices) 
+function post_array(&$val, $var, $choices = NULL) 
 {
 	$v = post_get_value($var);
 	if($v !== NULL) {

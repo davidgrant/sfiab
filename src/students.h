@@ -33,6 +33,9 @@ struct _project {
 
 	int sa_nom[16];
 	int num_sa_nom;
+
+	char *unavailable_timeslots[16];
+	int num_unavailable_timeslots;
 };
 
 struct _judge {
@@ -49,7 +52,7 @@ struct _judge {
 	int available_in_round[8];
 	int lang[3];
 
-	void *round1_divisional_jteam;
+	void *round0_divisional_jteam;
 
 	int on_jteams_in_round[8];
 };

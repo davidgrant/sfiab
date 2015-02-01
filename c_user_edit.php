@@ -6,6 +6,8 @@ require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('email.inc.php');
 require_once('project_number.inc.php');
+require_once('timeslots.inc.php');
+
 
 
 $mysqli = sfiab_init('committee');
@@ -74,8 +76,8 @@ case 'psave_back':
 		post_int($edit_p['number_sort'], 'number_sort');
 		post_int($edit_p['floor_number'], 'floor_number');
 		post_text($edit_p['number'], 'number');
+		post_array($edit_p['unavailable_timeslots'], 'unavailable_timeslots');
 		project_save($mysqli, $edit_p);
-
 
 		if($action == 'psave') {
 			form_ajax_response(array('status'=>0));
@@ -184,9 +186,11 @@ form_page_begin($page_id, array());
 
 
 if(in_array('student', $edit_u['roles'])) { ?>
-	<h3>Project <?=$edit_p['number']?></h3>
-	<p>Title: <?=$edit_p['title']?>
-<?php	$form_id = $page_id.'_project_form';
+	<h3>Project - <?=$edit_p['number']?> - <?=$edit_p['title']?></h3>
+<?php	
+	$timeslots = timeslots_load_all($mysqli);
+
+	$form_id = $page_id.'_project_form';
 	form_begin($form_id, 'c_user_edit.php');
 	form_hidden($form_id, 'uid', $edit_u['uid']);
 	form_yesno($form_id, 'disqualified_from_awards', 'Project Disqualifed from Awards', $edit_p);
@@ -196,6 +200,18 @@ if(in_array('student', $edit_u['roles'])) { ?>
 
 	form_text($form_id, 'number_sort', 'Numeric Project Number for Sorting', $ns);
 	form_text($form_id, 'floor_number', 'Floor Location Number', $fn);
+
+	/* Unavailble timeslots are of the form round:num */
+	foreach($timeslots as $tid=>&$ts) {
+		$data = array();
+
+		foreach($ts['timeslots'] as $num=>&$t) {
+			$key = $t['round'].':'.$t['num'];
+			$data[$key] = date('H:i', $t['start_timestamp']).'<br/>- '.date('H:i', $t['end_timestamp']);
+		}
+		form_check_group($form_id, "unavailable_timeslots", "{$ts['name']} Unavailable Timeslots", $data, $edit_p);
+	}
+
 
 	$attrs = '';
 	if(!$edit_p['accepted']) {
@@ -244,7 +260,7 @@ if(in_array('student', $edit_u['roles'])) { ?>
 	</tr>
 	<tr>
 		<td><a href="#" data-role="button"  data-inline="true" data-theme="r" onclick="return user_list_info_purge(<?=$edit_u['uid']?>);" >Purge</a></td>
-		<td>Purging a user deletes all traces of them.  They are removed from judging teams, awards, like they never existed.  This action cannot be undone.  They're gone.</td>
+		<td>Purging a user deletes all traces of them.  They are deleted from winner lists, judging teams, tours, projects, everything, like they never existed.  This action cannot be undone.  They're gone.</td>
 	</tr>
 </table>
 

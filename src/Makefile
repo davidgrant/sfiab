@@ -49,6 +49,7 @@ C_SRCS= anneal.c\
 	main.c\
 	sfiab.c\
 	students.c\
+	timeslots.c\
 	tours.c
 
 H_FILES=anneal.h\
@@ -57,6 +58,7 @@ H_FILES=anneal.h\
 	judges.h\
 	sfiab.h\
 	students.h\
+	timeslots.h\
 	tours.h
 
 

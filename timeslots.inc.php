@@ -32,12 +32,14 @@ function timeslot_load($mysqli, $id , $data = NULL)
 	/* Create timeslots */
 	$a['timeslots'] = array();
 	for($x=0;$x<$a['num_timeslots']; $x++) {
-		$num = $x + 1;
-		$ts[$num] = array();
-		$ts[$num]['start_timestamp'] = $a['start_timestamp'] + (60 * $x * $a['timeslot_length']);
-		$ts[$num]['num'] = $num;
-		$ts[$num]['timeslot_id'] = $a['id'];
-		$ts[$num]['round'] = $a['round'];
+		$ts = array();
+		$ts['start_timestamp'] = $a['start_timestamp'] + (60 * $x * $a['timeslot_length']);
+		$ts['end_timestamp'] = $ts['start_timestamp'] + ($a['timeslot_length'] * 60);
+		$ts['num'] = $x;
+		$ts['timeslot_id'] = $a['id'];
+		$ts['round'] = $a['round'];
+
+		$a['timeslots'][$x] = $ts;
 	}
 
 	return $a;

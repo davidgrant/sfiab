@@ -111,6 +111,9 @@ void projects_load(struct _db_data *db, int year)
 		prefs = db_fetch_row_field(result, x, "sa_nom");
 		p->num_sa_nom = split_int_list(p->sa_nom, prefs);
 
+		prefs = db_fetch_row_field(result, x, "unavailable_timeslots");
+		p->num_unavailable_timeslots = split_str_list(p->unavailable_timeslots, prefs);
+
 
 		p->index = projects->len;
 		g_ptr_array_add(projects, p);
@@ -191,7 +194,7 @@ void judges_load(struct _db_data *db, int year)
 			if(j->years_national > 100) j->years_national = 1;
 
 		}
-		j->round1_divisional_jteam = NULL;
+		j->round0_divisional_jteam = NULL;
 
 		/* Turn the list of available rounds into a mask */
 		memset(j->available_in_round, 0, sizeof(int) * 8);
@@ -288,7 +291,7 @@ void awards_load(struct _db_data *db, int year)
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", j->name, j->grade, j->schools_id, j->tour_id_pref[0], j->tour_id_pref[1], j->tour_id_pref[2], j->id);
 		g_ptr_array_add(awards, a);
 
-		result2 = db_query(db, "SELECT * FROM award_prizes WHERE award_id='%d' ORDER BY `order` DESC", a->id);
+		result2 = db_query(db, "SELECT * FROM award_prizes WHERE award_id='%d' ORDER BY `ord` DESC", a->id);
 		for(y=0;y<result2->rows;y++) {
 			struct _prize *prize = malloc(sizeof(struct _prize));
 			prize->name = strdup(db_fetch_row_field(result2, y, "name")); 

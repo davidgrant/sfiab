@@ -52,6 +52,33 @@ int list_contains_int(int *list, int len, int val)
 	return 0;
 }
 
+int split_str_list(char **list, char *str)
+{
+	int i = 0;
+	char *p;
+
+	/* Special case, return nothing if the string is empty */
+	if(str[0] == 0) {
+		list[0] = NULL;
+		return 0;
+	}
+
+	while(1) {
+		/* Find a comma and null it out */
+		p = strchr(str, ',');
+		if(p) *p = 0;
+
+		/* Convert everything up to the comma(or everything if comma not found) */
+		list[i] = strdup(str);
+		i++;
+
+		/* Set str forward to where the comma was */
+		if(!p) break;
+		str = p+1;
+	}
+	return i;
+}
+
 
 void config_load(struct _db_data *db)
 {

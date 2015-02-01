@@ -58,8 +58,10 @@ function project_filter(&$p)
 	filter_int_or_null($p['num_mentors']);
 	filter_int($p['accepted']);
 	filter_int($p['disqualified_from_awards']);
-	filter_int_list($p['unavailable_timeslots']);
+	filter_str_list($p['unavailable_timeslots']);
 	filter_int_list($p['sa_nom']);
+
+	
 
 	if(!is_array($p['ethics'])) {
 		if($p['ethics'] == NULL) {
