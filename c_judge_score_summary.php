@@ -126,7 +126,7 @@ foreach($cats as $cid=>$c) {
 		$medal_distribution[$cid][$index] = $n;
 		/* Each cusp has 3 parts:
 		 * - top $config['projects_per_cusp']/2 projects that are assigned to [$index - 1] (unless $index=0)
-		 * - middle $n - $config['projects_per_cusp'] that are assiendt to [$index]
+		 * - middle $n - $config['projects_per_cusp'] that are assigned to [$index]
 		 * - bottom $config['projects_per_cusp']/2 projects that are assigned to [$index + 1]
 		 * We are not allowed to distribute more than $n projects, top and bottom are split
 		 *  evenly (ties to bottom), the middle could be zero 
@@ -287,8 +287,10 @@ foreach($cats as $cid=>$c) {
 			$medal_distribution[$cid][$index + 1] = $up;
 		}
 	}
-}
 
+	debug("Medal Distribution: ".print_r($medal_distribution[$cid], true));
+	
+}
 
 /* Should load these out of prizes */
 $plist = array('Gold', 'Silver','Bronze','Honourable Mention','Nothing');
@@ -296,42 +298,84 @@ $plist = array('Gold', 'Silver','Bronze','Honourable Mention','Nothing');
 
 switch($action) {
 case 'assign':
-	/* Add a project to a prize */
+	/* Assign all projects for a category to the cusp teams */
 	$cid = (int)$_POST['cid'];
 
-	/* Identify the jteams involved */
-	$cusp_jteams = array();
-	for($i=0; $i<count($plist)-1; $i++) {
-		$name = "{$cats[$cid]['name']} Cusp {$plist[$i]}-{$plist[$i+1]}";
-		$match = false;
-		foreach($jteams as $jteam_id=>&$jteam) {
-			if($jteam['name'] == $name) {
-				$cusp_jteams[] = &$jteam;
-				$match = true;
-				break;
-			}
-		}
-		if($match == false) {
-			form_ajax_response(array('status'=>1, 'error'=>"Couldn't find JTeam: $name"));
-			exit;
+	/* Find the divisional award for this category */
+	$award = NULL;
+	foreach($awards as $aid=>&$a) {
+		if($a['type'] == 'divisional' && in_array($cid, $a['categories'])) {
+			$award = &$a;
+			break;
 		}
 	}
 
-	/* Start at gold-silver (index 1) */
-	$match_cusp_index = 1;
-	foreach($cusp_jteams as &$jteam) {
+	debug("Assign projects for CUSP category $cid:{$cats[$cid]['name']}\n");
+
+	if($award === NULL) {
+		print("Error, couldn't find divisional award");
+		debug("   Error: Couldn't find divisional award.\n");
+		exit();
+	}
+		
+	/* Ensure it only has one categroy */
+	if(count($award['categories']) != 1) {
+		print("Error, turn on debug.");
+		debug("   Error:Divisional Award has more than one category\n");
+		exit();
+	}
+
+	debug("   Found divisional award {$award['id']}:{$award['name']}\n");
+	/* Now iterate over the prizes find the jteam for each prize, and assign projects.
+	 * Start at HM-nothing index (index 7) and work backwards.  The prizes_in_order
+	 * are HM -> gold */
+	$match_cusp_index = 7;
+	foreach($award['prizes_in_order'] as &$prize) {
+
+		unset($jteam);
+		$jteam = NULL;
+		foreach($jteams as $jteam_id=>&$jt) {
+			if($jt['prize_id'] == $prize['id']) {
+				$jteam = &$jt;
+				break;
+			}
+		}
+		debug("   Processing prize {$prize['id']}:{$prize['name']}\n");
+
+		if($jteam === NULL) {
+			print("Coudln't find jteam");
+			debug("   Couldn't find jteam for prize\n");
+			exit();
+		}
+
+		debug("   Found jteam {$jteam['id']}:{$jteam['name']}\n");
+
 		/* Delete projects on all cusp teams for $cid */
 		$jteam['project_ids'] = array();
 
 		/* Assign new projects */
-		foreach($projects_sorted[$cid] as $pid=>&$project) {
+		foreach($projects_sorted[$cid] as $index=>&$project) {
 			if($project['cusp_index'] == $match_cusp_index) {
-				$jteam['project_ids'][] = $pid;
+				$jteam['project_ids'][] = $project['pid'];
 			}
 		}
+		debug("   Added projects: ".join(',', $jteam['project_ids'])."\n");
+
+		/* Also record the number of cusp up projects (those that get this prize), all other projects
+		 * get the next prize down */
+		$up = $medal_distribution[$cid][$match_cusp_index];
+		$down = $n_projects_at_cusp[$cid][$match_cusp_index] - $up;
+		debug("   Award distribution up=$up, down=$down\n");
+		if($up + $down != count($jteam['project_ids'])) {
+			print("Error, turn on debug");
+			debug("   Prize has $up up + $down down != ".count($jteam['project_ids'])." project ids which were added\n");
+			exit();
+		}
+
+		$jteam['cusp_n_up'] = $up;
 
 		/* Increment to next cusp index */
-		$match_cusp_index += 2;
+		$match_cusp_index -= 2;
 
 		jteam_save($mysqli, $jteam);
 	}
@@ -362,6 +406,7 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 	</ul>
 
 	<p>Choose a category below, review the Cusp projects, then assign the projects to Cusp judging teams.
+	<hr/>
 
 	<div data-role="tabs">
 		<div data-role="navbar" >
@@ -404,7 +449,7 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 				<th>Total</th>
 				</tr>
 			</thead>
-<?php			foreach($projects_sorted[$cid] as $pid=>&$project) { 
+<?php			foreach($projects_sorted[$cid] as $sorted_i=>&$project) { 
 				$x++;
 				if($current_section != $project['cusp_index']) { 
 					$index = $project['cusp_index'];

@@ -23,10 +23,6 @@ $script_show_unawarded_prizes = false;
 $script_name = array_key_exists('name',$_GET) ? $_GET['name'] : 'Award Ceremony Script';
 
 if($script_debug) print("<pre>");
-function debug($str) {
-	global $script_debug;
-	if($script_debug) print($str);
-}
 
 $projects = projects_load_all($mysqli, $script_year);
 foreach($projects as &$p) {
@@ -237,10 +233,10 @@ if(!$script_group_by_prize) {
 				$winners[$prize_id] = array();
 			}
 
-			if(array_key_exists($prize['order'], $outer_prize_list)) {
+			if(array_key_exists($prize['ord'], $outer_prize_list)) {
 				/* Check that all the prizes here that already have the same name */
 				$name = $prize['name'];
-				foreach($outer_prize_list[$prize['order']] as $check_prize) {
+				foreach($outer_prize_list[$prize['ord']] as $check_prize) {
 					if($check_prize['name'] != $name) {
 						/* prize order exists, but the name doesn't match */
 						print("Prize order/name mismatch for group_by_prize");
@@ -253,9 +249,9 @@ if(!$script_group_by_prize) {
 					}
 				}
 			} else {
-				$outer_prize_list[$prize['order']] = array();
+				$outer_prize_list[$prize['ord']] = array();
 			}
-			$outer_prize_list[$prize['order']][] =& $prize;
+			$outer_prize_list[$prize['ord']][] =& $prize;
 		}
 	}
 

@@ -36,6 +36,8 @@ function jteam_load($mysqli, $jteam_id, $pdata = false)
 	filter_int($jteam['award_id']);
 	filter_int($jteam['num']);
 	filter_int($jteam['round']);
+	filter_int($jteam['prize_id']);
+	filter_int($jteam['cusp_n_up']);
 
 	unset($jteam['original']);
 	$original = $jteam;

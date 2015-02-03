@@ -23,6 +23,7 @@ struct _jteam {
 	struct _award *award;
 	int round;
 	int sa_only; /* If this jteam is for sa_only judges (no scheduling) */
+	int prize_id;
 
 	int *isef_div_count;
 	int *lang_count;
@@ -352,6 +353,7 @@ struct _jteam *jteam_create(struct _db_data *db, GPtrArray *jteams, char *name, 
 	g_ptr_array_add(jteams, jteam);
 
 	jteam->sa_only = 0;
+	jteam->prize_id = 0;
 
 	if(db != NULL) {
 		db_query(db, "INSERT INTO judging_teams (`num`,`name`,`autocreated`,`round`,`year`,`award_id`) "
@@ -590,6 +592,7 @@ void judges_anneal(struct _db_data *db, int year)
 
 				jteam = jteam_create(db, jteams, name, a);
 				jteam->round = 1;
+				jteam->prize_id = prize->id;
 				printf("JTeam %d: %s\n", jteam->num, jteam->name );
 			}
 
@@ -895,7 +898,8 @@ void judges_anneal(struct _db_data *db, int year)
 				ptr += sprintf(ptr, ",");
 			ptr += sprintf(ptr, "%d", p->pid);
 		}
-		db_query(db, "UPDATE judging_teams SET round='%d',user_ids='%s',project_ids='%s' WHERE id='%d'", jteam->round, judge_ids, project_ids, jteam->id);
+		db_query(db, "UPDATE judging_teams SET round='%d',user_ids='%s',project_ids='%s',prize_id='%d' WHERE id='%d'", 
+				jteam->round, judge_ids, project_ids, jteam->prize_id, jteam->id);
 	}
 
 	/* ====================================================================*/

@@ -129,7 +129,7 @@ case 'save':
 	exit();
 }
 
-$page_id = 'c_judge_scores';
+$page_id = 'c_judge_score_entry';
 $help = '<p>Enter Judging Scores';
 sfiab_page_begin("Enter Judging Scores", $page_id, $help);
 ?>

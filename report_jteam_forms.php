@@ -105,7 +105,14 @@ foreach($generate_rounds as $round ) {
 
 		$pdf->WriteHTML($html);
 
-		if($award['type'] == 'divisional') {
+		$sorted_project_ids = array();
+		foreach($jteam['project_ids'] as $pid) {
+			$project = &$projects[$pid];
+			$sorted_project_ids[$project['number_sort']] = $pid;
+		}
+		ksort($sorted_project_ids);
+
+		if($award['type'] == 'divisional' && $round != 1) {
 
 			$html = '<table>';
 			$html .= '<tr><td></td><td align="center"><b>Scientific Thought</b></td>';
@@ -113,14 +120,6 @@ foreach($generate_rounds as $round ) {
 			$html .= '<td align="center"><b>Communication</b></td>';
 			$html .= '</tr><tr><td colspan="4"><hr/></td></tr>';
 			
-
-			$sorted_project_ids = array();
-			foreach($jteam['project_ids'] as $pid) {
-				$project = &$projects[$pid];
-				$sorted_project_ids[$project['number_sort']] = $pid;
-			}
-			ksort($sorted_project_ids);
-
 			foreach($sorted_project_ids as $pid) {
 				$row = array();
 				$project = &$projects[$pid];
@@ -139,6 +138,62 @@ foreach($generate_rounds as $round ) {
 			$html.= '</table>';
 			$pdf->WriteHTML($html);
 
+		} else if($award['type'] == 'divisional' && $round == 1) {
+			/* Special CUSP report, print the exact number of boxes with the exact number of UP and DOWN prize names, e.g., so 
+			 * the judges assign 3 gold and 4 silver */
+
+			/* The up prize is the prize attached to the jteam */
+			$prize = $award['prizes'][$jteam['prize_id']];
+
+			/* The down prize is the previous one in the sorted prize list, could 
+			 * be NULL (Nothing) */
+			foreach($award['prizes_in_order'] as &$p) {
+				debug("{$award['name']}:{$p['name']}\n");
+			}
+
+			unset($down_prize);
+			$down_prize = NULL;
+			foreach($award['prizes_in_order'] as &$p) {
+				if($p['id'] == $jteam['prize_id']) {
+					break;
+				}
+				$down_prize = &$p;
+			}
+
+			$down_name = ($down_prize === NULL) ? 'Nothing' : $down_prize['name'];
+			$n_up = $jteam['cusp_n_up'];
+			$n_down = count($jteam['project_ids']) - $n_up;
+
+			$html = "<h4>CUSP Instructions: Assign $n_up {$prize['name']} and $n_down $down_name</h4>";
+
+			$html .= '<br/>&nbsp;<br/><table>';
+			$html .= "<tr><td align=\"center\" width=\"80mm\"><b>&nbsp;</b></td><td width=\"45mm\"></td>";
+			$html .= "<td align=\"center\" width=\"30mm\"><b>Project Number<br/></b></td><td></td>";
+			$html .= "</tr>";
+
+			$x = 0;
+			foreach($sorted_project_ids as $pid) {
+
+				$project = &$projects[$pid];
+
+				$short_title = htmlentities(substr($project['title'], 0, 50));
+				if(strlen($project['title']) > 50) $short_title .= "...";
+
+				$html .= "<tr><td align=\"center\" width=\"80mm\"><b>{$project['number']}</b><br/><font size=\"-3\">$short_title</font></td>";
+
+
+				$name = ($x < $n_up) ? $prize['name'] : $down_name;
+				$style = '';
+				if($x == $n_up) $style='border-top:3px solid black;';
+				$html .= "<td width=\"45mm\" align=\"right\"><font size=\"+5\">&nbsp;</font>$name: &nbsp;&nbsp;</td>";
+				$html .= "<td style=\"border:1px solid black;$style\" width=\"30mm\" height=\"10mm\">&nbsp;</td>";
+				$html .= "<td></td></tr>";
+
+				$x++;
+			}
+			$html .= '</table></hr>';
+			$pdf->WriteHTML($html);
+				
 		} else {
 			/* Use the same logic for cusp and SA teams, except query a different slot type */
 
@@ -154,7 +209,7 @@ foreach($generate_rounds as $round ) {
 				$html .= "</tr>";
 
 				for($y=1;$y<=$p['number'];$y++) {
-					$html .= "<tr><td align=\"right\" >Award #$y: &nbsp;</td>";
+					$html .= "<tr><td align=\"right\"><font size=\"+5\">&nbsp;</font>Award #$y: &nbsp;</td>";
 					$html .= "<td style=\"border:1px solid black;\" width=\"30mm\" height=\"10mm\">&nbsp;</td>";
 					$html .= "<td></td></tr>";
 

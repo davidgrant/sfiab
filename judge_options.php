@@ -27,7 +27,12 @@ switch($action) {
 case 'save':
 	if($closed) exit();
 	post_bool($u['j_willing_lead'], 'j_willing_lead');
-	post_bool($u['j_dinner'], 'j_dinner');
+
+	if($config['judge_ask_dinner']) {
+		post_bool($u['j_dinner'], 'j_dinner');
+	} else {
+		$u['j_dinner'] = 0;
+	}
 
 	$u['j_rounds'] = array();
 	for($r = 0; $r<$num_rounds; $r++) {
@@ -47,12 +52,25 @@ case 'save':
 	exit();
 }
 
-$help = '
+
+$dinner_time = '';
+$dinner_help = '';
+
+if($config['judge_ask_dinner'] == 1) {
+	if($num_rounds >= 2) {
+		$dinner_start = date('g:ia', $rounds[0]['end_timestamp']);
+		$dinner_end = date('g:ia', $rounds[1]['start_timestamp']);
+		$dinner_time = " from $dinner_start - $dinner_end on judging day";
+	}
+	$dinner_help = "<li><b>Dinner</b> - There is a judge's dinner$dinner_time for all judges.  This helps us guage the amount of food to purchse.";
+}
+
+$help = "
 <ul>
-<li><b>Team-Lead</b> - A team lead is responsible for communicating the final decision of the judging team to the chief judge.  
-<li><b>Dinner</b> - There is a judge\'s dinner from 5 - 6pm for all judges.  This helps us guage the amount of food to purchse.
+<li><b>Team-Lead</b> - A team lead is responsible for communicating the final decision of the judging team to the chief judge. 
+$dinner_help
 <li><b>Round 1/2</b> - When are you available to judge?  You will be assigned to judge in ALL rounds you answer \'Yes\' to.
-</ul>';
+</ul>";
 
 
 
@@ -77,7 +95,9 @@ sfiab_page_begin("Options", $page_id, $help);
 ?>	
 	<h3>Judging Options</h3> 
 <?php	form_yesno($form_id, 'j_willing_lead', "Are you willing to be the team-lead on your judging team?", $u, true);
-	form_yesno($form_id, 'j_dinner', "Will you be attending the Judge's Dinner (5-6pm on judging day)?", $u, true);
+	if($config['judge_ask_dinner']) {
+		form_yesno($form_id, 'j_dinner', "Will you be attending the Judge's Dinner$dinner_time?", $u, true);
+	}
 ?>	
 	<h3>Judging Languages</h3>
 	
@@ -86,7 +106,7 @@ sfiab_page_begin("Options", $page_id, $help);
 
 ?>
 	<h3>Time Availability</h3>
-	Note: You will be scheduled to judge in ALL of the judging rounds you answer 'Yes' to, not just one.
+	Note: You will be scheduled to judge in <b>ALL</b> of the judging rounds you answer 'Yes' to, not just one.
 	
 <?php	for($r=0; $r<$num_rounds; $r++) {
 		$ts = &$rounds[$r];
