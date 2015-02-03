@@ -38,14 +38,14 @@ $notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cu
 $notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
 $notices['Judging Teams']['sa_judges'] = array("OK All Special Award Judging Teams have (at most) {$config['judge_sa_max_projects']} projects per judge");
 foreach($jteams as &$jteam) {
-	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+	if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
 		if($c < $config['judge_div_min_team'] || $c > $config['judge_div_max_team']) {
 			$notices['Judging Teams']['r1div_judges'][] = "NO Round 1 Divisional Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['judge_div_min_team']}-{$config['judge_div_max_team']}";
 		}
 	}
-	if($jteam['round'] == 2 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
 		if($c < $config['judge_cusp_min_team'] || $c > $config['judge_cusp_max_team']) {
@@ -97,7 +97,7 @@ foreach($projects as $pid=>&$p) {
 	/* Check that each project is judged in round 1 */
 	$found = false;
 	foreach($jteams as &$jteam) {
-		if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+		if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 			if(in_array($pid, $jteam['project_ids'])) {
 				$found = true;
 				break;
@@ -130,7 +130,7 @@ foreach($projects as $pid=>&$p) {
 
 ?>	
 
-	<h3>Sanity Checks</h3> 
+	<h3>Judging Sanity Checks</h3> 
 	<ul data-role="listview" data-inset="true">
 <?php
 	foreach($notices as $sec=>$ns) { ?>
