@@ -126,7 +126,7 @@ void categories_load(struct _db_data *db, int year)
 	struct _db_result *result;
 	categories = g_ptr_array_new();
 	/* Load judges  */
-	result = db_query(db, "SELECT * FROM categories WHERE year='%d'", year);
+	result = db_query(db, "SELECT * FROM categories WHERE year='%d' ORDER BY cat_id", year);
 	for(x=0;x<result->rows; x++) {
 		struct _category *c = malloc(sizeof(struct _category));
 		c->name = strdup(db_fetch_row_field(result, x, "name"));
@@ -154,7 +154,7 @@ void challenges_load(struct _db_data *db, int year)
 	struct _db_result *result;
 	challenges = g_ptr_array_new();
 	/* Load judges  */
-	result = db_query(db, "SELECT * FROM challenges WHERE year='%d'", year);
+	result = db_query(db, "SELECT * FROM challenges WHERE year='%d' ORDER BY chal_id", year);
 	for(x=0;x<result->rows; x++) {
 		struct _challenge *c = malloc(sizeof(struct _challenge));
 		c->name = strdup(db_fetch_row_field(result, x, "name"));

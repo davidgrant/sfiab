@@ -708,6 +708,12 @@ class pdf extends TCPDF {
 				$flags = ENT_QUOTES;
 				if(PHP_VERSION_ID >= 50400) $flags |= ENT_HTML401;
 
+				if(!is_string($row[$f])) {
+					print("<pre>");
+					print("Row [$f] is not a string.");
+					debug_print_backtrace();
+				}
+
 				$d = htmlentities($row[$f], $flags , "UTF-8");
 				$d = nl2br($d);
 

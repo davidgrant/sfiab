@@ -14,11 +14,22 @@ $projects = projects_load_all($mysqli);
 $timeslots = timeslots_load_all($mysqli);
 $students = students_load_all_accepted($mysqli);
 
+/* Build a list of timeslots by round */
+$timeslots_by_round = array();
+foreach($timeslots as $tid=>&$ts) {
+	$timeslots_by_round[$ts['round']] = $ts;
+}
+
+/* For each loaded project, add some more info */
 foreach($projects as $pid=>&$p) {
 	$p['students'] = array();
 	$p['timeslots'] = array();
+	foreach($timeslots as $timeslot_id=>&$ts) {
+		$p['timeslots'][$timeslot_id] = array();
+	}
 }
 
+/* Add student info to projects */
 foreach($students as $uid=>&$s) {
 	/* Cross link them with projects */
 	$pid = $s['s_pid'];
@@ -26,17 +37,29 @@ foreach($students as $uid=>&$s) {
 	$projects[$pid]['students'][] = $s;
 }
 
+/* Build a list of timeslot assignments for each project.  There could be more than one assignment
+ * for a project, so store it as an array, e.g. let's say 18 is the timeslot ID for round 0 
+ * $project[pid][timeslots][18][0] = array of timeslot assignments
+ * $project[pid][timeslots][18][1] = empty if no assignments
+ * $project[pid][timeslots][18][2] = array of timeslot assignments
+ * ...
+ * $project[pid][timeslots][18][num_timeslots_in_ts_18] = array of timeslot assignments
+ */
 $q = $mysqli->query("SELECT * FROM timeslot_assignments WHERE year='{$config['year']}'");
 while($r = $q->fetch_assoc()) {
 	$pid = $r['pid'];
-	$timeslot = &$projects[$pid]['timeslots'];
-	if(!array_key_exists($r['num'], $timeslot)) {
-		$timeslot[$r['num']] = array();
+	$timeslot_id = $r['timeslot_id'];
+	$timeslot_num = $r['timeslot_num'];
+
+	$timeslot = &$projects[$pid]['timeslots'][$timeslot_id];
+
+	if(!array_key_exists($r['timeslot_num'], $timeslot)) {
+		$timeslot[$timeslot_num] = array();
 	}
-	$timeslot[$r['num']][] = $r;
+	$timeslot[$timeslot_num][] = $r;
 }
 
-
+/* Special command line options for generating a single scheudle */
 $project_numbers = array();
 $project_floor_numbers = array();
 if(array_key_exists('pn', $_GET)) {
@@ -83,20 +106,19 @@ foreach($projects as $pid=>&$p) {
 	}
 	$names = join(', ', $n);
 	
-	$pdf->WriteHTML("<h3></h3><p>
-		".i18n('Project Title').": <b>{$p['title']}</b> <br/>
-		".i18n('Students').": <b>$names</b><br/>");
+	$pdf->WriteHTMLCell(175, '', '', '', "<h3>{$p['title']}</h3>".i18n('Students').": <b>$names</b><br/>", 0, 2);
+//	$pdf->SetXY($x, $y + 20);
 
-	$ptimeslot = &$p['timeslots'];
 
-	$num = 0;
-	for($round=1;$round<=2;$round++) {
-		if($round == 1) {
-			$pdf->WriteHTML("<h3>".i18n("Round 1 -- April 10, 2pm - 5pm")."</h3>");
-		} else {
-			$pdf->WriteHTML("<h3>".i18n("Round 2 -- April 10, 6pm - 9pm")."</h3>");
-		}
-		$pdf->WriteHTML("<br/>");
+	/* Do rounds in order */
+	foreach($timeslots_by_round as $round=>&$ts) {
+
+		/* Get a pointer to the timeslot list for this project and round */
+		$ptimeslot = &$p['timeslots'][$ts['id']];
+
+		$start_date = date('F j, g:ia', $ts['start_timestamp']); /* April 10 2:00pm */
+		$end_date = date('g:ia', $ts['end_timestamp']); /* 5:00pm */
+		$pdf->WriteHTML("<h3>".i18n("{$ts['name']} -- $start_date - $end_date")."</h3><br/>");
 
 		$table = array('col'=>array(), 'widths'=>array() );
 		$table['fields'] = array('time','slot');
@@ -111,32 +133,30 @@ foreach($projects as $pid=>&$p) {
 		$table['total'] = 0;
 
 		$table['data'] = array();
-		$round_start_num = ($round == 1) ? 1 : 10;
-		$round_end_num = $round_start_num + 9;
-		for($num = $round_start_num; $num < $round_end_num; $num++) {
+		for($itimeslot = 0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
 			$row = array();
 
-			$ts = $timeslots[$num];
-			$row['time'] = date("g:i a", strtotime($ts['start']));
+			$row['time'] = date("g:i a", $ts['timeslots'][$itimeslot]['start_timestamp']);
 
-			if(!array_key_exists($num, $ptimeslot)) {
+			/* No information? Just call it a judging timeslot */
+			if(!array_key_exists($itimeslot, $ptimeslot)) {
 				$row['slot'] = 'Judging';
 			} else {
 				$txt = '';
-				switch($ptimeslot[$num][0]['type']) {
+				switch($ptimeslot[$itimeslot][0]['type']) {
 				case 'free':
 					$txt = "-- Break --";
 					break;
 				case 'special':
-					if($round == 1) {
+					if($round == 0) {
 						$txt = 'Special Awards Judging';
 					} else {
 						$txt = 'Additional Judging';
 					}
 					break;
 				case 'divisional':
-					if($round == 1) {
-						$txt = 'Round 1 Divisional Judging';
+					if($round == 0) {
+						$txt = $ts['name'].' Divisional Judging';
 					} else {
 						$txt = 'Additional Judging';
 					}

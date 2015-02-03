@@ -14,9 +14,28 @@ $mysqli = sfiab_init('committee');
 $u = user_load($mysqli);
 
 $projects = projects_load_all($mysqli);
+$timeslots = timeslots_load_all($mysqli);
 $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
 $judges = judges_load_all($mysqli);
+
+
+$generate_rounds = array();
+for($round=0;$round<count($timeslots); $round++) {
+	if(!array_key_exists('round', $_GET) || intval($_GET['round']) == $round) {
+		$generate_rounds[] = $round;
+	}
+}
+
+$generate_types = array();
+if(!array_key_exists('type', $_GET) || $_GET['type'] == 'divisional') {
+	$generate_types[] = 'divisional';
+}
+if(!array_key_exists('type', $_GET) || $_GET['type'] == 'special') {
+	$generate_types[] = 'special';
+	$generate_types[] = 'grand';
+	$generate_types[] = 'other';
+}
 
 //print("<pre>");
 
@@ -40,13 +59,21 @@ function td_box()
 	</tr></table>";
 }
 
-for($round=1;$round <=2; $round++) {
+foreach($generate_rounds as $round ) {
+	$ts = &$timeslots_by_round[$round];
+	$timeslot_id = $ts['id'];
+
 	foreach($jteams as $jteam_id=>&$jteam) {
 		if($jteam['round'] != $round) continue;
 
 		if($filter_jteam != 0 && $jteam_id != $filter_jteam) continue;
 
 		$award = $awards[$jteam['award_id']];
+
+		if(!in_array($award['type'], $generate_types)) {
+			continue;
+		}
+		
 		$n_judges = count($jteam['user_ids']);
 
 		$pdf->AddPage();
@@ -54,7 +81,7 @@ for($round=1;$round <=2; $round++) {
 		$y = $pdf->GetY();
 		$pdf->setFontSize(14);
 		$pdf->SetXY(-40, 10);
-		$pdf->Cell(30, 0, "Round $round", 0);
+		$pdf->Cell(30, 0, $ts['name'], 0);
 		$pdf->SetXY($x, $y);
 		$pdf->setFontSize(11);
 
@@ -84,7 +111,7 @@ for($round=1;$round <=2; $round++) {
 			$html .= '<tr><td></td><td align="center"><b>Scientific Thought</b></td>';
 			$html .= '<td align="center"><b>Creativity and <br/>Originality</b></td>';
 			$html .= '<td align="center"><b>Communication</b></td>';
-			$html .= '</tr>';
+			$html .= '</tr><tr><td colspan="4"><hr/></td></tr>';
 			
 
 			$sorted_project_ids = array();
@@ -98,7 +125,10 @@ for($round=1;$round <=2; $round++) {
 				$row = array();
 				$project = &$projects[$pid];
 
-				$html .= "<tr><td align=\"right\"><b>{$project['number']}  &nbsp;</b></td>";
+				$short_title = htmlentities(substr($project['title'], 0, 65));
+				if(strlen($project['title']) > 65) $short_title .= "...";
+
+				$html .= "<tr><td align=\"right\"><b>{$project['number']}</b> &nbsp;<br/><font size=\"+2\">&nbsp;</font><font size=\"-3\">$short_title</font></td>";
 
 				for($x=0;$x<3;$x++) {
 					$html .= '<td align="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.td_box().'</td>';
@@ -114,7 +144,8 @@ for($round=1;$round <=2; $round++) {
 
 			$html = '';
 			foreach($award['prizes_in_order'] as $p) { 
-				$html .= '<h4>'.$p['name'].' - '.$p['number'].' Prize(s) To Award</h4>';
+				$plural = ($p['number'] == 1) ? '' : 's';
+				$html .= '<h4>'.$p['name'].' - '.$p['number']." Prize$plural To Award</h4>";
 
 
 				$html .= '<table>';
@@ -137,9 +168,9 @@ for($round=1;$round <=2; $round++) {
 			$pdf->WriteHTML($html);
 			
 		}	
-		$pdf->WriteHTML("<br/><br/><br/><h3>Important Notes:</h3>
+		$pdf->WriteHTML("<br/><h3>Important Notes:</h3>
 		<ul>
-		<li>Submit this sheet to the Chief Judge!
+		<li>Submit this form to the Chief Judge!
 		</ul>");
 
 	}

@@ -9,6 +9,7 @@ function projects_load_all($mysqli, $only_accepted=true, $year = NULL)
 	$acc = $only_accepted ? " accepted='1' AND ": '';
 
 	$q = $mysqli->query("SELECT * FROM projects WHERE $acc year='$year' ORDER BY number_sort");
+
 	$projects = array();
 	while($p = $q->fetch_assoc()) {
 		$pr = project_load($mysqli, -1, $p);

@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('reports.inc.php');
+require_once('timeslots.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -59,6 +60,8 @@ sfiab_page_begin("Download Reports", $page_id, $help);
 $q = $mysqli->query("SELECT MIN(year) AS M FROM users");
 $u = $q->fetch_assoc();
 $min_year = $u['M'];
+
+$timeslots = timeslots_load_rounds($mysqli);
 
 
 ?>
@@ -132,12 +135,32 @@ $min_year = $u['M'];
 	</table>
 	<br/>
 
-	<h3>Special / Custom Reports</h3>
-	<ul data-role="listview" data-inset="true">
-	<li><a href="report_project_timetable.php" data-rel="external" data-ajax="false">Project Judging Schedules for the Students (one per page, takes a few seconds to generate)</a></li>
-	<li><a href="report_jteam_timetable.php" data-rel="external" data-ajax="false">Judging Team Schedules (one judging team per page, takes a few seconds to generate)</a></li>
-	<li><a href="report_jteam_forms.php" data-rel="external" data-ajax="false">Judging Team Hand-In Forms (one judging team per page, takes a few seconds to generate)</a></li>
-	</ul>
+	<h3>Judging Reports and Forms</h3>
+	<table>
+	<tr><td>Project Judging Schedules for the Students: <br/>(one per page, takes a few seconds to generate)</td>
+	<td>
+		<div data-role="controlgroup" data-type="horizontal">
+		<a href="report_project_timetable.php" data-ajax="false" data-role="button">All Projects</a>
+	</td></tr>
+	<tr><td>Judging Team Schedules: <br/>(one judging team per page)</td>
+	<td>
+		<div data-role="controlgroup" data-type="horizontal">
+<?php		foreach($timeslots as $round=>&$ts) { ?>
+			<a href="report_jteam_timetable.php?round=<?=$round?>&type=divisional" data-ajax="false" data-role="button"><?=$ts['name']?> - Divisional</a>
+			<a href="report_jteam_timetable.php?round=<?=$round?>&type=special" data-ajax="false" data-role="button"><?=$ts['name']?> - Special</a>
+<?php		} ?>
+		</div>
+	</td></tr>
+	<tr><td>Judging Team Hand-In Forms: <br/>(one judging team per page) </td>
+	<td>
+		<div data-role="controlgroup" data-type="horizontal">
+<?php		foreach($timeslots as $round=>&$ts) { ?>
+			<a href="report_jteam_forms.php?round=<?=$round?>&type=divisional" data-ajax="false" data-role="button"><?=$ts['name']?> - Divisional</a>
+			<a href="report_jteam_forms.php?round=<?=$round?>&type=special" data-ajax="false" data-role="button"><?=$ts['name']?> - Special</a>
+<?php		} ?>
+		</div>
+	</td></tr>
+	</table>
 	<br/>
 
 

@@ -82,7 +82,7 @@ function print_timeslot_div($form_id, $tid, &$ts)
 		<h3>Judging Round Number <span class="timeslot_div_round"><?=$ts['round'] + 1?></span></h3>
 <?php	
 		form_text($form_id, "ts[$tid][name]", "Name", $ts['name']);
-		form_text($form_id, "ts[$tid][start]", "Round Start Time (in minutes after fair begins at {$config['date_fair_begins']})", $ts['start'], 'date');
+		form_text($form_id, "ts[$tid][start]", "Round Start Time (in minutes after fair begins at {$config['date_fair_begins']})", $ts['start']);
 		form_int($form_id, "ts[$tid][num_timeslots]", 'Number of Timeslots in Round', $ts['num_timeslots']);
 		form_int($form_id, "ts[$tid][timeslot_length]", 'Length of each Timeslot (minutes)', $ts['timeslot_length']);
 

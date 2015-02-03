@@ -24,7 +24,7 @@ $jteams = jteams_load_all($mysqli);
 
 /* Link div1 jteams to projects */
 foreach($jteams as &$jteam) {
-	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+	if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		foreach($jteam['project_ids'] as $pid) {
 			if(!array_key_exists($pid, $projects)) {
 				/* Project $pid is assigned to a jteam but the project isn't complete */

@@ -7,11 +7,13 @@ require_once('awards.inc.php');
 require_once('timeslots.inc.php');
 require_once('committee/students.inc.php');
 require_once('committee/judges.inc.php');
+require_once('debug.inc.php');
 require_once('tcpdf.inc.php');
 
 $mysqli = sfiab_init('committee');
 
 $u = user_load($mysqli);
+
 
 $projects = projects_load_all($mysqli);
 $timeslots = timeslots_load_all($mysqli);
@@ -19,37 +21,74 @@ $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
 $judges = judges_load_all($mysqli);
 
-$num_rounds = count($timeslots);
+debug("Loaded ".count($projects)." projects\n");
+
+
+$generate_rounds = array();
+for($round=0;$round<count($timeslots); $round++) {
+	if(!array_key_exists('round', $_GET) || intval($_GET['round']) == $round) {
+		$generate_rounds[] = $round;
+	}
+}
+
+$generate_types = array();
+if(!array_key_exists('type', $_GET) || $_GET['type'] == 'divisional') {
+	$generate_types[] = 'divisional';
+}
+if(!array_key_exists('type', $_GET) || $_GET['type'] == 'special') {
+	$generate_types[] = 'special';
+	$generate_types[] = 'grand';
+	$generate_types[] = 'other';
+}
+
+debug("Generate Rounds: ".print_r($generate_rounds, true)."\n");
+
 
 foreach($jteams as &$jteam) {
 	$jteam['timeslots'] = array();
+	foreach($timeslots as $timeslot_id=>&$ts) {
+		$jteam['timeslots'][$timeslot_id] = array();
+	}
 }
 
 foreach($projects as &$project) {
 	$project['timeslots'] = array();
+	foreach($timeslots as $timeslot_id=>&$ts) {
+		$project['timeslots'][$timeslot_id] = array();
+	}
 }
-//print("<pre>");
+
+/* Create an index of timeslots by round too */
+$timeslots_by_round = array();
+foreach($timeslots as $tid=>&$ts) {
+	$timeslots_by_round[$ts['round']] = $ts;
+}
 
 $q = $mysqli->query("SELECT * FROM timeslot_assignments WHERE year='{$config['year']}'");
 while($r = $q->fetch_assoc()) {
 	$pid = $r['pid'];
 	$judge_id = $r['judge_id'];
 	$jteam_id = $r['judging_team_id'];
-	$timeslot_num = $r['num'];
+	$timeslot_num = $r['timeslot_num'];
+	$timeslot_id = $r['timeslot_id'];
 
-	$projects[$pid]['timeslots'][$timeslot_num] = $r['type'];
-
-//	print_r($r);
-//	print_r($jteams[$jteam_id]);
-	
-
-	if($jteam_id == 0) continue;
-	$timeslot = &$jteams[$jteam_id]['timeslots'];
-	if(!array_key_exists($timeslot_num, $timeslot)) {
-		$timeslot[$timeslot_num] = array();
+	if(!array_key_exists($pid, $projects)) {
+		print("Project $pid is assigned to judging, but wasn't loaded by project_load_all");
+		exit();
 	}
 
-	$timeslot[$timeslot_num][$judge_id] = $pid;
+	/* Make a list of slot types for each round for each project */
+	$projects[$pid]['timeslots'][$timeslot_id][$timeslot_num] = $r['type'];
+
+	/* There isn't always a jteam, but if there is, link it to the
+	 * project too */
+	if($jteam_id != 0) {
+		$timeslot = &$jteams[$jteam_id]['timeslots'][$timeslot_id];
+		if(!array_key_exists($timeslot_num, $timeslot)) {
+			$timeslot[$timeslot_num] = array();
+		}
+		$timeslot[$timeslot_num][$judge_id] = $pid;
+	}
 
 }
 
@@ -60,7 +99,11 @@ if (array_key_exists('id', $_GET)) {
 
 $pdf=new pdf( "Judging Team Schedule", $config['year'] );
 
-for($round=0;$round<$num_rounds; $round++) {
+/* Do the rounds in order, we built this array in order */
+foreach($generate_rounds as $round ) {
+	$ts = &$timeslots_by_round[$round];
+	$timeslot_id = $ts['id'];
+
 	foreach($jteams as $jteam_id=>&$jteam) {
 		if($jteam['round'] != $round) continue;
 
@@ -69,12 +112,16 @@ for($round=0;$round<$num_rounds; $round++) {
 		$award = $awards[$jteam['award_id']];
 		$n_judges = count($jteam['user_ids']);
 
+		if(!in_array($award['type'], $generate_types)) {
+			continue;
+		}
+
 		$pdf->AddPage();
 		$x = $pdf->GetX();
 		$y = $pdf->GetY();
 		$pdf->setFontSize(14);
 		$pdf->SetXY(-40, 10);
-		$pdf->Cell(30, 0, "Round $round", 0);
+		$pdf->Cell(30, 0, $ts['name'], 0);
 		$pdf->SetXY($x, $y);
 		$pdf->setFontSize(11);
 
@@ -107,8 +154,9 @@ for($round=0;$round<$num_rounds; $round++) {
 		$table['total'] = 0;
 		$table['data'] = array();
 
+		
 		if($award['type'] == 'divisional' && $round == 0) {
-
+			/* Round 1 */
 			$x = 0;
 			foreach($jteam['user_ids'] as $judge_id) {
 				$table['fields'][] = "J$x";
@@ -119,21 +167,23 @@ for($round=0;$round<$num_rounds; $round++) {
 				$x++;
 			}
 
-			for($num = 1; $num <=9; $num++) {
-				$row = array();
+			for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
 
-				$ts = $timeslots[$num];
-				$row['time'] = date("g:i a", strtotime($ts['start']));
+				$row = array();
+				$row['time'] = date("g:i a", $ts['timeslots'][$itimeslot]['start_timestamp']);
 
 				$x = 0;
 				foreach($jteam['user_ids'] as $judge_id) {
 
-					$jteam_timeslots = &$jteam['timeslots'];
+					$round_timeslots = &$jteam['timeslots'][$timeslot_id];
 					$txt = '';
 					/* Is $judge_id on $jteam_id assigned to a project in slot number $num ? */
-					if(array_key_exists($num, $jteam_timeslots)) {
-						if(array_key_exists($judge_id, $jteam_timeslots[$num])) {
-							$txt = $projects[$jteam_timeslots[$num][$judge_id]]['number'];
+					if(array_key_exists($itimeslot, $round_timeslots)) {
+						if(array_key_exists($judge_id, $round_timeslots[$itimeslot])) {
+							$txt = $projects[$round_timeslots[$itimeslot][$judge_id]]['number'];
+							if(!array_key_exists('number', $projects[$round_timeslots[$itimeslot][$judge_id]])) {
+								print_r($projects[$round_timeslots[$itimeslot][$judge_id]]);
+							}
 						} 
 					}
 					$row["J$x"] = $txt;
@@ -143,9 +193,9 @@ for($round=0;$round<$num_rounds; $round++) {
 			}
 
 			$pdf->add_table($table);
-			$pdf->WriteHTML("<br/><br/><br/><h3>Important Notes:</h3>
+			$pdf->WriteHTML("<br/><br/>
 			<ul>
-			<li>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.
+			<li><b>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.</b>
 			</ul>");
 
 
@@ -159,15 +209,12 @@ for($round=0;$round<$num_rounds; $round++) {
 
 
 			$table['header']['time'] = 'Project';
-			for($x = 0; $x < 9; $x++) {
-				$num  = ($round == 0) ? ($x+1) : ($x + 10);
-				$ts = $timeslots[$num];
-
-				$table['fields'][] = "T$x";
-				$table['header']["T$x"] = date("g:i", strtotime($ts['start']));
-				$table['col']["T$x"] = array('on_overflow' => '',
+			for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
+				$table['fields'][] = "T$itimeslot";
+				$table['header']["T$itimeslot"] = date("g:i", $ts['timeslots'][$itimeslot]['start_timestamp']);
+				$table['col']["T$itimeslot"] = array('on_overflow' => '',
 							      'align' => 'center');
-				$table['widths']["T$x"] = 20;
+				$table['widths']["T$itimeslot"] = 20;
 			}
 
 			$sorted_project_ids = array();
@@ -178,37 +225,44 @@ for($round=0;$round<$num_rounds; $round++) {
 			ksort($sorted_project_ids);
 		
 
+			$showed_vbar = false;
 			foreach($sorted_project_ids as $pid) {
 				$row = array();
 				$project = &$projects[$pid];
 
 				$row['time'] = $project['number'];
 
-				$x = 0;
-				for($x = 0; $x < 9; $x++) {
-					$num  = ($round == 0) ? ($x+1) : ($x + 10);
+				for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
 
-					if(!array_key_exists($num, $project['timeslots'])) {
+					if($project['timeslots'][$timeslot_id] == NULL) {
+						print("project $pid timeslots [$timeslot_id] is nULL\n");
+						print_r($project);
+					}
+
+					if(!array_key_exists($itimeslot, $project['timeslots'][$timeslot_id])) {
 						
-						print("<pre>Timeslot $num doesn't exist in timeslots for pid:$pid: ");
+						print("<pre>Timeslot $itimeslot doesn't exist in timeslots[$timeslot_id] for pid:$pid: ");
 						print_r($project);
 						exit();
 					}
 
 					$txt = '';
-					if($project['timeslots'][$num] == $slot_type) {
+					if($project['timeslots'][$timeslot_id][$itimeslot] == $slot_type) {
 						$txt = 'O';
+					} else if($round != 0 && $slot_type == 'special' && $project['timeslots'][$timeslot_id][$itimeslot] == 'divisional') {
+						$txt = '|';
+						$showed_vbar =true;
 					}
-					$row["T$x"] = $txt;
+					$row["T$itimeslot"] = $txt;
 				}
 				$table['data'][] = $row;
 			}
 
+
 			$pdf->add_table($table);
-			$pdf->WriteHTML("<br/><br/><br/><h3>Important Notes:</h3>
-			<ul>
-			<li>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.
-			</ul>");
+			$pdf->WriteHTML("<br/><ul><li>O = Student is availble for judging.</li>".
+			($showed_vbar ? '<li>&nbsp;| = Student is availble for other judges. You may judge the student but other judges have priority.</li>' : '').
+			"<br/><li><b>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.</b></ul>");
 		}	
 
 	}

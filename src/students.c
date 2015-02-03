@@ -70,7 +70,7 @@ void projects_load(struct _db_data *db, int year)
 
 	projects = g_ptr_array_new();
 	/* Load students and tour choices */
-	result = db_query(db, "SELECT * FROM projects WHERE year='%d' AND num_students IS NOT NULL", year);
+	result = db_query(db, "SELECT * FROM projects WHERE year='%d' AND num_students IS NOT NULL AND accepted='1'", year);
 	for(x=0;x<result->rows; x++) {
 		struct _project *p = malloc(sizeof(struct _project));
 		int pid, count;
@@ -89,6 +89,8 @@ void projects_load(struct _db_data *db, int year)
 		}
 
 		if(count != num_students) {
+			printf("Not loading project %d because the project num_students=%d is not equal to the number of students found = %d\n",
+						pid, num_students, count);
 			free(p);
 			continue;
 		}
