@@ -414,7 +414,7 @@ void isef_divisions_load(struct _db_data *db, int year)
 	define_isef_division(129, "PS", "OTHR", "Other", "Studies that cannot be assigned to one of the above categories, such as the effects of plants or plant-derived substances on animal and human health.");
 
 	/*ANIMAL SCIENCES, Study of animals and animal life, including their structure, function, life history, interactions, classification, and evolution.*/
-	define_isef_similar("AS", "ME", "BI", "CB", "EV");
+	define_isef_similar("AS", "" /*"ME"*/, "BI", "CB", "EV");
 
 	/* BEHAVIORAL AND SOCIAL SCIENCES, The science or study of the thought processes and behavior of humans and other animals in their interactions with the environment studied through observational and experimental methods.*/
 	define_isef_similar("BE", "ME", "", "", "");
@@ -423,7 +423,7 @@ void isef_divisions_load(struct _db_data *db, int year)
 	define_isef_similar("BI", "CB", "MI", "" /*"ME"*/, "");
 
 	/* CELLULAR AND MOLECULAR BIOLOGY, The study of the structure and formation of cells.*/
-	define_isef_similar("CB", "BI", "ME", "MI", "");
+	define_isef_similar("CB", "BI", /*"ME"*/"", "MI", "");
 
 	/* CHEMISTRY, The science of the composition, structure, properties, and reactions of matter.*/
 	define_isef_similar("CH", "BI", "EV", "", "");
@@ -444,7 +444,7 @@ void isef_divisions_load(struct _db_data *db, int year)
 	define_isef_similar("ET", "EN", "EA", "" /*"EE"*/, "");
 
 	/* ENVIRONMENTAL MANAGEMENT, The application of engineering principals to solve practical problems of managing mans\' interaction with the environment with the goal to maintain and improve the state of an environmental resource affected by human activities.*/
-	define_isef_similar("EM", "EV", "ET", "EN", "");
+	define_isef_similar("EM", "EV", "ET", "", "");
 
 	/* ENVIRONMENTAL SCIENCES, The analysis of existing conditions of the environment.*/
 	define_isef_similar("EV", "BI", "CH", "EA", "AS");
@@ -453,10 +453,10 @@ void isef_divisions_load(struct _db_data *db, int year)
 	define_isef_similar("MA", "CS", "EE", "PH", "");
 
 	/* HEALTH SCIENCES, The science of diagnosing, treating, or preventing disease and other damage to the body or mind.*/
-	define_isef_similar("ME", "BE", "BI", "CB", "MI");
+	define_isef_similar("ME", "" /*"BE"*/, "BI", ""/*"CB"*/, "" /*"MI"*/);
 
 	/* MICROBIOLOGY, The study of microorganisms, including bacteria, viruses, fungi, and pathogens.*/
-	define_isef_similar("MI", "CB", "ME", "BI", "");
+	define_isef_similar("MI", "CB", ""/*"ME"*/, "BI", "");
 
 	/* PHYSICS AND ASTRONOMY, Physics is the science of matter and energy and of interactions between the two. Astronomy is the study of anything in the universe beyond the Earth.*/
 	define_isef_similar("PH", "EA", "MA", "EE", "");

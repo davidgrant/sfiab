@@ -55,6 +55,7 @@ struct _judge {
 	void *round0_divisional_jteam;
 
 	int on_jteams_in_round[8];
+	int *isef_div_mask;
 };
 
 struct _prize {

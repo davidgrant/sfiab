@@ -43,7 +43,7 @@ case 'run':
 	
 }
 
-sfiab_page_begin("Judge Scheudler", $page_id);
+sfiab_page_begin("Judge Scheduler", $page_id);
 
 ?>
 
@@ -57,12 +57,14 @@ sfiab_page_begin("Judge Scheudler", $page_id);
 ?>	<h3>Judge Scheduler Settings</h3> 
 <?php	
 	form_begin($form_id, 'c_judge_scheduler.php');
-	form_int($form_id, "judge_div_min_projects", 'Divisional - Min Projects per Judge', $config['judge_div_min_projects']);
-	form_int($form_id, "judge_div_max_projects", 'Divisional - Max Projects per Judge', $config['judge_div_max_projects']);
-	form_int($form_id, "judge_div_min_team", 'Divisional - Min Judges per Team', $config['judge_div_min_team']);
-	form_int($form_id, "judge_div_max_team", 'Divisional - Max Judges per Team', $config['judge_div_max_team']);
-	form_int($form_id, "judge_cusp_min_team", 'Cusp - Min Judges per Team', $config['judge_cusp_min_team']);
-	form_int($form_id, "judge_cusp_max_team", 'Cusp - Max Judges per Team', $config['judge_cusp_max_team']);
+//	form_int($form_id, "judge_div_min_team", 'Divisional - Min Judges per Team', $config['judge_div_min_team']);
+	form_int($form_id, "judge_div_max_team", 'Divisional - Judges per Team', $config['judge_div_max_team']);
+//	form_int($form_id, "judge_div_min_projects", 'Divisional - Min Projects per Judge', $config['judge_div_min_projects']);
+	form_int($form_id, "judge_div_max_projects", 'Divisional - Projects per Judge', $config['judge_div_max_projects']);
+//	form_int($form_id, "judge_cusp_min_team", 'Cusp - Min Judges per Team', $config['judge_cusp_min_team']);
+	form_int($form_id, "judge_cusp_max_team", 'Cusp - Judges per Team', $config['judge_cusp_max_team']);
+	$tmp='';
+	form_int($form_id, "judge_cusp_projects", 'Cusp - Projects per Cusp', $tmp);
 //	form_int($form_id, "judge_sa_min_projects", 'Special Awards - Min Projects per Judge', $config['judge_sa_min_projects']);
 	form_int($form_id, "judge_sa_max_projects", 'Special Awards - Max Projects per Judge', $config['judge_sa_max_projects']);
 	form_submit($form_id, 'save', 'Save', 'Saved');

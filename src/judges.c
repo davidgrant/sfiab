@@ -26,62 +26,58 @@ struct _jteam {
 	int prize_id;
 
 	int *isef_div_count;
+	int *isef_div_mask;
 	int *lang_count;
 
 	GPtrArray *judges;
 	GPtrArray *projects;
 };
 
+void jteam_print(struct _jteam *jteam) ;
 
-
-/* Scratch memory for the jteam cost calculation so we dont' have to reallocate
- * it every time */
-struct _judging_data {
-	int *tmp_isef_div;
-	int *tmp_lang;
-} judging_data;
 
 
 /* Cost for projects assigned to each jteam */
 float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bucket)
 {
-	int x, y;
+	int x, y, iproject;
 	float cost = 0;
 	int unique_divs = 0;
 	int unique_langs = 0;
 	int min_mask_missing = isef_divisions->len+1;
-	/*
+	int language_count[NUM_LANGUAGES];
+
 	struct _award *a = annealer->data_ptr;
 	struct _jteam *jteam = g_ptr_array_index(a->jteams, bucket_id);
-	*/
 
 	/* +1 because an ID starts at 1, not 0 */
-	memset(judging_data.tmp_isef_div, 0, (isef_divisions->len+1) * sizeof(int));
-	memset(judging_data.tmp_lang, 0, 3 * sizeof(int));
+	memset(language_count, 0, NUM_LANGUAGES * sizeof(int));
+	memset(jteam->isef_div_mask, 0, isef_divisions->len * sizeof(int));
 
+	
+	for(iproject=0; iproject<bucket->len; iproject++) {
+		struct _project *p = g_ptr_array_index(bucket, iproject);
 
-	for(x=0;x<bucket->len;x++) {
-		struct _project *p = g_ptr_array_index(bucket, x);
+		if(jteam->isef_div_mask[p->isef_id] == 0) unique_divs += 1;
+		jteam->isef_div_mask[p->isef_id] = 2; /* Primary */
 
-		if(judging_data.tmp_isef_div[p->isef_id] == 0) unique_divs+= 1;
-		judging_data.tmp_isef_div[p->isef_id] += 1;
-
-		if(judging_data.tmp_lang[p->language_id] == 0) unique_langs += 1;
-		judging_data.tmp_lang[p->language_id] += 1;
+		if(language_count[p->language_id] == 0) unique_langs += 1;
+		language_count[p->language_id] += 1;
 	}
 
 	/* For each div in the isef divs, see if the mask for that div matches the 
 	 * entire div set.  We want to find one div that matches everything so that
 	 * all isef_divs in this jteam are "related" */
-	for(x=1;x<=isef_divisions->len;x++) {
+	for(x=1;x<isef_divisions->len;x++) {
 		struct _isef_division *test_div;
 		int mask_missing = 0;
-		if(judging_data.tmp_isef_div[x] == 0) continue;
+		if(jteam->isef_div_mask[x] == 0) continue;
 
 		test_div = g_ptr_array_index(isef_divisions, x);
 		for(y=1;y<=isef_divisions->len;y++) {
-			if(judging_data.tmp_isef_div[y] > 0 && test_div->similar_mask[y] == 0) {
-				/* This jteam has a div that isn't in the current mask, no match. */
+			if(jteam->isef_div_mask[y] > 0 && test_div->similar_mask[y] == 0) {
+				/* This jteam has a div that isn't in the current mask, no match. 
+				 * Note: similar_mask also stores the primary div */
 				mask_missing += 1;
 			}
 		}
@@ -108,13 +104,15 @@ float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *
 		cost += (bucket->len - config.max_projects_per_judge) * 100;
 	}
 
-	/* Cost each project over 3/4 the max, just to break ties */
+	/* Cost 1 for each project over 3/4 the max, just to break ties to
+	 * avoid one jteam with 5 projects, and another with 7 */
 	if(bucket->len > (config.max_projects_per_judge * 3 / 4)) {
 		cost += bucket->len - (config.max_projects_per_judge * 3 / 4);
 	}
 
 	/* Score +200 pts for each duplicate project this team is judging, we
 	 * really don't want a jteam judging the same project twice */
+#if 0	
 	if(bucket->len > 1) {
 		for(x=0;x<bucket->len-1;x++) {
 			struct _project *p1 = g_ptr_array_index(bucket, x);
@@ -126,6 +124,7 @@ float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *
 			}
 		}
 	}
+#endif	
 	return cost;	
 }
 
@@ -133,16 +132,15 @@ float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *
  * This handles both round0 and round1 (cusp) */
 float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bucket)
 {
-	int x, i, y;
+	int x, i;
 	float cost = 0;
 	int have_lead = 0;
 	int years_experience_weighted = 0;
-	float div_cost;
 	/* the gptrarray of jteams was passed as the data ptr so we can find
 	 * our jteam */
 	GPtrArray *jteams = annealer->data_ptr;
 	struct _jteam *jteam = g_ptr_array_index(jteams, bucket_id);
-	int *lang_count, *div_count;
+	int lang_count[NUM_LANGUAGES];
 	int n_round0_jteams = 0;
 	int n_round0_dupes = 0;
 
@@ -151,6 +149,9 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 		cost = bucket->len * 5;
 		return cost;
 	}
+
+//	printf("Calculate cost for jteam: \n");
+//	jteam_print(jteam);
 
 	/* Cost over/under */
 	if(jteam->award->is_divisional) {
@@ -170,12 +171,10 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 		assert(0);
 	}
 
-	/* Clean out the maps, and set pointers so we can use
-	 * nice names */
-	memset(judging_data.tmp_isef_div, 0, (isef_divisions->len+1) * sizeof(int));
-	memset(judging_data.tmp_lang, 0, 3 * sizeof(int));
-	lang_count = judging_data.tmp_lang;
-	div_count = judging_data.tmp_isef_div;
+	memset(lang_count, 0, NUM_LANGUAGES * sizeof(int));
+	if(jteam->round != 0) {
+		memset(jteam->isef_div_mask, 0, isef_divisions->len * sizeof(int));
+	}
 
 	/* For each judge score their div and cat pref.. this is just adding up 
 	 * what we've got on the team, it's the same for round 1 and 2, even 
@@ -183,6 +182,10 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 	for(x=0;x<bucket->len;x++) {
 		struct _judge *j = g_ptr_array_index(bucket, x);
 		int cat_cost;
+		int judge_missing_divs, idiv;
+
+//		printf("Judge %d: ", x);
+//		judge_print(j);
 
 		/* Cat */
 		if(j->cat_pref == 0) { /* No pref */
@@ -199,21 +202,47 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 			}
 		}
 		cost += cat_cost;
+//		printf("   cat cost = %d\n", cat_cost);
 
 		/* Count the judge's languages to the team count */
-		lang_count[1] += j->lang[1];
-		lang_count[2] += j->lang[2];
+		for(i=0;i<NUM_LANGUAGES;i++) {
+			lang_count[i] += j->lang[i];
+		}
 
-		/* Count of all the divs covered by the judges in this jteam.
-		 * Count: 2 for each div directly present, and
-		 *        1 for each similar div present */
-		for(i=0;i<3;i++) {
-			struct _isef_division *d = g_ptr_array_index(isef_divisions, j->isef_id_pref[i]);
-			div_count[j->isef_id_pref[i]] += 2;
+		if(jteam->round == 0) {
+			/* Match the divs the judge has with the divs the jteam needs */
+			judge_missing_divs = 0;
+			for(idiv = 1; idiv < isef_divisions->len; idiv++) {
+				if(jteam->isef_div_mask[idiv] == 2 && j->isef_div_mask[idiv] == 0) {
+					/* Judge is missing this primary div for the jteam, that's bad */
+					judge_missing_divs += 10;
+				} else if(jteam->isef_div_mask[idiv] == 1 && j->isef_div_mask[idiv] == 0) {
+					/* Judge is missing this similar div for the jteam, that's not bad */
+					judge_missing_divs += 1;
+				} else if(jteam->isef_div_mask[idiv] == 2 && j->isef_div_mask[idiv] == 1) {
+					/* Judge only has a similar match for the primary need of the jteam */
+					judge_missing_divs += 5;
+				}
+			}
+			/* Square the cost so more missing divs gets worse and worse */
+			cost += judge_missing_divs * judge_missing_divs;
+	//		printf("   div cost = %d\n", judge_missing_divs * judge_missing_divs);
+			
+			/* Check languages */
+			for(i=0;i<NUM_LANGUAGES;i++) {
+				if(jteam->lang_count[i] > 0 && j->lang[i] == 0) {
+					/* This judge is missing a language */
+					cost += 200;
+				}
+			}
 
-			/* Now iterate over all the similar divs */
-			for(y=0;y<d->num_similar;y++) {
-				div_count[d->similar[y]] += 1;
+		} else {
+			/* For cusp teams there are no projects yet, so there can't be any div cost, we just want
+			 * a good spread of the major divs, so add them up.  Since the jteam's isef_div_mask
+			 * is unused, we'll reuse it here to count up the divs this jteam has.  We cleared it 
+			 * above, and we use it below once all the judges are added up */
+			for(idiv = 1; idiv < isef_divisions->len; idiv++) {
+				jteam->isef_div_mask[idiv] += j->isef_div_mask[idiv];
 			}
 		}
 
@@ -266,42 +295,19 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 	/* Compare what the judges have to what the projects need */
 	/* Languages */
 	if(jteam->round == 0) {
-		for(i=1;i<3;i++) {
-			if(jteam->lang_count[i] > 0 && lang_count[i] < bucket->len) {
-				/* Some judge doesn't have a needed language */
-				cost += 100 * (bucket->len - lang_count[i]);
-			} else if(jteam->lang_count[i] == 0 && lang_count[i] > 0) {
-				/* The penalty for missing languages should be enough to  pull judges the right way 
-				 Some judge has an extra language 
-				cost += 1; */
-			}
-		}
-
-		/* Compare the judge div prefs we have on this team
-		 * with what the projects need.  We don't actually use
-		 * the 2,1 point system above */
-		div_cost = 0;
-		for(i=1; i<isef_divisions->len; i++) {
-			if(div_count[i] > 0 && jteam->isef_div_count[i] == 0) {
-				/* Judge team has a div not needed by the projects, the missing div
-				 * penalty should pull this away */
-	//			div_cost += judging_data.tmp_isef_div[i];
-			} else if (div_count[i] == 0 && jteam->isef_div_count[i] > 0) {
-				/* Judge team is missing a div needed by the projects.. this is a problem. */
-				div_cost += jteam->isef_div_count[i] * 50;
-			} else {
-				/* Match or not needed */
-				div_cost += 0;
-			}
-		}
-		cost += div_cost;
-
-		if(have_lead == 0) 
+		if(have_lead == 0) {
+		//	printf("   Lead: 100\n");
 			cost += 100;
+		}
+
+		/* Small penalty for a jteam with very little experience */
+		if(years_experience_weighted < 10) { 
+			cost += (10 - years_experience_weighted) * 5 ;
+		}
 	}
 
 	if(jteam->round == 1) {
-		div_cost = 0;
+		int div_cost = 0;
 		/* Don't care about languages or team lead */
 		/* Divs, we want a good spread */
 		for(i=1; i<isef_divisions->len; i++) {
@@ -310,31 +316,54 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 			/* Only look at top level divs */
 			if(d->parent != -1) continue;
 
-			if(div_count[d->id] == 0) {
+			if(jteam->isef_div_mask[d->id] == 0) {
 				/* No experience in this top-level div */
 				div_cost += 20;
 			}
 		}
 		cost += div_cost;
 
-		/* Peanlize two judges on the same round1 team from the same round0 team. */
+		/* Penalize two judges on the same round1 team from the same round0 team. */
 		cost += n_round0_dupes * 100;
 
-		/* Peanlize not having at least half the round1 members from a j1 team 
+		/* Penalize not having at least half the round1 members from a round0 team 
 		 * judging the same award */
 		if( (n_round0_jteams / 2) < bucket->len) {
 			cost += (bucket->len - (n_round0_jteams / 2)) * 100;
 		}
 	}
 
-	/* Small penalty for a jteam with very little experience */
-	if(jteam->round == 0 && years_experience_weighted < 10) { 
-		cost += (10 - years_experience_weighted) * 5 ;
-	}
-
 	assert(cost >= 0);
+
+//	printf("   Cost: %.1g\n", cost);
 	return cost;	
 }
+
+
+int jteam_find_best_judge_from_list(struct _jteam *jteam, GPtrArray *judges)
+{
+	int idiv, ijudge;
+	int lowest_div_missing = isef_divisions->len;;
+	int lowest_judge = -1;
+
+	for(ijudge=0; ijudge<judges->len; ijudge++) {
+		struct _judge *judge = g_ptr_array_index(judges, ijudge);
+		int div_missing = 0;
+
+		for(idiv=0;idiv<isef_divisions->len;idiv++) {
+			if(jteam->isef_div_mask[idiv] == 2 && judge->isef_div_mask[idiv] != 2) {
+				div_missing++;
+			}
+		}
+		if(div_missing < lowest_div_missing) {
+			lowest_div_missing = div_missing;
+			lowest_judge = ijudge;
+		}
+	}
+//	printf("Lowest missing = %d\n", lowest_div_missing);
+	return lowest_judge;
+}
+
 
 
 
@@ -346,10 +375,12 @@ struct _jteam *jteam_create(struct _db_data *db, GPtrArray *jteams, char *name, 
 	jteam->num = jteams->len;
 	jteam->judges = g_ptr_array_new();
 	jteam->projects = g_ptr_array_new();
-	jteam->isef_div_count = malloc((isef_divisions->len + 1) * sizeof(int));
-	memset(jteam->isef_div_count, 0, (isef_divisions->len + 1) * sizeof(int));
-	jteam->lang_count = malloc(3 * sizeof(int));
-	memset(jteam->lang_count, 0, 3 * sizeof(int));
+	jteam->isef_div_count = malloc(isef_divisions->len * sizeof(int));
+	memset(jteam->isef_div_count, 0, isef_divisions->len * sizeof(int));
+	jteam->isef_div_mask = malloc(isef_divisions->len * sizeof(int));
+	memset(jteam->isef_div_mask, 0, isef_divisions->len * sizeof(int));
+	jteam->lang_count = malloc(NUM_LANGUAGES * sizeof(int));
+	memset(jteam->lang_count, 0, NUM_LANGUAGES * sizeof(int));
 	g_ptr_array_add(jteams, jteam);
 
 	jteam->sa_only = 0;
@@ -378,8 +409,8 @@ void jteam_print(struct _jteam *jteam)
 		printf(" %s", div->div);
 	}
 	printf(", langs:");
-	if(jteam->lang_count[1] > 0) printf(" en(%d)", jteam->lang_count[1]);
-	if(jteam->lang_count[2] > 0) printf(" fr(%d)", jteam->lang_count[2]);
+	if(jteam->lang_count[LANGUAGE_ENGLISH] > 0) printf(" en(%d)", jteam->lang_count[LANGUAGE_ENGLISH]);
+	if(jteam->lang_count[LANGUAGE_FRENCH] > 0) printf(" fr(%d)", jteam->lang_count[LANGUAGE_FRENCH]);
 
 	printf(", %d projects\n", jteam->projects->len);
 
@@ -462,6 +493,7 @@ void judges_anneal(struct _db_data *db, int year)
 {
 	int x, y, i;
 	int itimeslot, iround, iproject;
+	int lang_count[NUM_LANGUAGES];
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
 	GPtrArray **judge_jteam_assignments = NULL;
@@ -477,9 +509,6 @@ void judges_anneal(struct _db_data *db, int year)
 
 	categories_load(db, year);
 	isef_divisions_load(db, year);
-
-	judging_data.tmp_isef_div = malloc((isef_divisions->len + 1)* sizeof(int));
-	judging_data.tmp_lang = malloc( 3 * sizeof(int));
 
 	judges_load(db, year);
 	awards_load(db, year);
@@ -524,6 +553,7 @@ void judges_anneal(struct _db_data *db, int year)
 		}
 
 		if(a->is_divisional) {
+			int num_languages;
 			if(a->num_cats != 1) {
 				printf("ERROR: divisional award %s has %d cats, not 1.\n", a->name, a->num_cats);
 				assert(0);
@@ -537,18 +567,28 @@ void judges_anneal(struct _db_data *db, int year)
 
 			printf("Assigning Projects to Award %s (category: %s)\n", a->name, cat->name);
 
-			/* Assign all projects in this category to the divisional award */
+			/* Assign all projects in this category to the divisional award
+			 * Count the number of unique languages */
+			memset(lang_count, 0, NUM_LANGUAGES * sizeof(int));
 			for(iproject=0;iproject<projects->len;iproject++) {
 				struct _project *p = g_ptr_array_index(projects, iproject);
 				if(p->cat_id == cat->id) {
 					g_ptr_array_add(a->projects, p);
+					lang_count[p->language_id]++;
 				}
 			}
 
+			num_languages = 0;
+			for(i=0;i<NUM_LANGUAGES;i++) {
+				if(lang_count[i] > 0) num_languages++;
+			}
+
 			/* Calculate number of jteams needed for round0 */
+			/* Add one to the jteams for each extra language to help avoid mixing languages */
 			/* 0/8 = 0, 1/8 ... 8/8 = 1,  9/8 = 2, etc.. */
-			num_jteams = ((a->projects->len - 1) / config.max_projects_per_judge) + 1;
-			printf("   => %d projects, %d jteams\n", a->projects->len, num_jteams);
+			num_jteams = ((a->projects->len - 1) / config.max_projects_per_judge) + 1 + (num_languages - 1);
+
+			printf("   => %d projects, %d jteams (added %d for extra languages)\n", a->projects->len, num_jteams, num_languages - 1);
 
 			/* Create teams */
 			for(i=0;i<num_jteams;i++) {
@@ -630,15 +670,33 @@ void judges_anneal(struct _db_data *db, int year)
 	g_ptr_array_add(jteams_list, g_ptr_array_index(jteams, 0));
 	for(x=1;x<jteams->len;x++) {
 		struct _jteam *jteam = g_ptr_array_index(jteams, x);
-		if (jteam->award->is_divisional && jteam->round == 0) {
-			g_ptr_array_add(jteams_list, jteam);
-			/* Build the divs and langs taht this jteam will need to have */
-			for(iproject=0;iproject<jteam->projects->len;iproject++) {
-				struct _project *p = g_ptr_array_index(jteam->projects, iproject);
-				jteam->isef_div_count[p->isef_id] += 1;
-				jteam->lang_count[p->language_id] += 1;
+
+		memset(jteam->isef_div_mask, 0, isef_divisions->len * sizeof(int));
+		memset(jteam->isef_div_count, 0, isef_divisions->len * sizeof(int));
+		memset(jteam->lang_count, 0, NUM_LANGUAGES * sizeof(int));
+
+		/* Build the divs and langs that this jteam will need to have */
+		for(iproject=0;iproject<jteam->projects->len;iproject++) {
+			struct _project *p = g_ptr_array_index(jteam->projects, iproject);
+			struct _isef_division *div = g_ptr_array_index(isef_divisions, p->isef_id);
+			jteam->isef_div_count[p->isef_id] += 1;
+			jteam->isef_div_mask[p->isef_id] = 2;
+			jteam->lang_count[p->language_id] += 1;
+
+			/* Expand the mask, but don't overwrite primary divs */
+			for(i=0;i<div->num_similar; i++) {
+				if(jteam->isef_div_mask[div->similar[i]] != 2) {
+					jteam->isef_div_mask[div->similar[i]] = 1;
+				}
 			}
 		}
+		
+		/* Add this team to our round 1 divisional list */
+		if (jteam->award->is_divisional && jteam->round == 0) {
+			g_ptr_array_add(jteams_list, jteam);
+		}
+
+		
 	}
 
 	/* All judges available in round0 execpt SA only are candidates */
@@ -842,21 +900,35 @@ void judges_anneal(struct _db_data *db, int year)
 
 		ideal_projects_in_round[round] -= jteam->projects->len;
 		jteam->round = round;
-		printf("\n   JTeam %d: %s assigned to round %d.  has %d projects, ideal is now [0]=%d, [1]=%d\n", jteam->id, jteam->name, round,
+		printf("\n   JTeam %d: %s assigned to round %d.  has %d projects, ideal is now [0]=%d [1]=%d, mask=", jteam->id, jteam->name, round,
 				jteam->projects->len, ideal_projects_in_round[0], ideal_projects_in_round[1]);
+		for(i=0;i<isef_divisions->len;i++) {
+			if(jteam->isef_div_mask[i] == 2) {
+				struct _isef_division *d = g_ptr_array_index(isef_divisions, i);
+				printf(" %s", d->div);
+			}
+		}
+		printf("\n");
 
-		/* Assign judges randomly */
+		/* Calculate required judges */
 		if(jteam->projects->len > 0) 
 			judges_required = (jteam->projects->len - 1) / config.projects_per_sa_judge + 1;
 		else 
-			judges_required = 0;
+			judges_required = 1; /* Assign one judge because we want to give out the award, probably */
+
+
 		printf("         => %d judges are required.\n", judges_required);
 		for(i=0; i<judges_required; i++) {
 			struct _judge *j;
+			int ijudge;
 			if(judge_list->len == 0) continue;
 
-			j = g_ptr_array_index(judge_list, 0);
-			g_ptr_array_remove_index_fast(judge_list, 0);
+			ijudge = jteam_find_best_judge_from_list(jteam, judge_list);
+
+			if(ijudge == -1) continue;
+
+			j = g_ptr_array_index(judge_list, ijudge);
+			g_ptr_array_remove_index_fast(judge_list, ijudge);
 
 			g_ptr_array_add(jteam->judges, j);
 			printf("      => ");
@@ -864,8 +936,7 @@ void judges_anneal(struct _db_data *db, int year)
 		}
 
 	}
-	
-	
+		
 
 	}
 

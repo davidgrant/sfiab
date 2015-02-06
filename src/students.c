@@ -104,9 +104,9 @@ void projects_load(struct _db_data *db, int year)
 		p->isef_id = db_fetch_row_field_int(result, x, "isef_id");
 		p->language = strdup(db_fetch_row_field(result, x, "language"));
 		if(strcmp(p->language, "fr") == 0) {
-			p->language_id = 2;
+			p->language_id = LANGUAGE_FRENCH;
 		} else {
-			p->language_id = 1;
+			p->language_id = LANGUAGE_ENGLISH;
 		}
 		p->students = NULL;
 
@@ -209,17 +209,27 @@ void judges_load(struct _db_data *db, int year)
 
 		/* Turn the languages (stored in php serialize, oops) into a mask */
 		p = db_fetch_row_field(result, x, "j_languages");
-		j->lang[1] = strstr(p, "en") ? 1 : 0;
-		j->lang[2] = strstr(p, "fr") ? 1 : 0;
+		j->lang[LANGUAGE_ENGLISH] = strstr(p, "en") ? 1 : 0;
+		j->lang[LANGUAGE_FRENCH] = strstr(p, "fr") ? 1 : 0;
 
 		
-		/* Remap prefs to parent */
+		/* Remap prefs to parent and setup the div mask */
+		j->isef_div_mask = malloc( isef_divisions->len * sizeof(int));
+		memset(j->isef_div_mask, 0, isef_divisions->len * sizeof(int));
 		for(i=0;i<3;i++) {
 			struct _isef_division *d;
 			if(j->isef_id_pref[i] <= 0) continue;
 			d = g_ptr_array_index(isef_divisions, j->isef_id_pref[i]);
 			if(d->parent != -1) 
 				j->isef_id_pref[i] = d->parent;
+
+
+			/* Reload div in case it changed */
+			d = g_ptr_array_index(isef_divisions, j->isef_id_pref[i]);
+			j->isef_div_mask[j->isef_id_pref[i]] = 2;
+			for(y=0;y<d->num_similar; y++) {
+				j->isef_div_mask[d->similar[y]] = 1;
+			}
 		}
 
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", j->name, j->grade, j->schools_id, j->tour_id_pref[0], j->tour_id_pref[1], j->tour_id_pref[2], j->id);
@@ -233,7 +243,7 @@ void judges_load(struct _db_data *db, int year)
 void judge_print(struct _judge *j) 
 {
 	int x;
-	printf(" %5d: %s, %s%s", j->id, j->name, j->lang[1] ? "en ":"", j->lang[2] ? "fr": "");
+	printf(" %5d: %s, %s%s", j->id, j->name, j->lang[LANGUAGE_ENGLISH] ? "en ":"", j->lang[LANGUAGE_FRENCH] ? "fr": "");
 	if(j->sa_only) {
 		printf("SA only:");
 		for(x=0;x<j->num_sa;x++) {

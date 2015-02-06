@@ -5,6 +5,13 @@
 
 #include "db.h"
 
+enum _languages {
+	LANGUAGE_ENGLISH,
+	LANGUAGE_FRENCH,
+	NUM_LANGUAGES,
+};
+
+
 
 struct _config {
         int year;
