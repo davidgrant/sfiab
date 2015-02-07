@@ -710,7 +710,9 @@ class pdf extends TCPDF {
 
 				if(is_null($row[$f])) {
 					$d = "";
-				} else if (!is_string($row[$f])) {
+				} else if (!is_scalar($row[$f])) {
+					/* scalars are int, floats, strings, bools, everything else
+					 * htmlentities wont' take */
 					print("<pre>");
 					print("Row [$f] is not a string.");
 					print("Row[$f]: ".print_r($row[$f], true)."\n");
