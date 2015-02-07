@@ -5,9 +5,10 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 
 $mysqli = sfiab_init('volunteer');
-$closed = sfiab_registration_is_closed($u);
 
 $u = user_load($mysqli);
+
+$closed = sfiab_registration_is_closed($u);
 
 $page_id = 'v_personal';
 

@@ -370,5 +370,97 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 }
 
 
+function remote_handle_old_get_awards($mysqli, &$fair, &$data, &$response)
+{
+	/* Get an award from an upstream server, specified by the local award_id, but
+	 * requested by the upstream award id */
+	$awards = array();
+	$year = $data['getawards']['year'];
+
+	$response['error'] = 0;
+
+	$ids = array();
+	/* Load a list of awards linked to the fair id */
+	$q = $mysqli->query("SELECT * FROM awards WHERE year='$year' AND FIND_IN_SET('{$fair['id']}',`feeder_fair_ids`)>0");
+	debug("Query: SELECT * FROM awards WHERE FIND_IN_SET('{$fair['id']}', `feeder_fair_ids`)>0\n");
+	while($a = $q->fetch_assoc()) {
+		debug(print_r($a, true));
+		$award = array();
+		$award['identifier'] = $a['id'];
+		$award['external_additional_materials'] = '';
+		$award['external_register_winners'] = 0;
+		$award['year'] = $a['year'];
+		$award['name_en'] = $a['name'];
+		$award['criteria_en'] = $a['s_desc'];
+		$award['upload_winners'] = '1';
+		$award['self_nominate'] = $a['self_nominate'];
+		$award['schedule_judges'] = $a['schedule_judges'];
+		
+		if($a['sponsor_uid']) {
+			$sq = $mysqli->query("SELECT * FROM users WHERE uid='{$a['sponsor_uid']}'");
+			if($sq->num_rows) {
+				$s =  $sq->fetch_assoc();
+				$award['sponsor'] = $s['organization'];
+			}
+		}
+
+		$award['prizes'] = array();
+		$pq = $mysqli->query("SELECT * FROM award_prizes WHERE award_id='{$a['id']}'");
+		while($p = $pq->fetch_assoc()) {
+			/* Map array keys -> local database field */
+			$map = array(	'cash' => 'cash', 'scholarship' => 'scholarship',
+					'value' => 'value', 'prize_en' => 'name', 'number'=>'number',
+					'ord'=>'ord');
+			$prize = array('identifier' => '');
+			foreach($map as $k=>$field) $prize[$k] = $p[$field];
+
+			$prize['trophystudentkeeper']='0';
+			$prize['trophystudentreturn']='0';
+			$prize['trophyschoolkeeper']='0';
+			$prize['trophyschoolreturn']='0';
+
+			$award['prizes'][] = $prize;
+		}
+		$awards[] = $award;
+	}
+	$response['awards'] = $awards;
+
+	return $response['error'];
+}
+
+function remote_handle_old_get_categories($mysqli, &$fair, &$data, &$response)
+{
+	$year = intval($data['get_categories']['year']);
+	$cat = array();
+	$q=$mysqli->query("SELECT * FROM categories WHERE year='$year' ORDER BY cat_id");
+	while($r=$q->fetch_object()) {
+	        $cat[$r->cat_id]=array('id' => $r->cat_id,
+				'category' => $r->name,
+				'mingrade' => $r->min_grade,
+				'maxgrade' => $r->max_grade);
+	}
+	$response['categories'] = $cat;
+	$response['error'] = 0;
+}
+
+function remote_handle_old_get_divisions($mysqli, &$fair, &$data, &$response)
+{
+	$year = intval($data['get_divisions']['year']);
+	$div = array();
+	$q=$mysqli->query("SELECT * FROM challenges WHERE year='$year' ORDER BY chal_id");
+	while($r=$q->fetch_object()) {
+		$div[$r->chal_id] = array('id' => $r->chal_id,
+				'division' => $r->name);
+	}
+	$response['divisions'] = $div;
+	$response['error'] = 0;
+}
+function remote_handle_old_upload_assign($mysqli, &$fair, &$data, &$response)
+{
+
+
+}
+
+
 
 ?>

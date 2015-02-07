@@ -30,16 +30,38 @@ require_once('debug.inc.php');
 $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
+
 /* According to PHP, $_POST is already urldecoded, so don't mirror our urlencode */
-$command = $_POST['d'];
+if(!array_key_exists('d', $_POST)) {
+	debug("data sent to server is missing command: ".print_r($_POST, true));
 
-$data = json_decode($command, true);
+	/* Hack to support old sfiab */
+	if(array_key_exists('json', $_POST)) {
+		debug("Attempting to convert from old sfiab json query\n");
+		$data =  json_decode($_POST['json'], true);
+		$data['password'] = $data['auth']['password'];
+	} else {
+		exit();
+	}
+} else {
+	$data = json_decode($_POST['d'], true);
+}
+
 $password = $data['password'];
-
 $fair = fair_load_by_hash($mysqli, $password);
+
+if($fair === NULL) {
+	debug("Coudln't find fair for hash: $password\n");
+	exit();
+}
+
+$fair['old_sfiab'] = ($fair['username'] == '') ? false : true;
 
 debug("Incoming command matched password for fair: {$fair['name']}\n");
 debug("Decoded Command:".print_r($data, true)."\n");
+if($fair['old_sfiab']) {
+	debug("Using OLD sfiab support\n");
+}
 
 $response = remote_handle_cmd($mysqli, $fair, $data);
 
@@ -73,10 +95,23 @@ function remote_handle_cmd($mysqli, &$fair, &$data)
 		return $response;
 	}
  
-	/* Check the token in the command by communicating back with the fair URL we have on record */
-	if(remote_check_token($mysqli, $fair, $data['token']) == false) {
+	/* Check the token in the command by communicating back with the fair URL we have on record, 
+	 * hack for old support, if there is a fair username, skip the token check */
+	if($fair['old_sfiab'] == false && remote_check_token($mysqli, $fair, $data['token']) == false) {
  		$response['error'] = 1;
 		$response['message'] = "Authentication Failed4";
+		return $response;
+	}
+
+
+	if($fair['old_sfiab']) {
+		/* Old allow a few commands */
+		if(array_key_exists('getawards', $data)) remote_handle_old_get_awards($mysqli, $fair, $data, $response);
+		if(array_key_exists('get_categories', $data)) remote_handle_old_get_categories($mysqli, $fair, $data, $response);
+		if(array_key_exists('get_divisions', $data)) remote_handle_old_get_divisions($mysqli, $fair, $data, $response);
+
+
+		$response['hi'] = 'hi';
 		return $response;
 	}
 
