@@ -708,14 +708,19 @@ class pdf extends TCPDF {
 				$flags = ENT_QUOTES;
 				if(PHP_VERSION_ID >= 50400) $flags |= ENT_HTML401;
 
-				if(!is_string($row[$f])) {
+				if(is_null($row[$f])) {
+					$d = "";
+				} else if (!is_string($row[$f])) {
 					print("<pre>");
 					print("Row [$f] is not a string.");
+					print("Row[$f]: ".print_r($row[$f], true)."\n");
+					print("Row: ".print_r($row, true)."\n");
 					debug_print_backtrace();
+					$d = "";
+				} else {
+					$d = htmlentities($row[$f], $flags , "UTF-8");
+					$d = nl2br($d);
 				}
-
-				$d = htmlentities($row[$f], $flags , "UTF-8");
-				$d = nl2br($d);
 
 				/* unfortunately, HTML doesn't do overflow the 
 				 * way we want, so compute the width of each cell

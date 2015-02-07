@@ -189,8 +189,8 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	int num_moves_this_temp;
 	int num_accepted_this_temp;
 
-//	srand(time(NULL));
-	srand(0);
+	srand(time(NULL));
+//	srand(0);
 
 	/* Setup */
 	printf("Annealer\n");
