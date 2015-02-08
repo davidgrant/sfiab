@@ -196,15 +196,10 @@ function generic_save($mysqli, &$p, $table, $table_key)
 					$v = NULL;
 				else 
 					$v = $val;
-
-				/* Then for everything, strip slashes and escape */
-				$v = stripslashes($v);
-				$v = $mysqli->real_escape_string($v);
 			}
 			if(is_null($v)) {
 				$set .= "`$key`=NULL";
 			} else {
-				$v = stripslashes($v);
 				$v = $mysqli->real_escape_string($v);
 				$set .= "`$key`='$v'";
 			}

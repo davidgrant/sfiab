@@ -120,6 +120,8 @@ case 'save':
 	post_text($e['subject'], 'subject');
 	post_text($e['body'], 'body');
 
+	debug("email_save: post data: ".print_r($_POST, true)."\n");
+
 	email_save($mysqli, $e);
 	form_ajax_response(array('status'=>0, 'location'=>'back'));
 	exit();
