@@ -47,7 +47,7 @@ function check_attempts($mysqli, $uid)
 	$uid = (int)$uid;
  
 	$q = $mysqli->query("SELECT time FROM log WHERE uid = '$uid'
-						AND type = 'login bad pass' 
+						AND type = 'login' AND result='0'
 						AND time > DATE_SUB(NOW(), INTERVAL $interval SECOND)
 						ORDER BY time DESC
 						LIMIT 6"); 
@@ -95,7 +95,7 @@ case 'register':
 	if(!check_username($username) || !check_email($email) || !array_key_exists($as, $sfiab_roles) || array_key_exists($as, $not_allowed_roles)) {
 		/* Validation form isn't doing it's job */
 		print('');
-		sfiab_log($mysqli, "register bad", "Invalid data username: {$username}, email: {$email}, as: $as");
+		sfiab_log_register($mysqli, $username, $email, $as, "Invalid data provided", 0);
 		exit();
 	}
 
@@ -109,10 +109,10 @@ case 'register':
 	 * If the latest status for a user in the latest year is anything other than
 	 *  new or deleted, */
 	$q_username = $mysqli->real_escape_string($username);
- 	$q = $mysqli->query("SELECT `uid`,`year`,`enabled` FROM `users` WHERE username='$q_username' ORDER BY `year` DESC,`enabled` DESC LIMIT 1");
+ 	$q = $mysqli->query("SELECT `uid`,`year`,`enabled`,`new` FROM `users` WHERE username='$q_username' ORDER BY `year` DESC,`enabled` DESC LIMIT 1");
 	if($q->num_rows > 0) { 
 		$r = $q->fetch_assoc();
-		if($r['enabled']) {
+		if(!$r['new']) {
 			print('Sorry, username already exists');
 			exit();
 		}
@@ -129,10 +129,10 @@ case 'register':
 	$u['lastname'] = $ln;
 	user_save($mysqli, $u);
 
-	/* Send an email */
-	$result = email_send($mysqli, "New Registration", $u['uid'], array('password'=>$u['scrambled_password']) );
+	/* Send an email, also re-scrambles their password */
+	email_send_welcome_email($mysqli, $u);
 
-	sfiab_log($mysqli, "register ok", "username: $username, email: $email, as: $as, email status: $result");
+	sfiab_log_register($mysqli, $u, $email, $as, "", 1);
 	
 	print('0');
 	exit();
@@ -152,13 +152,14 @@ case 'login':
 
 	/* User exists? */
 	if($u == NULL) { 
-		sfiab_log($mysqli, 'login no user', $username);
+		sfiab_log_login($mysqli, $username, 'no user', 0);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
 	/* user must be active */
 	if(!$u['enabled']) {
+		sfiab_log_login($mysqli, $u, 'user not enabled', 0);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
@@ -166,7 +167,7 @@ case 'login':
 	/* Hash must be valid, it gets read from the $_SESSION, so there's no 
 	 * reason for it not to be valid*/
 	if(strlen($u['salt']) != 128) {
-		sfiab_log($mysqli, 'login bad salt', $username);
+		sfiab_log_login($mysqli, $u, 'bad salt', 0);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
@@ -176,7 +177,7 @@ case 'login':
 
 	/* Check for too many login attempts */
 	if(check_attempts($mysqli, $u['uid']) == true) { 
-		sfiab_log($mysqli, 'login locked', $username, $u['uid']);
+		sfiab_log_login($mysqli, $u, 'locked', 0);
 		print(ajax(2, 'This account has been locked due to too many failed login attempts.  It will be unlocked in 30 minutes, or use the password recovery link below to unlock it immediately'));
 		exit();
 	}
@@ -190,14 +191,13 @@ case 'login':
 	 * database */
 	$salted_hash = hash('sha512', $hashed_pw.$u['salt']);
 	if($salted_hash != $u['password']) {
-		sfiab_log($mysqli, 'login bad pass', $username, $u['uid']);
+		sfiab_log_login($mysqli, $u, 'bad bass', 0);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}
 
 	/* If the year doesn't match, duplicate the user into the current year */
 	if($u['year'] != $config['year']) {
-			
 		$u = user_copy($mysqli, $u, $config['year']);
 
 		/* Pretend that they're new so if they're a student they get a new project */
@@ -230,7 +230,7 @@ case 'login':
 	$reg = array();
 	incomplete_check($mysqli, $reg, $u, false, true);
 	
-	sfiab_log($mysqli, 'login ok', $username);
+	sfiab_log_login($mysqli, $u, 'ok', 1);
 	print(ajax(0, user_homepage($u)));
 	exit();
 

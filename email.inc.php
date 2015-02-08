@@ -35,24 +35,41 @@ function email_create($mysqli)
 	return $eid;
 }
 
-function email_send($mysqli, $email_name, $uid, $additional_replace = array()) 
+function email_id($mysqli, $email_name)
 {
-	global $config;
-
 	/* Lookup the ID of this email */
 	$q = $mysqli->query("SELECT `id` FROM `emails` WHERE `name`='$email_name'");
 	if($q->num_rows != 1) {
 		/* Not found */
-		sfiab_log($mysqli, "email error", "Email \"$email_name\" not found.");
+		$uid = 0;
+		sfiab_log($mysqli, "email_not_found", $uid, 0, $email_name, "Email \"$email_name\" not found.");
 		return false;
 	}
 	$r = $q->fetch_assoc();
 	$db_id = $r['id'];
+	return $db_id;
+	
+}
+
+function email_send($mysqli, $email_name, $uid, $additional_replace = array()) 
+{
+	global $config;
+
+	$db_id = email_id($mysqli, $email_name);
+	if($db_id == false) {
+		return false;
+	}
 
 	/* Lookup the user */
 	$u = user_load($mysqli, $uid);
-	if($u == NULL) return false;
-	if(!$u['enabled'] == 'deleted') return false;
+	if($u == NULL) {
+		debug("email_send: user is null\n");
+		return false;
+	}
+	if(!$u['enabled']) {
+		debug("email_send: user is not enabled\n");
+		return false;
+	}
 
 	/* Fill in additional replace vars that the email send script can't
 	 * calculate from the command line, like the fair URL */
@@ -63,9 +80,12 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 	$em = $mysqli->real_escape_string($u['email']);
 
 	$mysqli->real_query("INSERT INTO queue(`command`,`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
-			('email',$db_id,$uid,'$em','$n','$ad','queued')");
+			('email','$db_id','$uid','$em','$n','$ad','queued')");
 
-	print($mysqli->error);
+	debug("email_send: queued email $db_id, uid=$uid, em=$em, name=$n, replace=$ad\n");
+	if($mysqli->error != '') {
+		debug("email_send: {$mysqli->error}\n");
+	}
 
 	queue_start($mysqli);
 
@@ -91,6 +111,44 @@ function queue_start($mysqli)
 {
 	$mysqli->query("UPDATE config SET val='0' WHERE var='queue_stop'");
 	exec("php -q scripts/sfiab_queue_runner.php 1>/dev/null 2>&1 &");
+}
+
+
+function find_users_needing_registration_email($mysqli)
+{
+	global $config;
+
+	$email_id = email_id($mysqli, "New Registration");
+
+	/* Select all successful welcome emails, index by user id */
+	$welcome_emails = array();
+	$q = $mysqli->query("SELECT `uid` FROM `log` WHERE `type`='email_send' AND `email_id`='$email_id' AND `result`='1' AND `year`='{$config['year']}'");
+	print($mysqli->error);
+	while($r = $q->fetch_row()) {
+		$uid = (int)$r[0];
+		$welcome_emails[$uid] = 1;
+	}
+
+	$new_users = array();
+	/* Find all new users, and for each, check if there is a welcome email in the queue that was successfully sent */
+	$q = $mysqli->query("SELECT * FROM users WHERE `fair_id`>0 AND FIND_IN_SET('student',`roles`)>0 AND `password_expired`='1' AND `year`='{$config['year']}'");
+	while($r = $q->fetch_assoc()) {
+		$uid = (int)$r['uid'];
+		if(!array_key_exists($uid, $welcome_emails)) {
+			/* New user, but no welcome email has been sent */
+			$new_users[$uid] = user_load_from_data($mysqli, $r);
+		}
+	}
+	return $new_users;
+
+}
+
+/* Scramble the user's password and send a welcome email */
+function email_send_welcome_email($mysqli, &$user) 
+{
+	user_scramble_and_expire_password($mysqli, $user);
+	$result = email_send($mysqli, "New Registration", $user['uid'], array('password'=>$user['scrambled_password']) );
+	return $result;
 }
 
 ?>

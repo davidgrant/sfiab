@@ -28,7 +28,7 @@ require_once('project.inc.php');
 require_once('user.inc.php');
 require_once('awards.inc.php');
 require_once('PHPMailer/PHPMailerAutoload.php');
-
+require_once('debug.inc.php');
 
 $sleepmin=0.5;  // 0.5 seconds
 
@@ -138,21 +138,28 @@ while(true) {
 		//Attach an image file
 	//	$mail->addAttachment('images/phpmailer_mini.gif');
 
-		//send the message, check for errors
-		if (!$mail->send()) {
-			$mysqli->real_query("UPDATE queue SET `result`='failed' WHERE id=$db_id");
-			sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id}: {$mail->ErrorInfo}");
+
+		/* Send the message, but give us a way to override all sending for testing
+		 * (put $pretend_to_send_email in the config.inc.php) */
+		if(isset($pretend_to_send_email) && $pretend_to_send_email == true) {
+			$mail_ok = true;
+			debug("Pretending mail to $db_email was sent successfully.\n");
 		} else {
-			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
-			sfiab_log($mysqli, "email send", "Sent email with emails_id {$db_emails_id} to $db_email");
+			$mail_ok = $mail->send();
 		}
+
+		if ($mail_ok) {
+			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+		} else {
+			$mysqli->real_query("UPDATE queue SET `result`='failed' WHERE id=$db_id");
+		}
+		sfiab_log_email_send($mysqli, $db_emails_id, $db_uid, $db_email, $mail->ErrorInfo, $mail_ok);
 		break;
 
 	case 'push_award':
 		$fair = fair_load($mysqli, $db_fair_id);
 		$award = award_load($mysqli, $db_award_id);
 		$result = remote_push_award_to_fair($mysqli, $fair, $award);
-		sfiab_log($mysqli, "push award", "Push award \"{$award['name']}\" to fair \"{$fair['name']}\", result=$result");
 		if($result == 0) {
 			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		}
@@ -172,7 +179,6 @@ while(true) {
 		$year = $db_award_id; /* Repurpose the award_id for the year */
 		print("SFIAB Queue Runner: get_stats: $year\n");
 		$result = remote_get_stats_from_fair($mysqli, $fair, $year);
-		sfiab_log($mysqli, "sync stats", "Sync Stats for fair {$fair['id']} for $year, result=$result");
 		if($result == 0) {
 			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		}

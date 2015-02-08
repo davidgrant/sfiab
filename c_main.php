@@ -2,6 +2,7 @@
 require_once('common.inc.php');
 require_once('user.inc.php');
 require_once('form.inc.php');
+require_once('email.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -19,6 +20,16 @@ sfiab_page_begin("Committee Main", 'c_main', $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 	<h3>Hello <?=$u['firstname']?></h3>
+
+<?php
+	$new_users = find_users_needing_registration_email($mysqli);
+	if(count($new_users) > 0) {
+?>		<h3>Pending Actions</h3>
+		<ul data-role="listview" data-inset="true">
+		<li><a href="c_register_feeder.php" data-rel="external" data-ajax="false"><font color=red><?=count($new_users)?></font> students from feeder fairs have not been sent a registration email, click here to send them</a></li>
+		</ul>	
+<?php	} ?>
+	
 
 
 	<h3>Sanity Checks</h3> 

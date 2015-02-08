@@ -19,7 +19,7 @@ function user_change_password($mysqli, &$u, $new_password)
 	$hashed_pw = hash('sha512', $new_password);
 	$u['password'] = hash('sha512', $hashed_pw.$u['salt']);
 	$u['password_expired'] = 0;
-	sfiab_log($mysqli, 'change pw', "");
+	sfiab_log($mysqli, 'change_pw', $u, 1);
 	user_save($mysqli, $u);
 }
 
@@ -28,7 +28,7 @@ function user_scramble_and_expire_password($mysqli, &$u)
 	/* Scramble the user's password.  Save the plaintext password in $u['scrambled_password'] which doesn't get saved anywhere or reloaded.  THings like the mailer
 	 * need it to send to the user after a password reste */
 
-	sfiab_log($mysqli, 'scramble pw', "");
+	sfiab_log($mysqli, 'scramble_pw', $u, 1);
 	/* Get a new salt and password */
 	$u['scrambled_password'] = substr(hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true)), 0, 9);
 	user_change_password($mysqli, $u, $u['scrambled_password']);
@@ -388,6 +388,7 @@ function user_get_export($mysqli, &$user)
 	$export_u['address'] = $user['address'];
 	$export_u['city'] = $user['city'];
 	$export_u['postalcode'] = $user['postalcode'];
+	$export_u['province'] = $user['province'];
 	$export_u['phone1'] = $user['phone1'];
 	$export_u['phone2'] = $user['phone2'];
 	$export_u['organization'] = $user['organization'];
@@ -483,6 +484,7 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 	$u['address'] = $incoming_user['address'];
 	$u['city'] = $incoming_user['city'];
 	$u['postalcode'] = $incoming_user['postalcode'];
+	$u['province'] = $incoming_user['province'];
 	$u['phone1'] = $incoming_user['phone1'];
 	$u['phone2'] = $incoming_user['phone2'];
 	$u['organization'] = $incoming_user['organization'];

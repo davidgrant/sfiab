@@ -81,7 +81,7 @@ function sfiab_init($roles, $skip_password_expiry_check=false)
 	return $mysqli;
 }
 
-function sfiab_log($mysqli, $type, $data, $uid=-1, $fair_id=-1, $result=0)
+function sfiab_log($mysqli, $type, &$u_or_uid, $result=0, $data='', $message='', $pid=0, $fair_id=0, $email_id=0, $award_id=0, $prize_id=0)
 {
 	global $config;
 
@@ -90,24 +90,94 @@ function sfiab_log($mysqli, $type, $data, $uid=-1, $fair_id=-1, $result=0)
 	} else {
 		$ip = "commandline";
 	}
-	if ($uid == -1 && sfiab_session_is_active()) {
-		if(array_key_exists('uid', $_SESSION)) {
-			$uid = $_SESSION['uid'];
+
+	$pid = (int)$pid;
+	if(is_array($u_or_uid)) {
+		$uid = $u_or_uid['uid'];
+		$pid = $u_or_uid['s_pid'];
+		if($data == '') {
+			$data = $u_or_uid['username'];
 		}
+	} else if(is_null($u_or_uid) || $u_or_uid == 0) {
+		$uid = 0;
+		if(sfiab_session_is_active()) {
+			if(array_key_exists('uid', $_SESSION)) {
+				$uid = $_SESSION['uid'];
+				$pid = $_SESSION['u']['s_pid'];
+			}
+		} 
+	} else {
+		$uid = (int)$u_or_uid;
 	}
+
 	$type = $mysqli->real_escape_string($type);
 	$data = $mysqli->real_escape_string($data);
+	$m = $mysqli->real_escape_string($message);
 	$year = $config['year'];
 	$fair_id = (int)$fair_id;
 	$result = (int)$result;
+	$email_id = (int)$email_id;
+	$award_id = (int)$award_id;
+	$prize_id = (int)$prize_id;
+	$result = (int)$result;
 
-	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`fair_id`,`year`,`time`,`type`,`data`,`result`) 
-				VALUES('$ip',$uid,$fair_id,$year,NOW(),'$type','$data',$result)");
+	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`pid`,`fair_id`,`email_id`,`award_id`,`prize_id`,`year`,`time`,`type`,`data`,`message`,`result`) 
+				VALUES('$ip',$uid,'$pid',$fair_id,$email_id,$award_id,$prize_id,$year,NOW(),'$type','$data','$m',$result)");
+	$str = "uid=$uid";
+	if($fair_id > 0) $str .= ", fair_id=$fair_id";
+	if($email_id > 0) $str .= ", email_id=$email_id";
+	if($award_id > 0) $str .= ", award_id:prize_id=$award_id:$prize_id";
+	debug("sfiab_log: $type: $result, $ip, $year, $str, $data, $m\n");
+	if($mysqli->error != '') {
+		debug("sfiab_log: {$mysqli->error}\n");
+	}
 }
 
 function sfiab_log_sync_stats($mysqli, $fair_id, $result)
 {
-	sfiab_log($mysqli, "sync_stats", "", -1, $fair_id, $result);
+	$uid = 0;
+	sfiab_log($mysqli, "sync_stats", $uid, $result, "", "", 0, $fair_id);
+}
+
+function sfiab_log_push_award($mysqli, $fair_id, $award_id, $result, $data='')
+{
+	$uid = 0;
+	sfiab_log($mysqli, "push_award", $uid, $result, $data, "", 0, $fair_id, 0, $award_id);
+}
+
+function sfiab_log_push_winner($mysqli, $fair_id, $award_id, $prize_id, $project_id, $result)
+{
+	$uid = 0;
+	sfiab_log($mysqli, "push_winner", $uid, $result, "", "", $project_id, $fair_id, 0, $award_id, $prize_id);
+}
+
+function sfiab_log_email_send($mysqli, $email_id, $uid, $email, $error_message, $result) 
+{
+	sfiab_log($mysqli, "email_send", $uid, $result, $email, $error_message, 0, 0, $email_id);
+}
+
+function sfiab_log_register($mysqli, $u_or_username, $email, $role, $error_message, $result)
+{
+	if(is_array($u_or_username)) {
+		$u = &$u_or_username;
+		$username = $u['username'];
+	} else {
+		$u = NULL;
+		$username = "$u_or_username";
+	}
+	sfiab_log($mysqli, "register", $u, $result, "{$username}, {$email}, {$role}", $error_message);
+}
+
+function sfiab_log_login($mysqli, $u_or_username, $reason, $result)
+{
+	if(is_array($u_or_username)) {
+		$u = &$u_or_username;
+		$username = $u['username'];
+	} else {
+		$u = NULL;
+		$username = "$u_or_username";
+	}
+	sfiab_log($mysqli, "login", $u, $result, $username, $reason);
 }
 
 function sfiab_session_start() 
@@ -330,6 +400,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
 			    'c_user_list' => NULL,
 			    'c_user_edit' => NULL,
+			    'c_register_feeder' => NULL,
 			    'c_report_editor' => NULL,
 			    'c_timeslots' => NULL,
 			    'c_timeslots_assign' => NULL,

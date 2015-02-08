@@ -2,8 +2,10 @@
 
 function login_logout($mysqli, $u) 
 {
-	sfiab_session_start();
-	sfiab_log($mysqli, 'logout', $_SESSION['username']);
+	if(sfiab_session_is_active()) {
+		sfiab_session_start();
+	}
+	sfiab_log($mysqli, "logout", $u, 1);
 	// Unset all session values
 	$_SESSION = array();
 	// get session parameters 

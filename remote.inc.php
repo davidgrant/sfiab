@@ -178,6 +178,9 @@ function remote_push_award_to_fair($mysqli, &$fair, &$award)
 {
 	$cmd['push_award'] = award_get_export($mysqli, $fair, $award);
 	$response = remote_query($mysqli, $fair, $cmd);
+
+	sfiab_log_push_award($mysqli, $fair['id'], $award['id'], $response['error'], $award['name']);
+	
 	return $response['error'];
 }
 
@@ -232,6 +235,8 @@ function remote_push_winner_to_fair($mysqli, $prize_id, $project_id)
 	}
 	$response = remote_query($mysqli, $fair, $cmd);
 	debug("remote_push_winner_to_fair: response=".print_r($response, true)."\n");
+
+	sfiab_log_push_winner($mysqli, $fair['id'], $award['id'], $prize['id'], $project['pid'], $response['error']);
 	return $response['error'];
 }
 
@@ -276,7 +281,7 @@ function remote_handle_push_winner($mysqli, &$fair, &$data, &$response)
 
 	/* If this award registers students at this fair, override the incoming
 	 * project number, otherwise * keep it */
-	if($prize['upstream_register_winners'] == 1) {
+	if($award['upstream_register_winners'] == 1) {
 		$incoming_project['number'] = NULL;
 	}
 
@@ -296,7 +301,7 @@ function remote_handle_push_winner($mysqli, &$fair, &$data, &$response)
 	 * save this all at once, but best to let the get_export/sync be mirrors of each other, rather than
 	 * sometimes introducing new fields */
 	project_load_students($mysqli, $p);
-	if($prize['upstream_register_winners'] == 0) {
+	if($award['upstream_register_winners'] == 0) {
 		debug("push winner: set winner to complete/accepted because upstream_register_winners == 0\n"); 
 		$p['accepted'] = 1;
 		project_save($mysqli, $p);
@@ -312,28 +317,6 @@ function remote_handle_push_winner($mysqli, &$fair, &$data, &$response)
 	$response['error'] = 0;
 }
 	
-
-
-function remote_push_finalize_winners()
-{
-}
-
-
-/* Called when a feeder fair wants to finalize the winners for a prize that
- * is marked as "upstream register winners".  That means we have to iterate
- * over all the winners, email them, and ready their accounts to login */
-function remote_handle_finalize_winners()
-{
-			/* This award is for students who are participating in this fair, we need
-			 * to get their reg number to them if this is a new registration 
-			 * Only send it if they weren't matched to a student already in this project */
-			$result = email_send($mysqli, "New Registration", $sid, array('password'=>$password) );
-			$response['notice'][] = "	 - Sent welcome registration email to: {$s['firstname']} {$s['lastname']} &lt;{$s['email']}&gt;";
-			sfiab_log($mysqli, "register", "username: {$username}, email: {$s['email']}, as: student, email status: $result");
-
-}
-
-
 /* Fair $fair has requested our stats */
 function handle_get_stats($mysqli, &$fair, &$data, &$response) 
 {
@@ -366,6 +349,9 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 			stats_sync($mysqli, $fair, $response['get_stats']);
 		}
 	}
+
+	sfiab_log_sync_stats($mysqli, $fair['id'], $response['error']);
+	
 	return $response['error'];
 }
 
@@ -388,7 +374,7 @@ function remote_handle_old_get_awards($mysqli, &$fair, &$data, &$response)
 		$award = array();
 		$award['identifier'] = $a['id'];
 		$award['external_additional_materials'] = '';
-		$award['external_register_winners'] = 0;
+		$award['external_register_winners'] = $a['upstream_register_winners'];
 		$award['year'] = $a['year'];
 		$award['name_en'] = $a['name'];
 		$award['criteria_en'] = $a['s_desc'];
@@ -520,6 +506,7 @@ function remote_handle_old_upload_assign($mysqli, &$fair, &$data, &$response)
 					$s['address'] = $incoming_student['address'];
 					$s['city'] = $incoming_student['city'];
 					$s['postalcode'] = $incoming_student['postalcode'];
+					$s['province'] = $incoming_student['school']['province_code'];
 					$s['phone1'] = $incoming_student['phone'];
 					$s['phone2'] = NULL;
 					$s['organization'] = '';

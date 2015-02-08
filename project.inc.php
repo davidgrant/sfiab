@@ -115,7 +115,7 @@ function project_filter(&$p)
 function project_load_students($mysqli, &$p) 
 {
 	$users = array();
-	$r = $mysqli->query("SELECT * FROM users WHERE s_pid={$p['pid']}");
+	$r = $mysqli->query("SELECT * FROM users WHERE s_pid='{$p['pid']}'");
 	while($u = $r->fetch_assoc()) {
 		$users[] = user_load($mysqli, -1, -1, NULL, $u);
 	}

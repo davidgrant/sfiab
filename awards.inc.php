@@ -43,6 +43,7 @@ function award_load($mysqli, $id , $data = NULL)
 	filter_int($a['sponsor_uid']);
 	filter_int($a['upstream_fair_id']);
 	filter_int($a['upstream_award_id']);
+	filter_bool($a['upstream_register_winners']);
 	filter_int_list($a['feeder_fair_ids']);
 
 	/* Make a copy for the original */
@@ -146,7 +147,6 @@ function prize_load($mysqli, $pid, $data=NULL)
 	
 	filter_str_list($p['trophies']);
 	filter_int($p['id']);
-	filter_bool($p['upstream_register_winners']);
 	filter_int($p['upstream_prize_id']);
 
 	unset($p['original']);
@@ -197,14 +197,16 @@ function award_load_cwsf($mysqli)
 	return award_load($mysqli, -1, $q->fetch_assoc());
 }
 
-function prize_load_winners($mysqli, &$prize)
+function prize_load_winners($mysqli, &$prize, $load_students = true)
 {
 	$q = $mysqli->query("SELECT * FROM winners WHERE award_prize_id='{$prize['id']}'");
 	$projects = array();
 	while($r = $q->fetch_assoc()) {
 		$pid = (int)$r['pid'];
 		$projects[$pid] = project_load($mysqli, $pid);
-		project_load_students($mysqli, $projects[$pid]);
+		if($load_students) {
+			project_load_students($mysqli, $projects[$pid]);
+		}
 	}
 	return $projects;
 }
@@ -247,6 +249,7 @@ function award_sync($mysqli, $fair, $incoming_award)
 	$a['type'] = $incoming_award['type'];
 	$a['upstream_fair_id'] = $fair['id'];
 	$a['upstream_award_id'] = $incoming_award_id;
+	$p['upstream_register_winners'] = $incoming_award['upstream_register_winners'];
 	$a['sponsor_uid'] = sponsor_create_or_get($mysqli, $incoming_award['sponsor_organization'], $year);
 
 	/* Map grades to categories */
@@ -286,7 +289,6 @@ function award_sync($mysqli, $fair, $incoming_award)
 		$p['value'] = $incoming_prize['value'];
 		$p['trophies'] = $incoming_prize['trophies'];
 		$p['number'] = $incoming_prize['number'];
-		$p['upstream_register_winners'] = $incoming_prize['upstream_register_winners'];
 		$p['upstream_prize_id'] = $incoming_prize['id'];
 		$local_prizes_seen[$prize_id] = true;
 	}

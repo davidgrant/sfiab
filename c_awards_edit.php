@@ -46,6 +46,7 @@ case 'save_back':
 		post_array($a['categories'], 'categories', $cats);
 		$a['feeder_fair_ids'] = array();
 		post_array($a['feeder_fair_ids'], 'feeder_fair_ids', $fairs);
+		post_bool($a['upstream_register_winners'], 'upstream_register_winners');
 	}
 
 	post_bool($a['include_in_script'],'include_in_script');
@@ -84,7 +85,6 @@ case 'save_back':
 			post_float($prize['cash'],array('prize', $pid, 'cash'));
 			post_float($prize['scholarship'],array('prize', $pid, 'scholarship'));
 			post_float($prize['value'],array('prize', $pid, 'value'));
-			post_bool($prize['upstream_register_winners'],array('prize', $pid, 'upstream_register_winners'));
 			post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
 		}
 	}
@@ -179,9 +179,6 @@ function print_prize_div($form_id, &$p, $show)
 		form_text($form_id, "prize[$pid][value]", 'Prize Value', $p['value']);
 		form_check_group($form_id, "prize[$pid][trophies]", "Trophies", $award_trophies, $p['trophies']);
 ?>
-		<div class="award_external" style="display:none;"> 
-<?php			form_yesno($form_id, "prize[$pid][upstream_register_winners]", "(Upstream) Register Winners at this fair", $p['upstream_register_winners']); ?>
-		</div>
 
 <?php		if(!$form_disabled) { ?>
 			<div align="right">
@@ -282,6 +279,17 @@ function print_prize_div($form_id, &$p, $show)
 <?php	
 		if($remote_award) $form_disabled =  true;
 		form_check_list($form_id, "feeder_fair_ids", "Feeder Fairs", $fairs, $a);
+?>
+		<p>You can also make accounts for winners assigned by a feeder
+		fair so they can become participants in this fair.  When winners
+		are assigned, an option will appear on the main committee page
+		to send welcome emails to these participants.  Welcome emails
+		are not sent automatically because winner uploading is
+		automatic and a feeder fair could assign a winner by mistake,
+		then remove the assignment.  We don't want to immediately send
+		welcome emails in that case.</p> 
+<?php
+		form_yesno($form_id, "upstream_register_winners", "Register Winners at this fair", $a);
 ?>
 	</div>
 

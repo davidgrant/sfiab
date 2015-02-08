@@ -131,8 +131,8 @@ case 'del':
 	exit();
 
 case 'resend':
-	user_scramble_and_expire_password($mysqli, $edit_u);
-	$result = email_send($mysqli, "New Registration", $edit_u['uid'], array('password'=>$edit_u['scrambled_password']) );
+	/* Note: also scrambles their password */
+	email_send_welcome_email($mysqli, $edit_u);
 	form_ajax_response(0);
 	exit();
 
