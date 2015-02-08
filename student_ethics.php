@@ -174,7 +174,7 @@ function policy($name, $text, $link = '')
 	procedures outlined here are not followed.  If this page says you need to do something
 	(e.g., give a letter of information to your participants before they
 	take your survey), and you haven't, you need to email our
-	ethics committee <?=mailto($config['email_ethics'])?> and explain the situation so we can
+	ethics committee <?=antispambot($config['email_ethics'])?> and explain the situation so we can
 	help. 
 	
 <?php 	if(count($incomplete_fields) == 0 || (count($incomplete_fields) == 1 && $incomplete_fields[0] == 'agree') ) {
@@ -206,19 +206,19 @@ function policy($name, $text, $link = '')
 			policy('Survey Low Risk', 'Most Surveys, Skill Tests, and Observations of Behaviour are considered Low Risk (See YSC Policy 4.1.1.1 Section 3.1).');
 
 		if($e['humanfooddrug'])
-			policy('Food and Drug Significant Risk', "This Drug related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.2). Significant Risk Drug must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.2b). <i>If your project was not carried out under professional supervision, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".mailto($config['email_ethics']).".</i>");
+			policy('Food and Drug Significant Risk', "This Drug related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.2). Significant Risk Drug must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.2b). <i>If your project was not carried out under professional supervision, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics']).".</i>");
 
 		if($e['humanfood4'] || $e['humanfoodlow1'] || $e['humanfoodlow2']) 
-			policy('Food or Drink Significant Risk', "This Food or Drink related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.4). Significant Risk Ingestion Projects must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.4e). <i>If your project was not carried out under professional supervision, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".mailto($config['email_ethics']).".</i>");
+			policy('Food or Drink Significant Risk', "This Food or Drink related project is considered a Significant Risk project (See YSC Policy 4.1.1.2 Section 3.4). Significant Risk Ingestion Projects must be carried out under professional supervision at a laboratory with its own internal Ethics Review Committee, such as a university or hospital laboratory (See YSC Policy 4.1.1.2 Section 3.4e). <i>If your project was not carried out under professional supervision, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics']).".</i>");
 
 		if($e['humanfood1'] && !$e['humanfood3']  && !$e['humanfood4'] && !$e['humanfood5'] && !$e['humanfooddrug'] && !$e['humanfoodlow1'] && !$e['humanfoodlow2']) 
 			policy('Food and Drink Low Risk', 'This Food or Drink related project may meet the requirements for a Low Risk project (See YSC Policy 4.1.1.1 Section 3.2).');
 
 		if($e['humanfood3']) 
-			policy('Caffeinated Drinks', "Caffeinated Drinks are subject to Special Rules.  Caffeinated Drinks are only permitted in Science Fair Projects within strict limits based on caffeine content and the age of the participants (see Caffeine Guidelines and also YSC Policy 4.1.1.1 section 3.3). <i>If caffeinated drinks were used outside these limits, your project may not be eligible for the {$config['fair_abbreviation']}; in this case, please email ".mailto($config['email_ethics']).".</i>");
+			policy('Caffeinated Drinks', "Caffeinated Drinks are subject to Special Rules.  Caffeinated Drinks are only permitted in Science Fair Projects within strict limits based on caffeine content and the age of the participants (see Caffeine Guidelines and also YSC Policy 4.1.1.1 section 3.3). <i>If caffeinated drinks were used outside these limits, your project may not be eligible for the {$config['fair_abbreviation']}; in this case, please email ".antispambot($config['email_ethics']).".</i>");
 		
 		if($e['human1'])
-			policy("Letter of Information', 'Your Participants must be provided with a Letter of Information that provides details on your Project (See YSC Policy 4.1.1.1 Section 4.4). <i>If your project did not include a letter of information or equivalent, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".mailto($config['email_ethics'])."</i>.  Click on this item for a blank Letter of Information template.", 
+			policy("Letter of Information', 'Your Participants must be provided with a Letter of Information that provides details on your Project (See YSC Policy 4.1.1.1 Section 4.4). <i>If your project did not include a letter of information or equivalent, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics'])."</i>.  Click on this item for a blank Letter of Information template.", 
 			'http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/letter_of_information_blank_en.doc');
 
 
@@ -226,7 +226,7 @@ function policy($name, $text, $link = '')
 			policy('Informed Consent for Surveys', 'Participants must give informed consent, but for Surveys this can be assumed by completion of the Survey itself (See YSC Policy 4.1.1.1 Section 4.3).');
 
 		if($e['humanfood1'] || $e['humanfood2'] || $e['humantest1']) {
-			policy('Informed Consent',"Participants must give informed consent and complete a written Permission Form (See YSC Policy 4.1.1.1 Section 4.5). <i>If documentation of informed consent was not obtained, your project may not be eligible for the {$config['fair_abbreviation']}. Please email ".mailto($config['email_ethics'])."</i>.  A blank Informed Consent Permission Form template can be downloaded here.  Please remember that your project may not reveal the identity of any of your subjects (i.e. no names or photos). ",
+			policy('Informed Consent',"Participants must give informed consent and complete a written Permission Form (See YSC Policy 4.1.1.1 Section 4.5). <i>If documentation of informed consent was not obtained, your project may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics'])."</i>.  A blank Informed Consent Permission Form template can be downloaded here.  Please remember that your project may not reveal the identity of any of your subjects (i.e. no names or photos). ",
 					'http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/informed_consent_blank_en.doc');
 			policy('Informed Consent Under 18', 'The Parents or Guardians of Participants under 18 must also provide their written consent (See YSC Policy 4.1.1.1 Section 4.2).');
 			policy('Participants on Medications', 'For projects involving food testing, participants must not be taking prescription medications, to minimize the risk of drug-food interactions (See YSC Policy 4.1.1.1 Section 3.2b).');
@@ -237,7 +237,7 @@ function policy($name, $text, $link = '')
 		}
 
 		if($e['animal_drug'])
-			policy('Animal Drugs', "Drugs may only be used in an experiment if carried out at a Hospital, University, Medical or similar Laboratory under the direction of a Scientific Supervisor.  See YSC Policy 4.1.2 \"Use of Animals in Research\" Section 10. <i>If your project was completed without scientific supervision, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".mailto($config['email_ethics']).".</i>");
+			policy('Animal Drugs', "Drugs may only be used in an experiment if carried out at a Hospital, University, Medical or similar Laboratory under the direction of a Scientific Supervisor.  See YSC Policy 4.1.2 \"Use of Animals in Research\" Section 10. <i>If your project was completed without scientific supervision, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics']).".</i>");
 		
 		if($e['animal_tissue']) 
 			policy('Animal Tissues', 'Animal tissues and parts may only be obtained and used in a project under very specific rules.  Make sure you comply with YSC Policy 4.1.2 "Use of Animals in Research"  Sections 8.2 and 8.3.');
@@ -251,7 +251,7 @@ function policy($name, $text, $link = '')
 		if($e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) {
 			policy('Adult Supervisor Review', 'Your Adult Supervisor will need to review your experiment before you start, confirm that you meet the above requirements, ensure that it does not put the participants at risk either physically or emotionally, and then sign Form 4.1B to confirm.');
 			policy('Scientific Supervisor', 'You will need a Scientific Supervisor to review and approve your project, and sign Form 4.1B.');
-			policy('Ethics Committee Review', "The {$config['fair_abbreviation']} Ethics Committee must review and confirm that the project meets the requirements of YSC Policy 4.1.1.2 and sign Form 4.1B before you present your project at the fair. <i>Please email Form 4.1B to ".mailto($config['email_ethics'])." as soon as you complete your registration</i>.");
+			policy('Ethics Committee Review', "The {$config['fair_abbreviation']} Ethics Committee must review and confirm that the project meets the requirements of YSC Policy 4.1.1.2 and sign Form 4.1B before you present your project at the fair. <i>Please email Form 4.1B to ".antispambot($config['email_ethics'])." as soon as you complete your registration</i>.");
 		}
 
 
@@ -269,7 +269,7 @@ function policy($name, $text, $link = '')
 			policy('Significant-Risk Projects Involving Humans', 'Youth Science Canada requires that all significant-risk projects
 							involving humans be approved before any research starts. Ethics approval may come from
 							an Ethics Committee at a university or research lab, or may come from our 
-							Ethics Committee ('.mailto($config['email_ethics']).').  <b>Failure to recieve approval will likely result in disqualification.</b>',
+							Ethics Committee ('.antispambot($config['email_ethics']).').  <b>Failure to recieve approval will likely result in disqualification.</b>',
 				'files/research_proposal_en.doc');
 		}
 		/* Only living animals */
@@ -278,7 +278,7 @@ function policy($name, $text, $link = '')
 			policy('Animal Projects', 'Youth Science Canada requires that all projects involving vertebrate animals and 
 							cephalopods be approved before any research starts. Ethics approval may come from
 							an Ethics Committee at a university or research lab, or may come from our
-							Ethics Committee ('.mailto($config['email_ethics']).').  <b>Failure to recieve approval will likely result in disqualification.</b>',
+							Ethics Committee ('.antispambot($config['email_ethics']).').  <b>Failure to recieve approval will likely result in disqualification.</b>',
 				'files/research_plan_animals_en.doc');
 		}
 		if(!$forms2) {
@@ -305,12 +305,12 @@ function policy($name, $text, $link = '')
 		}
 		if( $e['humanfood4'] || $e['humanfooddrug'] || $e['humanfoodlow1'] || $e['humantest1'] || $e['humanfoodlow2']) {
 			$forms2 = true;
-			policy("Form 4.1B - Participation of Humans (Significant Risk)', 'You will need to complete YSC Form 4.1B \"Participation of Humans - Significant Risk\". This form can be found here.  <i>A complete version of Form 4.1B should be emailed to ".mailto($config['email_ethics'])." as soon as you complete your registration, so that it can be reviewed by the {$config['fair_abbreviation']} ethics committee before you present at the fair.</i>", 
+			policy('Form 4.1B - Participation of Humans (Significant Risk)', "You will need to complete YSC Form 4.1B \"Participation of Humans - Significant Risk\". This form can be found here.  <i>A complete version of Form 4.1B should be emailed to ".antispambot($config['email_ethics'])." as soon as you complete your registration, so that it can be reviewed by the {$config['fair_abbreviation']} ethics committee before you present at the fair.</i>",
 				'files/4.1B_Humans_Significant_Risk_0.pdf');
 		}
 		if ($e['animal_vertebrate'] || $e['animal_ceph'] || $e['animal_tissue'] ) {
 			$forms2 = true;
-			policy("Form 4.1C - Use of Animals', 'Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, and the Scientific Supervisor. This form can be found here. <i>A complete version of Form 4.1C should be emailed to ".mailto($config['email_ethics'])." as soon as you complete your registration, so that it can be reviewed by the {$config['fair_abbreviation']} ethics committee before you present at the fair</i>.",
+			policy('Form 4.1C - Use of Animals', "Projects involving vertebrate animals, cephalopods, animal embryos, or animal tissues must complete YSC Form 4.1C Animals - Approval, signed by the student, the Adult Supervisor, and the Scientific Supervisor. This form can be found here. <i>A complete version of Form 4.1C should be emailed to ".antispambot($config['email_ethics'])." as soon as you complete your registration, so that it can be reviewed by the {$config['fair_abbreviation']} ethics committee before you present at the fair</i>.",
 				'files/4.1C_Animals_0-2.pdf');
 		}
 		if(!$forms2) {
@@ -330,7 +330,7 @@ function policy($name, $text, $link = '')
 						and procedures and have filled out all necessary forms and will bring them to the fair.  
 						<b>Your project may be disqualified if:</b>',
 					array('You don\'t bring the forms outlined above to the fair',
-						'You haven\'t followed the policies and procedures outline above OR haven\'t emailed our Ethics Committee ('.mailto($config['email_ethics']).')',
+						'You haven\'t followed the policies and procedures outline above OR haven\'t emailed our Ethics Committee ('.antispambot($config['email_ethics']).')',
 						'You provide incorrect information about your project (e.g., claiming to have given your participants a letter of information when you haven\'t)'), $e);
 		} else {
 			questionc('agree', 'Please check the box on the right to acknowledge that the information here is correct.',
