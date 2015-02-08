@@ -457,8 +457,100 @@ function remote_handle_old_get_divisions($mysqli, &$fair, &$data, &$response)
 }
 function remote_handle_old_upload_assign($mysqli, &$fair, &$data, &$response)
 {
+	$challenges = challenges_load($mysqli);
+
+	foreach($data['awards_upload'] as &$up) {
+		$our_award_id = $up['external_identifier'];
+		$year = $up['year'];
+
+		/* Find the award */
+		$a = award_load($mysqli, $our_award_id);
+		debug("Loaded award to accept remote upload of winners: {$a['name']}\n");
+
+		foreach($up['prizes'] as &$incoming_prize) {
+			$prize_name = $incoming_prize['name'];
+
+			/* Find this prize in the award */
+			$match = false;
+			foreach($a['prizes'] as $prize) {
+				if($prize['name'] == $prize_name) {
+					$match = true;
+					break;
+				}
+			}
+			if($match == false) {
+				debug("Unable to find prize $prize_name in award\n");
+				continue;
+			}
+
+			/* Pull in the projects */
+			foreach($incoming_prize['projects'] as &$incoming_project) {
+				/* Construct a valid local project, then just call project_sync */
+				$p = array();
+				$p['pid'] = $incoming_project['projectid'];
+				$p['title'] = $incoming_project['title'];
+				$p['tagline'] = '';
+				$p['abstract'] = $incoming_project['abstract'];
+				$p['language'] = $incoming_project['language'];
+				$p['number'] = $incoming_project['projectnumber'];
+				$p['req_electricity'] = 0;
+				$p['challenge'] = $challenges[$incoming_project['projectdivisions_id']]['name'];
+				$p['year'] = $year;
+
+				$p['mentors'] = array();
+				$p['num_mentors'] = 0;
+
+				$p['students'] = array();
+				foreach($incoming_project['students'] as &$incoming_student) {
+					$s = array();
+					$s['year'] = $year;
+					$s['uid'] = $p['pid'] + count($p['students']); /* Create a number to uniquely identifiy this user */
+					$s['unique_uid'] = $s['uid'];
+					$s['roles'] = array('student');
+					$s['username'] = $incoming_student['email'];
+					$s['salutation'] = '';
+					$s['firstname'] = $incoming_student['firstname'];
+					$s['lastname'] = $incoming_student['lastname'];
+					$s['pronounce'] = NULL;
+					$s['sex'] = $incoming_student['gender'];
+					$s['email'] = $incoming_student['email'];
+					$s['grade'] = $incoming_student['grade'];
+					$s['language'] = $incoming_student['language'];
+					$s['birthdate'] = $incoming_student['birthdate'];
+					$s['address'] = $incoming_student['address'];
+					$s['city'] = $incoming_student['city'];
+					$s['postalcode'] = $incoming_student['postalcode'];
+					$s['phone1'] = $incoming_student['phone'];
+					$s['phone2'] = NULL;
+					$s['organization'] = '';
+					$s['medicalert'] = NULL;
+					$s['food_req'] = '';
+					$s['s_teacher'] = $incoming_student['teachername'];
+					$s['s_teacher_email'] = $incoming_student['teacheremail'];
+
+					$s['emergency_contacts'] = array();
+
+					$s['school'] = array();
+					$s['school']['school'] = $incoming_student['school']['schoolname'];
+					$s['school']['city'] = $incoming_student['school']['city'];
+					$s['school']['province'] = $incoming_student['school']['province_code'];
+
+					$p['students'][] = $s;
+				}
+
+				$push_winner = array();
+				$push_winner['prize_id'] = $prize['id'];
+				$push_winner['project'] = $p;
 
 
+				$push_response = array();
+				$cmd = array('push_winner' => $push_winner);
+				debug("Push winner command: ".print_r($push_winner, true)."\n");
+				remote_handle_push_winner($mysqli, $fair, $cmd, $push_response);
+
+			}
+		}
+	}
 }
 
 

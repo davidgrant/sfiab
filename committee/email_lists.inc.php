@@ -1,4 +1,4 @@
-<?
+<?php
 /* Useful flags in the database to manipulate, we could probably turn this into a form that
  * toggles the flags like at the top of the user list, rather than explicitly setting each
  * one:

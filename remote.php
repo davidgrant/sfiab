@@ -109,6 +109,7 @@ function remote_handle_cmd($mysqli, &$fair, &$data)
 		if(array_key_exists('getawards', $data)) remote_handle_old_get_awards($mysqli, $fair, $data, $response);
 		if(array_key_exists('get_categories', $data)) remote_handle_old_get_categories($mysqli, $fair, $data, $response);
 		if(array_key_exists('get_divisions', $data)) remote_handle_old_get_divisions($mysqli, $fair, $data, $response);
+		if(array_key_exists('awards_upload', $data)) remote_handle_old_upload_assign($mysqli, $fair, $data, $response);
 
 
 		$response['hi'] = 'hi';
