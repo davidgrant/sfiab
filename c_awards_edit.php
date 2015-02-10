@@ -25,8 +25,11 @@ if(array_key_exists('action', $_POST)) {
 switch($action) {
 case 'save':
 case 'save_back':
+	/* We should guard against some thigns here for div awards (can't
+	change prize names or the award category.  But that's ok, if someone
+	really wants to do that it'll reset on the next award list load or
+	judge scheduler load */
 
-	
 	$cats = categories_load($mysqli);
 
 	$aid = (int)$_POST['aid'];
@@ -166,13 +169,17 @@ function print_prize_div($form_id, &$p, $show)
 {
 	global $award_trophies;
 	global $form_disabled;
+	global $div_award;
+
 	$pid = $p['id'];
 	$show_attr = $show ? 'data-collapsed="false"' : '';
 
 ?>	<div data-role="collapsible" data-pid="<?=$pid?>" <?=$show_attr?> data-collapsed-icon="carat-r" and data-expanded-icon="carat-d">
 		<h3><span class="prize_div_name"><?=$p['name']?></span></h3>
 <?php	
+		if($div_award) $form_disabled = true;
 		form_text($form_id, "prize[$pid][name]", 'Name', $p['name']);
+		if($div_award) $form_disabled = false;
 		form_int($form_id, "prize[$pid][number]", "Number Available to be Awarded", $p['number']);
 		form_text($form_id, "prize[$pid][cash]", 'Cash Award', $p['cash']);
 		form_text($form_id, "prize[$pid][scholarship]", 'Scholarship', $p['scholarship']);
@@ -180,7 +187,7 @@ function print_prize_div($form_id, &$p, $show)
 		form_check_group($form_id, "prize[$pid][trophies]", "Trophies", $award_trophies, $p['trophies']);
 ?>
 
-<?php		if(!$form_disabled) { ?>
+<?php		if(!$form_disabled && !$div_award) { ?>
 			<div align="right">
 			<a href="#" onclick="return prize_delete(<?=$pid?>);" data-role="button" data-icon="delete" data-inline="true" data-theme="r" >Delete Prize</a>
 			</div>
@@ -205,6 +212,7 @@ function print_prize_div($form_id, &$p, $show)
 
 	$a = award_load($mysqli, $aid);
 	$remote_award = ($a['upstream_fair_id'] != 0) ? true : false;
+	$div_award = ($a['type'] == 'divisional') ? true : false;
 
 	/* Use $remote_award to determine what fields to disable.  Disable
 	 * individual fields by toggling the * global form form_disabled flags..
@@ -217,12 +225,18 @@ function print_prize_div($form_id, &$p, $show)
 ?>		<p>This award was automatically downloaded from the <b><?=$fair['name']?></b>.  Because it is a downloaded award, some field cannot be changed. Upstream changes are automatically downloaded.
 <?php	}
 
+	if($div_award) { ?>
+		<p><b>This is a divisional award.  It is created automatically and some field cannot be changed.  To edit the prize names, go to the Judge Scheduling options in the Configuration Variables.</b>
+<?php	}
+
 	form_begin($form_id, 'c_awards_edit.php');
 	form_hidden($form_id, 'aid',$a['id']);
 	
 	if($remote_award) $form_disabled = true;
 	form_text($form_id, 'name', "Name", $a);
+	if($div_award) $form_disabled = true;
 	form_select($form_id, 'type', "Type", $award_types, $a);
+	if($div_award) $form_disabled = false;
 	form_textbox($form_id, 's_desc', "Student Description (Student and Judges see this, public on website, goes in ceremony script)", $a);
 	form_textbox($form_id, 'j_desc', "Judge Description (Only judges see this)", $a);
 	if($remote_award) $form_disabled = false;
@@ -239,9 +253,12 @@ function print_prize_div($form_id, &$p, $show)
 <?php		form_text($form_id, 'sponsor_organization', "New Sponsor");?>
 	</div>
 
-<?php	form_check_group($form_id, 'categories', "Categories", $cats, $a);
+<?php	
+	if($div_award) $form_disabled = true;
+	form_check_group($form_id, 'categories', "Categories", $cats, $a);
 	form_yesno($form_id, 'self_nominate', 'Students can Self Nominate', $a);
 
+	if($div_award) $form_disabled = false;
 	if($remote_award) $form_disabled = false;
 
 	form_yesno($form_id, 'schedule_judges', 'Schedule Judges', $a);
@@ -262,7 +279,7 @@ function print_prize_div($form_id, &$p, $show)
 	} ?>
 	</div>
 
-<?php	if(!$remote_award) { ?>
+<?php	if(!$remote_award && !$div_award) { ?>
 		<a href="#" onclick="return prize_create(<?=$aid?>);" data-role="button" data-icon="plus" data-inline="true" data-theme="g">Create a New Prize</a><br/>
 <?php	}
 

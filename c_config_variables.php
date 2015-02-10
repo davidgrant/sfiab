@@ -4,6 +4,8 @@ require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
+require_once('awards.inc.php');
+require_once('debug.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -36,7 +38,16 @@ case 'save':
 		if(substr($p, 0, 4) == 'cfg_') {
 			$var = substr($p, 4);
 			$val = $mysqli->real_escape_string($v);
-			$mysqli->query("UPDATE config SET `val`='$val' WHERE `var`='$var'");
+			$mysqli->real_query("UPDATE config SET `val`='$val' WHERE `var`='$var'");
+			$config[$var] = $val;
+
+			/* Do variable-dependent things when a variable is saved */
+			switch($var) {
+			case 'judge_divisional_prizes':
+				debug("config judge_divisional_prizes was saved, running award_update_divisional()\n");
+				award_update_divisional($mysqli);
+				break;
+			}
 		}
 	}
 	form_ajax_response(0);

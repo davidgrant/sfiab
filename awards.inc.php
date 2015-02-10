@@ -211,6 +211,107 @@ function prize_load_winners($mysqli, &$prize, $load_students = true)
 	return $projects;
 }
 
+function award_update_divisional($mysqli)
+{
+	global $config;
+	/* Ensures there is a div award for each age cat.  Creates missing awards
+	 * Ensures the prizes are as specified in the config
+	 * (judge_divisional_prizes, highest prize first) , creates them if
+	 * they don't exist */
+	$cats = categories_load($mysqli);
+	$div_awards = array();
+	foreach($cats as $cid=>&$cat) {
+		$div_awards[$cid] = NULL;
+	}
+
+	debug("Checking divisional awards...\n");
+	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' AND `type`='divisional' ORDER BY `ord`");
+	while($d = $q->fetch_assoc()) {
+		$ok = true;
+		$a = award_load($mysqli, 0, $d);
+		$cid = $a['categories'][0];
+
+		/* Skip awards (and delete them below if there not exactly one category, 
+		 * or if there are duplicates */
+		if(count($a['categories']) != 1) $ok = false;
+		if($div_awards[$cid] !== NULL) $ok = false;
+
+		if($ok) {
+			debug("   Found divisional award: {$a['name']}\n");
+			$div_awards[$a['categories'][0]] = $a;
+		} else {
+			debug("   Deleting unknown divisional award: {$a['name']}\n");
+			award_delete($mysqli, $a);
+		}
+		
+	}
+
+	/* Make a trimmed ordered list of prizes by the order they should
+	 * appear.  The first in judge_divisional_prizes is the highest award, so
+	 * it gets the highest order... count them and work backwards */
+	$div_prizes = array();
+	$t = explode(",", $config['judge_divisional_prizes']);
+	$order = count($t);
+	foreach($t as $prize_name) {
+		$div_prizes[trim($prize_name)] = $order;
+		$order -= 1;
+	}
+	debug("   Divisional prize list: ".print_r($div_prizes, true)."\n");
+	
+
+	/* See if there are any divisional awards missing */
+	foreach($div_awards as $cid=>$a) {
+		if($a === NULL) {
+			$sponsor_uid = sponsor_create_or_get($mysqli, $config['fair_abbreviation']);
+			$aid = award_create($mysqli, $config['year']);
+			$a = award_load($mysqli, $config['year']);
+			$div_awards[$cid] = $a;
+
+			$a['name'] = $cat[$cid]['name'].' Divisional';
+			$a['categories'][] = $cid;
+			$a['self_nominate'] = 0;
+			$a['include_in_script'] = 1;
+			$a['schedule_judges'] = 1;
+			$a['ord'] = $cid;
+			$a['sponsor_uid'] = $sponsor_uid;
+
+			debug("   Created divisional award: {$a['name']}\n");
+
+			award_save($mysqli, $a);
+		}
+
+		debug("   Checking Prizes in divisional award: {$a['name']}\n");
+		/* Check prizes */
+		$tmp_div_prizes = $div_prizes;
+		foreach($a['prizes'] as $prize_id=>&$prize) {
+			/* Make sure this prize name is in the div prize list and hasn't already been seen.
+			 * we do that by removing items from a copy of the div list while checking it */
+			if(array_key_exists($prize['name'], $tmp_div_prizes)) {
+				/* Set the order, then unset the prize from the temp array so we can't find
+				 * it again.  If a div award has two Gold Prizes, for example, the second will be
+				 * deleted. */
+				$prize['ord'] = $tmp_div_prizes[$prize['name']];
+				debug("      Found order:prize {$prize['ord']}:{$prize['name']}\n");
+			 	unset($tmp_div_prizes[$prize['name']]);
+			} else {
+				/* This prize isn't in the div prizes, so delete it */
+				debug("      Deleting unknown prize {$prize['name']}\n");
+				prize_delete($mysqli, $a, $prize_id);
+			}
+		}
+		/* Anything left in the tmp_div_rpizes array needs to be created as a prize */
+		foreach($tmp_div_prizes as $prize_name=>$order) {
+			$prize_id = prize_create($mysqli, $a);
+			$a['prizes'][$prize_id]['name'] = $prize_name;
+			$a['prizes'][$prize_id]['ord'] = $order;
+			debug("      Creating new prize {$a['prizes'][$prize_id]['ord']}:{$a['prizes'][$prize_id]['name']}\n");
+		}
+		award_save($mysqli, $a);
+	}
+	debug("   Divisional award check complete\n");
+
+}
+
 
 function award_sync($mysqli, $fair, $incoming_award)
 {

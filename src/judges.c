@@ -434,6 +434,11 @@ int judges_anneal_checks(struct _db_data *db)
 
 	printf("Running Checks...\n");
 
+	if(projects->len <= 0) {
+		printf("   There are no projects.  Nothing to do.\n");
+		ok = 0;
+	}
+
 	/* All Divisional awards should have exactly one category */
 	for(i=0;i<awards->len;i++) {
 		struct _award *a = g_ptr_array_index(awards, i);

@@ -148,7 +148,7 @@ sfiab_page_begin("Fair Logo", $page_id, $help);
 	if(!file_exists('files/logo.jpg')) { ?>
 		<p>No Fair Image detected, this means reports will be broken.
 <?php	} else { ?>
-		<img width="200" src="files/logo.jpg">
+		<img width="200" src="file.php?f=logo">
 <?php	} 
 
 	$form_id = $page_id.'_logo_form';

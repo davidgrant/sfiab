@@ -93,28 +93,27 @@ void config_load(struct _db_data *db)
 
 		if(strcmp(var, "year") == 0)
 			config.year = atoi(val);
-		if(strcmp(var, "judge_div_min_projects") == 0)
-			config.min_projects_per_judge = atoi(val);
 		if(strcmp(var, "judge_div_max_projects") == 0)
 			config.max_projects_per_judge = atoi(val);
-		if(strcmp(var, "judge_div_min_team") == 0)
-			config.min_judges_per_team = atoi(val);
 		if(strcmp(var, "judge_div_max_team") == 0)
 			config.max_judges_per_team = atoi(val);
-		if(strcmp(var, "judge_cusp_min_team") == 0)
-			config.min_judges_per_cusp_team = atoi(val);
 		if(strcmp(var, "judge_cusp_max_team") == 0)
 			config.max_judges_per_cusp_team = atoi(val);
 		if(strcmp(var, "judge_sa_max_projects") == 0)
 			config.projects_per_sa_judge = atoi(val);
 
 	}
+
+	config.min_judges_per_team = config.max_judges_per_team;
+	config.min_judges_per_cusp_team = config.max_judges_per_cusp_team;
+
 	printf("Loaded SFIAB Config:\n");
 	printf("   year: %d\n", config.year);
-	printf("   Projects per Div judge: %d -> %d\n", config.min_projects_per_judge, config.max_projects_per_judge);
+	printf("   Projects per Div judge: %d\n", config.max_projects_per_judge);
 	printf("   Projects per SA judge: up to %d\n", config.projects_per_sa_judge);
-	printf("   Judges per Div Team: %d -> %d\n", config.min_judges_per_team, config.max_judges_per_team);
-	printf("   Judges per Cusp Team: %d -> %d\n", config.min_judges_per_cusp_team, config.max_judges_per_cusp_team);
+	printf("   Judges per Div Team: %d\n", config.max_judges_per_team);
+	printf("   Judges per Cusp Team: %d\n", config.max_judges_per_cusp_team);
+
 	
 	db_free_result(result);
 }

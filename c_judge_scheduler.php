@@ -16,18 +16,6 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 switch($action) {
-case 'save':
-	$fields = array('judge_div_min_projects', 'judge_div_max_projects',
-			'judge_div_min_team','judge_div_max_team',
-			'judge_cusp_min_team','judge_cusp_max_team',
-			'judge_sa_min_projects','judge_sa_max_projects');
-	$t = array();
-	foreach($fields as $f) {
-		post_int($t[$f],$f);
-		$mysqli->query("UPDATE config SET `val`='{$t[$f]}' WHERE `var`='$f' AND year='{$config['year']}'");
-	}
-	form_ajax_response(0);
-	exit();
 
 case 'run':
 	if(!file_exists("logs")) {
@@ -55,21 +43,29 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 	$form_id = $page_id.'_form';
 
 ?>	<h3>Judge Scheduler Settings</h3> 
+	<p>These settings can be changed on the <a href="c_config_variables.php#Judge_Scheduler" data-ajax="false">Configuration Variables - Judge Scheduler</a> page.
+		
+
+	<table data-role="table" data-mode="none" class="table_stripes">
+	<thead><tr><th>Variable</th><th>Value</th></tr></thead>
 <?php	
-	form_begin($form_id, 'c_judge_scheduler.php');
-//	form_int($form_id, "judge_div_min_team", 'Divisional - Min Judges per Team', $config['judge_div_min_team']);
-	form_int($form_id, "judge_div_max_team", 'Divisional - Judges per Team', $config['judge_div_max_team']);
-//	form_int($form_id, "judge_div_min_projects", 'Divisional - Min Projects per Judge', $config['judge_div_min_projects']);
-	form_int($form_id, "judge_div_max_projects", 'Divisional - Projects per Judge', $config['judge_div_max_projects']);
-//	form_int($form_id, "judge_cusp_min_team", 'Cusp - Min Judges per Team', $config['judge_cusp_min_team']);
-	form_int($form_id, "judge_cusp_max_team", 'Cusp - Judges per Team', $config['judge_cusp_max_team']);
-	$tmp='';
-	form_int($form_id, "judge_cusp_projects", 'Cusp - Projects per Cusp', $tmp);
-//	form_int($form_id, "judge_sa_min_projects", 'Special Awards - Min Projects per Judge', $config['judge_sa_min_projects']);
-	form_int($form_id, "judge_sa_max_projects", 'Special Awards - Max Projects per Judge', $config['judge_sa_max_projects']);
-	form_submit($form_id, 'save', 'Save', 'Saved');
-	form_end($form_id);
-?>
+	$q = $mysqli->query("SELECT * FROM config WHERE category='Judge Scheduler' ORDER BY `order`,var");
+	while($r = $q->fetch_assoc()) { 
+		if($r['var'] == 'judge_divisional_prizes' || $r['var'] == 'judge_divisional_distribution') {
+			continue;
+		} ?>
+		<tr><td><?=$r['name']?></td><td><b><?=$r['val']?></b></td></tr>
+<?php	} ?>
+	<tr><td>Divisional Prizes and Distribution</td><td><b>
+<?php
+	$prizes = explode(',', $config['judge_divisional_prizes']);
+	$dist = explode(',', $config['judge_divisional_distribution']);
+	for($i=0;$i<count($prizes);$i++) { ?>
+		<?=$prizes[$i]?> - <?=$dist[$i]?>%<br/>
+<?php	} ?>
+	</b></td></tr>
+	</table>
+
 	<hr/>
 	<h3>Run The Scheduler</h3> 
 	<p>The scheduler is much faster than the old one, but it'll still take

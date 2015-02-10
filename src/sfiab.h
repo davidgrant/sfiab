@@ -15,7 +15,6 @@ enum _languages {
 
 struct _config {
         int year;
-	int min_projects_per_judge;
 	int max_projects_per_judge;
 	int min_judges_per_team;
 	int max_judges_per_team;

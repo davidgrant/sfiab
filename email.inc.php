@@ -24,8 +24,6 @@ function email_load($mysqli, $email_name, $eid=-1, $data=NULL)
 
 function email_save($mysqli, &$e)
 {
-	debug("email_save: ".print_r($e, true)."\n");
-
 	generic_save($mysqli, $e, 'emails', 'id');
 }
 

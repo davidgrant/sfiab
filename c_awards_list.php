@@ -71,6 +71,10 @@ case 'add':
 $sponsors = sponsors_load_all($mysqli);
 $fairs = fair_load_all_upstream($mysqli);
 
+/* Update divisional awards.  This will be a noop if everything is up to date */
+award_update_divisional($mysqli);
+
+
 $help = 'Use the <button data-icon="gear" data-iconpos="notext" data-inline="true"></button> button to edit the award and prizes.  Drag and drop the <button data-icon="bars" data-iconpos="notext" data-inline="true"></button> icon to reorder the awards.  Drag the [=] handle before each prize to re-order the prizes within the award.  Awards/Prizes at the top of the list will go first in the award ceremony.';
 
 sfiab_page_begin("Edit Awards", $page_id, $help);
@@ -147,7 +151,12 @@ sfiab_page_begin("Edit Awards", $page_id, $help);
 <?php				foreach($a['prizes_in_order'] as &$p) { ?>
 					<tr id="<?=$p['id']?>">
 					<td width="30%"><span class="prize_handle">[=]</span> <?=$p['name']?></td>
-					<td width="5%">x<?=$p['number']?></td>
+<?php					if($p['number'] == 0) {
+						$num = "unlimited";
+					} else {
+						$num = "x {$p['number']}";
+					} ?>
+					<td width="5%"><?=$num?></td>
 <?php					$strs = array();
 					if($p['cash'] > 0) $strs[] = "$".$p['cash']." cash";
 					if($p['scholarship'] > 0) $strs[] = "$".$p['scholarship']." scholarship";
