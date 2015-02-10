@@ -67,6 +67,13 @@ foreach($_GET as $k=>$v) {
 	case 'edit':
 		$uid = (int)$v;
 		$new_u = user_load($mysqli, $uid);
+
+		/* Create a project */
+		if($new_u['s_pid'] === NULL && in_array('student', $new_u['roles'])) {
+			$new_u['s_pid'] = project_create($mysqli);
+			user_save($mysqli, $new_u);
+		}
+		
 		$_SESSION['edit_uid'] = $uid;
 		$_SESSION['edit_roles'] = $new_u['roles'];
 		$_SESSION['edit_name'] = $new_u['name'];

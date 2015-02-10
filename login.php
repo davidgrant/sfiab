@@ -208,10 +208,12 @@ case 'login':
 	/* Is the user a student?, if so also create a project */
 	if($u['new']) {
 		$u['new'] = 0;
-		if(in_array('student', $u['roles'])) {
-			$pid = project_create($mysqli);
-			$u['s_pid'] = $pid;
-		}
+		user_save($mysqli, $u);
+	}
+
+	if($u['s_pid'] === NULL && in_array('student', $u['roles'])) {
+		$pid = project_create($mysqli);
+		$u['s_pid'] = $pid;
 		user_save($mysqli, $u);
 	}
 

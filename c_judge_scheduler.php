@@ -17,15 +17,18 @@ if(array_key_exists('action', $_POST)) {
 }
 switch($action) {
 
+case 'status':
+	$r = array();
+	$r['running'] = false;
+	$r['messages'] = time(NULL);
+	/* Get data from most recent run of the scheduler from the log */
+
+	print(json_encode($r));
+	exit();
+	
 case 'run':
-	if(!file_exists("logs")) {
-		mkdir("logs");
-	}
-
-	print("hi");
-	print exec("./src/sfiab_annealer judges > logs/judge_scheduler.log &");
-
-	print("hi");
+//	$mysqli->real_query("INSERT INTO queue(`command`,`result`) VALUES('judge_scheduler','queued')");
+//	queue_start($mysqli);
 	form_ajax_response(array('status'=>0, ));
 	exit();
 	
@@ -68,16 +71,14 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 
 	<hr/>
 	<h3>Run The Scheduler</h3> 
-	<p>The scheduler is much faster than the old one, but it'll still take
-	about 2-3 minutes to run.  There's no indication (yet) when it's done, but
-	you can watch for the output here (just keep reloading after the scheduler is 
-	started it until text shows up): <a data-ajax="false" href="logs/judge_scheduler.log">Log
-	File</a>
-
-	<p>There will be no indication that you pressed the button below
-	either.  Just press it once, then check the log file... it'll be empty.
-	Then in 2-3min i'll show some data.
-
+	<p>The scheduler takes about one minute to run.  It will:
+	<ul><li><b>Delete all automatically created judging teams</b> (e.g., from a previous run of this scheduler), manually created judging teams are not touched.
+	<li>Create new judging teams for divisional, CUSP, and every special award marked as "schedule judges"
+	<li>Assign judges to teams
+	<li>Assign projects to divisional teams and special awards teams
+	<li>Assign projects to specific judges for divisional teams
+	<li>Create a judging schedule for each judging team and project (printable on the reports page)
+	</ul>
 
 <?php
 	$form_id = $page_id.'_run_form';
@@ -86,8 +87,48 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 	form_end($form_id);
 ?>
 
+	<hr/>
+	<h3>Scheduler Status</h3> 
+	<table>
+	<tr><td>Status:</td><td><div id="scheduler_percent" style="font-weight: bold;"></div></td></tr>
+	<tr><td>Output:</td><td><div id="scheduler_messages"</div></td></tr>
+	</table>
+
+
+
+
+
 
 </div></div>
+
+<script>
+function c_judge_scheduler_run_form_post_submit(form,data) {
+	$("#c_judge_scheduler_run_form_submit_run").attr('disabled', true);
+	judge_scheduler_update();
+}
+
+function judge_scheduler_update() {
+	$.ajax({url: 'c_judge_scheduler.php',
+		type: 'POST',
+		dataType: 'json',
+		data: { action: 'status' },
+		success: function(data) {
+			if(!data.running) {
+				$('#scheduler_percent').html('Not Running');
+				$('#scheduler_messages').html(data.messages);
+			} else {
+				$('#scheduler_percent').html('Running: 0%');
+				$('#scheduler_messages').html("Starting");
+				setTimeout(judge_scheduler_update, 2000);
+			}
+		}
+	});
+}
+
+var first_update = judge_scheduler_update();
+
+</script>
+
 	
 <?php
 sfiab_page_end();

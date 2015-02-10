@@ -13,4 +13,4 @@ INSERT INTO `config` ( `var` , `val` , `category` , `type` , `type_values` , `or
 ('judge_divisional_prizes', 'Gold,Silver,Bronze,Honourable Mention', 'Judge Scheduler', 'text', '', '60', 'Divisional Prizes', 'Comma-separated list of prize names for each divisional award, in order of the best prize first, e.g., "Gold, Silver, Bronze, Honourable Mention".'),
 ('judge_divisional_distribution', '5,10,15,20', 'Judge Scheduler', 'text', '', '70', 'Divisional Prize Distribution', 'Comma-separated list percentages (without the percent sign) for the percent of projects to be assigned to each of the Divisional Prizes (defined in judge_divisional_prizes".  e.g., for 5% Gold, 10% Silver, 15% Bronze, and 20% Honourable Mention, set this to "5,10,15,20".');
 
-
+ALTER TABLE `queue` CHANGE `command` `command` ENUM( 'email', 'push_award', 'push_winner', 'get_stats', 'judge_scheduler', 'tour_scheduler' ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
