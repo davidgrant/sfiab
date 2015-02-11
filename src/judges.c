@@ -4,6 +4,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+
 
 #include <glib.h>
 
@@ -36,6 +41,18 @@ struct _jteam {
 void jteam_print(struct _jteam *jteam) ;
 
 
+void scheduler_log(struct _db_data *db, int result, char *msg, ...)
+{
+	va_list args;
+	char buffer[1024];
+        va_start(args,msg);
+        vsprintf(buffer, msg, args);
+        va_end(args);
+
+	db_query(db, "INSERT INTO log (`ip`,`time`,`year`,`type`,`data`,`result`) "
+					"VALUES ('commandline',NOW(),'%d','judge_scheduler','%s','%d')",
+					current_year, buffer, result);
+}
 
 /* Cost for projects assigned to each jteam */
 float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bucket)
@@ -435,6 +452,7 @@ int judges_anneal_checks(struct _db_data *db)
 	printf("Running Checks...\n");
 
 	if(projects->len <= 0) {
+		scheduler_log(db, 99, "There are no projects.  Nothing to do.");
 		printf("   There are no projects.  Nothing to do.\n");
 		ok = 0;
 	}
@@ -444,11 +462,13 @@ int judges_anneal_checks(struct _db_data *db)
 		struct _award *a = g_ptr_array_index(awards, i);
 		if(a->is_divisional) {
 			if(a->num_cats != 1) {
+				scheduler_log(db, 99, "Divisional Award %s has %d categories, not 1.", a->name, a->num_cats);
 				printf("   Divisional Award %s has %d categories, not 1.\n", a->name, a->num_cats);
 				ok = 0;
 			}
 
 			if(a->prizes->len < 1) {
+				scheduler_log(db, 99, "Divisional Award %s has no prizes", a->name);
 				printf("   Divisional Award %s has no prizes.\n", a->name);
 				ok = 0;
 			}
@@ -480,6 +500,7 @@ int judges_anneal_checks(struct _db_data *db)
 		}
 
 		if(count != 1) {
+			scheduler_log(db, 99, "Category %s has %d divisional awards, not 1.", cat->name, count);
 			printf("   Category %s has %d awards, not 1.\n", cat->name, count);
 			ok = 0;
 		}
@@ -529,8 +550,11 @@ void judges_anneal(struct _db_data *db, int year)
 	}
 
 
+	scheduler_log(db, 1, "Judge Scheduler starting");
+
 	if(!judges_anneal_checks(db) ) {
 		printf("Judge Annealing checks failed.  exit.\n");
+		scheduler_log(db, 100, "Judge Scheduler checks failed. Abort.");
 		return;
 	}
 
@@ -539,9 +563,11 @@ void judges_anneal(struct _db_data *db, int year)
 	/* ====================================================================*/
 	printf("Delete current autocreated judging teams...\n");
 	db_query(db, "DELETE FROM judging_teams WHERE year='%d' and autocreated='1'", year);
+	scheduler_log(db, 2, "Deleting old auto-created judging teams and assignments");
 
 
 	/* ====================================================================*/
+	scheduler_log(db, 3, "Creating new judging teams");
 	printf("Creating Judging Teams...\n");
 	jteam_create(NULL, jteams, "Unused Judges", NULL);
 
@@ -665,6 +691,7 @@ void judges_anneal(struct _db_data *db, int year)
 			assert(0);
 		}
 	}
+	scheduler_log(db, 25, "Created %d judging teams", jteams->len);
 	printf("   Created %d JTeams.\n", jteams->len);
 
 	/* ====================================================================*/
@@ -712,6 +739,7 @@ void judges_anneal(struct _db_data *db, int year)
 		if(!j->available_in_round[0]) continue;
 		g_ptr_array_add(judge_list, j);
 	}
+	scheduler_log(db, 25, "Assigning %d available first round judges to %d divisional judging teams", judge_list->len, jteams_list->len);
 	printf("   Divisional Awards have %d jteams and %d judges available\n", jteams_list->len, judge_list->len);
 	anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
 			&jteam_judge_cost, NULL);
@@ -757,6 +785,7 @@ void judges_anneal(struct _db_data *db, int year)
 		if(!j->available_in_round[1]) continue; /* [1] == round 2 */
 		g_ptr_array_add(judge_list, j);
 	}
+	scheduler_log(db, 50, "Assigning %d available second round judges to %d CUSP judging teams", judge_list->len, jteams_list->len);
 	printf("   Cusp teams have %d JTeams and %d judges available\n", jteams_list->len, judge_list->len);
 //	anneal_set_debug(1);
 	anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
@@ -780,6 +809,7 @@ void judges_anneal(struct _db_data *db, int year)
 	 * to a round */
 	printf("\n");
 	printf("Assigning special-award-only judges...\n");
+	scheduler_log(db, 75, "Assigning special award judges to judging teams");
 	for(x=0;x<judges->len;x++) {
 		struct _judge *j = g_ptr_array_index(judges, x);
 		if(!j->sa_only) continue;
@@ -855,6 +885,7 @@ void judges_anneal(struct _db_data *db, int year)
 	int sa_judges_available_in_round[3] = {0,0,0};
 
 
+	scheduler_log(db, 80, "Assigning special award judging teams to rounds");
 	printf("Assigning special award JTeams to rounds...\n");
 
 	g_ptr_array_set_size(jteams_list, 0);
@@ -981,6 +1012,7 @@ void judges_anneal(struct _db_data *db, int year)
 	/* ====================================================================*/
 	/* Timeslot assignments */
 	printf("Doing Timeslot Assignments...\n");
+	scheduler_log(db, 90, "Doing timeslot assignments");
 
 	/* Delete old assignments */
 	db_query(db, "DELETE FROM timeslot_assignments WHERE year='%d'", year);
@@ -1111,6 +1143,7 @@ void judges_anneal(struct _db_data *db, int year)
 		printf("\n");
 	}
 
+	scheduler_log(db, 100, "Done.");
 
 
 

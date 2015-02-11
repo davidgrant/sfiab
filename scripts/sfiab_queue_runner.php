@@ -183,6 +183,14 @@ while(true) {
 			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		}
 		break;
+
+	case 'judge_scheduler':
+		debug("Starting the judge scheduler\n");
+		debug(getcwd());
+		system("src/sfiab_annealer judges > files/judge_scheduler_log.txt");
+		$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+		break;
+		
 	}
 
 

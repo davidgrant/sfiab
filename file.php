@@ -28,6 +28,7 @@ case 'research_plan_animals':
 
 case 'judge_scheduler_log':
 	$filename = 'judge_scheduler_log.txt';
+	break;
 
 default:
 	exit();

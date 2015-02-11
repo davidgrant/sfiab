@@ -34,7 +34,16 @@ int db_init(struct _db_data *db)
 
 	printf("Reading config.inc.php\n");
 
-	fp = fopen("../config.inc.php", "rt");
+	fp = fopen("config.inc.php", "rt");
+
+	if(fp == NULL) {
+		fp = fopen("../config.inc.php", "rt");
+	}
+	if(fp == NULL) {
+		printf("Unable to open SFIAB php config\n");
+		return 0;
+	}
+
 	while(!feof(fp)) {
 		fgets(line, 127, fp);
 		if(strstr(line, "$dbhost")) read_config_setting(line, db_host);

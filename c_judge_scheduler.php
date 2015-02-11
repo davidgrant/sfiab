@@ -4,6 +4,7 @@ require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
+require_once('email.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -19,16 +20,37 @@ switch($action) {
 
 case 'status':
 	$r = array();
-	$r['running'] = false;
-	$r['messages'] = time(NULL);
+
+	/* Look for a start message */
+	$q = $mysqli->query("SELECT `id` FROM log WHERE `type`='judge_scheduler' AND `result`='1' AND `year`='{$config['year']}' ORDER BY `id` DESC LIMIT 1");
+	if($q->num_rows != 1) {
+		$r['running'] = false;
+		$r['messages'] = "";
+		$r['percent'] = 0;
+	} else {
+		$d = $q->fetch_assoc();
+
+		/* Get all messages */
+		$r['running'] = true;
+		$r['messages'] = '';
+		$q = $mysqli->query("SELECT * FROM log WHERE `id`>='{$d['id']}' AND `type`='judge_scheduler' AND year='{$config['year']}' ORDER BY `id`");
+		while($d = $q->fetch_assoc()) {
+			$r['messages'] .= $d['data']."<br/>";
+			$r['percent'] = $d['result'];
+			if($d['result'] == 100) {
+				$r['running'] = false;
+			}
+		}
+	}
 	/* Get data from most recent run of the scheduler from the log */
 
 	print(json_encode($r));
 	exit();
 	
 case 'run':
-//	$mysqli->real_query("INSERT INTO queue(`command`,`result`) VALUES('judge_scheduler','queued')");
-//	queue_start($mysqli);
+	sfiab_log($mysqli, "judge_scheduler", $u, 1, "Initializing...");
+	$mysqli->real_query("INSERT INTO queue(`command`,`result`) VALUES('judge_scheduler','queued')");
+	queue_start($mysqli);
 	form_ajax_response(array('status'=>0, ));
 	exit();
 	
@@ -91,8 +113,11 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 	<h3>Scheduler Status</h3> 
 	<table>
 	<tr><td>Status:</td><td><div id="scheduler_percent" style="font-weight: bold;"></div></td></tr>
-	<tr><td>Output:</td><td><div id="scheduler_messages"</div></td></tr>
+	<tr><td valign="top" >Output:</td><td><div id="scheduler_messages"></div></td></tr>
 	</table>
+
+	<p>The complete output log is available here: <a href="file.php?f=judge_scheduler_log" data-ajax="false">Judge Scheduler Log</a>
+
 
 
 
@@ -102,10 +127,14 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 </div></div>
 
 <script>
+var started = false;
+
 function c_judge_scheduler_run_form_post_submit(form,data) {
 	$("#c_judge_scheduler_run_form_submit_run").attr('disabled', true);
 	judge_scheduler_update();
+	started = true;
 }
+
 
 function judge_scheduler_update() {
 	$.ajax({url: 'c_judge_scheduler.php',
@@ -113,13 +142,17 @@ function judge_scheduler_update() {
 		dataType: 'json',
 		data: { action: 'status' },
 		success: function(data) {
-			if(!data.running) {
+			if(!data.running && !started) {
 				$('#scheduler_percent').html('Not Running');
 				$('#scheduler_messages').html(data.messages);
 			} else {
-				$('#scheduler_percent').html('Running: 0%');
-				$('#scheduler_messages').html("Starting");
-				setTimeout(judge_scheduler_update, 2000);
+				$('#scheduler_percent').html('Running: '+data.percent+'%');
+				$('#scheduler_messages').html(data.messages);
+				if(data.percent != 100) {
+					setTimeout(judge_scheduler_update, 2000);
+				} else {
+					started = false;
+				}
 			}
 		}
 	});
