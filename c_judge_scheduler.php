@@ -128,6 +128,7 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 
 <script>
 var started = false;
+var update_ticker = 0;
 
 function c_judge_scheduler_run_form_post_submit(form,data) {
 	$("#c_judge_scheduler_run_form_submit_run").attr('disabled', true);
@@ -146,7 +147,11 @@ function judge_scheduler_update() {
 				$('#scheduler_percent').html('Not Running');
 				$('#scheduler_messages').html(data.messages);
 			} else {
-				$('#scheduler_percent').html('Running: '+data.percent+'%');
+				ticker_str = '';
+				update_ticker += 1;
+				for(x=0;x<update_ticker;x++) ticker_str += '.';
+				if(update_ticker == 3) update_ticker = 0;
+				$('#scheduler_percent').html('Running: '+data.percent+'% ' + ticker_str);
 				$('#scheduler_messages').html(data.messages);
 				if(data.percent != 100) {
 					setTimeout(judge_scheduler_update, 2000);
