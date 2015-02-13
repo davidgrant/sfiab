@@ -190,7 +190,14 @@ while(true) {
 		system("src/sfiab_annealer judges > files/judge_scheduler_log.txt");
 		$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		break;
-		
+
+	case 'tour_scheduler':
+		debug("Starting the tour scheduler\n");
+		debug(getcwd());
+		system("src/sfiab_annealer tours > files/tour_scheduler_log.txt");
+		$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+		break;
+
 	}
 
 

@@ -307,6 +307,16 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 				cost += 50;
 			}
 		}
+
+
+		/* See if there is a conflicting project on this team */
+		for(i=0; i<jteam->projects->len; i++) {
+			struct _project *p = g_ptr_array_index(jteam->projects, i);
+			if(list_contains_int(j->avoid_pids, j->num_avoid_pids, p->pid)) {
+				/* This jteam contains a project this judge isn't supposed to judge */
+				cost += 1000;
+			}
+		}
 	}
 
 	/* Compare what the judges have to what the projects need */
@@ -359,13 +369,30 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 
 int jteam_find_best_judge_from_list(struct _jteam *jteam, GPtrArray *judges)
 {
-	int idiv, ijudge;
+	int idiv, ijudge, iproject;
 	int lowest_div_missing = isef_divisions->len;;
 	int lowest_judge = -1;
+
 
 	for(ijudge=0; ijudge<judges->len; ijudge++) {
 		struct _judge *judge = g_ptr_array_index(judges, ijudge);
 		int div_missing = 0;
+		int ok = 1;
+
+		/* Search all projects on this jteam to see if the judge is allowed to judge them 
+		 * all */
+		if(judge->num_avoid_pids > 0) {
+			for(iproject=0; iproject<jteam->projects->len; iproject++) {
+				struct _project *p = g_ptr_array_index(jteam->projects, iproject);
+				if(list_contains_int(judge->avoid_pids, judge->num_avoid_pids, p->pid)) {
+					/* This jteam contains a project this judge isn't supposed to judge */
+					ok = 0;
+					break;
+				}
+			}
+			if(!ok) continue;
+		}
+		
 
 		for(idiv=0;idiv<isef_divisions->len;idiv++) {
 			if(jteam->isef_div_mask[idiv] == 2 && judge->isef_div_mask[idiv] != 2) {

@@ -232,6 +232,16 @@ void judges_load(struct _db_data *db, int year)
 			}
 		}
 
+		/* Malloc enough space for this int array that will never overflow */
+		p = db_fetch_row_field(result, x, "j_languages");
+		if(strlen(p) > 0) {
+			j->avoid_pids = malloc(strlen(p) * sizeof(int));
+			j->num_avoid_pids = split_int_list(j->avoid_pids, p);
+		} else {
+			j->num_avoid_pids = 0;
+			j->avoid_pids = NULL;
+		}
+
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", j->name, j->grade, j->schools_id, j->tour_id_pref[0], j->tour_id_pref[1], j->tour_id_pref[2], j->id);
 		g_ptr_array_add(judges, j);
 

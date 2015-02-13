@@ -248,15 +248,20 @@ function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false
 
 function form_get_value(&$name, &$value) 
 {
+	/* If the value is not an array, return the value */
 	if(!is_array($value)) return $value;
 
+	/* If it is, and the name request was something like j_pref_div[0], then pull out the specfic index and return
+	 * that.  This can nest multiple leves deep.  prize[0][1] for exmaple.
+	 * But if the specifier is [], then return the whole array */
 	$p = strpos($name, '[');
 	if($p !== false) {
 		/* Expect the name is either in the form:  j_pref_div[0] */
 		$array_name = substr($name, 0, $p);
-		$array_index = (int)substr($name, $p+1, -1);
+		$array_index_str = substr($name, $p+1, -1);
 
-		if(array_key_exists($array_name, $value)) {
+		if(strlen($array_index_str) > 0 && array_key_exists($array_name, $value)) {
+			$array_index = (int)$array_index_str;
 			
 			if(is_array($value[$array_name])) {
 				if(array_key_exists($array_index, $value[$array_name])) {
@@ -270,6 +275,9 @@ function form_get_value(&$name, &$value)
 				print("form_get_value(): values[$array_name] is not an array, but an index was specified.");
 				exit();
 			}
+		} else {
+			/* Set the name to the array name, and fall through to return the whole array */
+			$name = $array_name;
 		}
 	}
 	/* Value is an array, but name is not pointing to an array */
@@ -289,9 +297,11 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	if($form_disabled) $select_attrs .= ' disabled="disabled"';
 	if($inline) $select_attrs .= ' data-inline="true"';
 
+	/* For a multiselect, $v could be an array */
 	$v = form_get_value($name, $value);
 
 	form_label_div_begin($id, $name, $label, $wide);
+
 ?>
 	<select name="<?=$name?>" id="<?=$id?>" <?=$select_attrs?> >
 <?php 		if($data_role == '') { ?>
@@ -299,7 +309,11 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 <?php		}
 		foreach($data as $key=>$val) {
 			if(is_array($val)) $val = $val['name'];
-			$sel = ($v === $key) ? 'selected="selected"' : ''; ?>
+			if(is_array($v)) {
+				$sel = in_array($key, $v) ? 'selected="selected"' : '';
+			} else {
+				$sel = ($v === $key) ? 'selected="selected"' : ''; 
+			} ?>
 		        <option value="<?=$key?>" <?=$sel?> ><?=$val?></option>
 <?php		} ?>
 	</select>
@@ -458,7 +472,6 @@ function form_file($form_id, $name, $label)
 	<input id="<?=$id?>" name="<?=$name?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="file" <?=$d?> >
 <?php
 	form_label_div_end();
-
 }
 
 function form_begin($form_id, $action, $disable_form=false, $enable_ajax=true, $method = "post")

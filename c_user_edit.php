@@ -87,6 +87,22 @@ case 'psave_back':
 	}
 	exit();
 
+case 'jsave': 
+case 'jsave_back':
+	if(in_array('judge', $edit_u['roles'])) {
+		/* j_avoid_project_ids may not exist in the POST, that means it's empty */
+		$edit_u['j_avoid_project_ids'] = array();
+		post_array($edit_u['j_avoid_project_ids'], 'j_avoid_project_ids');
+		user_save($mysqli, $edit_u);
+
+		if($action == 'jsave') {
+			form_ajax_response(array('status'=>0));
+		} else {
+			form_ajax_response(array('status'=>0, 'location'=>'back'));
+		}
+	}
+	exit();
+
 case 'assign_project_number':
 	$result = project_number_assign($mysqli, $edit_p);
 	if($result != true) {
@@ -147,9 +163,6 @@ case 'change_pw':
 	form_ajax_response(0);
 	exit();
 }
-
-
-
 
 
 
@@ -223,6 +236,28 @@ if(in_array('student', $edit_u['roles'])) { ?>
 <?php
 	form_submit($form_id, 'psave', 'Save', 'Project Saved');
 	form_submit($form_id, 'psave_back', 'Save and Go Back', 'Project Saved');
+	form_end($form_id); 
+}
+
+
+if(in_array('judge', $edit_u['roles'])) {  ?>
+	<h3>Judge Information</h3>
+
+	<p>You can specify that a judge is not allowed to judge certain projects.  This works for all assignments except CUSP assignments where the judging teams are created before the CUSP projects are known.
+<?php
+
+	$projects = projects_load_all($mysqli);
+	$project_list = array();
+	foreach($projects as $pid=>&$p) {
+		$project_list[$pid] = $p['number'].' - '.$p['title'];
+	}
+
+	$form_id = $page_id.'_judge_form';
+	form_begin($form_id, 'c_user_edit.php');
+	form_hidden($form_id, 'uid', $edit_u['uid']);
+	form_multiselect($form_id, 'j_avoid_project_ids[]', 'Avoid Projects', $project_list, $edit_u);
+	form_submit($form_id, 'jsave', 'Save', 'Judge Information Saved');
+	form_submit($form_id, 'jsave_back', 'Save and Go Back', 'Judge Information Saved');
 	form_end($form_id); 
 }
 ?>
