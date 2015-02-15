@@ -171,7 +171,7 @@ $pdf->WriteHTML("<table><tr><td width=\"{$w}mm\">$e</td><td>$students</td></tr><
 $pdf->WriteHTML("<hr>");
 
 
-function sig($pdf, $text)
+function sig($pdf, $text1, $text2='')
 {
 	global $height_sigspace, $height_font;
 
@@ -181,13 +181,25 @@ function sig($pdf, $text)
 	 
 	$pdf->Cell(0, $height_sigspace + $height_font, '', 0, 0);
 
-	/* Restore X, and indent a bit, move Y down the signature space */
-	$pdf->SetXY($x + 15, $pdf->GetY() + $height_sigspace);
+	if($text2 == '') {
+		/* Restore X, and indent a bit, move Y down the signature space */
+		$pdf->SetXY($x + 15, $pdf->GetY() + $height_sigspace);
 
-	/* Box with a top line, then a space, then a box with a top line for the date */
-	$pdf->Cell(85, $height_font, $text, 'T', 0, 'C');
-	$pdf->SetX($pdf->GetX() + 15);
-	$pdf->Cell(60, $height_font, i18n('Date'), 'T', 1, 'C');
+		/* Box with a top line, then a space, then a box with a top line for the date */
+		$pdf->Cell(85, $height_font, $text1, 'T', 0, 'C');
+		$pdf->SetX($pdf->GetX() + 15);
+		$pdf->Cell(60, $height_font, i18n('Date'), 'T', 1, 'C');
+	} else {
+		/* Restore X, and indent a bit, move Y down the signature space */
+		$pdf->SetXY($x + 5, $pdf->GetY() + $height_sigspace);
+
+		/* Box with a top line, then a space, then a box with a top line for the date */
+		$pdf->Cell(65, $height_font, $text1, 'T', 0, 'C');
+		$pdf->SetX($pdf->GetX() + 10);
+		$pdf->Cell(65, $height_font, $text2, 'T', 0, 'C');
+		$pdf->SetX($pdf->GetX() + 10);
+		$pdf->Cell(35, $height_font, i18n('Date'), 'T', 1, 'C');
+	}
 }
 
 $e_decl = cms_get($mysqli, 'exhibitordeclaration', $u);
@@ -256,6 +268,23 @@ if($p_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");	
 }
 
+function course_tr($c1, $c2)
+{
+	$str = "<tr><td width=\"20\"></td>
+			<td width=\"80\" align=\"center\">$c1</td>
+			<td width=\"50\" align=\"center\">11&nbsp;&nbsp;&nbsp;12</td>
+			<td width=\"50\" style=\"border:1px solid black;\" align=\"right\">%</td>";
+	if($c2 != '') {
+		$str .= "<td width=\"20\"></td>
+			<td width=\"80\" align=\"center\">$c2</td>
+			<td width=\"50\" align=\"center\">11&nbsp;&nbsp;&nbsp;12</td>
+			<td width=\"50\" style=\"border:1px solid black;\" align=\"right\">%</td>";
+	}
+	$str .= "</tr>";
+	return $str;
+}
+	
+
 if($config['sig_enable_senior_marks_form']) {
 	foreach($users AS $user) {
 		if($user['grade'] <= 10) continue;
@@ -267,7 +296,10 @@ excellence at the [FAIRNAME].  Some of the awards that are applicable to the
 Senior Category entrants require verification of excellence in academic
 subjects.<br> 
 <br>
-To help us in distributing these awards, please complete the following.  This information is needed for senior category entrants only.<br>
+To help us in distributing these awards, please complete this form.  This
+information is used to verify the eligibility of award winners only, <i>not</i>
+to select the winners.  This information is needed for Senior Category entrants
+only.<br>
 <br>
 <table border=\"0\" cellpadding=\"2\">
 <tr>
@@ -288,10 +320,9 @@ To help us in distributing these awards, please complete the following.  This in
 </tr>
 </table>
 <br>
-NOTE: If you are a Grade 11 student, please complete Question 1, Question 2 for any of the Grade 12 courses you have taken, and enter the average of ALL your Grade 11 courses in Question 3.<br>
 <br>
-1. The post secondary institution(s) I hope to attend are (listed in priority): <br>
-
+1. Please list the post secondary institution(s) you hope to attend (highest priority first): <br>
+<br>
 <table cellpadding=\"5\">
 <tr>
     <td width=\"20\"></td><td width=\"500\">a. ______________________________________________________________________________ </td>
@@ -304,36 +335,40 @@ NOTE: If you are a Grade 11 student, please complete Question 1, Question 2 for 
 </tr>
 </table>
 <br>
-
-2. My marks in four (4) provincially examinable subjects:<br>
 <br>
-<table border=\"0\" cellpadding=\"5\">
+
+2. Please enter your most recent grades for the following courses.  Include courses your are 
+currently taking if a partial grade is available.
+
+<br>
+<table border=\"0\" cellpadding=\"5\" cellspacing=\"10\">
 <tr>
-    <td width=\"25\">a.</td><td width=\"300\">English 12: _________%</td>
+	<td width=\"20\"></td><td width=\"80\" align=\"center\"><b><br/>Course</b></td><td width=\"50\" align=\"center\"><b>Circle<br>11 or 12</b></td><td width=\"50\" align=\"center\"><b><br>Grade</b></td>
+	<td width=\"20\"></td><td width=\"80\" align=\"center\"><b><br/>Course</b></td><td width=\"50\" align=\"center\"><b>Circle<br>11 or 12</b></td><td width=\"50\" align=\"center\"><b><br>Grade</b></td>
 </tr>
-<tr>
-    <td width=\"25\">b.</td><td width=\"300\">Plus 2 or 3 of the following:</td>
-</tr>
-<tr>
-    <td align=\"right\" width=\"100\"> Biology 12:</td><td width=\"100\"> _________%</td>
-    <td align=\"right\" width=\"100\"> Geology 12:</td><td width=\"100\"> _________%</td>
-</tr>
-<tr>
-    <td align=\"right\" width=\"100\"> Physics 12:</td><td width=\"100\"> _________%</td>
-    <td align=\"right\" width=\"100\"> Chemistry 12:</td><td width=\"100\"> _________%</td>
-</tr>
-<tr>
-    <td width=\"25\">c.</td><td width=\"500\">Plus one (1) other provincially examinable subject (Omit this part if 3 marks were entered in Part 2.b.)</td>
-</tr><tr>
-    <td width=\"25\"></td><td width=\"500\">Course Name: ____________________________________        _________%</td>
-</tr>
+".course_tr("Biology", "Geology")."
+".course_tr("Calculus", "Math")."
+".course_tr("Chemistry", "Physics")."
+".course_tr("English", "")."
 </table>
 <br>
-3. Average of all my provincially examinable subjects:  ________%<br>
+<br>
 <br>
 Verification of Mark Status by an Official (a Counsellor or School Administrator)
 ";
+
+/*
+<tr><td width=\"20\"></td><td width=\"300\">Biology</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+<tr><td width=\"20\"></td><td width=\"300\">Geology</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+<tr><td width=\"20\"></td><td width=\"300\">Physics</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+<tr><td width=\"20\"></td><td width=\"300\">Chemistry</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+<tr><td width=\"20\"></td><td width=\"300\">Calculus</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+<tr><td width=\"20\"></td><td width=\"300\">Algebra</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+<tr><td width=\"20\"></td><td width=\"300\">Average:</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
+*/
 		$page = replace_vars($page, $user, array(), true);
+
+
 
  		$pdf->WriteHTML($page, true, false, false, false, '');
 
