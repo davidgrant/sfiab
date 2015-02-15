@@ -40,13 +40,16 @@ void students_load(struct _db_data *db, int year)
 		s->pid = atoi(db_fetch_row_field(result, x, "s_pid"));
 		s->project = NULL;
 
-		prefs = db_fetch_row_field(result, x, "tour_id_pref");
-		for(i=0;i<3;i++) 
+		for(i=0;i<3;i++) {
 			s->tour_id_pref[i] = -1;
-		i = split_int_list(s->tour_id_pref, prefs);
-		if(i > 3) {
-			printf("ERROR: Student \"%s\" managed to select more than 3 tour prefs\n", s->name);
-			assert(0);
+		}
+		prefs = db_fetch_row_field(result, x, "tour_id_pref");
+		if(prefs != NULL) {
+			i = split_int_list(s->tour_id_pref, prefs);
+			if(i > 3) {
+				printf("ERROR: Student \"%s\" managed to select more than 3 tour prefs\n", s->name);
+				assert(0);
+			}
 		}
 
 		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", s->name, s->grade, s->schools_id, s->tour_id_pref[0], s->tour_id_pref[1], s->tour_id_pref[2], s->id);

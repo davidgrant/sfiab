@@ -79,7 +79,10 @@ function get_or_create_sponsor_uid_for_year($mysqli, $sponsor_id, $year)
 
 	if(!array_key_exists($sponsor_id, $sponsors_map[0])) {
 		print("Can't find old sponsor ID {$sponsor_id}\n");
-		exit();
+		/* Sometimes this happens so this lets the conversion
+		 * continue */
+		return 0;
+//		exit();
 	}
 
 	$s = &$sponsors_map[0][$sponsor_id];
