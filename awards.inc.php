@@ -20,6 +20,7 @@ function award_create($mysqli, $year)
 {
 	$mysqli->query("INSERT INTO awards(`year`) VALUES('$year')");
 	$aid = $mysqli->insert_id;
+	debug("   create awward {$aid}, mysql:".$myslqi->error);
 	return $aid;
 }
 
@@ -167,8 +168,11 @@ function prize_delete($mysqli, &$a, $pid)
 
 function award_delete($mysqli, &$a)
 {
+	debug("Delete award {$a['id']}:{$a['name']}\n");
 	$mysqli->real_query("DELETE FROM award_prizes WHERE award_id='{$a['id']}'");
+	debug("   mysql:".$myslqi->error);
 	$mysqli->real_query("DELETE FROM awards WHERE id='{$a['id']}'");
+	debug("   mysql:".$myslqi->error);
 }
 
 function award_save($mysqli, &$a)
@@ -230,6 +234,10 @@ function award_update_divisional($mysqli)
 		$ok = true;
 		$a = award_load($mysqli, 0, $d);
 		$cid = $a['categories'][0];
+		if(!array_key_exists($cid, $cats)) {
+			debug("   Div award {$a['name']} has non-existant cat id '$cid'\n");
+			$ok = false;
+		}
 
 		/* Skip awards (and delete them below if there not exactly one category, 
 		 * or if there are duplicates */
@@ -261,22 +269,23 @@ function award_update_divisional($mysqli)
 
 	/* See if there are any divisional awards missing */
 	foreach($div_awards as $cid=>$a) {
+		debug("   Check div award:".print_r($a, true)."\n");
 		if($a === NULL) {
 			$sponsor_uid = sponsor_create_or_get($mysqli, $config['fair_abbreviation']);
 			$aid = award_create($mysqli, $config['year']);
-			$a = award_load($mysqli, $config['year']);
+			$a = award_load($mysqli, $aid);
 			$div_awards[$cid] = $a;
 
-			$a['name'] = $cat[$cid]['name'].' Divisional';
-			$a['categories'][] = $cid;
+			$a['name'] = $cats[$cid]['name'].' Divisional';
+			$a['categories'] = array($cid);
 			$a['self_nominate'] = 0;
 			$a['include_in_script'] = 1;
 			$a['schedule_judges'] = 1;
 			$a['ord'] = $cid;
 			$a['sponsor_uid'] = $sponsor_uid;
 
-			debug("   Created divisional award: {$a['name']}\n");
-
+			debug("   Created divisional award: {$a['name']}".print_r($a, true)."\n");
+		
 			award_save($mysqli, $a);
 		}
 

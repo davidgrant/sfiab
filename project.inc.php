@@ -207,10 +207,10 @@ function generic_save($mysqli, &$p, $table, $table_key)
 			$p['original'][$key] = $val;
 		}
 	}
-	//print_r($p);
+//	print_r($p);
 	if($set != '') {
 		$query = "UPDATE $table SET $set WHERE $table_key='{$p[$table_key]}'";
-	//	print($query);
+//		print($query);
 		$mysqli->real_query($query);
 	}
 }
