@@ -341,9 +341,13 @@ function tour_create($mysqli, $year=NULL)
 function tour_get_for_student_select($mysqli, &$u)
 {
 	global $config;
+
+	$grade = ($u['grade'] === NULL) ? 0 : (int)$u['grade'];
+
 	$q = $mysqli->query("SELECT * FROM tours WHERE year='{$config['year']}'
-					AND `grade_min` <= '{$u['grade']}'
-					AND `grade_max` >= '{$u['grade']}'");
+					AND `grade_min` <= '$grade'
+					AND `grade_max` >= '$grade'");
+	$tours = array();
 	while($d = $q->fetch_assoc()) {
 		$t = tour_load($mysqli, false, $d);
 		/* Change the name */

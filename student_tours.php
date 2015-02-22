@@ -56,7 +56,7 @@ sfiab_page_begin("Student Tour Selection", $page_id, $help);
 	<h3>Tour Selection</h3>
 
 <?php	if($u['grade'] === NULL || $u['grade'] == 0) { ?>
-		<p>Please enter your grade on the Personal Info page.  Some tours are only applicable to certain grades.
+		<p>Please enter your grade on the <a href="student_personal.php" data-ajax="false">Personal Info</a> page.  Some tours are only applicable to certain grades.
 		</div></div>
 	
 <?php		sfiab_page_end();
@@ -71,14 +71,18 @@ sfiab_page_begin("Student Tour Selection", $page_id, $help);
 
 <?php
 	$tours = tour_get_for_student_select($mysqli, $u);
-	
-	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_tours.php', $closed);
-	form_select($form_id, 'tour0', 'First Choice', $tours, $u['tour_id_pref'][0]);
-	form_select($form_id, 'tour1', 'Second Choice', $tours, $u['tour_id_pref'][1]);
-	form_select($form_id, 'tour2', 'Third Choice', $tours, $u['tour_id_pref'][2]);
-	form_submit($form_id, 'save', 'Save', 'Information Saved');
-	form_end($form_id);
+
+	if (count($tours) == 0) { ?>
+		<p>There are no tours available.</p>
+<?php 	} else {
+		$form_id = $page_id.'_form';
+		form_begin($form_id, 'student_tours.php', $closed);
+		form_select($form_id, 'tour0', 'First Choice', $tours, $u['tour_id_pref'][0]);
+		form_select($form_id, 'tour1', 'Second Choice', $tours, $u['tour_id_pref'][1]);
+		form_select($form_id, 'tour2', 'Third Choice', $tours, $u['tour_id_pref'][2]);
+		form_submit($form_id, 'save', 'Save', 'Information Saved');
+		form_end($form_id);
+	}
 
 ?>
 	<h3>Tour Descriptions</h3>
