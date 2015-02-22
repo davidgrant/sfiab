@@ -490,7 +490,7 @@ function remote_handle_old_upload_assign($mysqli, &$fair, &$data, &$response)
 				foreach($incoming_project['students'] as &$incoming_student) {
 					$s = array();
 					$s['year'] = $year;
-					$s['uid'] = $p['pid'] + count($p['students']); /* Create a number to uniquely identifiy this user */
+					$s['uid'] = ($p['pid']*10) + count($p['students']); /* Create a number to uniquely identifiy this user */
 					$s['unique_uid'] = $s['uid'];
 					$s['roles'] = array('student');
 					$s['username'] = $incoming_student['email'];
