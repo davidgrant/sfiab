@@ -22,6 +22,16 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_GET['action'];
 }
 
+$from_name = array('email_chair' => $config['fair_abbreviation']." Chair", 
+		   'email_chiefjudge' => $config['fair_abbreviation']." Chief Judge",
+		   'email_ethics' => $config['fair_abbreviation']." Ethics",
+		   'email_registration' => $config['fair_abbreviation']." Registration");
+
+$from_email = array('email_chair' => $from_name['email_chair']." &lt;".$config['email_chair']."&gt;",
+	            'email_chiefjudge' => $from_name['email_chiefjudge']." &lt;".$config['email_chiefjudge']."&gt;",
+		    'email_ethics' => $from_name['email_ethics']." &lt;".$config['email_ethics']."&gt;",
+		    'email_registration' => $from_name['email_registration']." &lt;".$config['email_registration']."&gt;");
+
 switch($action) {
 
 case 'new': 
@@ -52,6 +62,15 @@ case 'edit':
 	$form_id = $page_id.'_edit_form';
 	$e = email_load($mysqli, '', $eid);
 
+	/* Figure out what the from email is */
+	$email_key = '';
+	foreach($from_name as $key=>$val) {
+		if($e['from_name'] == $val) {
+			$email_key = $key;
+			break;
+		}
+	}
+
 ?>
 	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
 	<h3>Email Replacement Keys</h3>
@@ -59,9 +78,12 @@ case 'edit':
 	<table>
 	<tr><td>Key</td><td>Example</td><td>Replacement</td></tr>
 	<tr><td>[FAIRNAME]</td><td><?=$config['fair_name']?></td><td>The name of the science fair.</td></tr>
+	<tr><td>[FAIRABBR]</td><td><?=$config['fair_abbreviation']?></td><td>The abbreviation for the science fair name.</td></tr>
+	<tr><td>[LOGIN_LINK]</td><td><?=$config['fair_url']?>/index.php#login</td><td>A URL pointing to the login page on the registration site.</td></tr>
+	<tr><td>[FAIR_URL]</td><td><?=$config['fair_url']?></td><td>The main URL for the registration site.</td></tr>
+
 	<tr><td>[FIRSTNAME]</td><td><?=$u['firstname']?></td><td>The first name of the email recipient.</td></tr>
 	<tr><td>[LASTNAME]</td><td><?=$u['lastname']?></td><td>The last name of the email recipient.</td></tr>
-	<tr><td>[LOGIN_LINK]</td><td>http://reg.gvrsf.ca/#login</td><td>A URL pointing to the login page on the registration site.</td></tr>
 	<tr><td>[NAME]</td><td><?=$u['name']?></td><td>The full name (first + last) of the email recipient.</td></tr>
 	<tr><td>[PASSWORD]</td><td>35db324fc</td><td>The plain-text password of the mail recipient.  This only works for the "New Registration" and "Forgot Password" emails because the password is generated at the time the email is sent.  At all other times, the user's password is encoded in the database using a one-way hash.  It cannot be unencoded. </td></tr>
 	<tr><td>[SALUTATION]</td><td>Dr. </td><td>Salutation to be used for the mail recipient. </td></tr>
@@ -74,6 +96,7 @@ case 'edit':
 
 	<p>Replacement Keys can be used in the subject and body of the email.
 <?php
+
 	
 
 	form_begin($form_id, 'c_communication.php');
@@ -82,8 +105,9 @@ case 'edit':
 	form_text($form_id, 'section', 'Section', $e, 'text', $d);
 	form_text($form_id, 'name', 'Name', $e, 'text', $d);
 	form_textbox($form_id, 'description', 'Description', $e);
-	form_text($form_id, 'from_name', 'From Name', $e);
-	form_text($form_id, 'from_email', 'From Email', $e, 'email');
+	form_select($form_id, 'from_email', "From", $from_email, $email_key);
+//	form_text($form_id, 'from_name', 'From Name', $e);
+//	form_text($form_id, 'from_email', 'From Email', $e, 'email');
 	form_text($form_id, 'subject', 'Subject', $e);
 	form_textbox($form_id, 'body', 'Body', $e);
 	form_submit($form_id, 'save', 'Save', 'Email Saved');
@@ -115,8 +139,16 @@ case 'save':
 		post_text($e['name'], 'name');
 	}
 	post_text($e['description'], 'description');
-	post_text($e['from_name'], 'from_name');
-	post_text($e['from_email'], 'from_email');
+//	post_text($e['from_name'], 'from_name');
+//	post_text($e['from_email'], 'from_email');
+	$email_key = $_POST['from_email'];
+	if(!array_key_exists($email_key, $from_name) || !array_key_exists($email_key, $config) ) {
+		$e['from_name'] = '';
+		$e['from_email'] = '';
+	} else {
+		$e['from_name'] = $from_name[$email_key];
+		$e['from_email'] = $config[$email_key];
+	}
 	post_text($e['subject'], 'subject');
 	post_text($e['body'], 'body');
 
