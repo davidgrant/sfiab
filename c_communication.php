@@ -30,7 +30,8 @@ $from_name = array('email_chair' => $config['fair_abbreviation']." Chair",
 $from_email = array('email_chair' => $from_name['email_chair']." &lt;".$config['email_chair']."&gt;",
 	            'email_chiefjudge' => $from_name['email_chiefjudge']." &lt;".$config['email_chiefjudge']."&gt;",
 		    'email_ethics' => $from_name['email_ethics']." &lt;".$config['email_ethics']."&gt;",
-		    'email_registration' => $from_name['email_registration']." &lt;".$config['email_registration']."&gt;");
+		    'email_registration' => $from_name['email_registration']." &lt;".$config['email_registration']."&gt;",
+		    'specify_email' => "Other - Enter the from email name and address below");
 
 switch($action) {
 
@@ -63,7 +64,7 @@ case 'edit':
 	$e = email_load($mysqli, '', $eid);
 
 	/* Figure out what the from email is */
-	$email_key = '';
+	$email_key = 'specify_email';
 	foreach($from_name as $key=>$val) {
 		if($e['from_name'] == $val) {
 			$email_key = $key;
@@ -105,10 +106,13 @@ case 'edit':
 	form_text($form_id, 'section', 'Section', $e, 'text', $d);
 	form_text($form_id, 'name', 'Name', $e, 'text', $d);
 	form_textbox($form_id, 'description', 'Description', $e);
-	form_select($form_id, 'from_email', "From", $from_email, $email_key);
-//	form_text($form_id, 'from_name', 'From Name', $e);
-//	form_text($form_id, 'from_email', 'From Email', $e, 'email');
-	form_text($form_id, 'subject', 'Subject', $e);
+	form_select($form_id, 'email_key', "From", $from_email, $email_key);
+	$div_style = $email_key == 'specify_email' ? '' : 'style="display:none"';
+?>	<div id="specify_email" <?=$div_style?> >
+<?php		form_text($form_id, 'from_name', 'From Name', $e);
+		form_text($form_id, 'from_email', 'From Email', $e, 'email');
+?>	</div> 		
+<?php	form_text($form_id, 'subject', 'Subject', $e);
 	form_textbox($form_id, 'body', 'Body', $e);
 	form_submit($form_id, 'save', 'Save', 'Email Saved');
 ?>
@@ -123,6 +127,18 @@ case 'edit':
 	form_end($form_id);
 	sfiab_page_end();
 ?>
+
+	<script>
+	$( "#c_communication_edit_form_email_key" ).change(function(event) {
+		var val = $( "#c_communication_edit_form_email_key" ).val();
+		if( val == 'specify_email') {
+			$("#specify_email").show();
+		} else {
+			$("#specify_email").hide();
+		}
+	});
+	</script>
+
 
 	</div></div>
 <?php
@@ -139,10 +155,11 @@ case 'save':
 		post_text($e['name'], 'name');
 	}
 	post_text($e['description'], 'description');
-//	post_text($e['from_name'], 'from_name');
-//	post_text($e['from_email'], 'from_email');
-	$email_key = $_POST['from_email'];
-	if(!array_key_exists($email_key, $from_name) || !array_key_exists($email_key, $config) ) {
+	$email_key = $_POST['email_key'];
+	if($email_key == 'specify_email') {
+		post_text($e['from_name'], 'from_name');
+		post_text($e['from_email'], 'from_email');
+	} else if(!array_key_exists($email_key, $from_name) || !array_key_exists($email_key, $config) ) {
 		$e['from_name'] = '';
 		$e['from_email'] = '';
 	} else {
@@ -214,6 +231,7 @@ while($e = $q->fetch_assoc()) {
 	
 
 </div></div>
+
 
 <?php
 
