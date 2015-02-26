@@ -145,14 +145,13 @@ form_end($form_id);
 <h3>By Feeder Fair </h3>
 </td></tr>
 <tr><th>Fair</th><th>#Needing Welcome Email</th><th></th></tr>
-<?php	
+<?php
 $fairs = fair_load_all($mysqli);
 foreach($fairs as $fair_id=>&$fair) { 
 
 	if($fair['type'] != 'sfiab_feeder') {
 		continue;
 	}
-
 	$users = get_new_users_for_fair($mysqli, $new_users, $fair);
 ?>	<tr><td><?=$fair['name']?></td>
 	<td><?=count($users)?></td>
@@ -166,7 +165,24 @@ foreach($fairs as $fair_id=>&$fair) {
 	</td></tr>
 <?php	} ?>
 
+<tr><td colspan=3>
+<h3>Individually </h3>
+</td></tr>
+<tr><th>Fair/Award</th><th>Name/Email</th><th></th></tr>
+<?php
+foreach($new_users as $uid=>&$user) {
+	$fair = $fairs[$user['fair_id']];
+?>	<tr><td><?=$fair['name']?></td>
+	<td><?=$user['name']?><br/><?=$user['email']?></td>
+	<td></td>
+	</tr>
+<?php
+} ?>
+
+
 </table>
+
+
 
 </div></div>
 
