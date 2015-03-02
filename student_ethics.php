@@ -218,7 +218,7 @@ function policy($name, $text, $link = '')
 			policy('Caffeinated Drinks', "Caffeinated Drinks are subject to Special Rules.  Caffeinated Drinks are only permitted in Science Fair Projects within strict limits based on caffeine content and the age of the participants (see Caffeine Guidelines and also YSC Policy 4.1.1.1 section 3.3). <i>If caffeinated drinks were used outside these limits, your project may not be eligible for the {$config['fair_abbreviation']}; in this case, please email ".antispambot($config['email_ethics']).".</i>");
 		
 		if($e['human1'])
-			policy("Letter of Information', 'Your Participants must be provided with a Letter of Information that provides details on your Project (See YSC Policy 4.1.1.1 Section 4.4). <i>If your project did not include a letter of information or equivalent, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics'])."</i>.  Click on this item for a blank Letter of Information template.", 
+			policy("Letter of Information", "Your Participants must be provided with a Letter of Information that provides details on your Project (See YSC Policy 4.1.1.1 Section 4.4). <i>If your project did not include a letter of information or equivalent, it may not be eligible for the {$config['fair_abbreviation']}. Please email ".antispambot($config['email_ethics'])."</i>.  Click on this item for a blank Letter of Information template.", 
 			'http://cwsf.youthscience.ca/sites/default/files/documents/cwsf/letter_of_information_blank_en.doc');
 
 
