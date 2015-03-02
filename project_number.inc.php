@@ -47,17 +47,28 @@ function project_number_assign($mysqli, &$p, $move_other_projects=false)
 	debug("first unused floor number = $first_unused_floor_number\n");
 
 	switch($config['project_number_format']) {
-	case 'CHN':
-		$cat = sprintf("%02d", $p['cat_id']);
-		$cha = sprintf("%02d", $p['challenge_id']);
+	case 'CCHHXX':
+	case 'CHXX':
+		if($config['project_number_format'] == 'CCHHXX') {
+			$target_length = 6;
+			$number_start = 4;
+			$cat = sprintf("%02d", $p['cat_id']);
+			$cha = sprintf("%02d", $p['challenge_id']);
+		} else {
+			$target_length = 4;
+			$number_start = 2;
+			$cat = sprintf("%01d", $p['cat_id']);
+			$cha = sprintf("%01d", $p['challenge_id']);
+		}
+
 		/* Find a the lowest 2 digit number that matches $cat.$cha */
 		$pns = array();
 		foreach($projects as &$proj) {
 			if($proj['cat_id'] != $p['cat_id']) continue;
 			if($proj['challenge_id'] != $p['challenge_id']) continue;
-			if(strlen($proj['number']) != 6) continue;
+			if(strlen($proj['number']) != $target_length) continue;
 
-			$nn = (int)substr($proj['number'], 4, 2);
+			$nn = (int)substr($proj['number'], $number_start, 2);
 			$pns[$nn] = 1;
 		}
 		for($first_n = 1; ; $first_n++) {
