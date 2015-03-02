@@ -315,7 +315,7 @@ function tour_load($mysqli, $id , $data = NULL)
 function tour_load_all($mysqli)
 {
 	global $config;
-	$q = $mysqli->query("SELECT * FROM tours WHERE year='{$config['year']}'");
+	$q = $mysqli->query("SELECT * FROM tours WHERE year='{$config['year']}' ORDER BY `num`");
 	$tours = array();
 	while($d = $q->fetch_assoc()) {
 		$t = tour_load($mysqli, false, $d);

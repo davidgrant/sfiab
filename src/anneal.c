@@ -177,7 +177,8 @@ float anneal_check_costs(struct _annealer *annealer)
  * propose_move - optional, override the existing move proposal */
 int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrArray *items, 
 			float (*cost_function)(struct _annealer *annealer, int bucket_id, GPtrArray *bucket),
-			int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move) 
+			int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move),
+			void (*progress_callback)(float progress)
 		)
 {
 	int x, i, num_moves, num_accepted;
@@ -188,6 +189,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	int temperature_count = 0;
 	int num_moves_this_temp;
 	int num_accepted_this_temp;
+	float estimated_iterations;
 
 	srand(time(NULL));
 //	srand(0);
@@ -200,6 +202,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	annealer.item_bucket = malloc(sizeof(int) * items->len);
 	annealer.cost_function = cost_function;
 	annealer.propose_move = propose_move;
+	annealer.progress_callback = progress_callback;
 	annealer.data_ptr = data_ptr;
 
 	/* Allocate each bucket */
@@ -237,7 +240,8 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	temperature = 1000000000000.0;
 	inner_num = 1 * pow(items->len * num_buckets, 4/3);
 
-//	estimated_iterations = ceil(log(0.1 / $this->start_temp, $this->rate));
+	estimated_iterations = -log(1 / temperature) * 10 ;
+	printf("   => Estimated Iterations: %d\n", (int)estimated_iterations);
 	num_moves = 0;
 	num_accepted = 0;
 	last_cost = 0;
@@ -295,12 +299,12 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 
 		temperature_count ++;
 
-		/* Estimate %done callback 
-		if(isset ($this->update_callback)) {
-			$cb = $this->update_callback;
-			$cb($iterations, $estimated_iterations);
+		/* Estimate %done callback */
+		if(annealer.progress_callback) {
+			float p = temperature_count / estimated_iterations;
+			if(p > 1) p=1;
+			annealer.progress_callback(p);
 		}
-		*/
 
 		/* If we do too many costs over and over again, exit below */
 		if(cost == last_cost) {

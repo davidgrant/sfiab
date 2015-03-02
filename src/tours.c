@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <math.h>
 
 #include <glib.h>
 
@@ -12,6 +13,20 @@
 #include "students.h"
 
 GPtrArray *tours;
+static int current_year = 0;
+
+static void scheduler_log(struct _db_data *db, int result, char *msg, ...)
+{
+	va_list args;
+	char buffer[1024];
+        va_start(args,msg);
+        vsprintf(buffer, msg, args);
+        va_end(args);
+
+	db_query(db, "INSERT INTO log (`ip`,`time`,`year`,`type`,`data`,`result`) "
+					"VALUES ('commandline',NOW(),'%d','tour_scheduler','%s','%d')",
+					current_year, buffer, result);
+}
 
 struct _tour *tour_find(int id)
 {
@@ -216,6 +231,20 @@ void tours_load(struct _db_data *db, int year)
 	db_free_result(result);
 }
 
+static struct _db_data *global_db;
+void tours_progress_callback(float progress)
+{
+	static float last_progress = 0.0;
+
+	if(progress - last_progress > 0.1) {
+		int percent = 10 + (int)(80 * progress);
+		last_progress = progress;
+
+		scheduler_log(global_db, percent, "Assigning Tours");
+//		printf("Progress: %d%%\n", percent);
+	}
+}
+
 
 
 void tours_anneal(struct _db_data *db, int year)
@@ -224,13 +253,19 @@ void tours_anneal(struct _db_data *db, int year)
 	int rank_count[4] = {0, 0, 0, 0};
 	GPtrArray **tour_assignments;
 
+	scheduler_log(db, 5, "Loading Data");
+
+	global_db = db;
+	current_year = year;
+
 	tours_load(db, year);
 	students_load(db, year);
 
 	/* Assign students to tours */
+	scheduler_log(db, 10, "Assigning Tours");
 	tour_assignments = NULL;
 	anneal(NULL, &tour_assignments, tours->len, students, 
-			&tours_cost, &tours_propose_move);
+			&tours_cost, &tours_propose_move, &tours_progress_callback);
 
 	for(x=0;x<tours->len;x++) {
 		GPtrArray *ta = tour_assignments[x];
@@ -256,6 +291,7 @@ void tours_anneal(struct _db_data *db, int year)
 			rank_count[0], rank_count[1], rank_count[2], rank_count[3], 
 			rank_count[0] + rank_count[1] + rank_count[2] + rank_count[3]);
 
+	scheduler_log(db, 90, "Writing back results.");
 
 	/* Write results back to db */
 	printf("Writing tours back to students\n");
@@ -267,6 +303,8 @@ void tours_anneal(struct _db_data *db, int year)
 			db_query(db, "UPDATE users SET tour_id='%d' WHERE uid='%d'", t->id, s->id);
 		}
 	}
+	scheduler_log(db, 100, "Done.");
+	
 	printf("All done!\n");
 }
 

@@ -588,7 +588,7 @@ void exhibithall_anneal(struct _db_data *db, int year)
 	/* Assign students to exhibithalls */
 	exhibithall_assignments = NULL;
 	anneal(NULL, &exhibithall_assignments, exhibithall_objects->len, projects, 
-			&exhibithalls_cost, &exhibithall_propose_move);
+			&exhibithalls_cost, &exhibithall_propose_move, NULL/* progress callback*/);
 
 	/* Construct GVRSF style project numbers and write it back to the db */
 	printf("Writing exhibithalls back to students\n");

@@ -660,7 +660,7 @@ void judges_anneal(struct _db_data *db, int year)
 
 			/* Assign projects (not judges yet) to jteams */
 			anneal(a, &project_jteam_assignments, a->jteams->len, a->projects, 
-				&jteam_projects_cost, NULL/*&jteam_projects_propose_move*/);
+				&jteam_projects_cost, NULL/*&jteam_projects_propose_move*/, NULL/* progress callback*/);
 
 			/* Read data back and save in each jteam */
 			for(i=0;i<num_jteams;i++) {
@@ -769,7 +769,7 @@ void judges_anneal(struct _db_data *db, int year)
 	scheduler_log(db, 25, "Assigning %d available first round judges to %d divisional judging teams", judge_list->len, jteams_list->len);
 	printf("   Divisional Awards have %d jteams and %d judges available\n", jteams_list->len, judge_list->len);
 	anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
-			&jteam_judge_cost, NULL);
+			&jteam_judge_cost, NULL, NULL/* progress callback*/);
 
 	for(i=0;i<jteams_list->len;i++) {
 		GPtrArray *js = judge_jteam_assignments[i];
@@ -816,7 +816,7 @@ void judges_anneal(struct _db_data *db, int year)
 	printf("   Cusp teams have %d JTeams and %d judges available\n", jteams_list->len, judge_list->len);
 //	anneal_set_debug(1);
 	anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
-			&jteam_judge_cost, NULL);
+			&jteam_judge_cost, NULL, NULL/* progress callback*/);
 
 	for(i=0;i<jteams_list->len;i++) {
 		GPtrArray *js = judge_jteam_assignments[i];
