@@ -102,6 +102,8 @@ while(true) {
 		/* Load additional replacements */
 		$rep = unserialize($db_rep);
 
+		$from_name = replace_vars($db_email_from_name, $u, $rep);
+		$from_addr = replace_vars($db_email_from_addr, $u, $rep);
 		$subject = replace_vars($db_email_subject, $u, $rep);
 		$body = replace_vars($db_email_body, $u, $rep);
 		if($db_email_body_html != '') {
@@ -109,7 +111,8 @@ while(true) {
 		} else {
 			$body_html = '';
 		}
-
+	
+		debug("   from: $from_name $from_addr\n");
 		$mail = new PHPMailer();
 		$mail->isSMTP();	// Use smtp
 		$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
@@ -117,7 +120,7 @@ while(true) {
 		$mail->Host = "localhost";
 		$mail->Port = 25;
 		$mail->SMTPAuth = false;	/* No auth */
-		$mail->setFrom($db_email_from_addr, $db_email_from_name);
+		$mail->setFrom($from_addr, $from_name);
 		//Set an alternative reply-to address
 	//	$mail->addReplyTo('replyto@example.com', 'First Last');
 		//Set who the message is to be sent to
@@ -131,6 +134,7 @@ while(true) {
 			$mail->Body    = $body_html;
 			$mail->AltBody = $body;
 		}
+		debug("Send email: ".print_r($mail, true)."\n");
 
 	//	$mail->msgHTML("ile_get_contents('contents.html'), dirname(__FILE__));
 		//Replace the plain text body with one created manually

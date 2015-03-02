@@ -666,6 +666,8 @@ function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false
 			'/\[FAIRABBR\]/' => $config['fair_abbreviation'],
 			'/\[YEAR\]/' => $config['year'],
 			'/\[CHAIR_EMAIL\]/' => $html ? mailto($config['email_chair']) : $config['email_chair'],
+			'/\[EMAIL_CHAIR\]/' => $html ? mailto($config['email_chair']) : $config['email_chair'],
+			'/\[EMAIL_REGISTRATION\]/' => $html ? mailto($config['email_registration']) : $config['email_registration'],
 			'/\[DATE_FORMS_DUE\]/' => date('F d, Y', strtotime($config['date_student_registration_closes']) + 60*60*24),
 
 			);
@@ -679,6 +681,9 @@ function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false
 		/* Optional replacements */
 		if(array_key_exists('password', $additional_vars)) {
 			$rep['/\[PASSWORD\]/'] = $additional_vars['password'];
+		}
+		if(array_key_exists('username_list', $additional_vars)) {
+			$rep['/\[USERNAME_LIST\]/'] = $additional_vars['username_list'];
 		}
 	}
 
