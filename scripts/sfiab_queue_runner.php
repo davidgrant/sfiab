@@ -102,6 +102,7 @@ while(true) {
 		/* Load additional replacements */
 		$rep = unserialize($db_rep);
 
+		$from_addr = replace_vars($db_email_from_addr, $u, $rep);
 		$subject = replace_vars($db_email_subject, $u, $rep);
 		$body = replace_vars($db_email_body, $u, $rep);
 		if($db_email_body_html != '') {
@@ -117,7 +118,7 @@ while(true) {
 		$mail->Host = "localhost";
 		$mail->Port = 25;
 		$mail->SMTPAuth = false;	/* No auth */
-		$mail->setFrom($db_email_from_addr, $db_email_from_name);
+		$mail->setFrom($from_addr, $db_email_from_name);
 		//Set an alternative reply-to address
 	//	$mail->addReplyTo('replyto@example.com', 'First Last');
 		//Set who the message is to be sent to
