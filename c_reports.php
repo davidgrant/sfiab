@@ -85,7 +85,7 @@ $timeslots = timeslots_load_rounds($mysqli);
 	<form action="c_reports.php" id="<?=$form_id?>" method="GET" data-ajax="false" >
 	<input type="hidden" name="action" value="" class="sfiab_form_action" />
 <?php
-	form_select_optgroup($form_id, 'rid', 'Report', $report_sec, $val, "onchange=\"change_report()\"");
+	form_select_optgroup($form_id, 'rid', 'Report', $report_sec, $val);
 	$options = array();
 	foreach($report_options as $o=>$v) {
 		$options[$o] = $v['default'];
