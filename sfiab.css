@@ -756,6 +756,8 @@ html head + body .ui-body-l.ui-focus {
 	border-top: none;
 }
 
+
+
 @media (min-width: 75em) {
 	.sfiab_page {
 		width: 75% !important;
@@ -796,7 +798,7 @@ html head + body .ui-body-l.ui-focus {
 		position: absolute;
 		left: 0;
 		float: left;
-		width: 25%;
+		width: 25% !important;
 		overflow: visible !important;
 		background: none;
 		clip: auto;
@@ -824,7 +826,7 @@ html head + body .ui-body-l.ui-focus {
 	}
 */	
 	.sfiab_page {
-		width: 70% ;
+		width: 70% !important;
 		padding-top: 2em;
 		padding-left: 2em;
 		padding-right: 2em;

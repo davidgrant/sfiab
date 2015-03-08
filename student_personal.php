@@ -129,7 +129,6 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 ?>
 
 	<p><b>Note:</b> Changing your grade will delete your tour selections, special award selections, and could change your project Age Category.
-
 </div>
 
 <script>
