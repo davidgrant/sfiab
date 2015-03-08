@@ -18,7 +18,7 @@ sfiab_page_begin("Change Password", "a_change_password");
 
 	$initial_error = "";
 	if($_SESSION['password_expired']) {
-		$initial_error = "Your password has expired, please enter a new password";
+		$initial_error = "You have logged in successfully, but your password needs to be changed before continuing.  Please change your password below.";
 	}
 	form_page_begin($page_id, array(), $initial_error);
 

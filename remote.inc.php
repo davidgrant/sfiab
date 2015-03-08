@@ -355,7 +355,6 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 	return $response['error'];
 }
 
-
 function remote_handle_old_get_awards($mysqli, &$fair, &$data, &$response)
 {
 	/* Get an award from an upstream server, specified by the local award_id, but

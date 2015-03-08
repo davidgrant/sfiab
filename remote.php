@@ -34,17 +34,36 @@ sfiab_load_config($mysqli);
 /* According to PHP, $_POST is already urldecoded, so don't mirror our urlencode */
 if(!array_key_exists('d', $_POST)) {
 	debug("data sent to server is missing command: ".print_r($_POST, true));
+	exit();
 
 	/* Hack to support old sfiab */
+	/*
 	if(array_key_exists('json', $_POST)) {
 		debug("Attempting to convert from old sfiab json query\n");
 		$data =  json_decode($_POST['json'], true);
 		$data['password'] = $data['auth']['password'];
 	} else {
 		exit();
-	}
+	}*/
 } else {
 	$data = json_decode($_POST['d'], true);
+}
+
+/* Handle a ping upfront, even before password checking */
+if(array_key_exists('ping', $data)) {
+	$response = array();
+	$response['pong'] = array('name' => $config['fair_name'],
+				  'abbrv' => $config['fair_abbreviation'],
+				  'url' => $config['url'] );
+	$response['error'] = 0;
+	print(json_encode($response));
+	exit();
+}
+
+/* Now check the password and load the remote fair */
+
+if(!array_key_exists('password', $data)) {
+	exit();
 }
 
 $password = $data['password'];
@@ -55,7 +74,8 @@ if($fair === NULL) {
 	exit();
 }
 
-$fair['old_sfiab'] = ($fair['username'] == '') ? false : true;
+//$fair['old_sfiab'] = ($fair['username'] == '') ? false : true;
+$fair['old_sfiab'] = false;
 
 debug("Incoming command matched password for fair: {$fair['name']}\n");
 debug("Decoded Command:".print_r($data, true)."\n");
@@ -94,7 +114,7 @@ function remote_handle_cmd($mysqli, &$fair, &$data)
 		remote_handle_check_token($mysqli, $fair, $data, $response);
 		return $response;
 	}
- 
+
 	/* Check the token in the command by communicating back with the fair URL we have on record, 
 	 * hack for old support, if there is a fair username, skip the token check */
 	if($fair['old_sfiab'] == false && remote_check_token($mysqli, $fair, $data['token']) == false) {

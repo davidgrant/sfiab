@@ -136,7 +136,7 @@ case 'restore':
         case UPLOAD_ERR_INI_SIZE:
         case UPLOAD_ERR_FORM_SIZE:
         default:
-		form_ajax_response(array('status'=>1, 'error'=>'File Upload Failed'));
+		form_ajax_response(array('status'=>1, 'error'=>'File Upload Failed'.$_FILES['restore']['error']));
 		exit();
 	}
 	print("File OK.\n");
