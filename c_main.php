@@ -39,8 +39,8 @@ sfiab_page_begin("Committee Main", 'c_main', $help);
 
 	<h3>Committee Members</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="index.php#register" data-rel="external" data-ajax="false">Invite a Committee Member (or Judge or Student)</a></li>
 	<li><a href="c_user_list.php?roles[]=committee&years[]=-1" data-rel="external" data-ajax="false">Committee List / Editor</a></li>
+	<li><a href="index.php#register" data-rel="external" data-ajax="false">Invite a Committee Member (or Judge or Student)</a></li>
 	</ul>
 
 </div></div>

@@ -286,7 +286,7 @@ function form_get_value(&$name, &$value)
 
 
 
-function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false, $inline=false)
+function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wide=false, $multi=false, $inline=false, $filterable=false)
 { 
 	global $form_disabled;
 	$id = $page_id.'_'.$name;
@@ -296,6 +296,7 @@ function form_select($page_id, $name, $label, $data, &$value, $data_role='', $wi
 	if($multi) $select_attrs .= ' multiple="true" data-native-menu="false"';
 	if($form_disabled) $select_attrs .= ' disabled="disabled"';
 	if($inline) $select_attrs .= ' data-inline="true"';
+	if($filterable) $select_attrs .= 'data-native-menu="false" class="filterable-select"';
 
 	/* For a multiselect, $v could be an array */
 	$v = form_get_value($name, $value);
@@ -352,6 +353,11 @@ function form_select_optgroup($page_id, $name, $label, $data, &$value)
 <?php	} ?>
 	</select>
 <?php	form_label_div_end();
+}
+
+function form_select_filterable($form_id, $name, $label, $data, &$value)
+{
+	form_select($form_id, $name, $label, $data, $value, '',false, false, false, true);
 }
 
 function form_select_filter($page_id, $name, $label, $data, &$value)

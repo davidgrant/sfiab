@@ -64,8 +64,8 @@ sfiab_page_begin("Judging", $page_id);
 	<p>Complete: <b><?=$v_complete?></b> / <b><?=$v_complete+$v_incomplete?></b>,  plus not attending: <b><?=$v_not_attending?></b>.
 
 	<ul data-role="listview" data-inset="true">
-	<li><a href="index.php#register" data-rel="external" data-ajax="false">Invite a Volunteer</a></li>
 	<li><a href="c_user_list.php?roles[]=volunteer" data-rel="external" data-ajax="false">Volunteer List / Editor</a></li>
+	<li><a href="index.php#register" data-rel="external" data-ajax="false">Invite a Volunteer</a></li>
 	</ul>
 
 

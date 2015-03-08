@@ -154,7 +154,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 
 	case 's_project':
 		$p = project_load($mysqli, $u['s_pid']);
-		incomplete_check_text($ret, $p, array('title','tagline','abstract','language'));
+		incomplete_check_text($ret, $p, array('title','language'));
 		incomplete_check_bool($ret, $p, array('req_electricity'));
 		incomplete_check_gt_zero($ret, $p, array('challenge_id','isef_id'));
 

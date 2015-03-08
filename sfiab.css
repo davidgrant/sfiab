@@ -799,6 +799,8 @@ html head + body .ui-body-l.ui-focus {
 		width: 25%;
 		overflow: visible !important;
 		background: none;
+		clip: auto;
+
 		-webkit-transition: none !important;
 		-moz-transition: none !important;
 		transition: none !important;
@@ -927,4 +929,22 @@ html head + body .ui-body-l.ui-focus {
 	background-color: rgba(0,0,0,.04);
 }
 
-
+/* Filterable select menu */
+.ui-selectmenu.ui-popup .ui-input-search {
+    margin-left: .5em;
+    margin-right: .5em;
+}
+.ui-selectmenu.ui-dialog .ui-content {
+    padding-top: 0;
+}
+.ui-selectmenu.ui-dialog .ui-selectmenu-list {
+    margin-top: 0;
+}
+.ui-selectmenu.ui-popup .ui-selectmenu-list li.ui-first-child .ui-btn {
+    border-top-width: 1px;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+.ui-selectmenu.ui-dialog .ui-header {
+    border-bottom-width: 1px;
+}
