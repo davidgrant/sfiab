@@ -73,22 +73,24 @@ case 'save_back':
 
 	if(!$remote_award) {
 		/* Iterate over the $_POST['prizes'][prize_id] and save data for each prize */
-		foreach($_POST['prize'] as $pid=>$p) {
-			$pid = (int)$pid;
+		if(array_key_exists('prize', $_POST)) {
+			foreach($_POST['prize'] as $pid=>$p) {
+				$pid = (int)$pid;
 
-			if(!array_key_exists($pid, $a['prizes'])) {
-				print("Prize id not found, stop.");
-				exit();
+				if(!array_key_exists($pid, $a['prizes'])) {
+					print("Prize id not found, stop.");
+					exit();
+				}
+
+				$prize = &$a['prizes'][$pid];
+
+				post_text($prize['name'],array('prize', $pid, 'name') );
+				post_int($prize['number'],array('prize', $pid, 'number') );
+				post_float($prize['cash'],array('prize', $pid, 'cash'));
+				post_float($prize['scholarship'],array('prize', $pid, 'scholarship'));
+				post_float($prize['value'],array('prize', $pid, 'value'));
+				post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
 			}
-
-			$prize = &$a['prizes'][$pid];
-
-			post_text($prize['name'],array('prize', $pid, 'name') );
-			post_int($prize['number'],array('prize', $pid, 'number') );
-			post_float($prize['cash'],array('prize', $pid, 'cash'));
-			post_float($prize['scholarship'],array('prize', $pid, 'scholarship'));
-			post_float($prize['value'],array('prize', $pid, 'value'));
-			post_array($prize['trophies'], array('prize',$pid,'trophies'), $award_trophies);
 		}
 	}
 
