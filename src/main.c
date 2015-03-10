@@ -32,7 +32,6 @@ int main(int argc, char **argv)
 		printf("Exhibit Hall\n");
 		exhibithall_anneal(db, config.year);
 	}
-
 	db_close(db);
 
 	return 0;

@@ -52,6 +52,7 @@ C_SRCS= anneal.c\
 	timeslots.c\
 	tours.c
 
+
 H_FILES=anneal.h\
 	db.h\
 	exhibithall.h\
@@ -61,10 +62,14 @@ H_FILES=anneal.h\
 	timeslots.h\
 	tours.h
 
-
+all: sfiab_annealer
 
 sfiab_annealer: $(C_SRCS) $(H_FILES)
 	gcc -o sfiab_annealer $(C_SRCS) $(CFLAGS) $(LIBS)
+
+
+robotics: robotics.c
+	gcc -o robotics -Wall robotics.c $(CFLAGS) $(LIBS)
 	
 distclean:
-	$(RM) sfiab_annealer
+	$(RM) sfiab_annealer robotics

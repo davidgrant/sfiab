@@ -55,7 +55,7 @@ case 'add':
 	/* Create an award with a default name and ord=1 (move all other awards down one).
 	 * Create a prize for it too */
 	$mysqli->real_query("UPDATE awards SET `ord` = `ord`+1 WHERE year='{$config['year']}'");
-	$mysqli->real_query("INSERT INTO awards (`name`,`ord`,`year`) VALUES('New Award',1,'{$config['year']}')");
+	$mysqli->real_query("INSERT INTO awards (`name`,`ord`,`year`,`type`) VALUES('New Award',1,'{$config['year']}','special')");
 	$aid = $mysqli->insert_id;
 	$a = award_load($mysqli, $aid);
 	$pid = prize_create($mysqli, $a);
