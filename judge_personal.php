@@ -63,7 +63,7 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
 <?php
-	$degrees = array('bachelor'=>'Bachelor', 'master'=>'Master', 'doctorate'=>'Doctorate');
+	$degrees = array('none'=>'None', 'bachelor'=>'Bachelor', 'master'=>'Master', 'doctorate'=>'Doctorate' );
 
 	incomplete_check($mysqli, $fields, $u, $page_id);
 	form_page_begin($page_id, $fields);
