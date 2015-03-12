@@ -76,7 +76,15 @@ case 'psave_back':
 		post_int($edit_p['number_sort'], 'number_sort');
 		post_int($edit_p['floor_number'], 'floor_number');
 		post_text($edit_p['number'], 'number');
-		post_array($edit_p['unavailable_timeslots'], 'unavailable_timeslots');
+
+		$edit_p['unavailable_timeslots'] = array();
+		$timeslots = timeslots_load_all($mysqli);
+		foreach($timeslots as $tid=>&$ts) {
+			$a = array();
+			post_array($a, "unavailable_timeslots$tid");
+			$edit_p['unavailable_timeslots'] = array_merge($edit_p['unavailable_timeslots'] , $a);
+		}
+
 		project_save($mysqli, $edit_p);
 
 		if($action == 'psave') {
@@ -222,7 +230,7 @@ if(in_array('student', $edit_u['roles'])) { ?>
 			$key = $t['round'].':'.$t['num'];
 			$data[$key] = date('H:i', $t['start_timestamp']).'<br/>- '.date('H:i', $t['end_timestamp']);
 		}
-		form_check_group($form_id, "unavailable_timeslots", "{$ts['name']} Unavailable Timeslots", $data, $edit_p);
+		form_check_group($form_id, "unavailable_timeslots$tid", "{$ts['name']} Unavailable Timeslots", $data, $edit_p['unavailable_timeslots']);
 	}
 
 

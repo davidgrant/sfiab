@@ -29,6 +29,8 @@ struct _challenge {
 	int num_minutes;
 	struct _table *tables;
 	char *name;
+	int lunch_length;
+	int start_minute;
 };
 
 struct _team {
@@ -44,6 +46,7 @@ int num_teams=0;
 
 int num_minutes = 5 * 60;
 int num_tables = 0;
+int junior = 0;
 
 
 int **schedule = NULL;
@@ -76,7 +79,7 @@ static void place_entry(int ichal, int itable, int minute, int val, int partner_
 
 
 /* Place a team in chal, table near minute */
-static void place_team(int ichal, int itable, int minute, int iteam, int ipartner_team)
+static int place_team(int ichal, int itable, int minute, int iteam, int ipartner_team)
 {
 	struct _challenge *chal = &challenges[ichal];
 	struct _table *table = &chal->tables[itable];
@@ -141,12 +144,16 @@ static void place_team(int ichal, int itable, int minute, int iteam, int ipartne
 
 	if(selected_minute == -1) {
 		/* Collision */
-		printf("Collision at %s,%d,%d\n", challenges[ichal].name, itable, minute);
+		return 0;
+
+//		printf("Collision at %s,%d,%d\n", challenges[ichal].name, itable, minute);
 //		return;
-		exit(0);
+//		exit(0);
 	}
 
 	place_entry(ichal, itable, minute, iteam, ipartner_team);
+
+	return 1;
 
 
 
@@ -291,11 +298,6 @@ int do_team_assignment(int team_id)
 				partner_team = team->partner[i];
 			}
 
-			/* Iterate around tables, but there could be more or fewer 
-			 * tables than attempts */
-			if(itable >= chal->num_tables) {
-				itable = 0;
-			}
 			/* Make sure we don't go off the end of the schedule */
 			if(start + chal->timeslot_length > chal->num_minutes) {
 				start = 0;
@@ -304,7 +306,29 @@ int do_team_assignment(int team_id)
 			/* Place this team if there is no partner, or if
 			 * the team's id is less than the partner's. */
 			if(partner_team == -1 || team_id < partner_team) {
-				place_team(ichal, itable, start, team_id, partner_team);
+				int n, placed = 0;
+				for(n=0;n<chal->num_tables; n++) {
+
+					/* Iterate around tables, but there could be more or fewer 
+					 * tables than attempts */
+					if(itable >= chal->num_tables) {
+						itable = 0;
+					}
+				
+					if(place_team(ichal, itable, start, team_id, partner_team)) {
+						placed = 1;
+						break;
+					}
+					itable ++;
+
+				}
+
+				if(!placed) {
+					printf("Unable to place team %d, %s in any table\n", team_id, challenges[ichal].name);
+					exit(0);
+				}
+
+
 			}
 
 			itable++;
@@ -353,6 +377,40 @@ int mark_breaks(int ichal, int itable)
 	int lunch_start = 100; /* 12:00 - 10:20  */
 
 	for(minute=table->offset; minute<chal->num_minutes; minute += chal->timeslot_length) {
+
+		if(minute < chal->start_minute) {
+			/* All minutes before the start_minute, mark as unavailable */
+			place_entry(ichal, itable, minute, -3, -1);
+		}
+
+		/* Block off S3, Area 2 until 12:30 */
+		if(junior == 0 && ichal == 2 && itable == 1) {
+			if(minute < 130) {
+				place_entry(ichal, itable, minute, -3, -1);
+			}
+
+			/* Continue now , this table gets no lunch */
+			continue;
+		}
+		/* Block off J1, A2, until 10:40 */
+		if(junior == 1 && ichal == 0 && itable == 1) {
+			if(minute < 20) {
+				place_entry(ichal, itable, minute, -3, -1);
+			}
+		}
+		/* Block off J3, A2,A4, until 10:40 */
+		if(junior == 1 && ichal == 2 && (itable == 1 || itable == 3) ) {
+			if(minute < 20) {
+				place_entry(ichal, itable, minute, -3, -1);
+			}
+		}
+		/* Block off J3, A2,A4, until 10:40 */
+		if(junior == 1 && ichal == 3 && itable == 0 ) {
+			if(minute < 20) {
+				place_entry(ichal, itable, minute, -3, -1);
+			}
+		}
+
 		if(lunch_state == 0) {
 			if(itable %2 == 0) {
 				if(minute >= lunch_start) {
@@ -360,7 +418,7 @@ int mark_breaks(int ichal, int itable)
 					this_lunch_start = minute;
 				}
 			} else {
-				if(minute >= lunch_start + 30) {
+				if(minute >= lunch_start + (60 - chal->lunch_length - chal->timeslot_length)) {
 					lunch_state = 1;
 					this_lunch_start = minute;
 				}
@@ -368,7 +426,7 @@ int mark_breaks(int ichal, int itable)
 		}
 		if(lunch_state == 1) {
 			place_entry(ichal, itable, minute, -2, -1);
-			if(minute + chal->timeslot_length - this_lunch_start >= 30) {
+			if(minute + chal->timeslot_length - this_lunch_start >= chal->lunch_length) {
 				lunch_state = 2;
 			}
 		}
@@ -411,27 +469,35 @@ int main(void)
 	j_chal[0].timeslot_length = 5;
 	j_chal[0].teams_per_timeslot = 1;
 	j_chal[0].num_minutes = num_minutes - 30;
+	j_chal[0].lunch_length = 45;
+	j_chal[0].start_minute = 10;
 
 	j_chal[1].name = "J2";
 	j_chal[1].num_tables = 2;
 	j_chal[1].rounds_per_team = 2;
 	j_chal[1].timeslot_length = 6;
 	j_chal[1].teams_per_timeslot = 1;
-	j_chal[1].num_minutes = num_minutes - 30;
+	j_chal[1].num_minutes = num_minutes - 10;
+	j_chal[1].lunch_length = 45;
+	j_chal[1].start_minute = 0;
 
 	j_chal[2].name = "J3-White";
 	j_chal[2].num_tables = 3;
 	j_chal[2].rounds_per_team = 3;
 	j_chal[2].timeslot_length = 5;
 	j_chal[2].teams_per_timeslot = 2;
-	j_chal[2].num_minutes = num_minutes - 75;
+	j_chal[2].num_minutes = num_minutes - 80;
+	j_chal[2].lunch_length = 30;
+	j_chal[2].start_minute = 0;
 
 	j_chal[3].name = "J3-Black";
 	j_chal[3].num_tables = 1;
 	j_chal[3].rounds_per_team = 3;
 	j_chal[3].timeslot_length = 5;
 	j_chal[3].teams_per_timeslot = 2;
-	j_chal[3].num_minutes = num_minutes - 75;
+	j_chal[3].num_minutes = num_minutes - 85;
+	j_chal[3].lunch_length = 30;
+	j_chal[3].start_minute = 0;
 
 	j_chal[4].name = "J4";
 	j_chal[4].num_tables = 1;
@@ -439,6 +505,8 @@ int main(void)
 	j_chal[4].timeslot_length = 4;
 	j_chal[4].teams_per_timeslot = 1;
 	j_chal[4].num_minutes = num_minutes - 30;
+	j_chal[4].lunch_length = 30;
+	j_chal[4].start_minute = 40;
 
 	num_j_chal = 5;
 
@@ -448,6 +516,8 @@ int main(void)
 	s_chal[0].timeslot_length = 7;
 	s_chal[0].teams_per_timeslot = 1;
 	s_chal[0].num_minutes = num_minutes- 10;
+	s_chal[0].lunch_length = 30;
+	s_chal[0].start_minute = 0;
 
 	s_chal[1].name = "S2";
 	s_chal[1].num_tables = 2;
@@ -455,27 +525,35 @@ int main(void)
 	s_chal[1].timeslot_length = 8;
 	s_chal[1].teams_per_timeslot = 1;
 	s_chal[1].num_minutes = num_minutes -10;
+	s_chal[1].lunch_length = 30;
+	s_chal[1].start_minute = 0;
 
 	s_chal[2].name = "S3";
 	s_chal[2].num_tables = 2;
 	s_chal[2].rounds_per_team = 3;
 	s_chal[2].timeslot_length = 6;
 	s_chal[2].teams_per_timeslot = 2;
-	s_chal[2].num_minutes = num_minutes - 90;
+	s_chal[2].num_minutes = num_minutes - 60;
+	s_chal[2].lunch_length = 30;
+	s_chal[2].start_minute = 0;
 
 	s_chal[3].name = "S4";
 	s_chal[3].num_tables = 1;
 	s_chal[3].rounds_per_team = 3;
-	s_chal[3].timeslot_length = 4;
+	s_chal[3].timeslot_length = 5;
 	s_chal[3].teams_per_timeslot = 1;
 	s_chal[3].num_minutes = num_minutes - 30;
+	s_chal[3].lunch_length = 45;
+	s_chal[3].start_minute = 40;
 
 	s_chal[4].name = "S5";
 	s_chal[4].num_tables = 1;
 	s_chal[4].rounds_per_team = 3;
-	s_chal[4].timeslot_length = 4;
+	s_chal[4].timeslot_length = 5;
 	s_chal[4].teams_per_timeslot = 1;
 	s_chal[4].num_minutes = num_minutes- 30;
+	s_chal[4].lunch_length = 45;
+	s_chal[4].start_minute = 40;
 
 	num_s_chal = 5;
 
@@ -489,10 +567,12 @@ int main(void)
 			challenges = &j_chal[0];
 			num_challenges = num_j_chal;
 			output_filename = "j.csv";
+			junior = 1;
 		} else {
 			challenges = &s_chal[0];
 			num_challenges = num_s_chal;
 			output_filename = "s.csv";
+			junior = 0;
 		}
 		
 		num_tables = 0;
@@ -599,7 +679,12 @@ int main(void)
 		fprintf(fp, "By Area:\nTime,");
 		for(j=0;j<num_challenges;j++) {
 			for(y=0;y<challenges[j].num_tables;y++) {
-				fprintf(fp,"%s-%d,", challenges[j].name, y+1);
+				if(challenges[j].teams_per_timeslot != 2) {
+					fprintf(fp,"%s-%d,", challenges[j].name, y+1);
+				} else  {
+					fprintf(fp,"%s-%dL,", challenges[j].name, y+1);
+					fprintf(fp,"%s-%dR,", challenges[j].name, y+1);
+				}
 			}
 		}
 		fprintf(fp, "\n");
@@ -610,16 +695,27 @@ int main(void)
 			for(j=0;j<num_challenges;j++) {
 				for(y=0;y<challenges[j].num_tables;y++) {
 					struct _table *t = &challenges[j].tables[y];
-					if(partner_schedule[t->x_index][x] >= 0) {
-						fprintf(fp, "%3d %3d, ", teams[schedule[t->x_index][x]].id, teams[partner_schedule[t->x_index][x]].id);
+					if(schedule[t->x_index][x] == -3) {
+						fprintf(fp, ", ");
+					} else if(schedule[t->x_index][x] == -2) {
+						fprintf(fp, "Lunch, ");
+					} else if(schedule[t->x_index][x] == -1) {
+						fprintf(fp, ", ");
 					} else {
-						if(schedule[t->x_index][x] == -2) {
-							fprintf(fp, "Lunch, ");
-						} else if(schedule[t->x_index][x] == -1) {
-							fprintf(fp, ", ");
-						} else {
-							fprintf(fp, "%6d, ", teams[schedule[t->x_index][x]].id);	
-						}
+						fprintf(fp, "%6d, ", teams[schedule[t->x_index][x]].id);	
+					}
+
+					if(challenges[j].teams_per_timeslot != 2) {
+						; /* DO ntohing */
+
+					} else 	if(schedule[t->x_index][x] == -3) {
+						fprintf(fp, ", ");
+					} else if(schedule[t->x_index][x] == -2) {
+						fprintf(fp, "Lunch, ");
+					} else if(schedule[t->x_index][x] == -1) {
+						fprintf(fp, ", ");
+					} else {
+						fprintf(fp, "%6d, ", teams[partner_schedule[t->x_index][x]].id);
 					}
 				}
 			}
