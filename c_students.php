@@ -83,8 +83,9 @@ sfiab_page_begin("Students", $page_id);
 
 ?>	
 	<h3>Stats</h3> 
+	<p><b>Accepted</b> Students and Projects means a signature form has been received and marked in the system.  <b>Complete</b> Students and Projects could print a signature form, but it hasn't been received or entered into the system yet.
 	<table>
-	<tr><td></td><td colspan="2" align="center">Accepted</td><td colspan="2" align="center">Complete</td>
+	<tr><td></td><td colspan="2" align="center"><b>Accepted</b></td><td colspan="2" align="center"><b>Complete</b></td>
 		</tr>
 	<tr><td></td><td align="center">Students</td><td align="center">Projects</td><td align="center">Students</td><td align="center">Projects</td>
 	</tr>
