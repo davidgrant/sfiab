@@ -28,14 +28,14 @@ sfiab_page_begin("Students", $page_id);
 	$j_not_attending = 0;
 	$j_incomplete = 0;
 
-	$stats_line = array('accepted' => 0);
+	$stats_line = array('accepted' => 0, 'complete'=>0);
 
 	$stats = array();
 	foreach($cats as $c) {
 		$stats[$c['cat_id']] = array('students'=>$stats_line, 'projects'=>$stats_line);
 	}
 	$stats['total'] = array('students'=>$stats_line, 'projects'=>$stats_line);
-	
+
 	foreach($students as &$s) {
 		if($s['s_accepted'] == 1) {
 			$p =& $projects[$s['s_pid']];
@@ -46,13 +46,33 @@ sfiab_page_begin("Students", $page_id);
 				print_r(array_keys($stats));
 			}
 			$stats[$p['cat_id']]['students']['accepted']+=1;
+		} else if($s['s_complete'] == 1) {
+			$p =& $projects[$s['s_pid']];
+			$stats['total']['students']['complete']+=1;
+			if(!array_key_exists($p['cat_id'], $stats)) {
+				print("array key doesn't exist for cat_id=[{$p['cat_id']}]<br/>");
+				print_r($p);
+				print_r(array_keys($stats));
+			}
+			$stats[$p['cat_id']]['students']['complete']+=1;
+			$p['complete'] = true;
+		} else {
+			if(array_key_exists($s['s_pid'], $projects)) {
+				$p =& $projects[$s['s_pid']];
+				$p['complete'] = false;
+			}
 		}
+
 	}
 
 	foreach($projects as &$p) {
 		if($p['accepted']) {
 			$stats['total']['projects']['accepted']+=1;
 			$stats[$p['cat_id']]['projects']['accepted']+=1;
+		}
+		if(array_key_exists('complete', $p) && $p['complete'] == true) {
+			$stats['total']['projects']['complete']+=1;
+			$stats[$p['cat_id']]['projects']['complete']+=1;
 		}
 	}
 		
@@ -64,17 +84,23 @@ sfiab_page_begin("Students", $page_id);
 ?>	
 	<h3>Stats</h3> 
 	<table>
-	<tr><td></td><td colspan="2" align="center">Accepted</td></tr>
-	<tr><td></td><td align="center">Students</td><td align="center">Projects</td></tr>
+	<tr><td></td><td colspan="2" align="center">Accepted</td><td colspan="2" align="center">Complete</td>
+		</tr>
+	<tr><td></td><td align="center">Students</td><td align="center">Projects</td><td align="center">Students</td><td align="center">Projects</td>
+	</tr>
 <?php	foreach($cats as $cat_id=>$c) { ?>
 		<tr><td align="center"><?=$c['name']?></td>
 		    <td align="center"><?=$stats[$cat_id]['students']['accepted']?></td>
 		    <td align="center"><?=$stats[$cat_id]['projects']['accepted']?></td>
+		    <td align="center"><?=$stats[$cat_id]['students']['complete']?></td>
+		    <td align="center"><?=$stats[$cat_id]['projects']['complete']?></td>
 		</tr>
 <?php	} ?>
 	<tr><td align="center"><b>Total</b></td>
 	    <td align="center"><b><?=$stats['total']['students']['accepted']?></b></td>
 	    <td align="center"><b><?=$stats['total']['projects']['accepted']?></b></td>
+	    <td align="center"><b><?=$stats['total']['students']['complete']?></b></td>
+	    <td align="center"><b><?=$stats['total']['projects']['complete']?></b></td>
 	</tr>
 	</table>
 		
