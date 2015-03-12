@@ -195,6 +195,16 @@ $help = '<p>There are
 	so you can find all the complete ones.  When the green <font
 	color=green>Mark as Incomplete</font> button is showing, it means the
 	project has been marked as complete.';
+$help = '<p>There are
+	two buttons that may appear: <font color=red>Mark as Complete</font>,
+	and <font
+	color=green>Mark as Incomplete</font>.  The <font color=red>Mark as
+	Complete</font> button is red so you can scan through the list quickly
+	and find all incomplete (red) applications.  Similarly the <font
+	color=green>Mark as Incomplete</font> button is green 
+	so you can find all the complete ones.  When the green <font
+	color=green>Mark as Incomplete</font> button is showing, it means the
+	project has been marked as complete.';
 
 
 sfiab_page_begin("Input Signature Forms", $page_id, $help);
@@ -207,8 +217,7 @@ sfiab_page_begin("Input Signature Forms", $page_id, $help);
 	<h3>Input Signature Forms</h3>
 
 	<p>Use the list below to mark registrations as complete.  There are
-	three buttons that may appear: <font color=red>Mark as Complete</font>,
-	<font color=blue>Mark as Complete without payment</font>, and <font
+	two buttons that may appear: <font color=red>Mark as Complete</font> and <font
 	color=green>Mark as Incomplete</font>.  The <font color=red>Mark as
 	Complete</font> button is red so you can scan through the list quickly
 	and find all incomplete (red) applications.  Similarly the <font
@@ -276,21 +285,23 @@ foreach($projects as &$p) {
 <?php				if($accepted && $paid) {
 					$mark_as_complete_style = 'style="display:none;"';
 					$mark_as_incomplete_style = '';
-					$mark_as_complete_without_payment_style = 'style="display:none;"';
+//					$mark_as_complete_without_payment_style = 'style="display:none;"';
 				} else if ($accepted && !$paid) {
 					$mark_as_complete_style = '';
 					$mark_as_incomplete_style = '';
-					$mark_as_complete_without_payment_style = 'style="display:none;"';
+//					$mark_as_complete_without_payment_style = 'style="display:none;"';
 				} else {
 					$mark_as_complete_style = '';
 					$mark_as_incomplete_style = 'style="display:none;"';
-					$mark_as_complete_without_payment_style = '';
+//					$mark_as_complete_without_payment_style = '';
 				}
 ?>
 
 				<a href="#" onclick="input_reg_forms_mark_as_complete(<?=$pid?>)" id="input_reg_forms_c_<?=$pid?>" <?=$mark_as_complete_style?> data-role="button" data-theme="r" >Mark as Complete</a>
 				<a href="#" onclick="input_reg_forms_mark_as_incomplete(<?=$pid?>)" id="input_reg_forms_i_<?=$pid?>" <?=$mark_as_incomplete_style?> data-role="button" data-theme="g" >Mark as Incomplete</a>
-				<a href="#" onclick="input_reg_forms_mark_as_complete_wo_payment(<?=$pid?>)" id="input_reg_forms_w_<?=$pid?>" <?=$mark_as_complete_without_payment_style?> data-role="button" data-theme="l" >Mark as Complete<br/>Without Payment</a>
+<?php /*			<a href="#" onclick="input_reg_forms_mark_as_complete_wo_payment(<?=$pid?>)" id="input_reg_forms_w_<?=$pid?>" <?=$mark_as_complete_without_payment_style?> data-role="button" data-theme="l" >Mark as Complete<br/>Without Payment</a>
+*/ ?>
+
 			</div>
 		</div>
 	</li>
