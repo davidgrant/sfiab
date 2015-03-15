@@ -485,6 +485,12 @@ $report_students_fields = array(
 		'format' => '$%.02f',
 		'exec_function' => 'reports_students_registration_fee'),
 
+	'project_id' => array(
+		'name' => 'Project -- Registration ID',
+		'header' => 'Reg ID',
+		'width' => 1,
+		'table' => 'projects.pid' ),
+
 	'school' =>  array(
 		'start_option_group' => 'School Information',
 		'name' => 'School -- Name',
