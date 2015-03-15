@@ -47,6 +47,13 @@ case 'save_back':
 	post_bool($edit_u['attending'], 'attending');
 	post_text($edit_u['reg_close_override'], 'reg_close_override');
 
+	if($config['tshirt_enable']) {
+		post_text($edit_u['tshirt'], 'tshirt');
+		if(!array_key_exists($edit_u['tshirt'], $tshirt_sizes)) {
+			$edit_u['tshirt'] = NULL;
+		}
+	}
+
 	if($config['tours_enable']) {
 		if(in_array('student', $edit_u['roles'])) {
 			post_int($edit_u['tour_id'], 'tour_id');
@@ -195,6 +202,10 @@ form_page_begin($page_id, array());
 	form_radio_h($form_id, 'attending', "At the fair", $sel, $edit_u['attending']);
 	form_text($form_id, 'reg_close_override', "Registration Close Override", $edit_u, 'date');
 
+	if($config['tshirt_enable']) {
+		form_select($form_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $edit_u);
+	}
+
 	if($config['tours_enable']) {
 		if(in_array('student', $edit_u['roles'])) { 
 			$tours = tour_get_for_student_select($mysqli, $edit_u);
@@ -214,6 +225,7 @@ if(in_array('student', $edit_u['roles'])) { ?>
 	$form_id = $page_id.'_project_form';
 	form_begin($form_id, 'c_user_edit.php');
 	form_hidden($form_id, 'uid', $edit_u['uid']);
+	form_label($form_id, 'registration_id', 'Registration ID', $edit_p['pid']);
 	form_yesno($form_id, 'disqualified_from_awards', 'Project Disqualifed from Awards', $edit_p);
 	form_text($form_id, 'number', 'Project Number', $edit_p);
 	$ns = ($edit_p['number_sort'] == 0) ? '' : $edit_p['number_sort'];

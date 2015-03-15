@@ -7,29 +7,52 @@ require_once('incomplete.inc.php');
 require_once('form.inc.php');
 require_once('tcpdf.inc.php');
 
-$mysqli = sfiab_init('student');
+$mysqli = sfiab_init(array('student', 'committee'));
 
 $page_id = 's_signature';
 
-$u = user_load($mysqli);
-$p = project_load($mysqli, $u['s_pid']);
-$closed = sfiab_registration_is_closed($u);
+$sample = false;
+$generate_pdf = false;
 
-/* Get all users associated with this project */
-$users = user_load_all_for_project($mysqli, $u['s_pid']);
-/* Check for all complete */
-$all_complete = true;
-foreach($users as $user) {
-	if($user['s_complete'] == 0) {
-		$all_complete = false;
+if(array_key_exists('pdf', $_POST)) {
+	/* Generate a pdf */
+	$generate_pdf = true;
+	if(array_key_exists('action', $_POST)) {
+		if($_POST['action'] == 'sample') {
+			$sample = true;
+		}
 	}
 }
 
+$u = user_load($mysqli);
 
-/* Double check complete status with a force-reload */
-incomplete_check($mysqli, $fields, $u, $page_id, true);
+if($sample) {
+	sfiab_check_access($mysqli, array('committee'), false);
+}
 
-if(count($_POST) == 0) {
+/* Load real user data, or fake for a sample? */
+if(!$sample) {
+	/* Load project and users for a non-sample.  We use all this both
+	 * for the landing page and to display the pdf. */
+	$p = project_load($mysqli, $u['s_pid']);
+	$closed = sfiab_registration_is_closed($u);
+
+	/* Get all users associated with this project */
+	$users = user_load_all_for_project($mysqli, $u['s_pid']);
+	/* Check for all complete */
+	$all_complete = true;
+	foreach($users as $user) {
+		if($user['s_complete'] == 0) {
+			$all_complete = false;
+		}
+	}
+
+	/* Double check complete status with a force-reload */
+	incomplete_check($mysqli, $fields, $u, $page_id, true);
+}
+
+
+if($generate_pdf == false) {
 	/* Nothing to get, display the landing page */
 
 	$help='
@@ -103,13 +126,33 @@ if(count($_POST) == 0) {
 
 
 /* The signature form */
- //anyone can access a sample, we dont need to be authenticated or anything for that
- if(0 && $_POST['sample']) {
-	$registration_number=12345;
-	$registration_id=0;
-
+if($sample) {
 	$users = array();
 	$p = array();
+
+
+	$p['pid'] = 1234;
+	$p['title'] = "My Science Fair Project";
+	$p['cat_id'] = 3;
+	$p['challenge_id'] = 1;
+
+	$users[0]['schools_id'] = 0;
+	$users[0]['uid'] = 1111;
+	$users[0]['grade'] = 11;
+	$users[0]['name'] = "John Q. Doe";
+	$users[0]['username'] = "john_doe";
+	$users[0]['firstname'] = "John";
+	$users[0]['lastname'] = "Doe";
+	$users[0]['salutation'] = "";
+	$users[0]['organization'] = "";
+	$users[0]['sex'] = "male";
+	$users[0]['email'] = "john@example.com";
+	$users[0]['tshirt'] = "medium";
+
+
+
+	$school_name = "Example Secondary School";
+
 	/*
  	$projectinfo->title="Sample Project Title";
  	$projectinfo->division="Proj Division";
@@ -123,8 +166,6 @@ if(count($_POST) == 0) {
  } else {
  	/* Project and students already loaded */
  }
-
-if($closed) exit();
 
 $cats = categories_load($mysqli);
 $chals = challenges_load($mysqli);
@@ -157,6 +198,12 @@ $pdf->SetXY($x, $y);
  $students = "";
  $school_names = array();
  foreach($users as $user) { 
+ 	if($sample) {
+		/* Skip query for generating a sample */
+		$school_names[$user['uid']] = $school_name;
+		continue;
+	} 
+
 	$qq = $mysqli->query("SELECT school FROM schools WHERE id={$user['schools_id']}");
 	$rr = $qq->fetch_assoc();
 

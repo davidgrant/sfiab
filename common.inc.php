@@ -20,6 +20,14 @@ $sfiab_roles = array(	'student' => array('name' => 'Student'),
 			'sponsor' => array('name' => 'Sponsor')
 		);
 
+$tshirt_sizes = array('none' => 'None',
+			'xsmall' => 'X-Small',
+			'small' => 'Small',
+			'medium' => 'Medium',
+			'large' => 'Large',
+			'xlarge' => 'X-Large' );
+		
+
 function sfiab_db_connect()
 {
 	global $dbhost, $dbuser, $dbpassword, $dbdatabase;

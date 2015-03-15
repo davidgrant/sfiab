@@ -6,6 +6,7 @@ require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('email.inc.php');
+require_once('schools.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -153,12 +154,20 @@ sfiab_page_begin("User List", $page_id);
 		
 	</div>
 
-	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search..." data-inset="true">
 <?php
+//	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search..." data-inset="true">
+
+$hide_columns = array();
+$hide_columns['pid'] = true;
+$hide_columns['school'] = true;
 
 $q_roles_array = array();
 foreach($roles as $r) {
 	$q_roles_array[] = "FIND_IN_SET('$r',`roles`)>0";
+	if($r == 'student') {
+		$hide_columns['school'] = false;
+	}
+		
 }
 $q_roles = "( ".join(' OR ', $q_roles_array)." )";
 
@@ -210,6 +219,8 @@ $q = $mysqli->query($query);
 //print($query);
 print($mysqli->error);
 
+$schools = school_load_all($mysqli);
+
 $users = array();
 while($user_data = $q->fetch_assoc()) {
 	$users[] = user_load($mysqli, -1, -1, NULL, $user_data);
@@ -218,15 +229,30 @@ while($user_data = $q->fetch_assoc()) {
 
 ?>
 
-<li>
-<table width="100%">
-	<tr><td width="25%"><b>Name / Email</b></td>
-	<td width="25%"><b>Username</b></td>
-	<td width="25%"><b>Year</b></td>
-	<td width="25%"><b>Roles / Status</b></td>
-</tr></table>
-</li>
+<?php /*Use overflow x scroll in a containing div to make the whole table scroll <div style="overflow-x: scroll;"> */ ?>
 
+
+<table style="width: 100%">
+<tr>
+	<td width="100%"> <input id="user_list_filter_input" data-type="search" /> </td>
+	<td id="user_list_column_toggle" style="padding-top: 4px;" ></td>
+</tr></table>
+
+<table data-role="table" id="user_list" data-filter="true" data-filter-placeholder="Search..." 
+		data-input="#user_list_filter_input"
+		data-inset="true" data-mode="columntoggle" class="ui-responsive table-stroke"
+		data-column-btn-text="Columns..." >
+
+<thead><tr>
+	<th >Name / Email</th>
+	<th data-priority="1">Username</th>
+	<th data-priority="1">School</th>
+	<th data-priority="2">Reg ID</th>
+	<th data-priority="1">Role / Status</th>
+	<th data-priority="1">Year</th>
+	<th ></th>
+</tr></thead>
+<tbody>
 <?php
 foreach($users as &$user) {
 
@@ -234,9 +260,12 @@ foreach($users as &$user) {
 	$filter_text = "{$user['name']} {$user['organization']} $roles_str {$user['email']}";
 
 	$status = '';
+	$role = '';
 	foreach($user['roles'] as $r) {
+		if($role != '') $role .= ', ';
+		$role .= $sfiab_roles[$r]['name'];
+
 		if($status != '') $status .= ', ';
-		$status .= $sfiab_roles[$r]['name'];
 		if($user['attending']) {
 			switch($r) {
 			case 'judge': $complete = $user['j_complete']; break;
@@ -248,16 +277,18 @@ foreach($users as &$user) {
 			if($complete === NULL) {
 				; // Nothing.
 			} else if($complete == true) {
-				$status .= ' (<font color="green">Complete</font>)';
-			} else if($user['new'] == 1) {
-				$status .= ' (<font color="blue">New</font>)';
+				$status .= '<font color="green">Complete</font>';
 			} else {
-				$status .= ' (<font color="red">Incomplete</font>)';
+				$status .= '<font color="orange">Incomplete</font>';
 			}
 		}
 	}
-	if(!$user['attending']) {
-		$status .= ' - <font color="blue">Not Attending</font>';
+	if($user['new'] == 1) {
+		$status = '<font color="blue">New</font>';
+	} else if($user['enabled'] == 0) {
+		$status = '<font color="red">Deleted</font>';
+	} else if(!$user['attending']) {
+		$status = '<font color="blue">Not Attending</font>';
 	}
 
 	$link = "c_user_list.php?edit={$user['uid']}";
@@ -267,60 +298,43 @@ foreach($users as &$user) {
 		$org = $user['organization'].' - ';
 	}
 
+	$school_str = $user['schools_id'] > 0 ? $schools[$user['schools_id']]['school'] : '';
+
 ?>
-	<li id="user_list_<?=$user['uid']?>" data-filtertext="<?=$filter_text?>"><a href="c_user_edit.php?uid=<?=$user['uid']?>" >
-		<h3><?=$org.$user['name']?></h3><span class="ui-li-aside"><?=$status?></span>
-		<table width="100%">
-			<tr><td width="25%"><?=$user['email']?></td>
-			<td width="25%"><?=$user['username']?></td>
-			<td width="25%"><?=$user['year']?></td>
-			<td width="25%"></td>
-		</tr></table>
-	
-		</a>
-		<a href="<?=$link?>" data-external="true" data-ajax="false" data-icon="gear" >Edit</a>
-<?php /*		
-
-	<a href="#" class="user_list_item" onclick="user_list_info_toggle(<?=$v['uid']?>)
-
-		 <div id="user_list_info_<?=$v['uid']?>" class="user_list_info" style='display:none'>
-			<div class="ui-grid-a" data-role="fieldcontain">
-				<div class="ui-block-a" style="width:80%">
-					<table>
-					<tr><td>Username:</td><td><?=$v['username']?></td></tr>
-					</table>
-				 	<a href="#" onclick="return user_list_info_resend_welcome(<?=$v['uid']?>);" data-role="button" data-inline="true" data-ajax="false">Re-send welcome email</a>
-					
-				</div>
-				<div class="ui-block-b" style="width:20%;padding-bottom: 5px">
-					<div data-role="controlgroup" data-type="vertical">
-					 	<a href="<?=$link?>" data-role="button" data-theme="l" data-ajax="false">Edit</a>
-					 	<a href="#" data-role="button" data-theme="r" onclick="return user_list_info_delete(<?=$v['uid']?>);" >Delete</a>
-					 	<a href="#" data-role="button" data-theme="r" onclick="return user_list_info_purge(<?=$v['uid']?>);" >Purge</a>
-					</div>
-				</div>
-			</div>
-
-		</div>
-		// Put this in the script below
-		function user_list_info_toggle(id) {
-		$('#user_list_info_'+id).toggle();
-		return false;
-	}
-
-*/
-?>
-	</li>
-<?php
+	<tr>
+	<td style="word-break: break-all; min-width:20%;"><b><?=$org.$user['name']?></b><br/><?=$user['email']?></td>
+	<td align="center" style="word-break: break-all; min-width:20%; " ><?=$user['username']?></td>
+	<td align="center" style="min-width:15%; " ><?=$school_str?></td>
+	<td><?=$user['s_pid']?></td>
+	<td><?=$role?><br/><?=$status?></td>
+	<td><?=$user['year']?></td>
+	<td><div data-role="controlgroup" data-type="horizontal"  data-mini="true">
+		<a href="c_user_edit.php?uid=<?=$user['uid']?>" data-mini="true"  data-role="button" data-iconpos="notext" data-icon="gear" data-ajax="false">Edit</a>
+		<a href="<?=$link?>" data-mini="true" data-role="button" data-iconpos="notext" data-icon="user" data-ajax="false">Edit</a>
+	</div></td>
+	</tr>
+<?php	
 }
 ?>
 
-</ul>
+</tbody></table>
 
 <br/><br/>
 
 <script>
-
+/* Move the columns toggle button into the table beside the search bar */
+$(document).on("pagecreate", function () {
+		$(".ui-table-columntoggle-btn").appendTo($("#user_list_column_toggle"));
+		/* Hide some columns by default */
+<?php		foreach($hide_columns as $col=>$val) {
+			if($val == false) continue;
+			switch($col) {
+			case 'pid': $i = 2; break;
+			case 'school': $i = 1; break;
+			}
+?>			$("#user_list-popup .ui-checkbox label")[<?=$i?>].click();
+<?php		} ?>
+	});
 </script>
 
 

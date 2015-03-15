@@ -34,12 +34,12 @@ case 'get':
 		exit();
 	}
 
-	$q = $mysqli->query("SELECT text FROM cms WHERE name='$name'");
+	$q = $mysqli->query("SELECT text,type FROM cms WHERE name='$name'");
 	$r = $q->fetch_row();
-	$text = $r[0];
 
 	$vals = array();
-	$vals['text'] = $text;
+	$vals['text'] = $r[0];
+
 	form_ajax_response(array('status'=>0, 'val'=>$vals));
 	exit();
 
@@ -83,9 +83,21 @@ sfiab_page_begin("Edit Page Text", $page_id);
 	print("<hr/>");
 	form_textbox($form_id, "text", "Text", $text);
 	form_submit($form_id, 'save', 'Save', 'Saved');
-?>	
-<?php
 	form_end($form_id);
+
+?>
+	<hr/>
+	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
+		<h3>Download Sample Signature Form</h3>
+<?php		$form_id = $page_id.'_sig_form';
+		form_begin($form_id, 'student_signature.php', false, false);
+		form_hidden($form_id, 'pdf', 1);
+		form_button($form_id, 'sample', "Download Sample Signature Form");
+		form_end($form_id);
+?>
+	</div>
+
+<?php
 ?>
 
 </div></div>

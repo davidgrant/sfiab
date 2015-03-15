@@ -16,14 +16,6 @@ if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
 
-$tshirt_sizes = array('none' => 'None',
-			'xsmall' => 'X-Small',
-			'small' => 'Small',
-			'medium' => 'Medium',
-			'large' => 'Large',
-			'xlarge' => 'X-Large' );
-
-
 switch($action) {
 case 'save':
 	if($closed) exit();
