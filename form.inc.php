@@ -131,7 +131,8 @@ function form_radio_h($form_id, $name, $label, $data, &$value, $wide=false)
 <?php
 		$x=0;
 		foreach($data as $key=>$val) {
-			$sel = ($v === $key) ? 'checked="checked"' : ''; ?>
+			if(is_array($val)) $val = $val['name'];
+			$sel = ($v === $key) ? 'checked="checked"' : '';  ?>
 		        <input name="<?=$name?>" id="<?=$id.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="radio" <?=$d?> >
 		        <label for="<?=$id.'-'.$x?>"><?=$val?></label>
 <?php			$x++;
@@ -161,7 +162,7 @@ function form_check_group($form_id, $name, $label, $data, &$value, $wide = false
 <?php		$x=0;
 		foreach($data as $key=>$val) {
 			if(is_array($val)) $val = $val['name'];
-				$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
+			$sel = (in_array($key,$v)) ? 'checked="checked"' : ''; ?>
 			
 		        <input name="<?=$name?>[]" id="<?=$name.'-'.$x?>" value="<?=$key?>" <?=$sel?> type="checkbox" <?=$d?> >
 		        <label for="<?=$name.'-'.$x?>"><?=$val?></label>

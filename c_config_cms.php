@@ -89,9 +89,23 @@ sfiab_page_begin("Edit Page Text", $page_id);
 	<hr/>
 	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
 		<h3>Download Sample Signature Form</h3>
-<?php		$form_id = $page_id.'_sig_form';
+<?php		$cats = categories_load($mysqli);
+		/* Highest grade by default */
+		$max_grade = 0;
+		$max_cat = (int)0;
+		foreach($cats as $cat_id=>$c) {
+			if($c['max_grade'] > $max_grade) {
+				$max_grade = $c['max_grade'];
+				$max_cat = (int)$c['cat_id'];
+			}
+		}
+
+		$form_id = $page_id.'_sig_form';
 		form_begin($form_id, 'student_signature.php', false, false);
 		form_hidden($form_id, 'pdf', 1);
+		form_radio_h($form_id, 'cat_id', "Category", $cats, $max_cat);
+		$d = 1;
+		form_radio_h($form_id, 'num_students', "Number of Students", array(1=>'1', 2=>'2') , $d);
 		form_button($form_id, 'sample', "Download Sample Signature Form");
 		form_end($form_id);
 ?>

@@ -20,6 +20,8 @@ if(array_key_exists('pdf', $_POST)) {
 	if(array_key_exists('action', $_POST)) {
 		if($_POST['action'] == 'sample') {
 			$sample = true;
+			$sample_category = (int)$_POST['cat_id'];
+			$sample_num_students = (int)$_POST['num_students'];
 		}
 	}
 }
@@ -125,6 +127,10 @@ if($generate_pdf == false) {
 }
 
 
+$cats = categories_load($mysqli);
+$chals = challenges_load($mysqli);
+
+
 /* The signature form */
 if($sample) {
 	$users = array();
@@ -133,12 +139,12 @@ if($sample) {
 
 	$p['pid'] = 1234;
 	$p['title'] = "My Science Fair Project";
-	$p['cat_id'] = 3;
+	$p['cat_id'] = $sample_category;
 	$p['challenge_id'] = 1;
 
 	$users[0]['schools_id'] = 0;
 	$users[0]['uid'] = 1111;
-	$users[0]['grade'] = 11;
+	$users[0]['grade'] = $cats[$sample_category]['min_grade'];
 	$users[0]['name'] = "John Q. Doe";
 	$users[0]['username'] = "john_doe";
 	$users[0]['firstname'] = "John";
@@ -149,26 +155,25 @@ if($sample) {
 	$users[0]['email'] = "john@example.com";
 	$users[0]['tshirt'] = "medium";
 
+	if($sample_num_students == 2) {
+		$users[1]['schools_id'] = 0;
+		$users[1]['uid'] = 2222;
+		$users[1]['grade'] = $cats[$sample_category]['max_grade'];
+		$users[1]['name'] = "Jane R. Foo";
+		$users[1]['username'] = "jane_foo";
+		$users[1]['firstname'] = "Jane";
+		$users[1]['lastname'] = "Foo";
+		$users[1]['salutation'] = "";
+		$users[1]['organization'] = "";
+		$users[1]['sex'] = "female";
+		$users[1]['email'] = "jane@example.com";
+		$users[1]['tshirt'] = "small";
+	}
 
 
 	$school_name = "Example Secondary School";
 
-	/*
- 	$projectinfo->title="Sample Project Title";
- 	$projectinfo->division="Proj Division";
- 	$projectinfo->category="Proj Category";
-	$studentinfo->firstname="SampleFirst";
-	$studentinfo->lastname="SampleLast";
-	$studentinfo->grade="10";
-	$studentinfoarray[]=$studentinfo;
-	$rr->school="SampleSchool";
-	*/
- } else {
- 	/* Project and students already loaded */
- }
-
-$cats = categories_load($mysqli);
-$chals = challenges_load($mysqli);
+} 
 
 $pdf=new pdf( "Participant Signature Form ({$p['pid']})", $config['year'] );
 
@@ -201,16 +206,15 @@ $pdf->SetXY($x, $y);
  	if($sample) {
 		/* Skip query for generating a sample */
 		$school_names[$user['uid']] = $school_name;
-		continue;
-	} 
-
-	$qq = $mysqli->query("SELECT school FROM schools WHERE id={$user['schools_id']}");
-	$rr = $qq->fetch_assoc();
-
-	$school_names[$user['uid']] = $rr['school'];
+	} else {
+		$qq = $mysqli->query("SELECT school FROM schools WHERE id={$user['schools_id']}");
+		$rr = $qq->fetch_assoc();
+		$school_name = $rr['school'];
+		$school_names[$user['uid']] = $rr['school'];
+	}
 
 	if($students != '') $students .= '<br/>';
-	$students .= "{$user['name']}, Grade {$user['grade']}, {$rr['school']}";
+	$students .= "{$user['name']}, Grade {$user['grade']}, {$school_name}";
  }
 $e = i18n("Exhibitor$plural").":";
 $w = $pdf->GetStringWidth($e) + 2;
