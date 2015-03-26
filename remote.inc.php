@@ -354,7 +354,7 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 			stats_sync($mysqli, $fair, $response['get_stats']);
 		}
 	}
-	$result = ($response['error'] == 0) ? 1 : 0);
+	$result = ($response['error'] == 0) ? 1 : 0;
 	sfiab_log_sync_stats($mysqli, $fair['id'], $result);
 	
 	return $response['error'];
