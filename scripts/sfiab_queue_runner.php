@@ -164,18 +164,16 @@ while(true) {
 		$fair = fair_load($mysqli, $db_fair_id);
 		$award = award_load($mysqli, $db_award_id);
 		$result = remote_push_award_to_fair($mysqli, $fair, $award);
-		if($result == 0) {
-			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
-		}
+		$r = ($result == 0) ? 'ok' : 'failed';
+		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
 		break;
 
 	case 'push_winner':
 		print("SFIAB Queue Runner: push_winner: $db_prize_id, $db_project_id\n");
 		$result = remote_push_winner_to_fair($mysqli, $db_prize_id, $db_project_id);
 		sfiab_log($mysqli, "push winner", "Push Winner project $db_project_id for prize id $db_prize_id, result=$result");
-		if($result == 0) {
-			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
-		}
+		$r = ($result == 0) ? 'ok' : 'failed';
+		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
 		break;
 
 	case 'get_stats':
@@ -183,9 +181,8 @@ while(true) {
 		$year = $db_award_id; /* Repurpose the award_id for the year */
 		print("SFIAB Queue Runner: get_stats: $year\n");
 		$result = remote_get_stats_from_fair($mysqli, $fair, $year);
-		if($result == 0) {
-			$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
-		}
+		$r = ($result == 0) ? 'ok' : 'failed';
+		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
 		break;
 
 	case 'judge_scheduler':
