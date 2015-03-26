@@ -130,7 +130,7 @@ function sfiab_log($mysqli, $type, &$u_or_uid, $result=0, $data='', $message='',
 	$result = (int)$result;
 
 	$mysqli->real_query("INSERT INTO log (`ip`,`uid`,`pid`,`fair_id`,`email_id`,`award_id`,`prize_id`,`year`,`time`,`type`,`data`,`message`,`result`) 
-				VALUES('$ip',$uid,'$pid',$fair_id,$email_id,$award_id,$prize_id,$year,NOW(),'$type','$data','$m',$result)");
+				VALUES('$ip','$uid','$pid','$fair_id','$email_id','$award_id','$prize_id','$year',NOW(),'$type','$data','$m','$result')");
 	$str = "uid=$uid";
 	if($fair_id > 0) $str .= ", fair_id=$fair_id";
 	if($email_id > 0) $str .= ", email_id=$email_id";
@@ -395,6 +395,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_config_challenges' => NULL,
 			    'c_config_logo' => NULL,
 			    'c_config_cms' => NULL,
+			    'c_fairs' => NULL, 
 			    'c_judging' => array('Judging', 'c_judging.php'),
 			    'c_judge_sanity' => NULL,
 			    'c_judge_score_entry' => NULL,
