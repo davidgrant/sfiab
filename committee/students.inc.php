@@ -27,7 +27,7 @@ function students_load_all_accepted($mysqli, $year=0)
 					year='$year'
 					AND FIND_IN_SET('student',`roles`)>0
 					AND enabled = '1'
-					AND s_accepted = 1
+					AND s_accepted = '1'
 					 ");
 	$students = array();
 	while($j = $q->fetch_assoc()) {

@@ -389,6 +389,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_awards_edit' => NULL,
 			    'c_award_winners' => NULL,
 			    'c_backup' => NULL,
+			    'c_check_tours' => NULL,
 			    'c_config' => array('Configuration', 'c_config.php'),
 			    'c_config_variables' => NULL,
 			    'c_config_categories' => NULL,

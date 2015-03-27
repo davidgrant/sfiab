@@ -5,7 +5,7 @@ function sanity_get_accepted_students_without_tour($mysqli, &$students, &$num_ac
 	$ret = array();
 	$num_accepted = 0;
 	foreach($students as $uid=>&$s) {
-		if($s['s_complete'] != 1) continue;
+		if($s['s_accepted'] != 1) continue;
 
 		$num_accepted += 1;
 
@@ -20,7 +20,7 @@ function sanity_get_not_accepted_students_with_tour($mysqli, &$students)
 {
 	$ret = array();
 	foreach($students as $uid=>&$s) {
-		if($s['s_complete'] != 0) continue;
+		if($s['s_accepted'] != 0) continue;
 
 		if((int)$s['tour_id'] > 0) {
 			$ret[] = &$s;
