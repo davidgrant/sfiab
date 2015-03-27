@@ -31,20 +31,22 @@ sfiab_page_begin("Committee Main", 'c_main', $help);
 		$pending_actions['c_register_feeder.php'] = "<font color=red>".count($new_users)."</font> students from feeder fairs have not been sent a registration email, click here to send them";
 	} 
 
-	$users = students_load_all($mysqli);
-	$num_accepted = 0;
-	$students_accepted_without_tour = sanity_get_accepted_students_without_tour($mysqli, $users, $num_accepted);
-	$students_not_accepted_with_tour = sanity_get_not_accepted_students_with_tour($mysqli, $users);
+	if($config['tours_enable']) {
+		$users = students_load_all($mysqli);
+		$num_accepted = 0;
+		$students_accepted_without_tour = sanity_get_accepted_students_without_tour($mysqli, $users, $num_accepted);
+		$students_not_accepted_with_tour = sanity_get_not_accepted_students_with_tour($mysqli, $users);
 
-	if(count($students_not_accepted_with_tour) > 0 || count($students_accepted_without_tour) > 0) {
-		$str = '';
-		if(count($students_not_accepted_with_tour) > 0) {
-			$str .= "<font color=red>".count($students_not_accepted_with_tour)."</font> not accepted students are assigned to a tour.";
+		if(count($students_not_accepted_with_tour) > 0 || count($students_accepted_without_tour) > 0) {
+			$str = '';
+			if(count($students_not_accepted_with_tour) > 0) {
+				$str .= "<font color=red>".count($students_not_accepted_with_tour)."</font> not accepted students are assigned to a tour.";
+			}
+			if(count($students_accepted_without_tour) > 0) {
+				$str .= "<font color=red>".count($students_accepted_without_tour)."</font> / $num_accepted accepted students have not been assigned a tour";
+			}
+			$pending_actions['c_check_tours.php'] = $str;
 		}
-		if(count($students_accepted_without_tour) > 0) {
-			$str .= "<font color=red>".count($students_accepted_without_tour)."</font> / $num_accepted accepted students have not been assigned a tour";
-		}
-		$pending_actions['c_check_tours.php'] = $str;
 	}
 
 	if(count($pending_actions) > 0) { ?>
