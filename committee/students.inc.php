@@ -1,8 +1,11 @@
 <?php
 require_once(__DIR__.'/../user.inc.php');
 
-function students_load_all($mysqli, $year)
+function students_load_all($mysqli, $year=0)
 {
+	global $config;
+	if($year == 0) $year = $config['year'];
+
 	$q = $mysqli->query("SELECT * FROM users WHERE 
 					year='$year'
 					AND FIND_IN_SET('student',`roles`)>0
