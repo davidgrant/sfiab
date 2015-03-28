@@ -258,6 +258,8 @@ float exhibithalls_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bu
 //		printf("cost=%f\n", cost);
 	}
 
+//	printf("cost=%f\n", cost);
+
 	return cost;
 
 }

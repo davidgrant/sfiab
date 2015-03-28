@@ -19,6 +19,7 @@ struct _annealer {
 	int num_buckets;
 	GPtrArray *items;
 	void *data_ptr;
+	int check_costs;
 
 	float (*cost_function)(struct _annealer *annealer, int bucket_id, GPtrArray *bucket);
 	int (*propose_move)(struct _annealer *annealer, struct _anneal_move *move);

@@ -204,6 +204,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	annealer.propose_move = propose_move;
 	annealer.progress_callback = progress_callback;
 	annealer.data_ptr = data_ptr;
+	annealer.check_costs = 0;
 
 	/* Allocate each bucket */
 	printf("   => %d initial buckets\n", num_buckets);
@@ -295,7 +296,9 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 		if(cost == 0) break;
 
 		/* Sanity check */
-		anneal_check_costs(&annealer);
+		if(annealer.check_costs) {
+			anneal_check_costs(&annealer);
+		}
 
 		temperature_count ++;
 
