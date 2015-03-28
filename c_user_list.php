@@ -160,6 +160,7 @@ sfiab_page_begin("User List", $page_id);
 $hide_columns = array();
 $hide_columns['pid'] = true;
 $hide_columns['school'] = true;
+$hide_columns['project_number'] = true;
 
 $q_roles_array = array();
 foreach($roles as $r) {
@@ -220,6 +221,7 @@ $q = $mysqli->query($query);
 print($mysqli->error);
 
 $schools = school_load_all($mysqli);
+$projects = projects_load_all($mysqli, false);
 
 $users = array();
 while($user_data = $q->fetch_assoc()) {
@@ -248,6 +250,7 @@ while($user_data = $q->fetch_assoc()) {
 	<th data-priority="1">Username</th>
 	<th data-priority="1">School</th>
 	<th data-priority="2">Reg ID</th>
+	<th data-priority="2">Proj Num</th>
 	<th data-priority="1">Role / Status</th>
 	<th data-priority="1">Year</th>
 	<th ></th>
@@ -300,12 +303,15 @@ foreach($users as &$user) {
 
 	$school_str = $user['schools_id'] > 0 ? $schools[$user['schools_id']]['school'] : '';
 
+	$project_number = $user['s_pid'] > 0 ? $projects[$user['s_pid']]['number'] : '';
+
 ?>
 	<tr>
 	<td style="word-break: break-all; min-width:20%;"><b><?=$org.$user['name']?></b><br/><?=$user['email']?></td>
 	<td align="center" style="word-break: break-all; min-width:20%; " ><?=$user['username']?></td>
 	<td align="center" style="min-width:15%; " ><?=$school_str?></td>
 	<td><?=$user['s_pid']?></td>
+	<td><?=$project_number?></td>
 	<td><?=$role?><br/><?=$status?></td>
 	<td><?=$user['year']?></td>
 	<td><div data-role="controlgroup" data-type="horizontal"  data-mini="true">
@@ -331,6 +337,7 @@ $(document).on("pagecreate", function () {
 			switch($col) {
 			case 'pid': $i = 2; break;
 			case 'school': $i = 1; break;
+			case 'project_number': $i = 3; break;
 			}
 ?>			$("#user_list-popup .ui-checkbox label")[<?=$i?>].click();
 <?php		} ?>
