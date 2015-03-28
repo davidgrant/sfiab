@@ -24,7 +24,7 @@ void students_load(struct _db_data *db, int year)
 
 	students = g_ptr_array_new();
 	/* Load students and tour choices */
-	result = db_query(db, "SELECT * FROM users WHERE year='%d' AND FIND_IN_SET('student',`roles`) AND s_accepted='1'", year);
+	result = db_query(db, "SELECT * FROM users WHERE year='%d' AND FIND_IN_SET('student',`roles`) AND s_accepted='1' AND enabled='1' and attending='1'", year);
 	for(x=0;x<result->rows; x++) {
 		struct _student *s = malloc(sizeof(struct _student));
 		char *fn, *ln;
