@@ -54,7 +54,7 @@ case 'send':
 		if($u === NULL) {
 			form_ajax_response(array('status'=>1, 'error'=>'Unknown username'));
 		}
-		email_send($mysqli, $e['name'], $u['uid']);
+		email_send($mysqli, $e['name'], $u);
 	} else {
 		/* Query all users */
 		$query = "SELECT * FROM users WHERE $year_q AND {$elist['where']}";
@@ -62,11 +62,12 @@ case 'send':
 		$r = $mysqli->query($query);
 		print($mysqli->error);
 
+		$users = array();
 		while($ua = $r->fetch_assoc()) {
 //			print_r($ua);
-			$u = user_load_from_data($mysqli, $ua);
-			email_send($mysqli, $e['name'], $u['uid']);
+			$users[] = user_load_from_data($mysqli, $ua);
 		}
+		email_send_to_list($mysqli, $e['name'], $users);
 	}
 	form_ajax_response(array('status'=>0, 'location'=>'c_communication_queue.php'));
 	exit();

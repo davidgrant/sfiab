@@ -51,7 +51,9 @@ function email_id($mysqli, $email_name)
 	
 }
 
-function email_send($mysqli, $email_name, $uid, $additional_replace = array()) 
+
+/* Send to an array of users, no indexing just users = [ $u, $u, $u, etc. ] */
+function email_send_to_list($mysqli, $email_name, &$users, $additional_replace = array()) 
 {
 	global $config;
 
@@ -60,37 +62,81 @@ function email_send($mysqli, $email_name, $uid, $additional_replace = array())
 		return false;
 	}
 
-	/* Lookup the user */
-	$u = user_load($mysqli, $uid);
-	if($u == NULL) {
-		debug("email_send: user is null\n");
-		return false;
-	}
-	if(!$u['enabled']) {
-		debug("email_send: user is not enabled\n");
-		return false;
-	}
-
 	/* Fill in additional replace vars that the email send script can't
 	 * calculate from the command line, like the fair URL */
 	$additional_replace['fair_url'] = $config['fair_url'];
-
 	$ad = $mysqli->real_escape_string(serialize($additional_replace));
-	$n = $mysqli->real_escape_string($u['name']);
-	$em = $mysqli->real_escape_string($u['email']);
 
-	$mysqli->real_query("INSERT INTO queue(`command`,`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES 
-			('email','$db_id','$uid','$em','$n','$ad','queued')");
+	$query_str = '';
+	$c = 0;
 
-	debug("email_send: queued email $db_id, uid=$uid, em=$em, name=$n, replace=$ad\n");
-	if($mysqli->error != '') {
-		debug("email_send: {$mysqli->error}\n");
+	foreach($users as &$user) {
+		if(!$user['enabled']) {
+			debug("email_send: user {$user['uid']} is not enabled\n");
+			continue;
+		}
+
+		$n = $mysqli->real_escape_string($user['name']);
+		$em = $mysqli->real_escape_string($user['email']);
+		$uid = (int)$user['uid'];
+
+		/* Build up 10 queries before sending running the mysql insert */
+		if($query_str == '') {
+			$query_str = 'INSERT INTO queue(`command`,`emails_id`,`to_uid`,`to_email`,`to_name`,`additional_replace`,`result`) VALUES ';
+		} else {
+			$query_str .= ',';
+		}
+		$query_str .= "('email','$db_id','$uid','$em','$n','$ad','queued')";
+
+		if($c == 10) {
+			$mysqli->real_query($query_str);
+			if($mysqli->error != '') {
+				debug("email_send: query failed: $query_str\n");
+				debug("email_send: {$mysqli->error}\n");
+			}		
+			$query_str = '';
+			$c = 0;
+		}
+
+		$c += 1;
+
+		debug("email_send: queued email $db_id, uid=$uid, em=$em, name=$n, replace=$ad\n");
+	}
+
+	/* $query_str probably has stuff in it for the last query we were building.  Every incremental
+	 * step is a valid query, so just send it */
+	if($query_str != '') {
+		$mysqli->real_query($query_str);
+		if($mysqli->error != '') {
+			debug("email_send: query failed: $query_str\n");
+			debug("email_send: {$mysqli->error}\n");
+		}		
 	}
 
 	queue_start($mysqli);
+}
+
+/* Send a single email to a single user.  Can specify uid or $u if it's already loaded.  Just turns the user into a list and calls 
+ * email_send_to_list */
+ function email_send($mysqli, $email_name, &$uid_or_u, $additional_replace = array()) 
+{
+	if(is_array($uid_or_u) && array_key_exists('uid', $uid_or_u) ) {
+		$users = array($uid_or_u);
+	} else {
+		/* Lookup the user */
+		$u = user_load($mysqli, $uid_or_u);
+		if($u == NULL) {
+			debug("email_send: user is null\n");
+			return false;
+		}	
+		$users = array($u);
+	}
+
+	email_send_to_list($mysqli, $email_name, $users, $additional_replace);
 
 	return true;
 }
+
 
 function queue_stopped($mysqli) 
 {
