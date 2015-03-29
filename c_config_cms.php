@@ -100,14 +100,14 @@ sfiab_page_begin("Edit Page Text", $page_id);
 			}
 		}
 
-		$form_id = $page_id.'_sig_form';
-		form_begin($form_id, 'student_signature.php', false, false);
-		form_hidden($form_id, 'pdf', 1);
-		form_radio_h($form_id, 'cat_id', "Category", $cats, $max_cat);
+		$sig_form_id = $page_id.'_sig_form';
+		form_begin($sig_form_id, 'student_signature.php', false, false);
+		form_hidden($sig_form_id, 'pdf', 1);
+		form_radio_h($sig_form_id, 'cat_id', "Category", $cats, $max_cat);
 		$d = 1;
-		form_radio_h($form_id, 'num_students', "Number of Students", array(1=>'1', 2=>'2') , $d);
-		form_button($form_id, 'sample', "Download Sample Signature Form");
-		form_end($form_id);
+		form_radio_h($sig_form_id, 'num_students', "Number of Students", array(1=>'1', 2=>'2') , $d);
+		form_button($sig_form_id, 'sample', "Download Sample Signature Form");
+		form_end($sig_form_id);
 ?>
 	</div>
 

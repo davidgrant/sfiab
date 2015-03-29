@@ -731,7 +731,9 @@ function cms_get($mysqli, $name, &$u = NULL)
 	print($mysqli->error);
 	$r = $q->fetch_assoc();
 	if($r['use'] == 1) {
-		return replace_vars($r['text'], $u, array(), true);
+		$r = replace_vars($r['text'], $u, array(), true);
+		$r = preg_replace('/\[FILE ([A-Za-z0-9_-]+\.[a-z]+)\]/', 'file.php?f=$1', $r);
+		return $r;
 	}
 	return NULL;
 }

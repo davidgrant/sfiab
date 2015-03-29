@@ -2,6 +2,17 @@
 
 $file = $_GET['f'];
 
+
+/* Turn this into a database query */
+$files = array( "2015_ballroom.pdf",
+		"2015_partyroom.pdf",
+		"2015_schedule.pdf",
+		"2015_judgeform.pdf", 
+		"2015_safety_checklist.pdf",
+		"2015_ubcmap.pdf",
+		);
+
+
 $filename = '';
 $mimetype = '';
 switch($file) {
@@ -34,32 +45,41 @@ case 'tour_scheduler_log':
 	break;
 
 default:
-	exit();
+	/* Allow a passed-in file only if it appears in our database of files.  Below we strip out directories and
+	 * force a file access in files/ */
+	if(in_array($file, $files)) {
+		$filename = $file;
+	} else {
+		exit();
+	}
 }
 
-/*                case "pdf": $mimetype="application/pdf"; break;
-                case "zip": $mimetype="application/zip"; break;
-                case "doc": $mimetype="application/msword"; break;
-                case "gif": $mimetype="image/gif"; break;
-                case "png": $mimetype="image/png"; break;
-                case "jpe": case "jpeg":
-                case "jpg": $mimetype="image/jpg"; break;
-
-*/
 if($filename != '') {
-	$filename = "files/$filename";
-	$ext = pathinfo($filename, PATHINFO_EXTENSION);
 
-	switch($ext) {
+	$file_info = pathinfo($filename);
+
+	/* Check the filename and extension */
+	switch($file_info['extension']) {
 	case 'jpg':  $mimetype = 'image/jpg'; break;
 	case 'pdf':  $mimetype = 'application/pdf'; break;
 	case 'doc':  $mimetype = 'application/msword'; break;
 	case 'txt':  $mimetype = 'text/plain'; break;
 	case 'csv':  $mimetype = 'text/csv'; break;
+//          case "gif": $mimetype="image/gif"; break;
+//        case "zip": $mimetype="application/zip"; break;
 	default:
-		print("Unknown mimetype");
+		print("Invalid filename: extension");
 		exit();
 	}
+	if(preg_match('/[^A-Za-z0-9_-]/', $file_info['filename'])) {
+		print("Invalid filename: filename");
+		exit();
+	}
+
+	/* So now we know the filename only has A-Za-z0-9_- in it (and doesn't
+	 * have any . or / or other funny characters that might change the directory)
+	 * Construct the filename relative to files/ */
+	$filename = "files/".$file_info['filename'].".".$file_info['extension'];
 
 	header("Pragma: public");
 	header("Expires: 0");
