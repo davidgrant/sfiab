@@ -43,13 +43,7 @@ sfiab_page_begin("Student Main", 's_home', $help);
 		directly to your floor location (we can help you find it, there
 		will be maps posted) and setup your project before signing in.
 
-<?php		if($config['tours_enable']) {?>
-			<p>For safety reasons we are required to provide tour
-			assignments and emergency contact information to the
-			tour guides.  For this reason, we are unable to change your
-			tour.
-<?php		}
-
+<?php
 		$p = project_load($mysqli, $u['s_pid']);
 		if($p['number'] != '') { ?>
 			<p>Project Number: <b><font size=+3><?=$p['number']?></font></b>
@@ -59,6 +53,11 @@ sfiab_page_begin("Student Main", 's_home', $help);
 			if($u['tour_id'] > 0) {
 				$tour =& $tours[$u['tour_id']];
 ?>				<p>Tour: <b>#<?=$tour['num']?> - <?=$tour['name']?></b>
+				<p>Tour Note: For safety reasons we are
+				required to provide tour assignments and
+				emergency contact information to the tour
+				guides.  For this reason, we are unable to
+				change your tour.
 <?php			} else {
 ?>				<p>Tour: Not Assigned Yet
 <?php			} 
