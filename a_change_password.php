@@ -18,9 +18,21 @@ sfiab_page_begin("Change Password", "a_change_password");
 
 	$initial_error = "";
 	if($_SESSION['password_expired']) {
-		$initial_error = "You have logged in successfully, but your password needs to be changed before continuing.  Please change your password below.";
+		/* Make this a happy message because users are dumb..  I got
+		 * about a dozen complaints each year from judges and parents
+		 that were one of two things (no students have ever complained):
+		 * 1 - users thought "expired" meant their temporary password
+			expired and they needed to reset it again instead of
+			following the directions on the screen that says they
+			logged in successfully but need to set a new password
+			before proceeding.
+		 * 2 - the red message == login was unsuccessful, so they kept
+			 trying to login until their account was locked and
+			 complained that the temporary password didn't work 
+	         */
+		$initial_happy = "You have logged in successfully, but your password needs to be changed before continuing.  Please change your password below.";
 	}
-	form_page_begin($page_id, array(), $initial_error);
+	form_page_begin($page_id, array(), '', $initial_happy);
 
 	form_begin($form_id, 'login.php');
 
