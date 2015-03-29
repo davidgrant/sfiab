@@ -193,7 +193,7 @@ function find_users_needing_registration_email($mysqli)
 function email_send_welcome_email($mysqli, &$user) 
 {
 	user_scramble_and_expire_password($mysqli, $user);
-	$result = email_send($mysqli, "New Registration", $user['uid'], array('password'=>$user['scrambled_password']) );
+	$result = email_send($mysqli, "New Registration", $user, array('password'=>$user['scrambled_password']) );
 	return $result;
 }
 
