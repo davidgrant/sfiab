@@ -33,8 +33,8 @@ $projects = projects_load_all($mysqli);
 $notices = array();
 
 $notices['Judging Teams'] = array();
-$notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Judging Teams have {$config['judge_div_min_team']}-{$config['judge_div_max_team']} judges");
-$notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']} judges");
+$notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Judging Teams have {$config['judge_div_max_team']} judges");
+$notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_max_team']} judges");
 $notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
 $notices['Judging Teams']['sa_judges'] = array("OK All Special Award Judging Teams have (at most) {$config['judge_sa_max_projects']} projects per judge");
 foreach($jteams as &$jteam) {
