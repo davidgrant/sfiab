@@ -200,31 +200,21 @@ void db_free_result(struct _db_result *result)
 	free(result);
 }
 
-char *db_str(char *str, char free_old)
+int db_escape_str(char *ret, char *str)
 {
-#if 0
-	GString *s; 
-	char *ret;
-	char *orig_str = str;
+	int len = 0;
 	
 	if(!str) { 
-		return strdup("");
+		ret[0] = 0;
+		return 0;
 	}
-
-	s = g_string_sized_new(strlen(str));
 
 	while(*str) {
 		if(strchr("'\"\\", *str)) {
-			g_string_append_c(s, '\\');
+			ret[len++] = '\\';
 		}
-		g_string_append_c(s, *str);
+		ret[len++] = *str;
 		str++;
 	}
-	ret = s->str;
-	g_string_free(s, FALSE);
-	if(free_old) free(orig_str);
-
-	return ret;
-	#endif
-	return NULL;
+	return len;
 }

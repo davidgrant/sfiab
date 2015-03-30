@@ -247,7 +247,7 @@ function form_yesno($form_id, $name, $label, &$value, $wide=false, $slider=false
 	}
 }
 
-function form_get_value(&$name, &$value) 
+function form_get_value($name, &$value) 
 {
 	/* If the value is not an array, return the value */
 	if(!is_array($value)) return $value;

@@ -45,13 +45,16 @@ void scheduler_log(struct _db_data *db, int result, char *msg, ...)
 {
 	va_list args;
 	char buffer[1024];
+	char escaped_buffer[1024];
         va_start(args,msg);
         vsprintf(buffer, msg, args);
         va_end(args);
 
+	db_escape_string(escape_buffer, buffer);
+
 	db_query(db, "INSERT INTO log (`ip`,`time`,`year`,`type`,`data`,`result`) "
 					"VALUES ('commandline',NOW(),'%d','judge_scheduler','%s','%d')",
-					current_year, buffer, result);
+					current_year, escaped_buffer, result);
 }
 
 /* Cost for projects assigned to each jteam */
@@ -414,6 +417,8 @@ int jteam_find_best_judge_from_list(struct _jteam *jteam, GPtrArray *judges)
 struct _jteam *jteam_create(struct _db_data *db, GPtrArray *jteams, char *name, struct _award *award)
 {
 	struct _jteam *jteam = malloc(sizeof(struct _jteam));
+	char jteam_name[1024];
+
 	jteam->name = strdup(name);
 	jteam->award = award;
 	jteam->num = jteams->len;
@@ -430,10 +435,13 @@ struct _jteam *jteam_create(struct _db_data *db, GPtrArray *jteams, char *name, 
 	jteam->sa_only = 0;
 	jteam->prize_id = 0;
 
+	/* Escape some characters for mysql */
+	db_escape_str(jteam_name, jteam->name);
+
 	if(db != NULL) {
 		db_query(db, "INSERT INTO judging_teams (`num`,`name`,`autocreated`,`round`,`year`,`award_id`) "
 					"VALUES ('%d','%s','1','0','%d','%d')",
-					jteam->num, jteam->name, current_year, jteam->award->id);
+					jteam->num, jteam_name, current_year, jteam->award->id);
 		jteam->id = db_insert_id(db);
 	} else {
 		jteam->id = -1;
