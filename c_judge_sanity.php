@@ -32,11 +32,25 @@ $projects = projects_load_all($mysqli);
 /* Check that each round1 divisional jteam has exactly 3 judges, list the ones that don't */
 $notices = array();
 
+/* Count round0 and 1 div jteams */
+$round0_div_jteam_count = 0;
+$round1_div_jteam_count = 0;
+foreach($jteams as &$jteam) {
+	if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+		$round0_div_jteam_count += 1;
+	}
+	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
+		$round1_div_jteam_count += 1;
+	}
+}
+	
+
 $notices['Judging Teams'] = array();
-$notices['Judging Teams']['r1div_judges'] = array("OK All Round 1 Divisional Judging Teams have {$config['judge_div_max_team']} judges");
-$notices['Judging Teams']['r2div_judges'] = array("OK All Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_max_team']} judges");
+$notices['Judging Teams']['r1div_judges'] = array("OK All <b>$round0_div_jteam_count</b> Round 1 Divisional Judging Teams have {$config['judge_div_max_team']} judges");
+$notices['Judging Teams']['r2div_judges'] = array("OK All <b>$round1_div_jteam_count</b> Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_max_team']} judges");
 $notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
 $notices['Judging Teams']['sa_judges'] = array("OK All Special Award Judging Teams have (at most) {$config['judge_sa_max_projects']} projects per judge");
+
 foreach($jteams as &$jteam) {
 	if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
