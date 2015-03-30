@@ -41,15 +41,15 @@ foreach($jteams as &$jteam) {
 	if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
-		if($c < $config['judge_div_min_team'] || $c > $config['judge_div_max_team']) {
-			$notices['Judging Teams']['r1div_judges'][] = "NO Round 1 Divisional Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['judge_div_min_team']}-{$config['judge_div_max_team']}";
+		if($c > $config['judge_div_max_team']) {
+			$notices['Judging Teams']['r1div_judges'][] = "NO Round 1 Divisional Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['judge_div_max_team']}";
 		}
 	}
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
-		if($c < $config['judge_cusp_min_team'] || $c > $config['judge_cusp_max_team']) {
-			$notices['Judging Teams']['r2div_judges'][] = "NO Round 2 Divisional (Cusp) Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['judge_cusp_min_team']}-{$config['judge_cusp_max_team']}";
+		if($c > $config['judge_cusp_max_team']) {
+			$notices['Judging Teams']['r2div_judges'][] = "NO Round 2 Divisional (Cusp) Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['judge_cusp_max_team']}";
 		}
 	}
 	/* Make sure all projects exist */
@@ -66,7 +66,6 @@ foreach($jteams as &$jteam) {
 			$notices['Judging Teams']['sa_judges'][] = "NO Special Award Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges and <b>$p</b> projects.  More than {$config['judge_sa_max_projects']} projects per judge";
 		}
 	}
-
 }
 
 $notices['Awards'] = array();
