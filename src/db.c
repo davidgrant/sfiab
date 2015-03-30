@@ -216,5 +216,6 @@ int db_escape_str(char *ret, char *str)
 		ret[len++] = *str;
 		str++;
 	}
+	ret[len] = 0;
 	return len;
 }
