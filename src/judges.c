@@ -50,7 +50,7 @@ void scheduler_log(struct _db_data *db, int result, char *msg, ...)
         vsprintf(buffer, msg, args);
         va_end(args);
 
-	db_escape_string(escape_buffer, buffer);
+	db_escape_str(escaped_buffer, buffer);
 
 	db_query(db, "INSERT INTO log (`ip`,`time`,`year`,`type`,`data`,`result`) "
 					"VALUES ('commandline',NOW(),'%d','judge_scheduler','%s','%d')",
