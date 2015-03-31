@@ -43,7 +43,10 @@ $timeslots = timeslots_load_all($mysqli);
 			continue;
 		}
 
-?>		<h3><?=$ts['name']?></h3>
+		$round_start = date('F j, g:ia', $ts['start_timestamp']);
+		$round_end = date('g:ia', $ts['end_timestamp']);
+
+?>		<h3><?=$ts['name']?> - <?=$round_start?> - <?=$round_end?></h3>
 <?php		
 
 		foreach($jteams as &$jteam) {
