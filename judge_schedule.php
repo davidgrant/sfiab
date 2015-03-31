@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('awards.inc.php');
 require_once('committee/judges.inc.php');
+require_once('timeslots.inc.php');
 
 $mysqli = sfiab_init('judge');
 
@@ -19,10 +20,12 @@ $help = '
 
 sfiab_page_begin("Judge Schedule", $page_id, $help);
 
+$timeslots = timeslots_load_all($mysqli);
+
 ?>
 
 
-<div data-role="page" id="<?=$page_id?>"  ><div data-role="main" class="sfiab_page" > 
+<div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 
 
 	<h3>Judge Team and Project Assignments:</h3>
 <?php
@@ -33,10 +36,18 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 
 	$found_assignment = false;
 
-	for($round=1;$round<=2;$round++) {
+	foreach($timeslots as $timeslot_id => &$ts) {
 		$header_printed = false;
+
+		if(!in_array($ts['round'], $u['j_rounds'])) {
+			continue;
+		}
+
+?>		<h3><?=$ts['name']?></h3>
+<?php		
+
 		foreach($jteams as &$jteam) {
-			if($jteam['round'] != $round) continue;
+			if($jteam['round'] != $ts['round']) continue;
 
 			$found_assignment = true;
 
@@ -46,42 +57,46 @@ sfiab_page_begin("Judge Schedule", $page_id, $help);
 				$a[] = $temp_u['name'];
 			}
 			$members = join(', ', $a);
-			
-
-			if(!$header_printed) {
-?>				<h3>Round <?=$round?></h3>
-<?php			}
-			$header_printed = true;
-
 ?>
 			<h4>Team #<?=$jteam['num']?> - <?=$jteam['name']?></h4>
 			<table><tr><td>Members: </td><td><?=$members?></td></tr>
 
 			<tr><td valign="top">Projects:</td><td>
-			<table>
-<?php			foreach($jteam['project_ids'] as $pid) {
-				$p =& $projects[$pid];
-				$link = "<a data-ajax=\"false\" href=\"project_summary.php?pn={$p['number']}\">{$p['number']}</a>";
-?>				<tr><td><?=$link?></td>
-				<td><?=$p['title']?><td>
-				</tr>
-<?php			}?>
-			</table>
-			</td></tr></table>
-<?php		}	
-	}
-
-	if($found_assignment == false) {
-?>		<p>You have no judging assignments (yet). You <b>will</b> be
-		assigned to a judging team at or before fair, we're just not
-		sure which one yet.  e.g., some judges cancel at the last
-		minute, some judging teams need extra expertise in certain
-		areas, and some unlisted special awards still need judges.
 <?php
+			if($ts['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') { ?>
+				This is a CUSP judging team, projects will be assigned after the first round of judging is complete
+<?php			} else if (count($jteam['project_ids']) == 0) { ?>
+				No projects yet.  This could be because students cannot self-nominate for this award, or because all projects on the floor are eligible.  You will given judging instructions at the fair.
+<?php			} else { ?>
+				<table>
+<?php				$sorted_project_ids = array();
+				foreach($jteam['project_ids'] as $pid) {
+					$project = &$projects[$pid];
+					$sorted_project_ids[$project['number_sort']] = $pid;
+				}
+				ksort($sorted_project_ids);
+				foreach($sorted_project_ids as $pid) {
+					$p =& $projects[$pid];
+					$link = "<a data-ajax=\"false\" href=\"project_summary.php?pn={$p['number']}\">{$p['number']}</a>";
+?>					<tr><td><?=$link?></td>
+					<td><?=$p['title']?><td>
+					</tr>
+<?php				}?>
+				</table>
+<?php			} ?>				
+			</td></tr></table>
+<?php		}
+		if(!$found_assignment) {
+?>			<p>You have no judging assignments (yet). You <b>will</b> be
+			assigned to a judging team at or before fair, we're just not
+			sure which one yet.  e.g., some judges cancel at the last
+			minute, some judging teams need extra expertise in certain
+			areas, and some unlisted special awards still need judges.
+<?php		}
 	}
 
 ?>
-</div></div>
+</div>
 	
 
 <?php

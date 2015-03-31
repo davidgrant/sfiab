@@ -99,7 +99,7 @@ if(PHP_VERSION_ID >= 50400) $flags |= ENT_HTML401;
 </table>
 </center>
 <font size="2" face="Verdana, Arial, Helvetica, sans-serif">
-<?=nl2br(htmlentities($p['summary'], $flags , "UTF-8"))?>
+<?=nl2br(htmlentities($p['abstract'], $flags , "UTF-8"))?>
 </font>
 
 </body></html>
