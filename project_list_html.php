@@ -7,14 +7,8 @@ $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
 
-
-if(array_key_exists('SERVER_ADDR', $_SERVER)) {
-	echo "This script must be run from the command line";
-	exit;
-}
-
 $cats = categories_load($mysqli);
-$projects = projects_load_all($mysqli);
+$projects = projects_load_all($mysqli, true);
 
 
 foreach($cats as $cid=>$c) {
@@ -29,12 +23,13 @@ foreach($cats as $cid=>$c) {
 
 <?php	$cl = 'odd';
 	foreach($projects as $pid=>&$p) {
+
 		if($p['cat_id'] != $cid) continue;
 
-		$students = project_load_students($mysqli, $p);
+		project_load_students($mysqli, $p);
 
 		$ok = true;
-		foreach($students as &$s) {
+		foreach($p['students'] as $sid=>&$s) {
 			if($s['s_accepted'] == 0) $ok = false;
 		}
 		if(!$ok) continue;
@@ -47,7 +42,7 @@ foreach($cats as $cid=>$c) {
 
 ?>
 		<tr class="<?=$cl?>">
-			<td><a href="https://secure.youthscience.ca/sfiab/gvrsf/project_summary.php?pn=<?=$pn?>"><?=$pn?></a></td>
+			<td><a href="<?=$config['url']?>/project_summary.php?pn=<?=$pn?>"><?=$pn?></a></td>
 			<td><?=$p['title']?></td>
 		</tr>
 <?php

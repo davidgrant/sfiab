@@ -869,7 +869,7 @@ function sfiab_registration_is_closed($u, $role=NULL)
 			$reg_open_date = $config['date_student_registration_opens'];
 			$reg_close_date = $config['date_student_registration_closes'];
 
-			/* Accetped students are cannot make changes */
+			/* Accetped students cannot make changes */
 			if($u['s_accepted']) {
 				return true;
 			}
