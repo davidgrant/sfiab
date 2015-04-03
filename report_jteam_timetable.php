@@ -250,7 +250,7 @@ foreach($generate_rounds as $round ) {
 					if($project['timeslots'][$timeslot_id][$itimeslot] == $slot_type) {
 						$txt = 'O';
 					} else if($round != 0 && $slot_type == 'special' && $project['timeslots'][$timeslot_id][$itimeslot] == 'divisional') {
-						$txt = '|';
+						$txt = '+';
 						$showed_vbar =true;
 					}
 					$row["T$itimeslot"] = $txt;
@@ -261,7 +261,7 @@ foreach($generate_rounds as $round ) {
 
 			$pdf->add_table($table);
 			$pdf->WriteHTML("<br/><ul><li>O = Student is availble for judging.</li>".
-			($showed_vbar ? '<li>&nbsp;| = Student is availble for other judges. You may judge the student but other judges have priority.</li>' : '').
+			($showed_vbar ? '<li>&nbsp;+ = Student is availble for other judges. You may judge the student but other judges have priority.</li>' : '').
 			"<br/><li><b>Remember to fill out your ranking forms and submit them to the chief judge.  Without them we won't know which projects won.</b></ul>");
 		}	
 

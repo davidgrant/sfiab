@@ -166,12 +166,10 @@ foreach($generate_rounds as $round ) {
 
 			$html = "<h4>CUSP Instructions: Assign $n_up {$prize['name']} and $n_down $down_name</h4>";
 
-			$html .= '<br/>&nbsp;<br/><table>';
-			$html .= "<tr><td align=\"center\" width=\"80mm\"><b>&nbsp;</b></td><td width=\"45mm\"></td>";
-			$html .= "<td align=\"center\" width=\"30mm\"><b>Project Number<br/></b></td><td></td>";
-			$html .= "</tr>";
+			$html .= '<br/>&nbsp;<br/>';
+			$html .= '<table>';
+			$html .= "<tr><td align=\"center\" width=\"80mm\">";
 
-			$x = 0;
 			foreach($sorted_project_ids as $pid) {
 
 				$project = &$projects[$pid];
@@ -179,19 +177,24 @@ foreach($generate_rounds as $round ) {
 				$short_title = htmlentities(substr($project['title'], 0, 50));
 				if(strlen($project['title']) > 50) $short_title .= "...";
 
-				$html .= "<tr><td align=\"center\" width=\"80mm\"><b>{$project['number']}</b><br/><font size=\"-3\">$short_title</font></td>";
-
-
-				$name = ($x < $n_up) ? $prize['name'] : $down_name;
-				$style = '';
-				if($x == $n_up) $style='border-top:3px solid black;';
-				$html .= "<td width=\"45mm\" align=\"right\"><font size=\"+5\">&nbsp;</font>$name: &nbsp;&nbsp;</td>";
-				$html .= "<td style=\"border:1px solid black;$style\" width=\"30mm\" height=\"10mm\">&nbsp;</td>";
-				$html .= "<td></td></tr>";
-
-				$x++;
+				$html .= "<b>{$project['number']}</b><font size=\"-3\"><br/>$short_title<br/><br/></font>";
 			}
-			$html .= '</table></hr>';
+
+			$html .= '</td>';
+			
+			$html .= '<td width="80mm">';
+			$html .= '<table><tr><td width="45mm">&nbsp;</td>';
+			$html .= '<td align="center" width="30mm"><b>Project Number<br/></b></td></tr>';
+
+			for($x=0; $x<$n_up; $x++) {
+				$html .= "<tr><td width=\"45mm\" align=\"right\"><font size=\"+2\">&nbsp;{$prize['name']}</font>: &nbsp;&nbsp;</td>";
+				$html .= '<td style="border:1px solid black;" width="30mm" height="10mm">&nbsp;</td></tr>';
+			}
+			$html .= "<tr><td align=\"center\" colspan=\"2\"><font size=\"+2\"><br/>All remaining projects will be awarded <b>$down_name</b></font></td></tr>";
+			$html .= '</table>';
+
+			$html .= '</td>';
+			$html .= '</tr></table></hr>';
 			$pdf->WriteHTML($html);
 				
 		} else {
