@@ -42,7 +42,7 @@ foreach($cats as $cid=>$c) {
 
 ?>
 		<tr class="<?=$cl?>">
-			<td><a href="<?=$config['url']?>/project_summary.php?pn=<?=$pn?>"><?=$pn?></a></td>
+			<td><a href="<?=$config['fair_url']?>/project_summary.php?pn=<?=$pn?>"><?=$pn?></a></td>
 			<td><?=$p['title']?></td>
 		</tr>
 <?php
