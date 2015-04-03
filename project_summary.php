@@ -70,7 +70,7 @@ foreach($p['students'] as &$s) {
 }
 
 if(file_exists("data/logo-100.gif"))
-	$logo = "<img align=\"left\" height=\"50\" src=\"data/logo-100.gif\">";
+	$logo = "<img align=\"left\" height=\"50\" src=\"file.php?f=logo\">";
 else 
 	$logo = "";
 
