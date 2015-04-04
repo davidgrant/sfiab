@@ -137,7 +137,7 @@ sfiab_page_begin("Tours", $page_id);
 <?php
 	$form_id = $page_id.'_run_form';
 	form_begin($form_id, 'c_tours.php');
-	form_button($form_id, 'run', 'Run', 'g', 'check', 'Delete all tour assignemnts and create new ones?');
+	form_submit_enabled($form_id, 'run', 'Run', 'Started, check status below', 'g', 'check', 'Delete all tour assignemnts and create new ones?');
 	form_end($form_id);
 ?>
 
@@ -159,7 +159,6 @@ var started = false;
 var update_ticker = 0;
 
 function c_tours_run_form_post_submit(form,data) {
-	$("#c_tours_run_form_submit_run").attr('disabled', true);
 	tour_scheduler_update();
 	started = true;
 }

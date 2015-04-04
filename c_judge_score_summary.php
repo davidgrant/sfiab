@@ -426,7 +426,7 @@ sfiab_page_begin("Judging Scores Summary", $page_id, $help);
 <?php			$form_id = $page_id.'_'.$cid.'_form';
 			form_begin($form_id, "c_judge_score_summary.php");
 			form_hidden($form_id, 'cid', $cid);
-			form_button($form_id, 'assign',"Assign {$c['name']} Projects to Cusp Judging Teams");
+			form_submit_enabled($form_id, 'assign',"Assign {$c['name']} Projects to Cusp Judging Teams", "Done");
 			form_end($form_id);
 			
 ?>

@@ -431,17 +431,23 @@ function form_textbox($form_id, $name, $label, &$value, $minwords=false, $maxwor
 }
 
 /* This has a data-alt2 attribute so it is enabled/disabled with the sfiab_form */
-function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g', $icon="check", $confirm='')
+function form_submit($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g', $icon="check", $confirm='', $start_disabled=true)
 {
 	global $form_disabled;
 	$attrs = $form_disabled ? ' disabled="disabled"': '';
+	if($start_disabled) $attrs .= ' disabled="disabled"';
 	if($confirm != '') $attrs .= " data-confirm=\"$confirm\"";
 	if($icon != '') $attrs .= " data-icon=\"$icon\"";
 ?>
-	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" disabled="disabled" data-inline="true" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" <?=$attrs?> >
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-theme="<?=$theme?>" data-alt1="<?=$text?>" data-alt2="<?=$saved_text?>" <?=$attrs?> >
 		<?=$text?>
 	</button>
 <?php
+}
+
+function form_submit_enabled($form_id, $action, $text = "Save", $saved_text = "Information Saved", $theme='g', $icon="check", $confirm='')
+{
+	form_submit($form_id, $action, $text, $saved_text, $theme, $icon, $confirm, false);
 }
 
 /* This doesn't create a data-alt2 attribute, so it won't be enabled/disabled with the sfiab_form, it's always

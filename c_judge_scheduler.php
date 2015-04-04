@@ -105,7 +105,7 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 <?php
 	$form_id = $page_id.'_run_form';
 	form_begin($form_id, 'c_judge_scheduler.php');
-	form_button($form_id, 'run', 'Run');
+	form_submit_enabled($form_id, 'run', 'Run', 'Started, check status below', 'g', 'check', 'Delete all judge assignemnts and create new ones?');
 	form_end($form_id);
 ?>
 
@@ -120,10 +120,6 @@ sfiab_page_begin("Judge Scheduler", $page_id);
 
 
 
-
-
-
-
 </div></div>
 
 <script>
@@ -131,7 +127,6 @@ var started = false;
 var update_ticker = 0;
 
 function c_judge_scheduler_run_form_post_submit(form,data) {
-	$("#c_judge_scheduler_run_form_submit_run").attr('disabled', true);
 	judge_scheduler_update();
 	started = true;
 }
