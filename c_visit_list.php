@@ -192,6 +192,15 @@ sfiab_page_begin("Visit List", $page_id, $help);
 
 $projects = l_projects_load_all($mysqli, $config['year']);
 
+$sorted_project_ids = array();
+foreach($projects as &$p) {
+	$sorted_project_ids[$p['number_sort']] = $p['pid'];
+	$p['visit'] = false;
+	$p['visit_notes'] = '';
+}
+ksort($sorted_project_ids);
+
+
 $q = $mysqli->query("SELECT pid,notes,visit FROM visit_list WHERE uid='{$u['uid']}'");
 while($d = $q->fetch_row()) {
 	$pid = (int)$d[0];
@@ -203,11 +212,6 @@ while($d = $q->fetch_row()) {
 	}
 }
 
-$sorted_project_ids = array();
-foreach($projects as &$p) {
-	$sorted_project_ids[$p['number_sort']] = $p['pid'];
-}
-ksort($sorted_project_ids);
 
 
 foreach($sorted_project_ids as $pid) {
