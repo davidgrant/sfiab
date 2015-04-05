@@ -139,6 +139,20 @@ case 'print':
 			$row['time'] = $project['number'];
 
 			for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
+
+					if($project['timeslots'][$timeslot_id] == NULL) {
+						print("project $pid timeslots [$timeslot_id] is nULL\n");
+						print_r($project);
+					}
+
+					if(!array_key_exists($itimeslot, $project['timeslots'][$timeslot_id])) {
+						
+						print("<pre>Timeslot $itimeslot doesn't exist in timeslots[$timeslot_id] for pid:$pid: ");
+						print_r($project);
+						exit();
+					}
+
+			
 				$txt = '';
 				if($project['timeslots'][$timeslot_id][$itimeslot] == $slot_type) {
 					$txt = 'O';
