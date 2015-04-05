@@ -62,21 +62,72 @@ case 'jadd':
 	form_ajax_response(array('status'=>$jteam['round']));
 	exit();
 
-case 'jadd_smart':
+case 'jautoadd':
+
+	$projects = projects_load_all($mysqli);
+
 	/* Add a best-match single free judge to a judging team */
 	$jteam_id = (int)$_POST['jteam_id'];
 	$jteam = jteam_load($mysqli, $jteam_id);
 
 	$j_uid = false;
-	foreach($judges as $uid=>&$j) {
-//		if($j['j_round'][$jteam['round']-1] != 1) continue;
 
+	/* Build a list of divs for this jteam */
+	$jteam_divs = array();
+	foreach($jteam['project_ids'] as $pid) {
+		$p = &$projects[$pid];
+		$pref = $p['isef_id'];
+		if($isef_divs[$pref]['parent'] != false)
+			$div = $isef_divs[$pref]['parent'];
+		else 
+			$div = $isef_divs[$pref]['div'];
+		if(!array_key_exists($div, $jteam_divs)) {
+			$jteam_divs[$div] = 0;
+		}
+		$jteam_divs[$div] += 1;
 	}
 
+	$best_matches = -1;
+	$best_judge_id = 0;
+	foreach($judges as $uid=>&$j) {
 
-	$jteam['user_ids'][] = $j_uid;
-	jteam_save($mysqli, $jteam);
-	form_ajax_response(array('status'=>0));
+		if(!in_array($jteam['round'], $j['j_rounds'])) continue;
+
+		if(!$j['attending'] || !$j['j_complete'] || !$j['enabled']) continue;
+
+		/* Make sure this judge isn't assigned to a slot already */
+		$q = $mysqli->query("SELECT * FROM judging_teams WHERE FIND_IN_SET('$uid',`user_ids`)>0 AND round='{$jteam['round']}'");
+		if($q->num_rows > 0) {
+			/* Judge is already assigned in this round */
+			continue;
+		}
+
+		/* This judge is free in this round, see how their expertise matches */
+		$matches = 0;
+		foreach($j['j_div_pref'] as $pref) {
+			if($pref > 0) {
+				if($isef_divs[$pref]['parent'] != false)
+					$d = $isef_divs[$pref]['parent'];
+				else 
+					$d = $isef_divs[$pref]['div'];
+				if(array_key_exists($d, $jteam_divs) && $jteam_divs[$d] > 0) {
+					$matches += 1;
+				}
+			}
+		}
+
+		if($matches > $best_matches) {
+			$best_matches = $matches;
+			$best_judge_id = $uid;
+		}
+	}
+
+	if($best_matches > -1) {
+		$jteam['user_ids'][] = $best_judge_id;
+		jteam_save($mysqli, $jteam);
+	}
+
+	form_ajax_response(array('status'=>$jteam['round'], 'info'=>$best_judge_id));
 	exit();
 
 
@@ -147,7 +198,7 @@ sfiab_page_begin("Judging Teams List", $page_id, $help);
 				/* Is this judge on a jteam in ths round? */
 				$found = false;
 				foreach($jteams as &$jteam) {
-					if($jteam['round'] != $round+1) continue;
+					if($jteam['round'] != $round) continue;
 
 					foreach($jteam['user_ids'] as $uid) {
 						if($uid == $j['uid']) {
@@ -348,7 +399,7 @@ function jteam_li(&$jteam) {
 		<br/>
 		<div id="jteam_list_<?=$jteam['id']?>_control" data-role="controlgroup" data-type="horizontal" data-mini="true">
 		    <a href="#" onclick="jteam_enable_edit(<?=$jteam['id']?>)" class="ui-btn ui-corner-all ui-btn-inline">Edit</a>
-		    <a href="#" class="ui-btn ui-corner-all  ui-btn-inline">Auto-add Best Judge</a>
+		    <a href="#" onclick="jteam_jautoadd(<?=$jteam['id']?>)" class="ui-btn ui-corner-all  ui-btn-inline">Auto-add Best Judge</a>
 		</div>
 
 		<div id="jteam_list_<?=$jteam['id']?>_function" style="display:none;">
@@ -535,6 +586,32 @@ function jteam_jadd()
 
 	/* Post that */
 	$.post('c_jteam_edit.php', { action: "jadd", jteam_id: current_jteam_id, uid: judge_uid }, function(data) {
+		if(data.status >= 0) {
+			round = data.status;
+			judge_uid = data.info;
+
+			/* Remove from unused judges */
+			$('#j_unused_'+round+' tr[id="'+judge_uid+'"]').remove();
+			/* Add to jteam list */
+
+			$('#j_tr tr[id="'+judge_uid+'"]').appendTo('#j_jteam_'+current_jteam_id);
+			/* Append the [X] to the new tr in the jteam table */
+			$( "#j_jteam_"+current_jteam_id+' tr[id="'+judge_uid+'"]').append("<td id='X'><a href=\"#\" onclick=\"jteam_jdel("+judge_uid+");\">[X]</a></td>");
+
+			/* Change the unused count */
+			var count_span = $("#jteam_unused_"+round+"_count");
+			count_span.text(parseInt(count_span.text()) - 1);
+		}
+	}, "json");
+
+}
+
+
+function jteam_jautoadd(jteam_id)
+{
+	/* Read the current selection from the select box, that's the jid */
+	/* Post that */
+	$.post('c_jteam_edit.php', { action: "jautoadd", jteam_id: jteam_id,  }, function(data) {
 		if(data.status > 0) {
 			round = data.status;
 
@@ -553,6 +630,7 @@ function jteam_jadd()
 	}, "json");
 
 }
+
 
 
 function jteam_pdel(id)
