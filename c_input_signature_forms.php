@@ -186,16 +186,6 @@ function l_projects_load_all($mysqli, $year)
 
 $page_id = 'c_input_signature_forms';
 $help = '<p>There are
-	three buttons that may appear: <font color=red>Mark as Complete</font>,
-	<font color=blue>Mark as Complete without payment</font>, and <font
-	color=green>Mark as Incomplete</font>.  The <font color=red>Mark as
-	Complete</font> button is red so you can scan through the list quickly
-	and find all incomplete (red) applications.  Similarly the <font
-	color=green>Mark as Incomplete</font> button is green 
-	so you can find all the complete ones.  When the green <font
-	color=green>Mark as Incomplete</font> button is showing, it means the
-	project has been marked as complete.';
-$help = '<p>There are
 	two buttons that may appear: <font color=red>Mark as Complete</font>,
 	and <font
 	color=green>Mark as Incomplete</font>.  The <font color=red>Mark as

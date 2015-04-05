@@ -127,6 +127,11 @@ sfiab_page_begin("Students", $page_id);
 	<li><a href="" data-rel="external" data-ajax="false">Floorplanning</a></li>
 	</ul>
 
+	<h3>Visit Lists</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_visit_list.php" data-rel="external" data-ajax="false">Edit Visit List</a></li>
+	<li><a href="c_visit_list.php?action=print" data-rel="external" data-ajax="false">Print Visit List</a></li>
+
 </div></div>
 	
 
