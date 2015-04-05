@@ -58,7 +58,6 @@ case 'print':
 		$timeslots_by_round[$ts['round']] = $ts;
 	}
 
-
 	foreach($projects as &$project) {
 		$project['timeslots'] = array();
 		foreach($timeslots as $timeslot_id=>&$ts) {

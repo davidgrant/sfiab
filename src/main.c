@@ -28,6 +28,9 @@ int main(int argc, char **argv)
 	} else if(strcmp(argv[1], "judges") == 0) {
 		printf("Judges\n");
 		judges_anneal(db, config.year);
+	} else if(strcmp(argv[1], "timeslots") == 0) {
+		printf("Timeslots\n");
+		judges_timeslots(db, config.year);
 	} else if(strcmp(argv[1], "eh") == 0) {
 		printf("Exhibit Hall\n");
 		exhibithall_anneal(db, config.year);

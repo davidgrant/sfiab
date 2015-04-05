@@ -553,7 +553,7 @@ int judges_anneal_checks(struct _db_data *db)
 void judges_anneal(struct _db_data *db, int year)
 {
 	int x, y, i;
-	int itimeslot, iround, iproject;
+	int iproject;
 	int lang_count[NUM_LANGUAGES];
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
@@ -1049,6 +1049,119 @@ void judges_anneal(struct _db_data *db, int year)
 	printf("Doing Timeslot Assignments...\n");
 	scheduler_log(db, 90, "Doing timeslot assignments");
 
+
+	judges_timeslots(db, year);
+
+	scheduler_log(db, 100, "Done.");
+
+
+
+
+
+
+	printf("All done!\n");
+}
+
+GPtrArray *jteams_load(struct _db_data *db, int year)
+{
+	struct _db_result *result;
+	GPtrArray *jteams;
+	int x, i , j;
+	jteams = g_ptr_array_new();
+	/* Load students and tour choices */
+	result = db_query(db, "SELECT * FROM judging_teams WHERE year='%d'", year);
+	for(x=0;x<result->rows; x++) {
+		struct _jteam *jteam = malloc(sizeof(struct _jteam));
+		int award_id = atoi(db_fetch_row_field(result, x, "award_id"));
+		int n_list;
+		int list[1024];
+
+		jteam->id = atoi(db_fetch_row_field(result, x, "id"));
+		jteam->num = atoi(db_fetch_row_field(result, x, "num"));
+		jteam->name = strdup(db_fetch_row_field(result, x, "name"));
+		jteam->round = atoi(db_fetch_row_field(result, x, "round"));
+		jteam->sa_only = 0;
+
+		jteam->award = NULL;
+		for(i=0;i<awards->len;i++) {
+			struct _award *a = g_ptr_array_index(awards, i);
+			if(a->id == award_id) {
+				jteam->award = a;
+				break;
+			}
+		}
+		if(jteam->award == NULL) {
+			printf("JTeam Loader: Award %d not matched\n", award_id);
+		}
+	
+
+		n_list = split_int_list(list, db_fetch_row_field(result, x, "user_ids"));
+		jteam->judges = g_ptr_array_new();
+		for(i=0;i<n_list;i++) {
+			int judge_id = list[i];
+			int matched = 0;
+			for(j=0;j<judges->len;j++) {
+				struct _judge *judge = g_ptr_array_index(judges, j);
+				if(judge->id == judge_id) {
+					g_ptr_array_add(jteam->judges, judge);
+					matched = 1;
+					break;
+				}
+			}
+			if(!matched) {
+				printf("JTeam Loader: Judge %d not matched\n", judge_id);
+			}
+		}
+		n_list = split_int_list(list, db_fetch_row_field(result, x, "project_ids"));
+		jteam->projects = g_ptr_array_new();
+		for(i=0;i<n_list;i++) {
+			int pid = list[i];
+			int matched = 0;
+			for(j=0;j<projects->len;j++) {
+				struct _project *p = g_ptr_array_index(projects, j);
+				if(p->pid == pid) {
+					g_ptr_array_add(jteam->projects, p);
+					matched = 1;
+					break;
+				}
+			}
+			if(!matched) {
+				printf("JTeam Loader: Project %d not matched\n", pid);
+			}
+		}
+
+		//printf(" %s: grade %d, school %d,  (%d %d %d) id=%d\n", s->name, s->grade, s->schools_id, s->tour_id_pref[0], s->tour_id_pref[1], s->tour_id_pref[2], s->id);
+		g_ptr_array_add(jteams, jteam);
+
+	}
+	printf("Loaded %d jteams\n", jteams->len);
+	db_free_result(result);
+	return jteams;
+}
+
+
+
+
+void judges_timeslots(struct _db_data *db, int year)
+{
+	int itimeslot, iround, iproject, i, y;
+	GPtrArray *jteams;
+
+	current_year = year;
+
+	students_load(db, year);
+	projects_load(db, year);
+
+	categories_load(db, year);
+	isef_divisions_load(db, year);
+
+	judges_load(db, year);
+	awards_load(db, year);
+
+	timeslots_load(db, year);
+
+	jteams = jteams_load(db, year);
+
 	/* Delete old assignments */
 	db_query(db, "DELETE FROM timeslot_assignments WHERE year='%d'", year);
 
@@ -1059,6 +1172,8 @@ void judges_anneal(struct _db_data *db, int year)
 
 		/* Skip any non-divisional or non-round0 jteam */
 		if(!jteam->award->is_divisional || !jteam->round == 0) continue;
+
+		printf("Timeslots for jteam %s\n", jteam->name);
 
 		q1 = g_string_sized_new(65536);
 		g_string_assign(q1, "");
@@ -1085,6 +1200,7 @@ void judges_anneal(struct _db_data *db, int year)
 						if(timeslot_matrix->ts[iproject][itimeslot] >= 0) {
 							timeslot_matrix->ts[iproject][itimeslot] = TIMESLOT_CUSP;
 						}
+
 					}
 				}
 			}
@@ -1150,12 +1266,6 @@ void judges_anneal(struct _db_data *db, int year)
 
 					/* Build a query for the mysql insert, we're building up a list and sending a bunch
 					 * at a time because a single INSERT for each timeslot was very slow. */
-					if(ts->round != 0) {
-						/* hijack the timeslot_type, and set it to 0 so for non-0 rounds, 
-						 * we don't write a jteam or judge id */
-						timeslot_type = 0;
-					}
-						
 					if(q1->len != 0) {
 						g_string_append_printf(q1, ",");
 					}
@@ -1177,14 +1287,6 @@ void judges_anneal(struct _db_data *db, int year)
 		g_string_free(q1, 1);
 		printf("\n");
 	}
-
-	scheduler_log(db, 100, "Done.");
-
-
-
-
-
-
-	printf("All done!\n");
 }
+
 

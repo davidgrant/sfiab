@@ -10,22 +10,13 @@ require_once('awards.inc.php');
 
 
 $mysqli = sfiab_init('committee');
-:
+
 $u = user_load($mysqli);
 
 $timeslots = timeslots_load_all($mysqli);
 $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
 $projects = projects_load_all($mysqli);
-
-$debug = array_key_exists('debug', $_GET) ? true : false;
-
-if($debug) print("<pre>");
-function debug($txt)
-{
-	global $debug;
-	if($debug) print($txt);
-}
 
 $action = array_key_exists('action', $_POST) ? $_POST['action'] : '';
 
