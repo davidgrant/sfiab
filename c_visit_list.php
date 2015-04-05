@@ -267,7 +267,7 @@ foreach($sorted_project_ids as $pid) {
 
 	if($p['s_complete'] == false) continue;
 
-	$filter_text = "{$p['pid']} {$p['title']} {$p['visit_notes']}";
+	$filter_text = "{$p['pid']} {$p['title']} {$p['visit_notes']} Project {$p['number']}";
 	if($p['visit']) $filter_text .= ' visit';
 
 	$accepted = $p['students'][0]['s_accepted'] ? true : false;
