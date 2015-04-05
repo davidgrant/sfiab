@@ -42,10 +42,23 @@ case 'save':
 
 case 'print':
 
-	$projects = l_projects_load_all($mysqli, $config['year']);
+	$projects = l_projects_load_all($mysqli, $config['year'], $u);
 	$timeslots = timeslots_load_all($mysqli);
 
-	print_r($timeslots);
+	$generate_rounds = array();
+	for($round=0;$round<count($timeslots); $round++) {
+		if(!array_key_exists('round', $_GET) || intval($_GET['round']) == $round) {
+			$generate_rounds[] = $round;
+		}
+	}
+
+	/* Create an index of timeslots by round too */
+	$timeslots_by_round = array();
+	foreach($timeslots as $tid=>&$ts) {
+		$timeslots_by_round[$ts['round']] = $ts;
+	}
+
+
 	foreach($projects as &$project) {
 		$project['timeslots'] = array();
 		foreach($timeslots as $timeslot_id=>&$ts) {
@@ -53,82 +66,103 @@ case 'print':
 		}
 	}
 
+	$q = $mysqli->query("SELECT * FROM timeslot_assignments WHERE year='{$config['year']}'");
+	while($r = $q->fetch_assoc()) {
+		$pid = $r['pid'];
+		$judge_id = $r['judge_id'];
+		$jteam_id = $r['judging_team_id'];
+		$timeslot_num = $r['timeslot_num'];
+		$timeslot_id = $r['timeslot_id'];
+
+		/* Make a list of slot types for each round for each project */
+		$projects[$pid]['timeslots'][$timeslot_id][$timeslot_num] = $r['type'];
+	}
+	
+
 	$pdf=new pdf( "Visit List", $config['year'] );
 
-	/* Do the rounds in order, we built this array in order */
-	$pdf->AddPage();
-	$x = $pdf->GetX();
-	$y = $pdf->GetY();
-	$pdf->setFontSize(14);
-	$pdf->SetXY(-40, 10);
-	$pdf->Cell(30, 0, $ts['name'], 0);
-	$pdf->SetXY($x, $y);
-	$pdf->setFontSize(11);
+	foreach($generate_rounds as $round ) {
+		$ts = &$timeslots_by_round[$round];
+		$timeslot_id = $ts['id'];
+		/* Do the rounds in order, we built this array in order */
+		$pdf->AddPage();
 
-	$n = array();
-	$html = "<h3>{$u['firstname']}'s Visit List</h3><br/><br/><br/>";
-	$pdf->WriteHTML($html);
+		
+		$x = $pdf->GetX();
+		$y = $pdf->GetY();
+		$pdf->setFontSize(14);
+		$pdf->SetXY(-40, 10);
+		$pdf->Cell(30, 0, $ts['name'], 0);
+		$pdf->SetXY($x, $y);
+		$pdf->setFontSize(11);
 
-	$table = array('col'=>array(), 'widths'=>array() );
+		$n = array();
+		$html = "<h3>{$u['firstname']}'s Visit List</h3><br/><br/><br/>";
+		$pdf->WriteHTML($html);
 
-	$table['fields'] = array('time');
-	$table['header']['time'] = 'Time';
-	$table['col']['time'] = array('on_overflow' => '',
-				      'align' => 'center');
-	$table['widths']['time'] = 20;
-	$table['total'] = 0;
-	$table['data'] = array();
+		$table = array('col'=>array(), 'widths'=>array() );
 
-
-	/* Use the same logic for cusp and SA teams, except query a different slot type */
-	$slot_type = 'special';
-
-	$table['header']['time'] = 'Project';
-	for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
-		$table['fields'][] = "T$itimeslot";
-		$table['header']["T$itimeslot"] = date("g:i", $ts['timeslots'][$itimeslot]['start_timestamp']);
-		$table['col']["T$itimeslot"] = array('on_overflow' => '',
+		$table['fields'] = array('time');
+		$table['header']['time'] = 'Time';
+		$table['col']['time'] = array('on_overflow' => '',
 					      'align' => 'center');
-		$table['widths']["T$itimeslot"] = 20;
-	}
+		$table['widths']['time'] = 20;
+		$table['total'] = 0;
+		$table['data'] = array();
 
-	$sorted_project_ids = array();
-	foreach($projects as &$p) {
-		$sorted_project_ids[$p['number_sort']] = $p['pid'];
-	}
-	ksort($sorted_project_ids);
 
-	$showed_vbar = false;
-	foreach($sorted_project_ids as $pid) {
-		$row = array();
-		$project = &$projects[$pid];
+		/* Use the same logic for cusp and SA teams, except query a different slot type */
+		$slot_type = 'special';
 
-		$row['time'] = $project['number'];
-
+		$table['header']['time'] = 'Project';
 		for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
-			$txt = '';
-			if($project['timeslots'][$timeslot_id][$itimeslot] == $slot_type) {
-				$txt = 'O';
-			} else if($slot_type == 'special' && $project['timeslots'][$timeslot_id][$itimeslot] == 'divisional') {
-				$txt = '+';
-				$showed_vbar =true;
-			}
-			$row["T$itimeslot"] = $txt;
+			$table['fields'][] = "T$itimeslot";
+			$table['header']["T$itimeslot"] = date("g:i", $ts['timeslots'][$itimeslot]['start_timestamp']);
+			$table['col']["T$itimeslot"] = array('on_overflow' => '',
+						      'align' => 'center');
+			$table['widths']["T$itimeslot"] = 20;
 		}
-		$table['data'][] = $row;
+
+		$sorted_project_ids = array();
+		foreach($projects as &$p) {
+			$sorted_project_ids[$p['number_sort']] = $p['pid'];
+		}
+		ksort($sorted_project_ids);
+
+		$showed_vbar = false;
+		foreach($sorted_project_ids as $pid) {
+			$row = array();
+			$project = &$projects[$pid];
+
+			if($project['visit'] == 0) continue;
+
+			$row['time'] = $project['number'];
+
+			for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
+				$txt = '';
+				if($project['timeslots'][$timeslot_id][$itimeslot] == $slot_type) {
+					$txt = 'O';
+				} else if($slot_type == 'special' && $project['timeslots'][$timeslot_id][$itimeslot] == 'divisional') {
+					$txt = '+';
+					$showed_vbar =true;
+				}
+				$row["T$itimeslot"] = $txt;
+			}
+			$table['data'][] = $row;
+		}
+
+
+		$pdf->add_table($table);
+		$pdf->WriteHTML("<br/><ul><li>O = Student has Divisional Judging</li>".
+				($showed_vbar ? '<li>&nbsp;+ = Student has Special Awards Judging</li>' : '').
+				"</ul>");
 	}
-
-
-	$pdf->add_table($table);
-	$pdf->WriteHTML("<br/><ul><li>O = Student has Divisional Judging</li>".
-			($showed_vbar ? '<li>&nbsp;+ = Student has Special Awards Judging</li>' : '').
-			"</ul>");
 
 	print($pdf->output());
 	exit();
 }
 
-function l_projects_load_all($mysqli, $year)
+function l_projects_load_all($mysqli, $year, &$u)
 {
 	/* Load projects first */
 	$q = $mysqli->query("SELECT * FROM projects WHERE year='$year' ORDER BY number_sort ");
@@ -167,7 +201,23 @@ function l_projects_load_all($mysqli, $year)
 		if($p_user['s_complete'] == 0) {
 			$projects[$pid]['s_complete'] = false;
 		}
+
+		$projects[$pid]['visit'] = false;
+		$projects[$pid]['visit_notes'] = '';
+		
 	}
+
+	$q = $mysqli->query("SELECT pid,notes,visit FROM visit_list WHERE uid='{$u['uid']}'");
+	while($d = $q->fetch_row()) {
+		$pid = (int)$d[0];
+		$notes = $d[1];
+		$visit = (int)$d[2];
+		if(array_key_exists($pid, $projects)) {
+			$projects[$pid]['visit'] = $visit;
+			$projects[$pid]['visit_notes'] = $notes;
+		}
+	}
+	
 	return $projects;
 }
 
@@ -190,29 +240,13 @@ sfiab_page_begin("Visit List", $page_id, $help);
 <?php
 
 
-$projects = l_projects_load_all($mysqli, $config['year']);
+$projects = l_projects_load_all($mysqli, $config['year'], $u);
 
 $sorted_project_ids = array();
 foreach($projects as &$p) {
 	$sorted_project_ids[$p['number_sort']] = $p['pid'];
-	$p['visit'] = false;
-	$p['visit_notes'] = '';
 }
 ksort($sorted_project_ids);
-
-
-$q = $mysqli->query("SELECT pid,notes,visit FROM visit_list WHERE uid='{$u['uid']}'");
-while($d = $q->fetch_row()) {
-	$pid = (int)$d[0];
-	$notes = $d[1];
-	$visit = (int)$d[2];
-	if(array_key_exists($pid, $projects)) {
-		$projects[$pid]['visit'] = $visit;
-		$projects[$pid]['visit_notes'] = $notes;
-	}
-}
-
-
 
 foreach($sorted_project_ids as $pid) {
 	$p = &$projects[$pid];
