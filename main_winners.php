@@ -79,9 +79,9 @@ if(array_key_exists('type', $_GET)) {
 						AND `winners`.`year`='$year'
 						AND `awards`.`include_in_script`='1'
 					ORDER BY
-						`awards`.`order`, `award_prizes`.`order`, `projects`.`number_sort`
+						`awards`.`ord`, `award_prizes`.`ord`, `projects`.`number_sort`
 					");
-
+		print($mysqli->error);
 		$current_award = NULL;
 		$current_prize = NULL;
 
