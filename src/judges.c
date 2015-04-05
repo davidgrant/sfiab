@@ -1166,7 +1166,7 @@ void judges_timeslots(struct _db_data *db, int year)
 	db_query(db, "DELETE FROM timeslot_assignments WHERE year='%d'", year);
 
 	/* Do timeslot assignments */
-	for(i=1;i<jteams->len;i++) {
+	for(i=0;i<jteams->len;i++) {
 		struct _jteam *jteam = g_ptr_array_index(jteams, i);
 		GString *q1;
 
