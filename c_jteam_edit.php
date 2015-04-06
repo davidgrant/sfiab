@@ -38,7 +38,7 @@ case 'jdel':
 
 	$jteam = jteam_load($mysqli, $jteam_id);
 
-	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND judge_id='$j_uid'");
+//	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND judge_id='$j_uid'");
 
 	$new_uids = array();
 	foreach($jteam['user_ids'] as $uid) {
