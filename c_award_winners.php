@@ -202,7 +202,7 @@ function award_li(&$a) {
 			foreach($a['prizes'] as &$prize) { 
 				if($prize['upstream_register_winners']) { ?>
 					<b><font color="blue">This award has a prize that registers winner at the <?=$fairs[$a['upstream_fair_id']]['name']?>.  Once all winners are assigned you must finalize their registrations by going to Awards -> Finalize Upstream Winners.  Accounts for all the uploaded winners will be created (and they will be sent emails) only when this is done.  Assigning winners now does not create accounts or send any emails.</font></b>
-<?				}
+<?php				}
 			}
 		} 
 
@@ -226,7 +226,7 @@ function award_li(&$a) {
 			</table>
 			<div id="prize_editor_<?=$prize['id']?>" style="display:none;">
 			</div>
-<?
+<?php
 		}
 
 		?>
