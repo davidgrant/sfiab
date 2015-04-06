@@ -71,7 +71,7 @@ if($filename != '') {
 		print("Invalid filename: extension");
 		exit();
 	}
-	if(preg_match('/[^A-Za-z0-9_-]/', $file_info['filename'])) {
+	if(preg_match('/[^A-Za-z0-9_-\.]/', $file_info['filename'])) {
 		print("Invalid filename: filename");
 		exit();
 	}

@@ -38,6 +38,9 @@ case 'jdel':
 
 	$jteam = jteam_load($mysqli, $jteam_id);
 
+	/* Need to fix this, deleting timeslot assignments can leave holds in the timeslot, we need a way to automatically fix them , 
+	 * what we need is an incremental way to build a judge timeslot schedule that doesn't depend on running the full
+	 * timeslot scheduler */
 //	$mysqli->query("DELETE FROM timeslot_assignments WHERE judging_team_id='$jteam_id' AND judge_id='$j_uid'");
 
 	$new_uids = array();
