@@ -306,6 +306,19 @@ LRP 180		99765	5967	4	1 3/4 x 1/2 	80 */
 			'page_orientation' => 'L',
 			);
 
+ $report_stock['9x12envelope'] = array('name' => 'Envelope 9x12 Portrait',
+			'page_width' => 9,
+			'page_height' => 12,
+			'label_width' => 9,
+			'x_spacing' => 0,
+			'cols' => 1,
+			'label_height' => 12,
+			'y_spacing' => 0,
+			'rows' => 1,
+			'page_format' => 'CATENV_N10_1/2', /* (229x305 mm ; 9.00x12.00 in) */
+			'page_orientation' => 'P',
+			);
+
 
 /* Add stock optiosn to the report options array */
 $report_options['stock'] = array('desc' => "Paper Type",
