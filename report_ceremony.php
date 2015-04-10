@@ -127,7 +127,7 @@ function get_winners_html_for_prize(&$prize, &$winner_count)
 
 		$pn = $project['number'];
 		foreach($project['students'] as $s) {
-			$n = $s['name'];
+			$n = '<b>'.$s['name'].'</b>';
 			if($script_show_pronunciation && trim($s['pronounce']) != '') {
 				$n .= "<br/>&nbsp;&nbsp;&nbsp;({$s['pronounce']})";
 			}
