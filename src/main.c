@@ -19,6 +19,10 @@ int main(int argc, char **argv)
 	struct _db_data *db;
 
 	db = db_connect();
+	if(!db) {
+		printf("Can't connect to db\n");
+		return 0;
+	}
 
 	config_load(db);
 

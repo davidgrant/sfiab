@@ -62,7 +62,9 @@ struct _db_data *db_connect(void)
 	struct _db_data *ret;
 	ret = malloc(sizeof(struct _db_data));
 
-	db_init(ret);
+	if(!db_init(ret)) {
+		return NULL;
+	}
 
 	printf("Connect to: %s@%s/%s\n", db_user, db_host, db_db);
 
