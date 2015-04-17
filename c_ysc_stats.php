@@ -134,7 +134,7 @@ case 'send':
 		$ret['status'] = 1;
 		$ret['happy'] = 'Statistics successfully updated';
 	} else {
-		$ret['error'] = 'Update failed');
+		$ret['error'] = 'Update failed';
 	}
 	$ret['info'] = "The YSC Registration Server said: ".$datastream;
 	form_ajax_response($ret);
