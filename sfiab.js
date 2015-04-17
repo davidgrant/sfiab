@@ -106,6 +106,7 @@ $( document ).on( "pagecreate", function( event ) {
 		var form_missing_msg = $("#"+page_id+"_missing_msg");
 		var form_error_msg = $("#"+page_id+"_error_msg");
 		var form_happy_msg = $("#"+page_id+"_happy_msg");
+		var form_info_msg = $("#"+page_id+"_info_msg");
 		var submit_value = $('#'+form_id+' input.sfiab_form_action').attr('value');
 
 		var pre_submit_fn = window[form_id + '_pre_submit'];

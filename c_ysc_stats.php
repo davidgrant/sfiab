@@ -130,7 +130,7 @@ case 'send':
 
 	$ret = array();
 	$ret['status'] = 0;
-	if(strstr('successfully updated', $datastream)) {
+	if(strstr($datastream, 'successfully updated') {
 		$ret['status'] = 1;
 		$ret['happy'] = 'Statistics successfully updated';
 	} else {
