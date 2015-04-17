@@ -188,7 +188,7 @@ sfiab_page_begin("$ysc_name Affiliation Statistics", $page_id, $help);
 
 
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'c_award_cwsf.php');
+	form_begin($form_id, 'c_ysc_stats.php');
 	form_submit_enabled($form_id, 'send', 'Send Data to '.$ysc_name, 'Sent');
 	form_end($form_id);
 ?>
