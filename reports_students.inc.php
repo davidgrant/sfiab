@@ -23,6 +23,7 @@
 require_once('common.inc.php');
 require_once('project.inc.php');
 require_once('user.inc.php');
+require_once('isef.inc.php');
 
 function report_students_i18n_fr($mysqli, &$report, $field, $text)
 {
@@ -124,6 +125,24 @@ function report_student_regfee_item($mysqli, &$report, $field, $text)
 	}
 }
 
+function reports_students_isef_major($mysqli, &$report, $field, $text)
+{
+	global $isef_divs;
+	/* Given the project.isef_id, turn it into a name */
+	$id = $text;
+	if($isef_divs[$id]['parent'] != false) {
+		$parent = $isef_divs[$id]['parent'];
+		foreach($isef_divs as $k => $i) {
+			if($i['div'] == $parent) {
+				return $i['name'];
+			}
+		}
+		return ("not found");
+	} else {
+
+		return $isef_divs[$id]['name'];
+	}
+}
 
 /*
  $q = mysql_query("SELECT * FROM regfee_items WHERE year='{$config['FAIRYEAR']}'");
@@ -490,6 +509,13 @@ $report_students_fields = array(
 		'header' => 'Reg ID',
 		'width' => 1,
 		'table' => 'projects.pid' ),
+
+	'project_isef_major' => array(		
+		'name' => 'Project -- ISEF Major Division',
+		'header' => 'ISEF',
+		'width' => 2,
+		'table' => 'projects.isef_id',
+		'exec_function' => 'reports_students_isef_major'),
 
 	'school' =>  array(
 		'start_option_group' => 'School Information',
