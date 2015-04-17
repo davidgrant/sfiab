@@ -126,16 +126,18 @@ case 'send':
 	// echo "curl close <br />";
 	curl_close ($ch); /// close the curl session
 
-	$response=xml_parsexml($datastream);
-	if(!is_array($response)) {
-		form_ajax_response(array('status'=>0, 'error'=> 'Unable to parse response from YSC','info'=>$datastream));
-		exit();
+//	$response=xml_parsexml($datastream);
+
+	$ret = array();
+	$ret['status'] = 0;
+	if(strstr('successfully updated', $datastream)) {
+		$ret['status'] = 1;
+		$ret['happy'] = 'Statistics successfully updated';
+	} else {
+		$ret['error'] = 'Update failed');
 	}
-	/* De-array everything */
-	$ret = xml_dearray($response);
-
-	form_ajax_response(array('status'=>0, 'happy'=> 'The YSC Registration Server said: '.$ret));
-
+	$ret['info'] = "The YSC Registration Server said: ".$datastream;
+	form_ajax_response($ret);
 	exit();
  }
 

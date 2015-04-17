@@ -76,6 +76,7 @@ function xmlCreateRecurse($d)
   $Encoding=xml_encoding($String);
   $String=xml_deleteelements($String,"?");
   $String=xml_deleteelements($String,"!");
+  $Data = array();
   $Data=xml_readxml($String,$Data,$Encoding);
   return($Data);
  }
@@ -131,6 +132,7 @@ function xmlCreateRecurse($d)
  
  # Get next node
  function xml_nextnode($String) {
+  $Node = false;
   if(substr_count($String,"<") != substr_count($String,"/>")) {
    $Start=strpos($String,"<")+1;
    while(substr($String,$Start,1)=="/") {
