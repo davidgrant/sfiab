@@ -93,7 +93,7 @@ function stats_get_export($mysqli, &$fair, $year)
 			$stats['students_atrisk'] += $n_students;
 		}
 
-		if($s['designate'] == 'private') {
+		if($s['type'] == 'independent') {
 			$stats['schools_private'] += 1;
 			$stats['students_private'] += $n_students;
 		} else {
@@ -101,7 +101,7 @@ function stats_get_export($mysqli, &$fair, $year)
 			$stats['students_public'] += $n_students;
 		}
 
-		$districts[$s['district']] = 1;
+		$districts[$s['board']] = 1;
 
 	}
 	$stats['schools_districts'] = count(array_keys($districts));
