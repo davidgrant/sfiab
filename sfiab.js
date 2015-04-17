@@ -159,6 +159,13 @@ $( document ).on( "pagecreate", function( event ) {
 			} else {
 				form_happy_msg.hide();
 			}
+			// Or an info message ?
+			if(data.info != '') {
+				form_info_msg.html(data.info);
+				form_info_msg.show();
+			} else {
+				form_info_msg.hide();
+			}
 
 			// Change field values based on the response
 			sfiab_form_update_vals(form_id, data.val);

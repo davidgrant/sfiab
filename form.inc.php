@@ -543,6 +543,8 @@ function form_page_begin($page_id, $fields, $error_msg = '', $happy_msg = '', $m
 	<div id="<?=$page_id?>_happy_msg" class="happy" <?=($happy_msg=='') ? $none : ''?>>
 	<?=$happy_msg?>
 	</div>
+	<div id="<?=$page_id?>_info_msg" class="info" <?=$none?> >
+	</div>
 <?php
 }
 
