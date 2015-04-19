@@ -30,6 +30,7 @@ require_once('awards.inc.php');
 require_once('PHPMailer/PHPMailerAutoload.php');
 require_once('debug.inc.php');
 
+
 $sleepmin=0.5;  // 0.5 seconds
 
 print("SFIAB Queue Runner: Start\n");
@@ -45,7 +46,6 @@ if(count($_SERVER['argv']) > 1) {
 	}
 }
 
-
 if($config['queue_lock'] != '') {
 	print("Queue is already running (or the lock needs to be cleared)\n");
 	exit();
@@ -54,7 +54,7 @@ if($config['queue_lock'] != '') {
 $mysqli->real_query("UPDATE config SET val='".time(NULL)."' WHERE var='queue_lock'");
 
 
-$q = $mysqli->prepare("SELECT `id`,`command`,`fair_id`,`award_id`,`prize_id`,`project_id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`additional_replace` 
+$q = $mysqli->prepare("SELECT `id`,`command`,`year`,`fair_id`,`award_id`,`prize_id`,`project_id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`additional_replace` 
 				FROM queue WHERE result='queued' LIMIT 1");
 $q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body`,`bodyhtml` FROM emails WHERE id = ?");
 //loop forever, but not really, it'll get break'd as soon as there's nothing left to send
@@ -67,7 +67,7 @@ while(true) {
    	/* Get an entry from the queue, exit if there are no more */
 	$q->execute(); 
 	$q->store_result();
-	$q->bind_result($db_id, $db_command, $db_fair_id, $db_award_id, $db_prize_id, $db_project_id,$db_emails_id,$db_uid,$db_to,$db_email,$db_rep);
+	$q->bind_result($db_id, $db_command, $db_year, $db_fair_id, $db_award_id, $db_prize_id, $db_project_id,$db_emails_id,$db_uid,$db_to,$db_email,$db_rep);
 
 	if($q->num_rows == 0) break;
 	$q->fetch();
@@ -178,12 +178,22 @@ while(true) {
 
 	case 'get_stats':
 		$fair = fair_load($mysqli, $db_fair_id);
-		$year = $db_award_id; /* Repurpose the award_id for the year */
+		$year = $db_year; 
 		print("SFIAB Queue Runner: get_stats: $year\n");
 		$result = remote_get_stats_from_fair($mysqli, $fair, $year);
 		$r = ($result == 0) ? 'ok' : 'failed';
 		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
 		break;
+
+	case 'push_stats':
+		$fair = fair_load($mysqli, $db_fair_id);
+		$year = $db_year; 
+		print("SFIAB Queue Runner: push_stats: $year\n");
+		$result = remote_get_stats_from_fair($mysqli, $fair, $year);
+		$r = ($result == 0) ? 'ok' : 'failed';
+		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
+		break;
+
 
 	case 'judge_scheduler':
 		debug("Starting the judge scheduler\n");

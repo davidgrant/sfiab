@@ -31,6 +31,13 @@ sfiab_page_begin("Committee Main", 'c_main', $help);
 		$pending_actions['c_register_feeder.php'] = "<font color=red>".count($new_users)."</font> students from feeder fairs have not been sent a registration email, click here to send them";
 	} 
 
+	$now = date( 'Y-m-d H:i:s' );
+	if($now > $config['date_fair_ends']) {
+		/* Have stats been sent to YSC? */
+	}
+
+
+
 	if($config['tours_enable']) {
 		$users = students_load_all($mysqli);
 		$num_accepted = 0;

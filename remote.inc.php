@@ -336,9 +336,14 @@ function remote_queue_get_stats_from_all_fairs($mysqli, $year)
 {
 	$fairs = fair_load_all_feeder($mysqli);
 	foreach($fairs as $fair_id=>$fair) {
-		$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`award_id`,`result`) VALUES('get_stats','$fair_id','$year','queued')");
+		$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`year`,`result`) VALUES('get_stats','$fair_id','$year','queued')");
 	}
 	queue_start($mysqli);
+}
+
+function remote_queue_push_stats_to_fair($mysqli, &$fair, $year)
+{
+	$mysqli->real_query("INSERT INTO queue(`command`,`fair_id`,`year`,`result`) VALUES('push_stats','$fair_id','$year','queued')");
 }
 
 /* Ask $fair for their stats and sync the result */
