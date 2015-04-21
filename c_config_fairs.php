@@ -49,7 +49,10 @@ case 'check':
 			$f['abbrv'] = $ret['abbrv'];
 			$val['abbrv'] = $ret['abbrv'];
 		}
-		form_ajax_response(array('status'=>0, 'happy'=>"Connection Established to {$ret['name']}", 'val' => array('password' => $f['password']))) ;
+		$f['password'] = $f['original']['password'];
+		fair_save($mysqli, $f);
+		form_ajax_response(array('status'=>0, 'happy'=>"Connection Established to {$ret['name']}", 'val' => $val)) ;
+		exit();
 	}
 	form_ajax_response(array('status'=>1, 'error'=>"Server couldn't be contacted"));
 	exit();
@@ -104,6 +107,7 @@ case 'edit':
 		if($fair === NULL) {
 			exit();
 		}
+		form_page_begin($page_id, array());
 
 ?>
 		<h3>Edit Fair:  <?=$fair['name']?></h3>
@@ -119,13 +123,12 @@ case 'edit':
 		form_select($form_id, 'type', "Type", $fair_types, $fair['type']);
 		form_text($form_id, 'website', "Website", $fair['website']);
 		form_text($form_id, 'password', "Secret Key", $fair['password']);
+		form_button_with_label($form_id, 'pass', '', 'Generate Random Secret Key');
 		form_text($form_id, 'username', "YSC Username (only for YSC upstream fairs)", $fair['username']);
 		form_submit($form_id, 'save', 'Save', 'Information Saved');
-?>		<a href="c_config_fairs.php" data-ajax="false" data-role="button" data-icon="back" data-theme="r" data-inline="true">Cancel</a>
-		<hr/>
-		<h3>Generate a new Secret Key</h3>
-<?php		form_button($form_id, 'pass', 'Generate Random Secret Key');
 		form_end($form_id);
+?>		<a href="c_config_fairs.php" data-ajax="false" data-role="button" data-icon="back" data-theme="r" data-inline="true">Cancel</a>
+<?php		form_end($form_id);
 ?>
 		<hr/>
 		<h3>How To Connect two SFIABs</h3>

@@ -39,7 +39,7 @@ function remote_query($mysqli, &$fair, &$cmd)
 	$v = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
 	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id='{$fair['id']}'");
 
-	if($fair['url'] === NULL) {
+	if($fair['password'] === NULL || $fair['url'] === NULL) {
 		$response = array('error'=>1, 'invalid URL or password for fair');
 		return $response;
 	}
@@ -73,6 +73,9 @@ function remote_query($mysqli, &$fair, &$cmd)
 		$response = array('error'=>1);
 	} else {
 		$response = json_decode($remote_response, true);
+		if(!is_array($response)) {
+			$response = array('error'=>1);
+		}
 	}
 	debug("remote_query: curl response:".print_r($response, true)."\n");
 	debug("remote_query: remove token for {$fair['name']}\n");
