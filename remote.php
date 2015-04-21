@@ -54,7 +54,7 @@ if(array_key_exists('ping', $data)) {
 	$response = array();
 	$response['pong'] = array('name' => $config['fair_name'],
 				  'abbrv' => $config['fair_abbreviation'],
-				  'url' => $config['url'] );
+				  'url' => $config['fair_url'] );
 	$response['error'] = 0;
 	print(json_encode($response));
 	exit();
