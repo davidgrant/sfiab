@@ -99,9 +99,11 @@ function form_label_div_begin($id, $name, $label, $wide = false)
 	$__form_label_div_label = $label;
 
 	$extra_class = $wide ? 'ui-field-contain-wide' : '';
-	if($label !== NULL) { ?>
+	if($label !== NULL) { 
+		if($label != '') $label .= ':' 
+?>
 		<div class="ui-field-contain <?=$extra_class?>">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
+		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?></label>
 <?php 	}
 }
 
@@ -463,6 +465,22 @@ function form_button($form_id, $action, $text = "Save", $theme='g', $icon="check
 		<?=$text?>
 	</button>
 <?php
+}
+
+function form_button_with_label($form_id, $action, $label, $text = "Save", $theme='g', $icon="check", $confirm='', $attrs='')
+{
+	global $form_disabled;
+	if($form_disabled) $attrs .= ' disabled="disabled"';
+	if($icon != '') $attrs .= " data-icon=\"$icon\"";
+	if($confirm != '') $attrs .= " data-confirm=\"$confirm\"";
+	form_label_div_begin($form_id, "action", $label, false);
+?>
+	<button type="submit" data-role="button" id="<?=$form_id?>_submit_<?=$action?>" name="action" value="<?=$action?>" data-inline="true" data-theme="<?=$theme?>" <?=$attrs?> >
+		<?=$text?>
+	</button>
+<?php
+	form_label_div_end();
+
 }
 
 function form_hidden($form_id, $name, $txt)

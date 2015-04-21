@@ -6,6 +6,7 @@ require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('fairs.inc.php');
+require_once('remote.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -31,7 +32,29 @@ case 'pass':
 	fair_save($mysqli, $f);
 	form_ajax_response(array('status'=>0, 'val' => array('password' => $f['password']))) ;
 	exit();
-	
+
+case 'check':
+	$id = (int)$_POST['id'];
+	$f = fair_load($mysqli, $id);
+	post_text($f['url'], 'url');
+	if($f['password'] === NULL) $f['password'] = '';
+	$ret = remote_ping($mysqli, $f);
+	if($ret['error'] == 0) {
+		$val = array();
+		if($f['name'] == '') {
+			$f['name'] = $ret['name'];
+			$val['name'] = $ret['name'];
+		}
+		if($f['abbrv'] == '') {
+			$f['abbrv'] = $ret['abbrv'];
+			$val['abbrv'] = $ret['abbrv'];
+		}
+		form_ajax_response(array('status'=>0, 'happy'=>"Connection Established to {$ret['name']}", 'val' => array('password' => $f['password']))) ;
+	}
+	form_ajax_response(array('status'=>1, 'error'=>"Server couldn't be contacted"));
+	exit();
+
+
 case 'save':
 	$id = (int)$_POST['id'];
 	$f = fair_load($mysqli, $id);
@@ -84,14 +107,16 @@ case 'edit':
 
 ?>
 		<h3>Edit Fair:  <?=$fair['name']?></h3>
+		<p>For creating a new fair: Enter the Server Address, then press "Check Connection", that will verify the server and populate the Name and Abbreviation
 <?php
 		$form_id = $page_id.'_form';
 		form_begin($form_id, 'c_config_fairs.php');
 		form_hidden($form_id,'id',$fair['id']);
+		form_text($form_id, 'url', "Server Address", $fair['url']);
+		form_button_with_label($form_id, 'check', '', 'Check Connection');
 		form_text($form_id, 'name', "Name", $fair['name']);
 		form_text($form_id, 'abbrv', "Abbreviation", $fair['abbrv']);
 		form_select($form_id, 'type', "Type", $fair_types, $fair['type']);
-		form_text($form_id, 'url', "Server Address", $fair['url']);
 		form_text($form_id, 'website', "Website", $fair['website']);
 		form_text($form_id, 'password', "Secret Key", $fair['password']);
 		form_text($form_id, 'username', "YSC Username (only for YSC upstream fairs)", $fair['username']);

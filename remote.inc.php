@@ -39,7 +39,7 @@ function remote_query($mysqli, &$fair, &$cmd)
 	$v = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
 	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id='{$fair['id']}'");
 
-	if($fair['password'] === NULL || $fair['url'] === NULL) {
+	if($fair['url'] === NULL) {
 		$response = array('error'=>1, 'invalid URL or password for fair');
 		return $response;
 	}
@@ -363,6 +363,24 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 	sfiab_log_sync_stats($mysqli, $fair['id'], $result);
 	
 	return $response['error'];
+}
+
+/* Ask $fair for their stats and sync the result */
+function remote_ping($mysqli, &$fair)
+{
+	/* Year is stored in award_id */
+	$cmd['ping'] = array();
+	$response = remote_query($mysqli, $fair, $cmd);
+
+	$ret = array();
+	$ret['error'] = $response['error'];
+	$ret['name'] = '';
+	$ret['abbrv'] = '';
+	if(array_key_exists('pong', $response)) {
+		$ret['name'] = $response['pong']['name'];
+		$ret['abbrv'] = $response['pong']['abbrv'];
+	}
+	return $ret;
 }
 
 function remote_handle_old_get_awards($mysqli, &$fair, &$data, &$response)
