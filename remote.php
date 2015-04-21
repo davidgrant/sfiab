@@ -54,14 +54,13 @@ if(array_key_exists('ping', $data)) {
 	$response = array();
 	$response['pong'] = array('name' => $config['fair_name'],
 				  'abbrv' => $config['fair_abbreviation'],
-				  'url' => $config['fair_url'] );
+				  /*'url' => $config['fair_url']*/ );
 	$response['error'] = 0;
 	print(json_encode($response));
 	exit();
 }
 
 /* Now check the password and load the remote fair */
-
 if(!array_key_exists('password', $data)) {
 	exit();
 }
@@ -140,6 +139,7 @@ function remote_handle_cmd($mysqli, &$fair, &$data)
 	if(array_key_exists('push_award', $data)) remote_handle_push_award($mysqli, $fair, $data, $response);
 	if(array_key_exists('push_winner', $data)) remote_handle_push_winner($mysqli, $fair, $data, $response);
 	if(array_key_exists('get_stats', $data)) handle_get_stats($mysqli,$fair, $data, $response);
+	if(array_key_exists('auth_ping', $data)) remote_handle_auth_ping($mysqli, $fair, $data, $response);
 
 	/* Should work */
 	if(array_key_exists('get_award', $data)) remote_handle_get_award($mysqli, $fair, $data, $response);

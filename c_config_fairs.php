@@ -51,11 +51,24 @@ case 'check':
 		}
 		$f['password'] = $f['original']['password'];
 		fair_save($mysqli, $f);
-		form_ajax_response(array('status'=>0, 'happy'=>"Connection Established to {$ret['name']}", 'val' => $val)) ;
+		form_ajax_response(array('status'=>0, 'happy'=>"Server Responded: {$ret['name']}.  Use the \"Check Authentication\" button to verify the secret key works", 'val' => $val)) ;
 		exit();
 	}
 	form_ajax_response(array('status'=>1, 'error'=>"Server couldn't be contacted"));
 	exit();
+
+case 'auth':
+	$id = (int)$_POST['id'];
+	$f = fair_load($mysqli, $id);
+	$ret = remote_auth_ping($mysqli, $f);
+	if($ret['error'] == 0) {
+		form_ajax_response(array('status'=>0, 'happy'=>"Server Responded: {$ret['name']}.  Everything seems to be working")) ;
+		exit();
+	}
+	form_ajax_response(array('status'=>1, 'error'=>"Authentication failed.  Make sure the remote fair is using the same secret key"));
+	exit();
+
+
 
 
 case 'save':
@@ -111,13 +124,13 @@ case 'edit':
 
 ?>
 		<h3>Edit Fair:  <?=$fair['name']?></h3>
-		<p>For creating a new fair: Enter the Server Address, then press "Check Connection", that will verify the server and populate the Name and Abbreviation
+		<p>For creating a new fair: Enter the Server Address, then press "Check Server", that will verify the server and populate the Name and Abbreviation
 <?php
 		$form_id = $page_id.'_form';
 		form_begin($form_id, 'c_config_fairs.php');
 		form_hidden($form_id,'id',$fair['id']);
 		form_text($form_id, 'url', "Server Address", $fair['url']);
-		form_button_with_label($form_id, 'check', '', 'Check Connection');
+		form_button_with_label($form_id, 'check', '', 'Check Server');
 		form_text($form_id, 'name', "Name", $fair['name']);
 		form_text($form_id, 'abbrv', "Abbreviation", $fair['abbrv']);
 		form_select($form_id, 'type', "Type", $fair_types, $fair['type']);
@@ -126,9 +139,19 @@ case 'edit':
 		form_button_with_label($form_id, 'pass', '', 'Generate Random Secret Key');
 		form_text($form_id, 'username', "YSC Username (only for YSC upstream fairs)", $fair['username']);
 		form_submit($form_id, 'save', 'Save', 'Information Saved');
-		form_end($form_id);
 ?>		<a href="c_config_fairs.php" data-ajax="false" data-role="button" data-icon="back" data-theme="r" data-inline="true">Cancel</a>
 <?php		form_end($form_id);
+?>
+		<hr/>
+		<h3>Check Authentication</h3>
+		<p>Use this button to check that your secret key is working after you have saved all the information above</p>
+<?php		
+		$form_id = $page_id.'_auth_form';
+		form_begin($form_id, 'c_config_fairs.php');
+		form_hidden($form_id,'id',$fair['id']);
+		form_button($form_id, 'auth', 'Check Authentication');
+		form_end($form_id);
+
 ?>
 		<hr/>
 		<h3>How To Connect two SFIABs</h3>

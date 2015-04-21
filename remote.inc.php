@@ -222,7 +222,6 @@ function remote_handle_get_award($mysqli, &$fair, &$data, &$response)
 	$response['get_award'] = award_get_export($mysqli, $fair, $a);
 }
 
-
 function remote_push_winner_to_fair($mysqli, $prize_id, $project_id)
 {
 	$prize = prize_load($mysqli, $prize_id);
@@ -368,10 +367,9 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 	return $response['error'];
 }
 
-/* Ask $fair for their stats and sync the result */
+/* Ping (no password required **************************************************/
 function remote_ping($mysqli, &$fair)
 {
-	/* Year is stored in award_id */
 	$cmd['ping'] = array();
 	$response = remote_query($mysqli, $fair, $cmd);
 
@@ -385,6 +383,31 @@ function remote_ping($mysqli, &$fair)
 	}
 	return $ret;
 }
+
+
+/* Auth Ping **************************************************/
+function remote_auth_ping($mysqli, &$fair)
+{
+	/* Get an award from an upstream server, specified by the local award_id, but
+	 * requested by the upstream award id */
+	$cmd['auth_ping'] = array();
+	$response = remote_query($mysqli, $fair, $cmd);
+	if($response['error'] == 0) {
+		award_sync($mysqli, $fair, $response['get_award']);
+	}
+	return $response['error'];
+}
+
+function remote_handle_auth_ping($mysqli, &$fair, &$data, &$response)
+{
+	global $config;
+	$response['auth_pong'] = array('name' => $config['fair_name'],
+				  'abbrv' => $config['fair_abbreviation'],
+				  'url' => $config['fair_url'] );
+	$response['error'] = 0;
+}
+
+
 
 function remote_handle_old_get_awards($mysqli, &$fair, &$data, &$response)
 {
