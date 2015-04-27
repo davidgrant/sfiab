@@ -133,6 +133,9 @@ case 'sync':
 	if($f['type'] == 'sfiab_upstream') {
 		/* Push our stats to upstream */
 		$response = remote_push_stats_to_fair($mysqli, $f, $config['year']);
+	} else if($f['type'] == 'old_sfiab2_feeder') {
+		/* Get stats from an old sfiab 2 */
+		$response = remote_get_stats_from_fair_old_sfiab2($mysqli, $f, $config['year']);
 	} else {
 		/* Get stats from upstream */
 		$response = remote_get_stats_from_fair($mysqli, $f, $config['year']);
@@ -258,6 +261,7 @@ default:
 			switch($f['type']) {
 			case 'sfiab_feeder':
 			case 'sfiab_upstream':
+			case 'old_sfiab2_feeder':
 				$sync_link = "href=\"#\" onclick=\"fair_sync_stats({$f['id']})\"";
 				break;
 			case 'ysc':

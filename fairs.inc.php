@@ -4,7 +4,8 @@ require_once('project.inc.php');
 
 $fair_types = array('sfiab_feeder' => "Feeder Fair",
 		    'sfiab_upstream' => 'Upstream Fair',
-		    'ysc' => 'Youth Science Canada (Upstream)' );
+		    'ysc' => 'Youth Science Canada (Upstream)',
+		    'old_sfiab2_feeder' => 'Old SFIAB2.0 Feeder Fair');
 
 function fair_load($mysqli, $fair_id, $username=NULL, $data=NULL, $hash=NULL) 
 {

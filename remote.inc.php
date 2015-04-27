@@ -44,13 +44,18 @@ function remote_query($mysqli, &$fair, &$cmd)
 		return $response;
 	}
 
+	/* Set the token and password */
 	$cmd['token'] = $v;
 	$cmd['password'] = $fair['password'];
 
 	debug("remote_query: curl to {$fair['url']}/remote.php  query:".print_r($cmd, true)."\n");
 
-	
-	$post_fields = "d=".urlencode(json_encode($cmd));
+	if($fair['type'] == 'old_sfiab2_feeder') {
+		$post_fields = 'json=';
+	} else {
+		$post_fields = "d=";
+	} 
+	$post_fields .= urlencode(json_encode($cmd));
 
 	$ch = curl_init(); /// initialize a cURL session
 	curl_setopt ($ch, CURLOPT_URL, $fair['url'].'/remote.php');
@@ -373,7 +378,6 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 		}
 	}
 	$result = ($response['error'] == 0) ? 1 : 0;
-	sfiab_log_sync_stats($mysqli, $fair['id'], $result);
 	
 	return $response['error'];
 }
@@ -444,6 +448,31 @@ function remote_handle_auth_ping($mysqli, &$fair, &$data, &$response)
 				  'abbrv' => $config['fair_abbreviation'],
 				  'url' => $config['fair_url'] );
 	$response['error'] = 0;
+}
+
+
+/* OLD: get stats from an old SFIB2 **************************************************/
+
+function remote_get_stats_from_fair_old_sfiab2($mysqli, &$fair, $year)
+{
+	/* We should only ask feeder fairs for stats */
+	if($fair['type'] != 'old_sfiab2_feeder') {
+		return 1;
+	}
+
+	/* Year is stored in award_id */
+	$cmd['get_stats'] = array();
+	$cmd['get_stats']['year'] = $year;
+	$response = remote_query($mysqli, $fair, $cmd);
+
+	if($response['error'] == 0) {
+		if(is_array($response['get_stats'])) {
+			stats_sync($mysqli, $fair, $response['get_stats']);
+		}
+	}
+	$result = ($response['error'] == 0) ? 1 : 0;
+	
+	return $response['error'];
 }
 
 

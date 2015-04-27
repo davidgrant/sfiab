@@ -23,14 +23,13 @@
 $report_fairs_fields = array(
 
 	'fairinfo_name' =>  array(
-		'start_option_group' => 'Fair Information',
+		'start_option_group' => 'Fair Statistics',
 		'name' => 'Fair -- Fair Name',
 		'header' => 'Name',
 		'width' => 38.1 /*mm*/,
 		'table' => 'fairs.name'),
 
 	'fairstats_year' => array (
-		'start_option_group' => 'Fair Statistics',
 		'name' => 'Fair Stats -- Year',
 		'header' => 'Year',
 		'width' => 25.4 /*mm*/,
