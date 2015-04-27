@@ -13,6 +13,26 @@ $mysqli = sfiab_init('committee');
 $u = user_load($mysqli);
 
 
+function get_last_sync($mysqli, $fair_id)
+{
+	global $config;
+	$text = '';
+	$q = $mysqli->query("SELECT time,result FROM log WHERE `year`='{$config['year']}' AND `type`='sync_stats' AND fair_id='$fair_id' ORDER BY `time` DESC LIMIT 1");
+	if($q->num_rows != 1) {
+		$text = 'never';
+	} else {
+		$r = $q->fetch_assoc();
+		$text = date("F j, Y h:ia", strtotime($r['time'])).'<br/>';
+		if($r['result'] == 1) {
+			$text .= '<font color="green">OK</font>';
+		} else {
+			$text .= '<font color="red">failed</font>';
+		}
+	}
+	return $text;
+}
+
+
 $action = '';
 if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
@@ -70,7 +90,7 @@ case 'auth':
 
 
 
-
+case 'saveback':
 case 'save':
 	$id = (int)$_POST['id'];
 	$f = fair_load($mysqli, $id);
@@ -88,14 +108,38 @@ case 'save':
 	}
 	fair_save($mysqli, $f);
 
-	form_ajax_response(array('status'=>0, 'location'=>'c_config_fairs.php'));
+	$ret = array('status'=>0);
+	if($action == 'saveback') {
+		$ret['location'] = 'c_config_fairs.php';
+	}
+	form_ajax_response($ret);
 	exit();
 
 case 'del':
 	/* Delete by id (not cid) and year just to be safe */
 	$id = (int)$_POST['id'];
 	$mysqli->real_query("DELETE FROM fairs WHERE `id`='$id'");
+	form_ajax_response(array('status'=>1, 'location' => 'c_config_fairs.php'));
+	exit();
+
+case 'allstats':
+	remote_queue_get_stats_from_all_fairs($mysqli, $config['year']);
 	form_ajax_response(0);
+	exit();
+
+case 'sync':
+	$id = (int)$_POST['id'];
+	$f = fair_load($mysqli, $id);
+	if($f['type'] == 'sfiab_upstream') {
+		/* Push our stats to upstream */
+		$response = remote_push_stats_to_fair($mysqli, $f, $config['year']);
+	} else {
+		/* Get stats from upstream */
+		$response = remote_get_stats_from_fair($mysqli, $f, $config['year']);
+	}
+
+	$text = get_last_sync($mysqli, $id);
+	print($text);
 	exit();
 }
 
@@ -139,7 +183,8 @@ case 'edit':
 		form_button_with_label($form_id, 'pass', '', 'Generate Random Secret Key');
 		form_text($form_id, 'username', "YSC Username (only for YSC upstream fairs)", $fair['username']);
 		form_submit($form_id, 'save', 'Save', 'Information Saved');
-?>		<a href="c_config_fairs.php" data-ajax="false" data-role="button" data-icon="back" data-theme="r" data-inline="true">Cancel</a>
+		form_submit($form_id, 'saveback', 'Save and Go Back', 'Information Saved', 'g', 'back');
+?>		<a href="c_config_fairs.php" data-ajax="false" data-role="button" data-icon="back" data-theme="r" data-inline="true">Cancel, Go Back</a>
 <?php		form_end($form_id);
 ?>
 		<hr/>
@@ -166,8 +211,14 @@ case 'edit':
 		<li>Enter or generate a secret key.  Both the Upstream and Feeder fair must have the SAME secret key, so generate it on one, and enter it on the other
 		</ul>
 
+		<hr/>
+		<h3>Delete Fair</h3>
 <?php
-
+		$form_id = $page_id.'_del_form';
+		form_begin($form_id, 'c_config_fairs.php');
+		form_hidden($form_id,'id',$fair['id']);
+		form_submit_enabled($form_id, 'del', 'Delete This Fair', 'Deleted', 'r', 'delete', 'Really Delete this fair?');
+		form_end($form_id);
 
 	break;
 
@@ -182,43 +233,48 @@ default:
 <?php		$fairs = fair_load_all($mysqli); ?>
 
 		<h3>Feeder/Upstream Fairs</h3>
-		<p><b>Feeder Fairs</b> are fairs that provide this fair with students.  This fair may export awards to feeder fairs, retrieve winners for those awards, and download fair statistics.
-		<p><b>Upstream Fairs</b> are fairs that this fair can send students to.  This fair can upload winners (of awards downloaded from the upstream fair) back to the upstream fair.
-		<p>Youth Science Canada is a special type of upstream fair that uses a different communication protocol.  Winners uploaded to this fair are registered for the CWSF.
+		<p>Fair Types:
+		<ul><li><b>Feeder Fairs</b> are fairs that provide this fair with students.  This fair may export awards to feeder fairs, retrieve winners for those awards, and download fair statistics.
+		<li><b>Upstream Fairs</b> are fairs that this fair can send students to.  This fair can upload winners (of awards downloaded from the upstream fair) to the upstream fair, and can upload fair statistics.
+		<li><b>Youth Science Canada</b> is a special type of upstream fair that uses a different communication protocol.  Winners uploaded to this fair are registered for the CWSF.
+		</ul>
 
 		<table id="config_fairs" data-role="table" data-mode="none" class="table_stripes">
 		<thead>
 			<tr>
-			<th align="center" width=30%>Fair name</th>
+			<th align="center" width=20%>Fair name</th>
 			<th align="center" width=10%>Type</th>
-			<th align="center" width=5%>Last Stats Sync</th>
+			<th align="center" width=10%>Last Stats Sync</th>
 			<th align="center" width=5%></th>
 		</thead>
 		<tbody>
 <?php
 		$current_type = '';
 		foreach($fairs as $fid=>&$f) { 
-			if($f['type'] == 'sfiab_feeder') {
-				$q = $mysqli->query("SELECT * FROM log WHERE `year`='{$config['year']}' AND `type`='sync_stats' AND `result`='1' AND fair_id='$fid' ORDER BY `time` DESC LIMIT 1");
-				if($q->num_rows != 1) {
-					$last_sync = 'never';
-				} else {
-					$r = $q->fetch_assoc();
-					$last_sync = date("F j, Y h:ia", strtotime($r['time']));
-				}
-			} else {
-				$last_sync = '--';
+
+			$sync_text = get_last_sync($mysqli, $fid);
+
+
+			switch($f['type']) {
+			case 'sfiab_feeder':
+			case 'sfiab_upstream':
+				$sync_link = "href=\"#\" onclick=\"fair_sync_stats({$f['id']})\"";
+				break;
+			case 'ysc':
+				$sync_link = "href=\"c_ysc_stats.php\"";
+				break;
 			}
+
 ?>
 
 			<tr id="<?=$s['id']?>" >
 			<td align="center"><?=$f['name']?></td>
 			<td align="center"><?=$fair_types[$f['type']]?></td>
-			<td align="center"><?=$last_sync?></td>
+			<td align="center"><span id="fair_sync_result_<?=$f['id']?>"><?=$sync_text?></span></td>
 			<td align="left">
 				<div data-role="controlgroup" data-type="horizontal" data-mini="true">
+					<a <?=$sync_link?> data-role="button" data-icon="recycle" data-iconpos="notext" >Sync</a>
 					<a href="c_config_fairs.php?edit=<?=$f['id']?>" data-role="button" data-iconpos="notext" data-icon="gear" data-ajax="false">Edit</a>
-					<a href="#" data-role="button" data-iconpos="notext" data-icon="delete" data-icon="delete" onclick="delete_fair(<?=$f['id']?>)">Delete</a>
 				</div>
 			</td>
 
@@ -244,8 +300,8 @@ default:
 		
 <?php
 		$form_id = $page_id.'_form';
-		form_begin($form_id, 'c_fairs.php');
-		form_button($form_id, 'stats', 'Synchronize Statistics' );
+		form_begin($form_id, 'c_config_fairs.php');
+		form_button($form_id, 'allstats', 'Synchronize All Statistics' );
 		form_end($form_id);
 ?>
 			
@@ -261,19 +317,19 @@ default:
 		
 <script>
 
-/* id is the mysql id, not the cid */
-function delete_fair(id)
-{
-	if(confirm('Really delete this fair?')) {
-		$.post('c_config_fairs.php', { action: "del", id: id }, function(data) { 
-			$("#"+id).remove();
-		});
-	}
-}
-
 function fair_create() {
 	$.post('c_config_fairs.php', { action: "add" }, function(data) {
 		window.location = "c_config_fairs.php?edit="+data;
+	});
+	return false;
+}
+
+function fair_sync_stats(id) {
+	$("#fair_sync_result_"+id).html("");
+	$.post('c_config_fairs.php', { action: "sync", id: id }, function(data) {
+		$("#fair_sync_result_"+id).html(data);
+		
+		
 	});
 	return false;
 }

@@ -139,6 +139,7 @@ function remote_handle_cmd($mysqli, &$fair, &$data)
 	if(array_key_exists('push_award', $data)) remote_handle_push_award($mysqli, $fair, $data, $response);
 	if(array_key_exists('push_winner', $data)) remote_handle_push_winner($mysqli, $fair, $data, $response);
 	if(array_key_exists('get_stats', $data)) handle_get_stats($mysqli,$fair, $data, $response);
+	if(array_key_exists('push_stats', $data)) handle_push_stats($mysqli,$fair, $data, $response);
 	if(array_key_exists('auth_ping', $data)) remote_handle_auth_ping($mysqli, $fair, $data, $response);
 
 	/* Should work */

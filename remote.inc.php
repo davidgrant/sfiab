@@ -328,8 +328,14 @@ function remote_handle_push_winner($mysqli, &$fair, &$data, &$response)
 function handle_get_stats($mysqli, &$fair, &$data, &$response) 
 {
 	$year = (int)$data['get_stats']['year'];
-	$response['get_stats'] = stats_get_export($mysqli, $fair, $year);
-	$response['error'] = 0;
+	/* Only upstream fairs are allowed to get stats from us */
+	if($fair['type'] == 'sfiab_upstream') {
+		$response['get_stats'] = stats_get_export($mysqli, $fair, $year);
+		sfiab_log_sync_stats($mysqli, $fair['id'], 1);
+		$response['error'] = 0;
+	} else {
+		$response['error'] = 1;
+	}
 	return true;
 }
 
@@ -351,6 +357,11 @@ function remote_queue_push_stats_to_fair($mysqli, &$fair, $year)
 /* Ask $fair for their stats and sync the result */
 function remote_get_stats_from_fair($mysqli, &$fair, $year)
 {
+	/* We should only ask feeder fairs for stats */
+	if($fair['type'] != 'sfiab_feeder') {
+		return 1;
+	}
+
 	/* Year is stored in award_id */
 	$cmd['get_stats'] = array();
 	$cmd['get_stats']['year'] = $year;
@@ -365,6 +376,36 @@ function remote_get_stats_from_fair($mysqli, &$fair, $year)
 	sfiab_log_sync_stats($mysqli, $fair['id'], $result);
 	
 	return $response['error'];
+}
+		
+/* Push Stats to upstream fair **************************************************/
+
+function handle_push_stats($mysqli, &$fair, &$data, &$response) 
+{
+	/* Only feeder fairs can push stats to us */
+	if($fair['type'] != 'sfiab_feeder') {
+		$response['error'] = 1;
+		return false;
+	}
+	stats_sync($mysqli, $fair, $data['push_stats']);
+	$response['error'] = 0;
+	sfiab_log_sync_stats($mysqli, $fair['id'], '1');
+	return true;
+}
+
+function remote_push_stats_to_fair($mysqli, &$fair, $year)
+{
+	/* We should only push stats to upstream fairs */
+	if($fair['type'] != 'sfiab_upstream') {
+		return 1;
+	}
+	$cmd['push_stats'] = array();
+	$cmd['push_stats'] = stats_get_export($mysqli, $fair, $year);
+	$response = remote_query($mysqli, $fair, $cmd);
+
+	$result = ($response['error'] == 0) ? 1 : 0;
+	sfiab_log_sync_stats($mysqli, $fair['id'], $result);
+	return $response;
 }
 
 /* Ping (no password required **************************************************/
@@ -392,10 +433,8 @@ function remote_auth_ping($mysqli, &$fair)
 	 * requested by the upstream award id */
 	$cmd['auth_ping'] = array();
 	$response = remote_query($mysqli, $fair, $cmd);
-	if($response['error'] == 0) {
-		award_sync($mysqli, $fair, $response['get_award']);
-	}
-	return $response['error'];
+	$response['auth_pong']['error'] = $response['error'];
+	return $response['auth_pong'];
 }
 
 function remote_handle_auth_ping($mysqli, &$fair, &$data, &$response)

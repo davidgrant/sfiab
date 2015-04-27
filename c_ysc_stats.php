@@ -136,6 +136,8 @@ case 'send':
 	} else {
 		$ret['error'] = 'Update failed';
 	}
+	sfiab_log_sync_stats($mysqli, $f['id'], $ret['status']);
+	
 	$ret['info'] = "The YSC Registration Server said: ".$datastream;
 	form_ajax_response($ret);
 	exit();
