@@ -105,6 +105,9 @@ function conv_db($mysqli, $old_prefix)
 		conv_volunteers($mysqli, $old_prefix, $year);
 	}
 
+	/* Delete any users from year 0 kicking around from the original v3.16 database */
+	$mysqli->query("DELETE FROM users WHERE year='0'");
+
 }
 
 

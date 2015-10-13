@@ -24,14 +24,13 @@ function conv_committee($mysqli, $old_prefix, $year)
 		$password = NULL;
 		$username = strstr($old_u['email'], '@', true);
 
-		$u = user_create($mysqli, $username, $old_u['email'], 'committee', $year, $password);
+		$u = user_create($mysqli, $old_u['username'], $old_u['email'], 'committee', $year, $password);
 
 		$u['phone1'] = $old_u['phonehome'];
 		$u['phone2'] = $old_u['phonecell'];
 		filter_phone($u['phone1']);
 		filter_phone($u['phone2']);
 
-		$u['username'] = NULL;
 		$u['firstname'] = $old_u['firstname'];
 		$u['lastname'] = $old_u['lastname'];
 		$u['salutation'] = $old_u['salutation'];
@@ -39,7 +38,6 @@ function conv_committee($mysqli, $old_prefix, $year)
 		$u['sex'] = $old_u['sex'];
 		$u['new'] = 0;
 		$u['enabled'] = 1;
-
 
 		user_save($mysqli, $u);
 		$c++;
