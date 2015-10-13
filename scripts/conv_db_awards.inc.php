@@ -124,7 +124,8 @@ function conv_winners($mysqli, $old_prefix, $year)
 				continue;
 			}
 			$r1 = $q1->fetch_assoc();
-			print("   Old Prize ID $prize_id doesn't exist in map, but is awarded, and exists: \n");
+			print("   Old Prize ID $prize_id doesn't exist in map, but is awarded, and exists.  Skipping.\n");
+			continue;
 			print_r($r1);
 			exit();
 		}
