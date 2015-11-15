@@ -387,7 +387,7 @@ case 'assign':
 
 $page_id = 'c_judge_score_summary';
 $help = '<p>Judging Scores Summary';
-sfiab_page_begin("Judging Scores Summary", $page_id, $help);
+sfiab_page_begin($u, "Judging Scores Summary", $page_id, $help);
 ?>
 
 

@@ -111,7 +111,7 @@ if(count($attending) == 0) {
 
 $page_id = 'c_user_list';
 
-sfiab_page_begin("User List", $page_id);
+sfiab_page_begin($u, "User List", $page_id);
 
 ?>
 

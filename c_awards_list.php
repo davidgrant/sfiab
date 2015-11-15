@@ -77,7 +77,7 @@ award_update_divisional($mysqli);
 
 $help = 'Use the <button data-icon="gear" data-iconpos="notext" data-inline="true"></button> button to edit the award and prizes.  Drag and drop the <button data-icon="bars" data-iconpos="notext" data-inline="true"></button> icon to reorder the awards.  Drag the [=] handle before each prize to re-order the prizes within the award.  Awards/Prizes at the top of the list will go first in the award ceremony.';
 
-sfiab_page_begin("Edit Awards", $page_id, $help);
+sfiab_page_begin($u, "Edit Awards", $page_id, $help);
 
 ?>
 

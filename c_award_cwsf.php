@@ -183,7 +183,7 @@ case 'register':
 
 
 $help = '<p>';
-sfiab_page_begin("CWSF Registration", $page_id, $help);
+sfiab_page_begin($u, "CWSF Registration", $page_id, $help);
 
 ?>
 

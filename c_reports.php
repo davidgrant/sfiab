@@ -55,7 +55,7 @@ case 'download':
 	exit();
 }
 
-sfiab_page_begin("Download Reports", $page_id, $help);
+sfiab_page_begin($u, "Download Reports", $page_id, $help);
 
 $q = $mysqli->query("SELECT MIN(year) AS M FROM users");
 $u = $q->fetch_assoc();

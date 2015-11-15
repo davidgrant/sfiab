@@ -199,7 +199,7 @@ function do_timeslot_assignments_from_scratch($mysqli)
 
 $page_id = 'c_timeslots_assign';
 
-sfiab_page_begin("Timeslot Assignments", $page_id);
+sfiab_page_begin($u, "Timeslot Assignments", $page_id);
 
 
 

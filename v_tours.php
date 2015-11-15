@@ -57,7 +57,7 @@ $help='
 	then you will be given the option to be matched to your student on this page.
 ';
 
-sfiab_page_begin("Volunteer Tour Selection", $page_id, $help);
+sfiab_page_begin($u, "Volunteer Tour Selection", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

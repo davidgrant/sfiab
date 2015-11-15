@@ -55,7 +55,7 @@ $help = '
 <li><b>Highest Post-Secondary Degree</b> - PhD, MSc, BASc, etc.
 </ul>';
 
-sfiab_page_begin("Judge Personal", $page_id, $help);
+sfiab_page_begin($u, "Judge Personal", $page_id, $help);
 
 ?>
 
@@ -70,7 +70,7 @@ sfiab_page_begin("Judge Personal", $page_id, $help);
 	form_disable_message($page_id, $closed);
 
 	$form_id = $page_id."_form";
-	form_begin($form_id, 'judge_personal.php', $closed);
+	form_begin($form_id, 'j_personal.php', $closed);
 
 	form_text($form_id, 'salutation', "Salutation (This goes on your name tag!)", $u);
 	form_text($form_id, 'firstname', "First Name", $u);

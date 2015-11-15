@@ -60,7 +60,7 @@ $help = "
 </ul>
 ";
 
-sfiab_page_begin("Project Information", $page_id, $help);
+sfiab_page_begin($u, "Project Information", $page_id, $help);
 
 ?>
 
@@ -91,7 +91,7 @@ sfiab_page_begin("Project Information", $page_id, $help);
 	<h3>Project Information</h3>
 <?php	
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_project.php', $closed);
+	form_begin($form_id, 's_project.php', $closed);
 	form_text($form_id, 'title', "Title", $p);
 	form_select($form_id, 'challenge_id', "Challenge", $chals_data, $p);
 	form_label($form_id, 'cat_id', 'Age Category', $cat_name);

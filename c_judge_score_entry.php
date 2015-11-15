@@ -131,7 +131,7 @@ case 'save':
 
 $page_id = 'c_judge_score_entry';
 $help = '<p>Enter Judging Scores';
-sfiab_page_begin("Enter Judging Scores", $page_id, $help);
+sfiab_page_begin($u, "Enter Judging Scores", $page_id, $help);
 ?>
 
 

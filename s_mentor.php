@@ -51,7 +51,7 @@ case 'save':
 		$mid = mentor_create($mysqli, $p['pid']);
 		$p['num_mentors'] = 1;
 		project_save($mysqli, $p);
-		form_ajax_response(array('status'=>0, 'location'=>'student_mentor.php'));
+		form_ajax_response(array('status'=>0, 'location'=>'s_mentor.php'));
 		exit();
 	}
 
@@ -89,7 +89,7 @@ case 'add':
 		$p['num_mentors'] += 1;
 		project_save($mysqli, $p);
 		incomplete_check($mysqli, $fields, $u, $page_id, true);
-		form_ajax_response(array('status'=>0, 'location'=>'student_mentor.php'));
+		form_ajax_response(array('status'=>0, 'location'=>'s_mentor.php'));
 	} else {
 		form_ajax_response(array('status'=>0, 'error'=>'Limit of 10 mentors reached'));
 	}
@@ -133,7 +133,7 @@ $help = '
 ';
 
 
-sfiab_page_begin("Student Personal", $page_id, $help);
+sfiab_page_begin($u, "Student Personal", $page_id, $help);
 
 $num_mentors = $p['num_mentors'];
 ?>
@@ -160,7 +160,7 @@ $num_mentors = $p['num_mentors'];
 		$mentors = 1;
 	}
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_mentor.php', $closed);
+	form_begin($form_id, 's_mentor.php', $closed);
 	form_yesno($form_id, 'num_mentors', "Were you assisted by mentors in doing this project?", $mentors, true);
 	form_submit($form_id, 'save', 'Save', 'Mentor Info Saved');
 	form_end($form_id);
@@ -171,7 +171,7 @@ $num_mentors = $p['num_mentors'];
 		$x++;
 		$form_id = $page_id.'_form_'.$mid;
 		print("<div id=\"mentor_div_$mid\"><h3>Mentor $x</h3>");
-		form_begin($form_id, 'student_mentor.php', $closed);
+		form_begin($form_id, 's_mentor.php', $closed);
 		form_text($form_id, "firstname$mid", "First Name", $u['firstname']);
 		form_text($form_id, "lastname$mid", "Last Name", $u['lastname']);
 		form_text($form_id, "email$mid", "Email", $u['email'], 'email');
@@ -195,7 +195,7 @@ $num_mentors = $p['num_mentors'];
 	}
 
 	$form_id = $page_id.'_add_form';
-	form_begin($form_id, 'student_mentor.php', $closed);
+	form_begin($form_id, 's_mentor.php', $closed);
 	form_button($form_id, 'add', 'Add A Mentor', 'Add A Mentor');
 	form_end($form_id);
 ?>
@@ -205,7 +205,7 @@ $num_mentors = $p['num_mentors'];
 <script>
 function mentor_delete(id) {
 	if(confirm('Really delete this mentor?') == false) return false;
-	$.post('student_mentor.php', { action: "del", mid: id }, function(data) {
+	$.post('s_mentor.php', { action: "del", mid: id }, function(data) {
 		if(data.status == 0) {
 			$("#mentor_div_"+id).hide();
 		}

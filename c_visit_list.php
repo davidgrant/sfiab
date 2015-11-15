@@ -239,7 +239,7 @@ $page_id = 'c_visit_list';
 $help = '<p>';
 
 
-sfiab_page_begin("Visit List", $page_id, $help);
+sfiab_page_begin($u, "Visit List", $page_id, $help);
 
 ?>
 

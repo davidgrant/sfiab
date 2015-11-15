@@ -172,7 +172,7 @@ function reports_students_registration_fee($mysqli, &$report, $field, $text)
 	return (float)$regfee;
 }
 
-function reporst_students_ethics_forms_required($mysqli, &$report, $field, $text)
+function reports_students_ethics_forms_required($mysqli, &$report, $field, $text)
 {
 	$p = project_load($mysqli, $text);
 	$e =& $p['ethics'];
@@ -609,7 +609,7 @@ $report_students_fields = array(
 		'header' => 'Forms',
 		'width' => 1,
 		'table' => 'users.s_pid',
-		'exec_function' => 'reporst_students_ethics_forms_required'),
+		'exec_function' => 'reports_students_ethics_forms_required'),
 		
 	/* Awards ============================================================*/
 

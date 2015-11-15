@@ -28,7 +28,7 @@ $fairs = fair_load_all($mysqli);
 
 
 
-sfiab_page_begin("Sync Fair Data", $page_id);
+sfiab_page_begin($u, "Sync Fair Data", $page_id);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

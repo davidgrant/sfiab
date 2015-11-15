@@ -28,7 +28,7 @@ $page_id = 'c_assign_project_numbers';
 $help = '<p>';
 
 
-sfiab_page_begin("Assign Project Numbers", $page_id, $help);
+sfiab_page_begin($u, "Assign Project Numbers", $page_id, $help);
 
 $projects = projects_load_all($mysqli, true);
 

@@ -145,7 +145,7 @@ case 'send':
 
 
 $help = '<p>';
-sfiab_page_begin("$ysc_name Affiliation Statistics", $page_id, $help);
+sfiab_page_begin($u, "$ysc_name Affiliation Statistics", $page_id, $help);
 
 ?>
 

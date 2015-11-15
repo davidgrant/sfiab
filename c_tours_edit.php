@@ -77,7 +77,7 @@ case 'edit':
 	$tid = (int)$_GET['edit'];
 	$page_id = 'c_tours_edit';
 	$help = '<p>';
-	sfiab_page_begin("Edit Tour", $page_id, $help);
+	sfiab_page_begin($u, "Edit Tour", $page_id, $help);
 
 ?>
 	<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -115,7 +115,7 @@ default:
 
 	$help = '<p>';
 
-	sfiab_page_begin("Edit Tours", $page_id, $help);
+	sfiab_page_begin($u, "Edit Tours", $page_id, $help);
 
 ?>
 

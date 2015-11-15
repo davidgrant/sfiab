@@ -8,12 +8,15 @@ if(array_key_exists('p', $_GET)) {
 
 require_once('common.inc.php');
 require_once('form.inc.php');
+require_once('user.inc.php');
 
 
 $mysqli = sfiab_init(NULL);
 sfiab_load_config($mysqli);
 
-sfiab_page_begin('Welcome', 'welcome');
+$u = user_load($mysqli);
+
+sfiab_page_begin($u, 'Welcome', 'welcome');
 
 //$login_hash = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
 //$_SESSION['login_hash'] = $login_hash;

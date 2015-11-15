@@ -84,7 +84,7 @@ $help = '
 <li><b>School</b> - If your school doesn\'t appear in the list, please contact the committee to have it added.
 </ul>';
 
-sfiab_page_begin("Student Personal", $page_id, $help);
+sfiab_page_begin($u, "Student Personal", $page_id, $help);
 
 ?>
 
@@ -106,7 +106,7 @@ sfiab_page_begin("Student Personal", $page_id, $help);
 
 	$d = array("A"=>'San', "B"=>"Los", "C"=>"Vanc", "D"=>"Tor");
 
-	form_begin($form_id, 'student_personal.php', $closed);
+	form_begin($form_id, 's_personal.php', $closed);
 	form_text($form_id, 'firstname', "First Name", $u);
 	form_text($form_id, 'lastname', "Last Name", $u);
 	form_text($form_id, 'pronounce', "Name Pronunciation Key", $u);

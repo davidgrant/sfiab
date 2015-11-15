@@ -4,7 +4,7 @@ require_once('awards.inc.php');
 
 $mysqli = sfiab_init(NULL);
 
-sfiab_page_begin("Winners", "winners");
+sfiab_page_begin($u, "Winners", "winners");
 
 /* Load year, cast to int */
 $year = array_key_exists('year', $_GET) ? (int)$_GET['year'] : '';

@@ -41,7 +41,7 @@ $help='
 <p>Some volunteer positions are provided with a tshirt.
 ';
 
-sfiab_page_begin("Volunteer Registration Options", $page_id, $help);
+sfiab_page_begin($u, "Volunteer Registration Options", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

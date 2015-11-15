@@ -22,7 +22,7 @@ if(array_key_exists('switchto', $_GET)) {
 
 $page_id = 'c_judging_list';
 
-sfiab_page_begin("Judge List", $page_id);
+sfiab_page_begin($u, "Judge List", $page_id);
 
 ?>
 

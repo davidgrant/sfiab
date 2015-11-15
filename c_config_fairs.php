@@ -157,7 +157,7 @@ case 'edit':
 	$id = (int)$_GET['edit'];
 	$page_id = 'c_config_edit_fair';
 	$help = '<p>';
-	sfiab_page_begin("Edit Fairs", $page_id, $help);
+	sfiab_page_begin($u, "Edit Fairs", $page_id, $help);
 
 ?>
 	<div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 
@@ -229,7 +229,7 @@ default:
 	$page_id = 'c_config_fairs';
 	$help = '<p>';
 
-	sfiab_page_begin("Edit Fairs", $page_id, $help);
+	sfiab_page_begin($u, "Edit Fairs", $page_id, $help);
 ?>
 	<div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 
 

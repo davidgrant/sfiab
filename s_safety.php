@@ -48,7 +48,7 @@ incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
 
 $help = '<p>Please complete all the questions on this page about safety';
 
-sfiab_page_begin("Project Safety", $page_id, $help);
+sfiab_page_begin($u, "Project Safety", $page_id, $help);
 ?>
 
 <?php
@@ -167,7 +167,7 @@ function policy($name, $text, $link = '')
 	
 	$form_id = $page_id.'_form';
 ?>
-	<form action="student_safety.php" method="post" data-ajax="false" id="<?=$form_id?>">
+	<form action="s_safety.php" method="post" data-ajax="false" id="<?=$form_id?>">
 
 <?php 	if(count($incomplete_fields) == 0 || (count($incomplete_fields) == 1 && $incomplete_fields[0] == 'agree') ) {
 ?>

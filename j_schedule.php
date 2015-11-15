@@ -18,7 +18,7 @@ $page_id = 'j_schedule';
 $help = '
 <p>';
 
-sfiab_page_begin("Judge Schedule", $page_id, $help);
+sfiab_page_begin($u, "Judge Schedule", $page_id, $help);
 
 $timeslots = timeslots_load_all($mysqli);
 

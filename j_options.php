@@ -74,7 +74,7 @@ $dinner_help
 
 
 
-sfiab_page_begin("Options", $page_id, $help);
+sfiab_page_begin($u, "Options", $page_id, $help);
 
 ?>
 
@@ -91,7 +91,7 @@ sfiab_page_begin("Options", $page_id, $help);
 	form_disable_message($page_id, $closed);
 
 	$form_id=$page_id.'_form';
-	form_begin($form_id,'judge_options.php', $closed);
+	form_begin($form_id,'j_options.php', $closed);
 ?>	
 	<h3>Judging Options</h3> 
 <?php	form_yesno($form_id, 'j_willing_lead', "Are you willing to be the team-lead on your judging team?", $u, true);

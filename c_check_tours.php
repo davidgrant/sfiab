@@ -18,7 +18,7 @@ $help = '
 <ul>
 </ul>';
 
-sfiab_page_begin("Sanity Check Tours", $page_id, $help);
+sfiab_page_begin($u, "Sanity Check Tours", $page_id, $help);
 
 ?>
 

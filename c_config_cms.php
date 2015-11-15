@@ -60,7 +60,7 @@ case 'save':
 
 }
 
-sfiab_page_begin("Edit Page Text", $page_id);
+sfiab_page_begin($u, "Edit Page Text", $page_id);
 
 ?>
 

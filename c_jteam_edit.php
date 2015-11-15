@@ -183,7 +183,7 @@ foreach($isef_divs as $id=>$d) {
 }
 $help .= '</ul>';
 
-sfiab_page_begin("Judging Teams List", $page_id, $help);
+sfiab_page_begin($u, "Judging Teams List", $page_id, $help);
 
 /* 		
 		<div style="display: inline-block; vertical-align: top"> */

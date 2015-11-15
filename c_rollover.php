@@ -15,7 +15,7 @@ $help = '
 <ul>
 </ul>';
 
-sfiab_page_begin("Rollover Fair Year", $page_id, $help);
+sfiab_page_begin($u, "Rollover Fair Year", $page_id, $help);
 
 ?>
 

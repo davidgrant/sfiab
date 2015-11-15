@@ -56,7 +56,7 @@ case 'save':
 
 $page_id = 'c_config_variables';
 $help = '<p>SFIAB Configuration';
-sfiab_page_begin("SFIAB Configuration", $page_id, $help);
+sfiab_page_begin($u, "SFIAB Configuration", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

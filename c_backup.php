@@ -182,7 +182,7 @@ case 'restore':
 
 $page_id = "c_backup";
 $help = "<p>Backup and Restore";
-sfiab_page_begin("Backup and Restore", $page_id, $help);
+sfiab_page_begin($u, "Backup and Restore", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

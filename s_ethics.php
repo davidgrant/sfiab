@@ -43,7 +43,7 @@ incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
 
 $help = '<p>Please complete all the questions on this page about ethics';
 
-sfiab_page_begin("Project Ethics", $page_id, $help);
+sfiab_page_begin($u, "Project Ethics", $page_id, $help);
 
 function question($name, $text, $help, $v)
 {
@@ -155,7 +155,7 @@ function policy($name, $text, $link = '')
 
 	$form_id = $page_id.'_form';
 ?>
-	<form action="student_ethics.php" method="post" data-ajax="false" id="<?=$form_id?>">
+	<form action="s_ethics.php" method="post" data-ajax="false" id="<?=$form_id?>">
 
 	<h3>Ethics Information and Forms</h3>
 

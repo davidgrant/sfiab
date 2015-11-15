@@ -15,7 +15,7 @@ $u = user_load($mysqli);
 
 $page_id = 'c_volunteers_list';
 
-sfiab_page_begin("Volunteer List", $page_id);
+sfiab_page_begin($u, "Volunteer List", $page_id);
 
 ?>
 

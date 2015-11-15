@@ -13,6 +13,8 @@ $closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_awards';
 
+sfiab_check_abort_in_preregistration($u, $page_id);
+
 $action = '';
 if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
@@ -68,7 +70,7 @@ $help = '
 <p>There are a number of special awards that each project can self-nominate for.  You can nominate your project for up to 4 awards.
 ';
 
-sfiab_page_begin("Student Award Nomination", $page_id, $help);
+sfiab_page_begin($u, "Student Award Nomination", $page_id, $help);
 
 ?>
 
@@ -81,7 +83,7 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 		/* Category hasn't been selected yet */
 ?>
 		<h3>Special Award Selection</h3>
-		<p>Please select your project age category on the <a href="student_project.php" data-ajax="false">Project Info</a> page first.
+		<p>Please select your project age category on the <a href="s_project.php" data-ajax="false">Project Info</a> page first.
 		</div></div>
 <?php
 		sfiab_page_end();
@@ -95,7 +97,7 @@ sfiab_page_begin("Student Award Nomination", $page_id, $help);
 	$awards = award_load_special_for_project_select($mysqli, $p);
 
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'student_awards.php', $closed);
+	form_begin($form_id, 's_awards.php', $closed);
 ?>
 	<p>Please choose up to 4 awards for self-nomination.  If you don't wish to self-nominate for any awards, select the first option below.
 <?php

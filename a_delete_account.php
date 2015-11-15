@@ -40,7 +40,7 @@ case 'delete':
 
 $page_id = 'a_delete_account';
 
-sfiab_page_begin("Delete Account", $page_id);
+sfiab_page_begin($u, "Delete Account", $page_id);
 ?>
 
 <div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 

@@ -7,7 +7,7 @@ $mysqli = sfiab_init(NULL, true);
 
 $u = user_load($mysqli);
 
-sfiab_page_begin("Change Password", "a_change_password");
+sfiab_page_begin($u, "Change Password", "a_change_password");
 
 ?>
 

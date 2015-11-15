@@ -59,7 +59,7 @@ aren\'t perfect matches available.  That is, if you select Biochemistry--Medicin
 <li><b>Age Category</b> - You may choose an age category you prefer to judge.  This is not a guarantee you will judge this age group, but we will try.
 </ul>';
 
-sfiab_page_begin("Expertise", $page_id, $help);
+sfiab_page_begin($u, "Expertise", $page_id, $help);
 
 ?>
 
@@ -83,7 +83,7 @@ sfiab_page_begin("Expertise", $page_id, $help);
 	$hidden = "style=\"display:none\"";
 
 	$form_id = $page_id.'_form';
-	form_begin($form_id, 'judge_expertise.php', $closed);
+	form_begin($form_id, 'j_expertise.php', $closed);
 ?>
 		<h3>Sponsor Judges</h3>
 <?php

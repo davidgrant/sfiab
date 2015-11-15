@@ -181,7 +181,7 @@ case 'change_pw':
 
 
 
-sfiab_page_begin("Edit User", $page_id, $help);
+sfiab_page_begin($u, "Edit User", $page_id, $help);
 
 form_page_begin($page_id, array());
 ?>

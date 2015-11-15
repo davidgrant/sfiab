@@ -13,7 +13,7 @@ $u = user_load($mysqli);
 
 $page_id = 'c_config';
 
-sfiab_page_begin("Configuration", $page_id);
+sfiab_page_begin($u, "Configuration", $page_id);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

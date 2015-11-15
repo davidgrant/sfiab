@@ -147,7 +147,7 @@ case 'delete':
 
 
 
-sfiab_page_begin("Edit Reports", $page_id, $help);
+sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

@@ -50,7 +50,7 @@ case 'save':
 	project_save($mysqli, $p);
 
 	incomplete_check($mysqli, $ret, $u, $page_id, true);
-	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'location'=>'student_partner.php'));
+	form_ajax_response(array('status'=>0, 'missing'=>$ret, 'location'=>'s_partner.php'));
 	exit();
 
 case 'invite':
@@ -118,7 +118,7 @@ case 'invite':
 					$mysqli->real_query("INSERT INTO partner_requests (`from_uid`,`to_uid`) VALUES
 								('{$u['uid']}', '{$r['uid']}')");
 
-					form_ajax_response(array('status'=>0, 'location'=>'student_partner.php'));
+					form_ajax_response(array('status'=>0, 'location'=>'s_partner.php'));
 					exit();
 					/* Redo invites query */
 //					$need_sent_reload = true;
@@ -229,7 +229,7 @@ $help = '<ul><li><b>Number of Students</b> - Only single and pair projects are e
 /* Recompute incomplete fields for this page before printing the leftnav */
 incomplete_check($mysqli, $fields, $u, $page_id, true);
 
-sfiab_page_begin("Project Partner", $page_id, $help);
+sfiab_page_begin($u, "Project Partner", $page_id, $help);
 
 ?>
 
@@ -265,7 +265,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			<p>If you <b>reject</b> this request, nothing will
 			happen except that the request will be deleted.
 
-			<form action="student_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
+			<form action="s_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
 				
 			<div class="ui-field-contain">
 				<button id="<?$page_id?>_cancel_<?=$i?>" name="action" value="accept_request" type="submit" data-inline="true" data-theme="g" <?=$d?>>
@@ -292,7 +292,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 	/* Put this way up here so we can use it's error div for the entire
 	 * page */
 	$form_id = $page_id.'_num_students_form';
-	form_begin($form_id, 'student_partner.php', $closed);
+	form_begin($form_id, 's_partner.php', $closed);
 	?>
 
 
@@ -328,7 +328,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			$v = '';
 
 			$form_incomplete_fields[] = 'un';
-			form_begin($this_form_id, 'student_partner.php', $closed);
+			form_begin($this_form_id, 's_partner.php', $closed);
 			form_text($this_form_id, 'un', 'Username', $v);
 			form_submit($this_form_id, 'invite', 'Invite', 'Invite');
 			form_end($this_form_id);
@@ -352,7 +352,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			$button_id = "cancel_submit_$i";
 
 			$v = "{$this_u['name']}<br/>({$this_u['username']})";
-?>			<form action="student_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
+?>			<form action="s_partner.php" method="post" data-ajax="false" id="<?=$this_form_id?>">
 				
 			<div class="ui-field-contain-wide ui-field-contain">
 				<label class="error" for="<?$page_id?>_cancel_<?=$i?>"><?=$v?></label>
@@ -389,7 +389,7 @@ sfiab_page_begin("Project Partner", $page_id, $help);
 			$button_text = "Remove from Project";
 		}
 ?>
-		<form action="student_partner.php" method="post" data-ajax="false">
+		<form action="s_partner.php" method="post" data-ajax="false">
 			<div class="ui-field-contain ui-field-contain-wide">
 				<label for="<?$page_id?>_remove_<?=$i?>"><?=$name?></label>
 				<button id="<?=$form_id?>_form_submit_<?=$i?>" type="submit" data-inline="true" data-theme="r" <?=$button_disabled?> <?=$d?>>

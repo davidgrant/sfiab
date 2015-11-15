@@ -41,7 +41,7 @@ case 'qstart':
 }
 
 
-sfiab_page_begin("Email Queue", $page_id, $help);
+sfiab_page_begin($u, "Email Queue", $page_id, $help);
 ?>
 
 

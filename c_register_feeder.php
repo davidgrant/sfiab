@@ -17,7 +17,7 @@ $help = '
 <ul>
 </ul>';
 
-sfiab_page_begin("Register Participants from Feeder Fairs", $page_id, $help);
+sfiab_page_begin($u, "Register Participants from Feeder Fairs", $page_id, $help);
 
 function get_new_users_for_prize($mysqli, &$all_users, &$award, &$prize)
 {

@@ -13,7 +13,7 @@ $u = user_load($mysqli);
 $page_id = 'c_students';
 
 
-sfiab_page_begin("Students", $page_id);
+sfiab_page_begin($u, "Students", $page_id);
 
 ?>
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -125,6 +125,11 @@ sfiab_page_begin("Students", $page_id);
 	<li><a href="c_input_signature_forms.php" data-rel="external" data-ajax="false">Input Received Signature Forms</a></li>
 	<li><a href="c_assign_project_numbers.php" data-rel="external" data-ajax="false">Assign Project Numbers</a></li>
 	<li><a href="" data-rel="external" data-ajax="false">Floorplanning</a></li>
+	</ul>
+
+	<h3>Ethics Approval</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_input_ethics.php" data-rel="external" data-ajax="false">Input Ethics Approval for Projects</a></li>
 	</ul>
 
 	<h3>Visit Lists</h3> 

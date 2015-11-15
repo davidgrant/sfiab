@@ -26,6 +26,8 @@ $tshirt_sizes = array('none' => 'None',
 			'medium' => 'Medium',
 			'large' => 'Large',
 			'xlarge' => 'X-Large' );
+
+$pages_disabled_in_preregistration = array ('s_tours', 's_awards','s_signature' );
 		
 
 function sfiab_db_connect()
@@ -295,30 +297,49 @@ function sfiab_left_nav_incomplete_count($page_id)
 	}
 	return $count;
 }
-function sfiab_print_left_nav_menu_entries($current_page_id, $menu)
+function sfiab_print_left_nav_menu_entries(&$u, $current_page_id, $menu)
 {
+	/* $u could be NULL! */
+	global $pages_disabled_in_preregistration;
+
 	foreach($menu as $id=>$d) {
 
 		if($d === NULL) continue;
-		$sel = ($current_page_id == $id) ? 'data-theme="a"' : ''; 
-		$e = 'data-rel="external" data-ajax="false"';
+
+		/* Disable some entries if in pregregistration mode */
+		$cl = ($current_page_id == $id) ? 'class="ui-li-selected"' : ''; 
+		$disable_link = false;
+		if(is_array($u) && sfiab_preregistration_is_open($u)) {
+			if(in_array($id, $pages_disabled_in_preregistration)) {
+				$cl = 'class="ui-li-disabled"';
+				$disable_link = true;
+			}
+		}
 
 		$theme = ($id == 'c_editing') ? 'data-theme="l"' : '';
 
 		$count = sfiab_left_nav_incomplete_count($id);
 		$style = ($count == 0) ? 'style="display: none;"' : '';
 		$incomplete = "<span $style class=\"ui-li-count\">$count</span>";
+		/* Apply $sel to the <li> and the <a> so it actually shows up */
 ?>
-		<li data-icon="false" <?=$sel?> <?=$theme?> >
-			<a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$e?> data-transition="fade" data-inline="true" >
-				<?=$d[0]?><?=$incomplete?>
-			</a>
+		<li data-icon="false" <?=$cl?> <?=$theme?> >
+<?php			if($disable_link) { ?>
+				<span class="entry"><?=$d[0]?><?=$incomplete?></span>
+<?php			} else { ?>
+				<a id="left_nav_<?=$id?>" href="<?=$d[1]?>" <?=$cl?> data-rel="external" data-ajax="false" data-transition="fade" data-inline="true" >
+					<?=$d[0]?><?=$incomplete?>
+				</a>
+<?php			} ?>				
 		</li>
 <?php	} 
 }
 
-function sfiab_print_left_nav_menu($menu_id, $text, $current_page_id, $menu)
+
+function sfiab_print_left_nav_menu(&$u, $menu_id, $text, $current_page_id, $menu)
 {
+	/* $u could be NULL! */
+
 	/* Count all incomplete */
 	$count = 0;
 	foreach($menu as $id=>$d) {
@@ -331,15 +352,17 @@ function sfiab_print_left_nav_menu($menu_id, $text, $current_page_id, $menu)
 ?>
 	<div id="<?=$menu_id?>" data-role="collapsible" data-inset="true" data-collapsed="<?=$collapsed?>" data-mini="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" class="ui-shadow ui-alt-icon ui-nodisc-icon">
 		<h3><?=$text?><?=$incomplete?></h3>
-		<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false">
-			<?=sfiab_print_left_nav_menu_entries($current_page_id, $menu);?>
+		<ul data-role="listview" class="jqm-list ui-alt-icon ui-nodisc-icon" data-inset="false" >
+			<?=sfiab_print_left_nav_menu_entries($u, $current_page_id, $menu);?>
 		</ul>
 	</div>
 <?php
 }
 
-function sfiab_print_left_nav($menu, $current_page_id="")
+function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 {
+	/* $u could be NULL! */
+
 	global $config;
 	$main_menu = array(
 			'welcome' => array('Welcome', 'index.php#welcome'),
@@ -349,29 +372,29 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			'contact' => array('Contact Us', 'index.php#contact'),
 		);
 
-	$student_menu = array('s_home' => array('Student Home', 'student_main.php'),
-			      's_personal' => array('Personal Info', 'student_personal.php'),
-			      's_emergency' => array('Emergency Contact', 'student_emergency.php'),
-			      's_reg_options' => array('Options', 'student_reg_options.php'),
-			      's_tours' => array('Tours', 'student_tours.php'),
-			      's_partner' => array('Partner', 'student_partner.php'),
-			      's_project' => array('Project Info', 'student_project.php'),
-			      's_ethics' => array('Project Ethics', 'student_ethics.php'),
-			      's_safety' => array('Project Safety', 'student_safety.php'),
-			      's_mentor' => array('Mentor Info', 'student_mentor.php'),
-			      's_awards' => array('Award Selection', 'student_awards.php'),
-			      's_signature' => array('Signature Form', 'student_signature.php'),
+	$student_menu = array('s_home' => array('Student Home', 's_main.php'),
+			      's_personal' => array('Personal Info', 's_personal.php'),
+			      's_emergency' => array('Emergency Contact', 's_emergency.php'),
+			      's_reg_options' => array('Options', 's_reg_options.php'),
+			      's_tours' => array('Tours', 's_tours.php'),
+			      's_partner' => array('Partner', 's_partner.php'),
+			      's_project' => array('Project Info', 's_project.php'),
+			      's_ethics' => array('Project Ethics', 's_ethics.php'),
+			      's_safety' => array('Project Safety', 's_safety.php'),
+			      's_mentor' => array('Mentor Info', 's_mentor.php'),
+			      's_awards' => array('Award Selection', 's_awards.php'),
+			      's_signature' => array('Signature Form', 's_signature.php'),
 			      );
 	if(!$config['tours_enable']) {
 		unset($student_menu['s_tours']);
 	}
 
-	$judge_menu = array('j_home' => array('Judge Home', 'judge_main.php'),
-			    'j_personal' => array('Personal Info', 'judge_personal.php'),
-			    'j_options' => array('Judging Options', 'judge_options.php'),
-			    'j_expertise' => array('Judging Expertise', 'judge_expertise.php'),
-			    'j_mentorship' => array('Mentorship', 'judge_mentorship.php'),
-			    'j_schedule' => array('Judging Assignments', 'judge_schedule.php'),
+	$judge_menu = array('j_home' => array('Judge Home', 'j_main.php'),
+			    'j_personal' => array('Personal Info', 'j_personal.php'),
+			    'j_options' => array('Judging Options', 'j_options.php'),
+			    'j_expertise' => array('Judging Expertise', 'j_expertise.php'),
+			    'j_mentorship' => array('Mentorship', 'j_mentorship.php'),
+			    'j_schedule' => array('Judging Assignments', 'j_schedule.php'),
 			    );
 
 	$volunteer_menu = array('v_home' => array('Volunteer Home', 'v_main.php'),
@@ -408,6 +431,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			    'c_students' => array('Students / Projects', 'c_students.php'),
 			    'c_assign_project_numbers' => NULL,
 			    'c_input_signature_forms' => NULL,
+			    'c_input_ethics' => NULL,
 			    'c_tours' => array('Tours', 'c_tours.php'),
 			    'c_volunteers' => array('Volunteers', 'c_volunteers.php'),
 			    'c_user_list' => NULL,
@@ -435,7 +459,6 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 
 	$user_edit_menu = array ('c_editing' => array('Return To Your User', 'c_user_list.php?return=1'),
 		);
-
 ?>
 
 	<div id="leftnav" data-role="panel" class="leftnav_panel" data-position="left" data-display="overlay" data-theme="a">
@@ -448,12 +471,12 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 		$editing_another_user = $_SESSION['edit_uid'];
 ?>
 		<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
-		<?=sfiab_print_left_nav_menu_entries($current_page_id, $user_edit_menu, true);?>
+		<?=sfiab_print_left_nav_menu_entries($u, $current_page_id, $user_edit_menu, true);?>
 		</ul>
 <?php
 		$roles = $_SESSION['edit_roles'];
 	} else  {
-		sfiab_print_left_nav_menu('leftnav_main', 'Main Menu', $current_page_id, $main_menu);
+		sfiab_print_left_nav_menu($u, 'leftnav_main', 'Main Menu', $current_page_id, $main_menu);
 		if(!sfiab_logged_in()) 
 			$roles = array();
 		else 
@@ -461,26 +484,26 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 	}
 
 	if(in_array('student', $roles)) 
-		sfiab_print_left_nav_menu('leftnav_student', 'Student Menu', $current_page_id, $student_menu);
+		sfiab_print_left_nav_menu($u, 'leftnav_student', 'Student Menu', $current_page_id, $student_menu);
 
 	if(in_array('judge', $roles)) 
-		sfiab_print_left_nav_menu('leftnav_judge', 'Judge Menu', $current_page_id, $judge_menu);
+		sfiab_print_left_nav_menu($u, 'leftnav_judge', 'Judge Menu', $current_page_id, $judge_menu);
 
 	if(in_array('committee', $roles)) 
-		sfiab_print_left_nav_menu('leftnav_committee', 'Committee Menu', $current_page_id, $committee_menu);
+		sfiab_print_left_nav_menu($u, 'leftnav_committee', 'Committee Menu', $current_page_id, $committee_menu);
 
 	if(in_array('volunteer', $roles)) 
-		sfiab_print_left_nav_menu('leftnav_committee', 'Volunteer Menu', $current_page_id, $volunteer_menu);
+		sfiab_print_left_nav_menu($u, 'leftnav_volunteer', 'Volunteer Menu', $current_page_id, $volunteer_menu);
 
 	if($editing_another_user == 0) {
 
 		if(sfiab_logged_in())
-			sfiab_print_left_nav_menu('leftnav_account', 'Account Menu', $current_page_id, $account_menu);
+			sfiab_print_left_nav_menu($u, 'leftnav_account', 'Account Menu', $current_page_id, $account_menu);
 ?>
 		<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
 <?php
 		if(sfiab_logged_in()) {
-			sfiab_print_left_nav_menu_entries($current_page_id, $logout_menu, true);
+			sfiab_print_left_nav_menu_entries($u, $current_page_id, $logout_menu, true);
 ?>
 			<script>
 				$("#left_nav_logout").on("click", function(event, ui) {
@@ -492,7 +515,7 @@ function sfiab_print_left_nav($menu, $current_page_id="")
 			</script>
 <?php		
 		} else {
-			sfiab_print_left_nav_menu_entries($current_page_id, $login_menu, true);
+			sfiab_print_left_nav_menu_entries($u, $current_page_id, $login_menu, true);
 		}
 	}
 ?>
@@ -574,11 +597,11 @@ function output_end()
 <?php
 }
 
-function sfiab_page_begin($title, $page_id="", $help="")
+function sfiab_page_begin(&$u, $title, $page_id="", $help="")
 {
 	output_start($title);
 	sfiab_print_header($page_id);
-	sfiab_print_left_nav($title, $page_id);
+	sfiab_print_left_nav($u, $title, $page_id);
 	if($help != "") {
 		sfiab_print_help_panel($page_id, $help);
 	}
@@ -832,18 +855,25 @@ function i18n($text)
 	return $text;
 }
 
-
-/* Is registration open for this user? reads the customer user override first
- * then uses the global date */
-function sfiab_registration_is_closed($u, $role=NULL)
+/* Returns:
+ * -2 registration isn't open yet
+ * -1 registration is closed
+ * 1 registration is open
+ * 2 preregistration is open */
+function sfiab_registration_status($u, $role=NULL)
 {
 	global $config;
 	$reg_close_date = '';
 
 	$now = date( 'Y-m-d H:i:s' );
 
+	$prereg_open_date = NULL;
+
 	if($role !== NULL) {
 		if($role == 'student') {
+			if($config['preregistration_enable']) {
+				$prereg_open_date = $config['date_student_preregistration_opens'];
+			}
 			$reg_open_date = $config['date_student_registration_opens'];
 			$reg_close_date = $config['date_student_registration_closes'];
 		} else if ($role == 'judge') {
@@ -854,13 +884,13 @@ function sfiab_registration_is_closed($u, $role=NULL)
 			$reg_open_date = $config['date_judge_registration_opens'];
 			$reg_close_date = $config['date_judge_registration_closes'];
 		} else {
-			return false;
+			return 1; /* Open */
 		}
 	} else {
-		/* Registration is never closed for a committee editting a user */
+		/* Registration is always open for a committee editting a user */
 		if(sfiab_session_is_active()) {
 			if(array_key_exists('edit_uid', $_SESSION)) {
-				return false;
+				return 1; /* Open */
 			}
 		}
 
@@ -868,12 +898,15 @@ function sfiab_registration_is_closed($u, $role=NULL)
 		 * has been accepted, disregard any reg close override and just
 		 * return that their reg is closed */
 		if(in_array('student', $u['roles'])) {
+			if($config['preregistration_enable']) {
+				$prereg_open_date = $config['date_student_preregistration_opens'];
+			}
 			$reg_open_date = $config['date_student_registration_opens'];
 			$reg_close_date = $config['date_student_registration_closes'];
 
-			/* Accetped students cannot make changes */
+			/* Accetped students registrations are closed*/
 			if($u['s_accepted']) {
-				return true;
+				return -1; /* Closed */
 			}
 
 		} else if (in_array('judge', $u['roles'])) {
@@ -884,7 +917,7 @@ function sfiab_registration_is_closed($u, $role=NULL)
 			$reg_open_date = $config['date_judge_registration_opens'];
 			$reg_close_date = $config['date_judge_registration_closes'];
 		} else {
-			return false;
+			return 1; /* Open */
 		}
 
 		/* If there is an override, use that date instead */
@@ -893,10 +926,52 @@ function sfiab_registration_is_closed($u, $role=NULL)
 		} 
 	}
 
-	if($reg_open_date < $now && $now < $reg_close_date)
-		return false;
-	else 
+	if($prereg_open_date !== NULL) {
+		if($now > $prereg_open_date && $now < $reg_open_date) {
+			return 2; /* Pre registration */
+		}
+	}		
+
+	if($now < $reg_open_date) {
+		return -2; /* Not yet open */
+	} else if ($now < $reg_close_date) {
+		return 1; /* Open */
+	} else {
+		return -1; /* Closed */
+	}
+}
+
+/* Is registration open for this user? reads the customer user override first
+ * then uses the global date */
+
+function sfiab_registration_is_closed($u, $role=NULL)
+{
+	$status = sfiab_registration_status($u, $role);
+	if($status < 0) {
+		/* Status < 0 means registration is closed */
 		return true;
+	}
+	return false;
+}
+
+function sfiab_preregistration_is_open(&$u)
+{
+	$status = sfiab_registration_status($u);
+	if($status == 2) {
+		return true;
+	}
+	return false;
+}
+
+function sfiab_check_abort_on_preregistration(&$u, $page_id)
+{
+	global $pages_disabled_in_preregistration;
+	if(in_array($page_id, $pages_disabled_in_preregistration)) {
+		print("This page is closed in pre-registration.");
+		exit();
+		return false;
+	}
+	return true;
 }
 
 

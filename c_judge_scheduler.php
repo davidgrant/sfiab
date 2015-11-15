@@ -56,7 +56,7 @@ case 'run':
 	
 }
 
-sfiab_page_begin("Judge Scheduler", $page_id);
+sfiab_page_begin($u, "Judge Scheduler", $page_id);
 
 ?>
 

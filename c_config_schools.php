@@ -56,7 +56,7 @@ case 'edit':
 	$id = (int)$_GET['edit'];
 	$page_id = 'c_config_edit_school';
 	$help = '<p>';
-	sfiab_page_begin("Edit Schools", $page_id, $help);
+	sfiab_page_begin($u, "Edit Schools", $page_id, $help);
 
 ?>
 	<div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -89,7 +89,7 @@ default:
 
 	$help = '<p>';
 
-	sfiab_page_begin("Edit Schools", $page_id, $help);
+	sfiab_page_begin($u, "Edit Schools", $page_id, $help);
 
 ?>
 

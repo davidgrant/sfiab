@@ -719,6 +719,7 @@ html head + body .ui-body-l.ui-focus {
 	text-shadow: none !important;
 }
 .jqm-list .ui-btn:hover,
+.jqm-list .ui-li-selected:hover,
 .jqm-list .ui-btn:active {
 	color: #3388cc;
 }
@@ -728,6 +729,15 @@ html head + body .ui-body-l.ui-focus {
 .jqm-list .ui-li-divider {
 	color: #3eb249;
 }
+.jqm-list .ui-li-selected {
+	background-color: #ffffff !important;
+	margin-right: 0px !important;
+}
+.jqm-list .ui-li-disabled {
+	background-color: #bbbbbb !important;
+}
+
+
 
 /* Navmenu */
 .leftnav_panel .ui-listview > li .ui-collapsible-heading {
@@ -840,9 +850,18 @@ html head + body .ui-body-l.ui-focus {
 		float: none;
 	}
 	
-	.leftnav_panel .ui-listview .ui-btn {
+	.leftnav_panel .ui-listview > li > a {
 		padding-left: 12.5%;
 	}
+	.leftnav_panel .ui-listview > li > span {
+		padding-left: 12.5%;
+	}
+
+	/* jquery applies a small indent to non-button list entries, this removes it so everythin lines up */
+	.leftnav_panel .ui-listview > li {
+		padding-left: 0 !important;
+	}
+
 /*	.leftnav_panel .ui-listview .ui-listview .ui-btn {
 		padding-left: 5%;
 	}

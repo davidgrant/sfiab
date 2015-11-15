@@ -62,7 +62,7 @@ $help = '
 <p>Please provide the name and phone number of at least one adult who can be contacted during the fair in case of emergency.
 ';
 
-sfiab_page_begin("Student Emergency Contact", $page_id, $help);
+sfiab_page_begin($u, "Student Emergency Contact", $page_id, $help);
 
 ?>
 
@@ -78,7 +78,7 @@ sfiab_page_begin("Student Emergency Contact", $page_id, $help);
 	$relations=array('parent'=>"Parent",'legalguardian'=>"Legal Guardian",'grandparent'=>"Grandparent",
 			'familyfriend'=>"Family Friend", 'other'=>"Other");
 
-	form_begin($form_id, 'student_emergency.php', $closed);
+	form_begin($form_id, 's_emergency.php', $closed);
 
 	for($x=count($ecs); $x < 2; $x++) {
 		$ec = array('id' => 0);

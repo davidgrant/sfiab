@@ -28,7 +28,7 @@ case 'save':
 		incomplete_check($mysqli, $fields, $u, false, true);
 	}
 
-	form_ajax_response(array('status'=>0, 'location'=>'judge_main.php'));
+	form_ajax_response(array('status'=>0, 'location'=>'j_main.php'));
 	exit();
 }
 
@@ -39,7 +39,7 @@ indicate that here and you will not be assigned to any judging
 team, or we will remove you from any teams you have been assigned to.  
 </ul>';
 
-sfiab_page_begin("Judge Main", $page_id, $help);
+sfiab_page_begin($u, "Judge Main", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -84,7 +84,7 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 
 		<h3>Judging Team and Schedule</h3>
 
-		<p>Judging Team and Schedules are available here: <a data-ajax="false" href="judge_schedule.php">Judging Team and Schedules</a>
+		<p>Judging Team and Schedules are available here: <a data-ajax="false" href="j_schedule.php">Judging Team and Schedules</a>
 		<p>If the page is blank it means you haven't been assigned to a
 		judging team, yet.  You <b>will</b> be assigned to a judging
 		team at or before fair, we're just not sure which one yet.
@@ -129,7 +129,7 @@ sfiab_page_begin("Judge Main", $page_id, $help);
 	$sel = array('1'=>'Yes, I\'ll be there', '0'=>'No, I can\'t make it');
 
 	$form_id = 'j_attending_form';
-	form_begin($form_id, 'judge_main.php');
+	form_begin($form_id, 'j_main.php');
 	form_radio_h($form_id, 'j_attending', "Judging at the fair", $sel, $u['attending']);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);

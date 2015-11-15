@@ -70,7 +70,7 @@ case 'add':
 
 
 $help = '<p>Edit the award';
-sfiab_page_begin("Timeslot Editor", $page_id, $help);
+sfiab_page_begin($u, "Timeslot Editor", $page_id, $help);
 
 
 function print_timeslot_div($form_id, $tid, &$ts)

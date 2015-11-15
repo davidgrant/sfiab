@@ -14,7 +14,7 @@ $u = user_load($mysqli);
 
 $page_id = 'c_judge_sanity';
 
-sfiab_page_begin("Judging", $page_id);
+sfiab_page_begin($u, "Judging", $page_id);
 
 /* Count judges */
 $judges = judges_load_all($mysqli, $config['year']);

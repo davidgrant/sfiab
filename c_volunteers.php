@@ -27,7 +27,7 @@ if(array_key_exists('action', $_POST)) {
 
 }
 
-sfiab_page_begin("Judging", $page_id);
+sfiab_page_begin($u, "Judging", $page_id);
 
 ?>
 

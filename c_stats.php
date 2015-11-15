@@ -17,7 +17,7 @@ $page_id = 'c_stats';
 $timeslots = timeslots_load_all($mysqli);
 $num_rounds = count($timeslots);
 
-sfiab_page_begin("Statistics", $page_id);
+sfiab_page_begin($u, "Statistics", $page_id);
 ?>
 
 <div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 

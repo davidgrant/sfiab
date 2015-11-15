@@ -132,7 +132,7 @@ case 'addimage':
 
 $page_id = "c_fair_logo";
 $help = "<p>Fair Logo - upload any PNG, GIF, or JPG.";
-sfiab_page_begin("Fair Logo", $page_id, $help);
+sfiab_page_begin($u, "Fair Logo", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

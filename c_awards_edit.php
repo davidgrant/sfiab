@@ -164,7 +164,7 @@ case 'padd':
 $help = '<p>Edit the award';
 
 
-sfiab_page_begin("Edit Award", $page_id, $help);
+sfiab_page_begin($u, "Edit Award", $page_id, $help);
 
 
 function print_prize_div($form_id, &$p, $show)

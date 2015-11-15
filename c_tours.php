@@ -61,7 +61,7 @@ case 'run':
 	
 }
 
-sfiab_page_begin("Tours", $page_id);
+sfiab_page_begin($u, "Tours", $page_id);
 
 ?>
 

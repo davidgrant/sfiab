@@ -73,7 +73,7 @@ case 'send':
 	exit();
 }
 
-sfiab_page_begin("Send Email", $page_id, $help);
+sfiab_page_begin($u, "Send Email", $page_id, $help);
 
 ?>
 

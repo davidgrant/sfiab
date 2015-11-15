@@ -40,7 +40,7 @@ indicate that here and we will remove you will not be assigned to any judging
 team, or we will remove you from any teams you have been assigned to.  
 </ul>';
 
-sfiab_page_begin("Volunteer Main", $page_id, $help);
+sfiab_page_begin($u, "Volunteer Main", $page_id, $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

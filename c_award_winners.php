@@ -92,7 +92,7 @@ $projects = projects_load_all($mysqli, $config['year']);
 
 $page_id = 'c_award_winners';
 $help = '<p>Enter Winning Projects';
-sfiab_page_begin("Enter Winning Projects", $page_id, $help);
+sfiab_page_begin($u, "Enter Winning Projects", $page_id, $help);
 ?>
 
 

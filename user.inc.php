@@ -82,7 +82,7 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 		if(sfiab_session_is_active()) {
 			if(array_key_exists('edit_uid', $_SESSION)) {
 				$r = $mysqli->query("SELECT * FROM users WHERE uid={$_SESSION['edit_uid']} LIMIT 1");
-			} else if($_SESSION['uid'] > 0) {
+			} else if(array_key_exists('uid', $_SESSION) && $_SESSION['uid'] > 0) {
 				$r = $mysqli->query("SELECT * FROM users WHERE uid={$_SESSION['uid']} LIMIT 1");
 			} else {
 				return NULL;
@@ -292,7 +292,7 @@ function user_homepage(&$u)
 
 	/* In order of priority */
 	if(in_array('student', $u['roles']))
-		$page .= 'student_main.php';
+		$page .= 's_main.php';
 	else if(in_array('committee', $u['roles']))
 		$page .= 'c_main.php';
 	else if(in_array('judge', $u['roles']))

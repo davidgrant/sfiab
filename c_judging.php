@@ -17,7 +17,7 @@ $page_id = 'c_judging';
 $timeslots = timeslots_load_all($mysqli);
 $num_rounds = count($timeslots);
 
-sfiab_page_begin("Judging", $page_id);
+sfiab_page_begin($u, "Judging", $page_id);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 

@@ -16,7 +16,7 @@ $help = '
 <ul><li><b>nothing</b> - no help yet.
 </ul>';
 
-sfiab_page_begin("Committee Main", 'c_main', $help);
+sfiab_page_begin($u, "Committee Main", 'c_main', $help);
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -63,12 +63,27 @@ sfiab_page_begin("Committee Main", 'c_main', $help);
 			<li><a href="<?=$link?>" data-rel="external" data-ajax="false"><?=$text?></a></li>
 <?php		} ?>
 		</ul>
-<?php	} ?>
+<?php	} 
 
+	$now = date( 'Y-m-d H:i:s' );
 
+	$status = array();
+	$status[-1] = '<font color="red">Closed</font>';
+	$status[1]  = '<font color="green">Open</font>';
+	$status[2]  = '<font color="orange">Pre-Registration</font>';
+	$status[-2] = '<font color="blue">Not Open Yet</font>';
+	$s_reg = $status[sfiab_registration_status(NULL, 'student')];
+	$j_reg = $status[sfiab_registration_status(NULL, 'judge')];
+	?>
 
 	<h3>Sanity Checks</h3> 
 	<ul data-role="listview" data-inset="true">
+	<li>	Student Registration: <?=$s_reg?><br/>
+	    	Judge Registration: <?=$j_reg?>
+<?php		if($config['volunteers_enable']) { ?>
+			<br/>Volunteer Registration: <?=$j_reg?>
+<?php		} ?>
+	</li>
 	<li><a href="c_judge_sanity.php" data-rel="external" data-ajax="false">Display Judging Sanity Checks</a></li>
 	<li><a href="c_check_tours.php" data-rel="external" data-ajax="false">Display Tour Sanity Checks</a></li>
 	</ul>

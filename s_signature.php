@@ -14,6 +14,10 @@ $page_id = 's_signature';
 $sample = false;
 $generate_pdf = false;
 
+$u = user_load($mysqli);
+
+sfiab_check_abort_on_preregistration($u, $page_id);
+
 if(array_key_exists('pdf', $_POST)) {
 	/* Generate a pdf */
 	$generate_pdf = true;
@@ -26,7 +30,6 @@ if(array_key_exists('pdf', $_POST)) {
 	}
 }
 
-$u = user_load($mysqli);
 
 if($sample) {
 	sfiab_check_access($mysqli, array('committee'), false);
@@ -63,7 +66,7 @@ if($generate_pdf == false) {
 	partner(s) sections are complete too.
 	';
 
-	sfiab_page_begin("Student Signature Form", $page_id, $help);
+	sfiab_page_begin($u, "Student Signature Form", $page_id, $help);
 
 	?>
 
@@ -113,7 +116,7 @@ if($generate_pdf == false) {
 		$d = 'disabled="disabled"';
 	}
 ?>
-	<form action="student_signature.php" method="post" data-ajax="false">
+	<form action="s_signature.php" method="post" data-ajax="false">
 	<input type="hidden" name="pdf" value="1"/>
 	<button type="submit" data-role="button" <?=$d?> data-theme="g" <?=$d?>>Download Signature Form</button>
 	</form>

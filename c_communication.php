@@ -53,7 +53,7 @@ case 'edit':
 		$sections = $s['S'];
 	}
 
-	sfiab_page_begin("Edit Email", $page_id.'_edit', $help);
+	sfiab_page_begin($u, "Edit Email", $page_id.'_edit', $help);
 ?>
 	<div data-role="page" id="<?=$page_id?>_edit"><div data-role="main" class="sfiab_page" > 
 
@@ -187,7 +187,7 @@ case 'delete':
 };
 
 
-sfiab_page_begin("Send Emails", $page_id, $help);
+sfiab_page_begin($u, "Send Emails", $page_id, $help);
 
 $emails = array();
 $q = $mysqli->query("SELECT * FROM emails ORDER BY `section`,`name` ");
