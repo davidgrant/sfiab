@@ -72,7 +72,8 @@ case 'un':
 
 $page_id = 'forgot';
 
-sfiab_page_begin('Forgot', $page_id);
+$u = NULL;
+sfiab_page_begin($u, 'Forgot', $page_id);
 
 ?>
 <div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 
