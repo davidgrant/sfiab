@@ -45,7 +45,8 @@ case 'tour_scheduler_log':
 	break;
 
 default:
-	/* Allow a passed-in file only if it appears in our database of files.  Below we strip out directories and
+	/* Allow a passed-in file only if it appears in our database of files.  Below we exit if the filename contains
+	 * any characters other than a-z, A-Z, 0-9, -._ strip out directories and
 	 * force a file access in files/ */
 	if(in_array($file, $files)) {
 		$filename = $file;
@@ -55,6 +56,18 @@ default:
 }
 
 if($filename != '') {
+
+	if(preg_match('/[^A-Za-z0-9_-\.]/', $filename)) {
+		print("Invalid filename: $filename");
+		exit();
+	}
+
+	if($filename[0] == '.') {
+		/* Forbid files starting with . (that includes ..) */
+		print("Invalid filename: $filename");
+		exit();
+	}
+
 
 	$file_info = pathinfo($filename);
 

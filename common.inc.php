@@ -28,7 +28,9 @@ $tshirt_sizes = array('none' => 'None',
 			'xlarge' => 'X-Large' );
 
 $pages_disabled_in_preregistration = array ('s_tours', 's_awards','s_signature' );
-		
+
+$signature_types = array('student' => 'Student', 'parent' => 'Parent/Guardian', 'teacher'=>'Teacher', 'ethics'=>'Supervisor');
+
 
 function sfiab_db_connect()
 {
@@ -707,18 +709,22 @@ function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false
 
 			);
 
-	if(count($additional_vars) > 0) {
-		$rep += array(
-			'/\[LOGIN_LINK\]/' => $additional_vars['fair_url'].'/index.php#login',
-			'/\[FAIR_URL\]/' => $additional_vars['fair_url'],
-			);
-
-		/* Optional replacements */
-		if(array_key_exists('password', $additional_vars)) {
-			$rep['/\[PASSWORD\]/'] = $additional_vars['password'];
-		}
-		if(array_key_exists('username_list', $additional_vars)) {
-			$rep['/\[USERNAME_LIST\]/'] = $additional_vars['username_list'];
+	/* A list of variables that aren't always available. */
+	foreach($additional_vars as $var=>&$val) {
+		switch($var) {
+		case 'fair_url':
+			/* We can get a whole lot of vars from the config */
+			$rep['/\[LOGIN_LINK\]/'] = $val.'/index.php#login';
+			$rep['/\[FAIR_URL\]/'] = $val;
+			break;
+		case 'password':
+		case 'username_list':
+		case 'student_name':
+			$rep['/\['.strtoupper($var).'\]/'] = $val;
+			break;
+		case 'signature_key':
+			$rep['/\[SIGNATURE_LINK\]/'] = $additional_vars['fair_url'].'/signature.php?k='.$val;
+			break;
 		}
 	}
 
@@ -963,13 +969,15 @@ function sfiab_preregistration_is_open(&$u)
 	return false;
 }
 
-function sfiab_check_abort_on_preregistration(&$u, $page_id)
+function sfiab_check_abort_in_preregistration(&$u, $page_id)
 {
 	global $pages_disabled_in_preregistration;
-	if(in_array($page_id, $pages_disabled_in_preregistration)) {
-		print("This page is closed in pre-registration.");
-		exit();
-		return false;
+	if(sfiab_preregistration_is_open($u)) {
+		if(in_array($page_id, $pages_disabled_in_preregistration)) {
+			print("This page is closed in pre-registration.");
+			exit();
+			return false;
+		}
 	}
 	return true;
 }

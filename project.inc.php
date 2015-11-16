@@ -208,7 +208,7 @@ function generic_save($mysqli, &$p, $table, $table_key)
 	}
 //	print_r($p);
 	if($set != '') {
-		$query = "UPDATE $table SET $set WHERE $table_key='{$p[$table_key]}'";
+		$query = "UPDATE $table SET $set WHERE `$table_key`='{$p[$table_key]}'";
 //		print($query);
 		$mysqli->real_query($query);
 	}
@@ -517,6 +517,51 @@ function project_get_export($mysqli, &$fair, &$project)
 	}
 
 	return $export_p;
+}
+
+
+function signature_load($mysqli, $key, $data = NULL)
+{
+	/* Check for something other than a base64 character A-Za-z9-0+/= */
+	if($data === NULL) {
+		if(strlen($key) != 32) exit();
+		if(preg_match("/[^A-Za-z0-9+\/\=]/", $key)) exit();
+		$k = $mysqli->real_escape_string($key);
+		$q = $mysqli->query("SELECT * FROM signatures WHERE `key`='$key'");
+		print($mysqli->error);
+		$sig = $q->fetch_assoc();
+
+		filter_int($sig['uid']);
+	} else {
+		$sig = $data;
+	}
+	unset($sig['original']);
+	$original = $sig;
+	$sig['original'] = $original;
+	
+	return $sig;
+}
+
+function signature_save($mysqli, $sig)
+{
+	generic_save($mysqli, $sig, "signatures", "key");
+}
+
+function signature_create($mysqli, $year = NULL) 
+{
+	global $config;
+	$year = ($year === NULL) ? $config['year'] : int($year);
+
+	/* Generate a 32 character key and insert it, try again if the insert fails  (duplicate key) */
+	for($x=0;$x<100;$x++) {
+		$key = base64_encode(mcrypt_create_iv(24, MCRYPT_DEV_URANDOM));
+		$r = $mysqli->real_query("INSERT INTO signatures(`key`,`year`) VALUES('$key','$year')");
+		if($r == true) {
+			return $key;
+		}
+	}
+	print("Unable to create a database key for an electronic signature form.  Please reload the page and try again.");
+	exit();
 }
 
 

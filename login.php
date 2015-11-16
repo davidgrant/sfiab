@@ -191,7 +191,7 @@ case 'login':
 	 * database */
 	$salted_hash = hash('sha512', $hashed_pw.$u['salt']);
 	if($salted_hash != $u['password']) {
-		sfiab_log_login($mysqli, $u, 'bad bass', 0);
+		sfiab_log_login($mysqli, $u, 'bad pass', 0);
 		print(ajax(1, 'Sorry, invalid username or password'));
 		exit();
 	}

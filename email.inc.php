@@ -133,7 +133,25 @@ function email_send_to_list($mysqli, $email_name, &$users, $additional_replace =
 	}
 
 	email_send_to_list($mysqli, $email_name, $users, $additional_replace);
+	return true;
+}
 
+function email_send_to_non_user($mysqli, $email_name, $to_name, $to_email, $additional_replace = array())
+{
+	/* Create a fake user */
+	$u = array();
+	$u['uid'] = 0;
+	$u['enabled'] = 1;
+	$u['email'] = filter_var($to_email, FILTER_VALIDATE_EMAIL);
+	$u['name'] = $to_name;
+
+	if($u['email'] == false) {
+		debug("email is invalid");
+		return false;
+	}
+
+	$users = array($u);
+	email_send_to_list($mysqli, $email_name, $users, $additional_replace);
 	return true;
 }
 

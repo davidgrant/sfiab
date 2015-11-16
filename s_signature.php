@@ -16,7 +16,7 @@ $generate_pdf = false;
 
 $u = user_load($mysqli);
 
-sfiab_check_abort_on_preregistration($u, $page_id);
+sfiab_check_abort_in_preregistration($u, $page_id);
 
 if(array_key_exists('pdf', $_POST)) {
 	/* Generate a pdf */
@@ -44,9 +44,10 @@ if(!$sample) {
 
 	/* Get all users associated with this project */
 	$users = user_load_all_for_project($mysqli, $u['s_pid']);
+
 	/* Check for all complete */
 	$all_complete = true;
-	foreach($users as $user) {
+	foreach($users as &$user) {
 		if($user['s_complete'] == 0) {
 			$all_complete = false;
 		}
@@ -54,6 +55,16 @@ if(!$sample) {
 
 	/* Double check complete status with a force-reload */
 	incomplete_check($mysqli, $fields, $u, $page_id, true);
+
+	/* Load electronic signatures */
+	foreach($users as &$user) {
+		$q = $mysqli->query("SELECT * FROM signatures WHERE uid='{$user['uid']}'");
+		$user['signatures'] = array();
+		while($r = $q->fetch_assoc()) {
+			$sig = signature_load($mysqli, NULL, $r);
+			$user['signatures'][$sig['type']] = $sig;
+		}
+	}
 }
 
 
@@ -81,17 +92,35 @@ if($generate_pdf == false) {
 ?>
 
 	<h3>Signature Form</h3>
-	<p>After all sections are complete for all students in this project, a
-	signature form must be printed, signed, and submitted to the Science
-	Fair Committee.  Instructions for completing the form and how/where to
-	submit it are attached to the form.
-	
-	<p>The signature form must be signed by a teacher, parent/guardian, and each student.
 
-	<p>For senior students, there is also a marks validation form that should
-	be submitted to qualify for University scholarship awards.
+	<p>After all sections are complete for all students in this project, a
+	signature form must be printed, signed, and submitted to complete your
+	application to the  <?=$config['fair_name']?>.  Instructions for
+	completing the form and how/where to submit it are attached to the
+	form.
+
+	<p>The signature form must be signed by a teacher, parent/guardian, and
+	each student.  For partner projects, each student may print a form, or
+	a single form can be used for all signatures.  (Basically, as long as
+	all the required signatures are present, we don't care how many pieces
+	of paper they are on.)
+
+<?php	if($config['sig_enable_senior_marks_form']) { ?>
+		<p>For senior students, there is also a marks validation form that should
+		be submitted to qualify for University scholarship awards.
+<?php	} ?>
+
 	
-	<p>For partner projects, each student may print a form, or a single form can be used for all signatures.
+<?php	if($config['enable_electronic_signatures']) { ?>
+		<h4>Electronic Signatures</h4>
+		<p>Instead of using the printed form to collect signatures, you
+		may instead collect electronic signatures, or you can
+		mix-and-match and use both (some signatures electronically,
+		some signatures on the printed form).  For an electronic
+		signature, we will email a link to an online form
+		to the person you need a signature from, and they can complete
+		the form online and submit it.  No paper required.
+<?php	} ?>
 
 	<h4>Status of Students</h4>
 		<ul data-role="listview" data-inset="true">
@@ -104,7 +133,63 @@ if($generate_pdf == false) {
 <?php		} ?>
 		</ul>
 
-	<h4>Download Signature Form</h4>
+
+<?php	if($config['enable_electronic_signatures']) {
+		$notice_printed = false;
+
+		foreach($users as $user) { ?>
+			<h3>Electronic Signatures for <?=$user['name']?>:</h3>
+
+<?php			if(!$notice_printed) { ?>
+				<p>Note: Remember, you do not have to use electronic signatures.  You can just use the printed form below if you choose.
+<?php				$notice_printed = true;
+			} ?>
+		
+			<table data-role="table" data-mode="none" class="table_stripes">
+			<tbody>
+<?php
+			foreach(array('student','parent','teacher') as $sig_type) {
+				$sig_name = $signature_types[$sig_type];
+				if(!array_key_exists($sig_type, $user['signatures']) || $sig['date_sent'] == '0000-00-00 00:00:00') {
+					/* Doesn't exist */
+					$sent = 'Not Sent';
+					$status = 0;
+				} else if ($sig['date_signed'] != '0000-00-00 00:00:00') {
+					$sent = "Signed by {$sig['signed_name']} ({$sig['email']}) on ".date('F j, g:ia', strtotime($sig['date_signed']));
+					$status = 2;
+				} else {
+					/* Not signed yet */
+					$sent = "Sent to {$sig['name']} ({$sig['email']}) on ".date('F j, g:ia', strtotime($sig['date_sent']));
+					$status = 1;
+				}
+
+?>
+				<tr >
+				<td align="center"><?=$sig_name?></td>
+			<td align="center"><?=$sent?></td>
+			<td align="left">
+<?php 				if($status == 0) { /* Doesn't exist */?>
+					<a href="s_signature_edit.php?uid=<?=$user['uid']?>&type=<?=$sig_type?>" data-mini="true"  data-inline="true" data-role="button" data-theme="g" data-ajax="false">Create Form</a>
+<?php 				} else if ($status == 1) { /* Not signed yet */?>
+					<span class="info" data-mini="true"  data-inline="true" data-role="button" data-theme="r" data-ajax="false">Waiting for Signature</span>
+				<a href="s_signature_edit.php?uid=<?=$user['uid']?>&type=<?=$sig_type?>&del=del" data-mini="true"  data-inline="true" data-role="button" data-theme="r" data-ajax="false">Delete Form</a>
+<?php 				} else { /* Signed */?>
+					<span class="happy" data-mini="true"  data-inline="true" data-role="button" data-theme="g" data-ajax="false">Signature Received</span>
+<?php 				} ?>
+					
+				</td>
+
+				</tr>
+
+<?php			} ?>
+			</tbody>
+			</table>
+<?php		} 
+	} ?>
+	
+
+	<h3>Download Information and Signature Form</h3>
+
 
 <?php	if($closed) {
 		$d = 'disabled="disabled"';
@@ -118,7 +203,7 @@ if($generate_pdf == false) {
 ?>
 	<form action="s_signature.php" method="post" data-ajax="false">
 	<input type="hidden" name="pdf" value="1"/>
-	<button type="submit" data-role="button" <?=$d?> data-theme="g" <?=$d?>>Download Signature Form</button>
+	<button type="submit" data-role="button" <?=$d?> data-theme="g" <?=$d?>>Download Information and Signature Form</button>
 	</form>
 	
 	</div></div>

@@ -54,7 +54,7 @@ sfiab_page_begin($u, "Student Registration Options", $page_id, $help);
 			<p>The cost of each T-Shirt is $<?=$config['tshirt_cost']?>, sizes are Adult sizes. </p>
 <?php		}
 		$form_id = $page_id.'_form';
-		form_begin($form_id, 'student_reg_options.php', $closed);
+		form_begin($form_id, 's_reg_options.php', $closed);
 		form_select($form_id, 'tshirt', 'T-Shirt', $tshirt_sizes, $u);
 		form_submit($form_id, 'save', 'Save', 'Information Saved');
 		form_end($form_id);

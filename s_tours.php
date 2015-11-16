@@ -11,7 +11,7 @@ $closed = sfiab_registration_is_closed($u);
 
 $page_id = 's_tours';
 
-sfiab_check_abort_on_preregistration($u, $page_id);
+sfiab_check_abort_in_preregistration($u, $page_id);
 
 $action = '';
 if(array_key_exists('action', $_POST)) {
