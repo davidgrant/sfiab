@@ -261,22 +261,38 @@ $( document ).on( "pagecreate", function( event ) {
 		form.submit();
 	});
 
+	function sfiab_form_changed(obj) 
+	{
+		var form_id= obj.closest('form').attr('id');
+		var button_enable_fn = window[form_id + '_button_enable'];
+		var enable = true;
+		/* See if there is a function that enables/disables form buttons on a condition */
+		if(typeof button_enable_fn === 'function') {
+			/* Yes, start by disabling all buttons */
+			$('#'+form_id+' button').each(function(index) {
+				$(this).attr('disabled', 'disabled');
+			});
+			/* Should they be enabled? */
+			enable = button_enable_fn();
+		}
+		
+		if(enable) {
+			/* Buttons should be enabled, do that now */
+			$('#'+form_id+' button').each(function(index) {
+				$(this).removeAttr('disabled');
+				$(this).text($(this).attr('data-alt1'));
+			});
+			/* Update the word count on any text areas */
+			update_word_count(obj);
+		}
+	}
+
 	$( ".sfiab_form" ).on('change',':input', function() {
-		var form_id= $(this).closest('form').attr('id');
-		$('#'+form_id+' button').each(function(index) {
-			$(this).removeAttr('disabled');
-			$(this).text($(this).attr('data-alt1'));
-		});
-		update_word_count($(this));
+		sfiab_form_changed($(this));
 	});
 
 	$( ".sfiab_form" ).on('keyup',':input', function() {
-		var form_id= $(this).closest('form').attr('id');
-		$('#'+form_id+' button').each(function(index) {
-			$(this).removeAttr('disabled');
-			$(this).text($(this).attr('data-alt1'));
-		});
-		update_word_count($(this));
+		sfiab_form_changed($(this));
 	});
 });
 

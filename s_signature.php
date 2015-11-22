@@ -150,6 +150,11 @@ if($generate_pdf == false) {
 <?php
 			foreach(array('student','parent','teacher') as $sig_type) {
 				$sig_name = $signature_types[$sig_type];
+				if(array_key_exists($sig_type, $user['signatures'])) {
+					$sig = $user['signatures'][$sig_type];
+				} else {
+					$sig = NULL;
+				}
 				if(!array_key_exists($sig_type, $user['signatures']) || $sig['date_sent'] == '0000-00-00 00:00:00') {
 					/* Doesn't exist */
 					$sent = 'Not Sent';
