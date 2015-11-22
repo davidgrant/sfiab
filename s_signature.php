@@ -525,7 +525,7 @@ if($config['sig_enable_release_of_information']) {
 		$pdf->AddPage();
 		$rel_of_info = cms_get($mysqli, 'sig_release_of_information', $user);
 	 	$t = nl2br($rel_of_info);
-		$t .= "<br/><br/>Please SIGN and return this form, along with other forms in this package".
+		$t .= "<br/><br/>Please SIGN and return this form, along with other forms in this package";
 		$pdf->WriteHTML("<h3>".i18n('Release of Information Form')."</h3>$t");
 
 		sig($pdf, "Signature of Parent or Guardian", "Name of Parent or Guardian (PRINTED)");
