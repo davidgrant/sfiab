@@ -12,11 +12,13 @@ $u = user_load($mysqli);
 $page_id = 'c_config_cms';
 
 $cms_pages = array('exhibitordeclaration' => "Signature Form: Exhibitor Declaration", 
-		   'parentdeclaration'=> "Signature Form: Parent Declaration",
-		   'teacherdeclaration'=> "Signature Form: Teacher Declaration",
+		   'electronic_exhibitor_declaration' => "Electronic Signature: Student Declaration", 
+		   'parentdeclaration'=> "Signature Form: Parent Declaration (also used on the electronic signature form)",
+		   'teacherdeclaration'=> "Signature Form: Teacher Declaration (also used on the electronic signature form)",
 		   'regfee'=> "Signature Form: Registration Fee Description",
 		   'postamble'=> "Signature Form: Post-Amble",
 		   'sig_release_of_information'=> "Signature Form: Release of Information Form",
+		   'sig_release_of_information_student'=> "Signature Form: Release of Information Form (student version)",
 		   'main'=> "Page: Main Page",
 		   'contact_us'=> "Page: Contact Us",
 		   'v_main'=> "Page: Volunteer Main Page",

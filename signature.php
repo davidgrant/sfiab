@@ -56,8 +56,8 @@ case 'sign':
 	exit();
 }
 
-
-$key = $_GET['k'];
+/* key could have + signs in it, the URL parser turns those into spaces.  Turn them back into +s */
+$key = str_replace(' ', '+', $_GET['k']);
 $sig = load_and_check_key($mysqli, $key);
 
 $str = '';
