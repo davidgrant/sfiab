@@ -103,7 +103,7 @@ sfiab_page_begin($u, "Edit Page Text", $page_id);
 		}
 
 		$sig_form_id = $page_id.'_sig_form';
-		form_begin($sig_form_id, 'student_signature.php', false, false);
+		form_begin($sig_form_id, 's_signature.php', false, false);
 		form_hidden($sig_form_id, 'pdf', 1);
 		form_radio_h($sig_form_id, 'cat_id', "Category", $cats, $max_cat);
 		$d = 1;
