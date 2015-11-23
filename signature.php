@@ -84,6 +84,8 @@ if(!$sample) {
 	$project = project_load($mysqli, $student['s_pid']);
 	$school = school_load($mysqli, $student['schools_id']);
 } else {
+	$cats = categories_load($mysqli);
+
 	$sig = array();
 	$sig['date_signed'] = '0000-00-00 00:00:00';
 	$sig['uid'] = -1;
