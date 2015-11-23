@@ -27,15 +27,4 @@ The student will still have a paper copy of the signature form, but you do not h
 INSERT INTO `config` ( `var` , `val` , `category` , `type` , `type_values` , `order` , `name`, `description`) VALUES
 	('enable_electronic_signatures', '0', 'Student Registration', 'yesno', '', '0', 'Enable Electronic Signatures', 'Allow students submit electronic signatures instead of a printed signature form.  The option for printing a signature form is still available.');
 
-INSERT INTO `cms` (`id`, `name`, `type`, `text`, `language`, `use`) VALUES (NULL, 'electronic_exhibitor_declaration', 'signaturepage', 'I certify that:
- 1. This project is my own work (and my partner\'s if applicable).
- 2. No more than two (2) students have worked on this project.
- 3. I agree that the decision of the judges will be final.
- 4. For projects using humans or animals, proper ethics approval has been obtained.
-', 'en', '1');
-
-
-INSERT INTO `cms` (`id`, `name`, `type`, `text`, `language`, `use`) VALUES (NULL, 'sig_release_of_information_student', 'signaturepage', 'Pursuant to the freedom of information and protection of privacy, I, [NAME], do hereby grant my permission to take, retain, and publish my photograph and written materials about me and my [YEAR] [FAIRNAME] project on printed materials and on the Internet through the [FAIRNAME], and award sponsor websites.
-
-I hereby give permission to use the materials to promote the Science Fair Program. This would include media, various social media sites, award sponsors, potential sponsors.  I understand that materials on social media sites are in the public domain and these online services may be located outside of Canada.', 'en', '1');
 

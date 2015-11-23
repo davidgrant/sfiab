@@ -30,6 +30,7 @@ case 'save':
 	post_text($u['province'], 'province');
 	post_text($u['language'], 'language');
 	post_text($u['j_psd'], 'j_psd');
+	post_text($u['j_heard_about'], 'j_heard_about');
 
 	$updates = array();
 	filter_phone($u['phone1']);
@@ -83,6 +84,7 @@ sfiab_page_begin($u, "Judge Personal", $page_id, $help);
 	form_province($form_id, 'province', 'Province / Territory', $u);
 	form_lang($form_id, 'language', "Preferred Language", $u);
 	form_select($form_id, 'j_psd', "Highest Post-Secondary Degree (or equivalent)", $degrees, $u);
+	form_text($form_id, 'j_heard_about', "How did you hear about becoming a judge at the fair?", $u);
 	form_submit($form_id, 'save', 'Save', 'Information Saved');
 	form_end($form_id);
 ?>

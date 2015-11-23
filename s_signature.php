@@ -276,6 +276,10 @@ $height_sigspace = 15; //mm
 $height_sigfont = $pdf->GetFontSize(); //mm
 
 
+list($regfee, $rfeedata) = compute_registration_fee($mysqli, $p, $users);
+$r_decl = cms_get($mysqli, 'sig_form_regfee', $u);
+
+
 $pdf->AddPage();
 
 $plural = (count($users)>1) ? 's' : '';
@@ -287,15 +291,20 @@ $pdf->barcode_2d(175, $y, 30, 30, $p['pid']);
 $pdf->SetXY($x, $y);
 
 
- $pdf->WriteHTML("<h3>".i18n('Registration Summary')."</h3>
+$pdf->WriteHTML("<h3>".i18n('Registration Summary')."</h3>
 	<p>
 	".i18n('Registration Number').": {$p['pid']} <br/>
 	".i18n('Project Title').": {$p['title']} <br/>
-        ".i18n($cats[$p['cat_id']]['name'])." / ".i18n($chals[$p['challenge_id']]['name']));
+        ".i18n('Project Category').": ".i18n($cats[$p['cat_id']]['name'])." / ".i18n($chals[$p['challenge_id']]['name']));
 
- $students = "";
- $school_names = array();
- foreach($users as $user) { 
+$regfeestr = '';
+if($r_decl !== NULL) {
+	$regfeestr = i18n('Registration Fee').": \${$regfee}";
+}
+
+$students = "";
+$school_names = array();
+foreach($users as $user) { 
  	if($sample) {
 		/* Skip query for generating a sample */
 		$school_names[$user['uid']] = $school_name;
@@ -311,8 +320,10 @@ $pdf->SetXY($x, $y);
  }
 $e = i18n("Exhibitor$plural").":";
 $w = $pdf->GetStringWidth($e) + 2;
-$pdf->WriteHTML("<table><tr><td width=\"{$w}mm\">$e</td><td>$students</td></tr></table>");
-$pdf->WriteHTML("<hr>");
+/* By adding hte regfee right to the end of the student table, it prevents a newline from appearing */
+$pdf->WriteHTML("<table><tr><td width=\"{$w}mm\">$e</td><td>$students</td></tr></table>$regfeestr");
+
+$pdf->WriteHTML("<br/><hr/>");
 
 
 function sig($pdf, $text1, $text2='')
@@ -346,21 +357,25 @@ function sig($pdf, $text1, $text2='')
 	}
 }
 
-$e_decl = cms_get($mysqli, 'exhibitordeclaration', $u);
-if($e_decl !== NULL) {
-	$t = nl2br($e_decl);
-	$pdf->WriteHTML("<h3>".i18n('Exhibitor Declaration')."</h3>$t");
+$e_instr = cms_get($mysqli, 'sig_form_instructions', $u);
+if($e_instr !== NULL) {
+	$pdf->WriteHTML("<h3>".i18n('Instructions')."</h3>".nl2br($e_instr));
+	$pdf->WriteHTML("<br><hr>");
+}
 
+
+$e_decl = cms_get($mysqli, 'sig_student_declaration', $u);
+if($e_decl !== NULL) {
+	$pdf->WriteHTML("<h3>".i18n('Exhibitor Declaration')."</h3>".nl2br($e_decl));
 	foreach($users AS $user) {
 		sig($pdf, "{$user['name']} (signature)");
 	}
 	$pdf->WriteHTML("<br><hr>");
  }
 
-$p_decl = cms_get($mysqli, 'parentdeclaration', $u);
+$p_decl = cms_get($mysqli, 'sig_parent_declaration', $u);
 if($p_decl !== NULL) {
- 	$t = nl2br($p_decl);
-	$pdf->WriteHTML("<h3>".i18n('Parent/Guardian Declaration')."</h3>$t");
+	$pdf->WriteHTML("<h3>".i18n('Parent/Guardian Declaration')."</h3>".nl2br($p_decl));
 
 	foreach($users AS $user) {
 		sig($pdf, "Parent/Guardian of {$user['name']} (signature)");
@@ -368,7 +383,7 @@ if($p_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");
  }
 
-$t_decl = cms_get($mysqli, 'teacherdeclaration', $u);
+$t_decl = cms_get($mysqli, 'sig_teacher_declaration', $u);
 if($t_decl !== NULL) {
  	$t = nl2br($t_decl);
 	$pdf->WriteHTML("<h3>".i18n('Teacher Declaration')."</h3>$t");
@@ -376,11 +391,9 @@ if($t_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");	
  }
 
-$r_decl = cms_get($mysqli, 'regfee', $u);
+/* We fetched r_decl above */
 if($r_decl !== NULL) {
 	$pdf->WriteHTML("<h3>".i18n('Registration Fee Summary')."</h3><br>");
-
-	list($regfee, $rfeedata) = compute_registration_fee($mysqli, $p, $users);
 
 	$x = $pdf->GetX() + 20;
 	$pdf->SetX($x);
@@ -405,10 +418,9 @@ if($r_decl !== NULL) {
 	$pdf->WriteHTML("<br><hr>");	
 }
 
-$p_decl = cms_get($mysqli, 'postamble', $u);
+$p_decl = cms_get($mysqli, 'sig_form_postamble', $u);
 if($p_decl !== NULL) {
- 	$t = nl2br($p_decl);
-	$pdf->WriteHTML("<h3>".i18n('Additional Information')."</h3>$t");
+	$pdf->WriteHTML("<h3>".i18n('Additional Information')."</h3>".nl2br($p_decl));
 	$pdf->WriteHTML("<br><hr>");	
 }
 
@@ -500,19 +512,7 @@ currently taking if a partial grade is available.
 <br>
 Verification of Mark Status by an Official (a Counsellor or School Administrator)
 ";
-
-/*
-<tr><td width=\"20\"></td><td width=\"300\">Biology</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-<tr><td width=\"20\"></td><td width=\"300\">Geology</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-<tr><td width=\"20\"></td><td width=\"300\">Physics</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-<tr><td width=\"20\"></td><td width=\"300\">Chemistry</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-<tr><td width=\"20\"></td><td width=\"300\">Calculus</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-<tr><td width=\"20\"></td><td width=\"300\">Algebra</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-<tr><td width=\"20\"></td><td width=\"300\">Average:</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td><td width=\"30\">&nbsp;</td></tr>
-*/
 		$page = replace_vars($page, $user, array(), true);
-
-
 
  		$pdf->WriteHTML($page, true, false, false, false, '');
 
@@ -523,7 +523,7 @@ Verification of Mark Status by an Official (a Counsellor or School Administrator
 if($config['sig_enable_release_of_information']) {
 	foreach($users AS $user) {
 		$pdf->AddPage();
-		$rel_of_info = cms_get($mysqli, 'sig_release_of_information', $user);
+		$rel_of_info = cms_get($mysqli, 'sig_release_of_information_parent', $user);
 	 	$t = nl2br($rel_of_info);
 		$t .= "<br/><br/>Please SIGN and return this form, along with other forms in this package";
 		$pdf->WriteHTML("<h3>".i18n('Release of Information Form')."</h3>$t");
@@ -532,37 +532,6 @@ if($config['sig_enable_release_of_information']) {
 		sig($pdf, "Signature of  {$user['name']}");
 	}
 }
-
-/*
-$pdf->addPage();
-
-$pdf->WriteHTML("<h3>".i18n('Principal or Vice-Principal\'s Signature')."</h3>
-    <p>
-    ".i18n('Registration Number').": $registration_number <br/>
-    ".i18n('Project Title').": {$projectinfo->title} <br/>
-        ".i18n($projectinfo->category)." / ".i18n($projectinfo->division));
-
-$e = i18n("Exhibitor$plural").":";
-$w = $pdf->GetStringWidth($e) + 2;
-$pdf->WriteHTML("<table><tr><td width=\"{$w}mm\">$e</td><td>$students</td></tr></table>");
-$pdf->WriteHTML("<hr>");
-
-$page = " The student(s) from your school, named above, has applied to compete in the Greater Vancouver Regional Science Fair (GVRSF) held on the upper floor Student Union Building at UBC on April 11, 12 and 13 of 2013. The application is supported by a teacher on your staff. This letter verifies your knowledge of the entry to this academic event and absence of the above named student(s) for the purposes of this competition. We will contact your school if there are any concerns. We wish your students all the best in this very worthwhile academic challenge.<br>
-<br>
-Please note that from the eligible participants entered, the GVRSF Committee, upon the recommendations of its Chief Judge(s), will select those to receive medals, prizes or scholarships and will also select participants to compete at this year's Canada-Wide Science Fair (CWSF) May 11 - 18, 2013.<br>
-<br>
-The GVRSF does considerable fundraising and has secured sufficient funding for one student for each selected project to attend the CWSF. However, for selected two-person projects, you will be contacted on the Friday of the Fair, to ascertain if the school will make financial arrangements for the second person to attend the Fair - the cost is $1,500. There is a time concern as decisions are made Friday and only students for whom finances are guaranteed can be announced on Saturday. Such discussions should be held in confidence directly with you but if you are absent or unavailable Friday, April 12, please alert a designated person of the possibility of our call.<br>
-<br>
-The Greater Vancouver Regional Science Fair is recognized as one of the most competitive Regional Science Fairs in Canada. Being selected from this Region to be a participant at the national Canada-Wide Science Fair is a tremendous honour for the students and for their school. This experience has proven to be very significant for students, many of whom have stayed involved with science fairs and a good many reference it as a landmark experience in their education and career pathways. Please consult our website www.gvrsf.ca for contacts or for more information. Again, congratulations on your school's participation.<br>
-<br>
-<h3>Principal or Vice-Principal's signature:</h3><br>
-My signature below acknowledges that I understand the opportunities outlined in the above document and authorize the students identified above to attend the Greater Vancouver Regional Science Fair. I also agree to the expectations explained above.<br><br>";
-
-$pdf->WriteHTML($page, true, false, false, false, '');
-
-sig($pdf, "Signature of Principal/Vice-Principal", "Print Name and Title");
-*/
-             
 
 print($pdf->output());
 ?>

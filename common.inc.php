@@ -29,7 +29,7 @@ $tshirt_sizes = array('none' => 'None',
 
 $pages_disabled_in_preregistration = array ('s_tours', 's_awards','s_signature' );
 
-$signature_types = array('student' => 'Student', 'parent' => 'Parent/Guardian', 'teacher'=>'Teacher', 'ethics'=>'Supervisor');
+$signature_types = array('student' => 'Exhibitor', 'parent' => 'Parent/Guardian', 'teacher'=>'Teacher', 'ethics'=>'Supervisor');
 
 
 function sfiab_db_connect()
@@ -869,11 +869,10 @@ function i18n($text)
 function sfiab_registration_status($u, $role=NULL)
 {
 	global $config;
+	$prereg_open_date = NULL;
 	$reg_close_date = '';
 
 	$now = date( 'Y-m-d H:i:s' );
-
-	$prereg_open_date = NULL;
 
 	if($role !== NULL) {
 		if($role == 'student') {
@@ -926,9 +925,15 @@ function sfiab_registration_status($u, $role=NULL)
 			return 1; /* Open */
 		}
 
-		/* If there is an override, use that date instead */
+		/* If there is an override, set the registration to open, and use the 
+		 * specified reg close date */
 		if($u['reg_close_override'] !== NULL) {
 			$reg_close_date = $u['reg_close_override'];
+			if($now < $u['reg_close_override']) {
+				/* Registration should be open, fudge the open date too */
+				$reg_open_date = $now;
+				$prereg_open_date = NULL;
+			}
 		} 
 	}
 

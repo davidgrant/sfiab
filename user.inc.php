@@ -118,7 +118,6 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool($u['s_complete']);
 
 	filter_languages($u['languages']);
-	
 
 	/* Student filtering */
 	filter_int_or_null($u['schools_id']);

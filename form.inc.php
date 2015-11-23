@@ -19,7 +19,7 @@ function form_label($page_id, $name, $label, $data)
 ?>
 	<div class="ui-field-contain">
 		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<?=$data?>
+		<span id="<?=$id?>"><?=$data?></span>
 	</div>
 <?php
 }

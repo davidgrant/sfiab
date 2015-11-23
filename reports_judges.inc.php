@@ -265,6 +265,12 @@ $report_judges_fields = array(
 		'table' => 'users.j_dinner',
 		'value_map' => array(0 => 'No', 1 => 'Yes')),
 
+	'j_heard_about' => array(
+		'name' => 'Judge -- How did you hear about the fair?',
+		'header' => 'Heard About',
+		'width' => 3,
+		'table' => 'users.j_heard_about'),
+
 /* Time Availability 
 	'available_in_divisional1' =>  array(
 		'name' => 'Time Availability -- Available in Divisional Round 1 ',
