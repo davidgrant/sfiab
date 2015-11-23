@@ -190,6 +190,7 @@ signature and you do not need to sign the paper signature form.
 <h3>Project Information</h3>
 
 <table data-role="table" data-mode="none" class="table_stripes">
+<TR><td>Student: </td><td><?=htmlentities($student['name'], $flags , "UTF-8")?></td></tr>
 <TR><td>Project Title: </td><td><?=htmlentities($project['title'], $flags , "UTF-8")?></td></tr>
 <TR><td>School: </td><td><?=htmlentities($school['school'], $flags , "UTF-8")?></td></tr>
 </table>
