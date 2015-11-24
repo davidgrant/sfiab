@@ -134,7 +134,7 @@ function policy($name, $text, $link = '')
 <?php
 	} else { ?>
 		<li style="white-space:normal">
-			<a href="<?=$link?>" data-ajax="false" data-rel="external" >
+			<a href="<?=$link?>" target="_blank" data-ajax="false" data-rel="external" >
 				<b><?=$name?></b><br/><?=$text?>
 			</a>
 		</li>
