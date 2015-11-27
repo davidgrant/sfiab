@@ -394,7 +394,19 @@ function form_lang($page_id, $name, $label, &$value)
 
 function form_province($page_id, $name, $label, &$value)
 {
-	$data = array( 'bc' => 'British Columbia', 'yk' => 'Yukon');
+	$data = array( 
+		'ab' => 'Alberta',
+		'bc' => 'British Columbia', 
+		'ma' => 'Manitoba',
+		'nb' => 'New Brunswick',
+		'nf' => 'Newfoundland and Labrador',
+		'ns' => 'Nova Scotia',
+		'no' => 'Northwest Territories',
+		'on' => 'Ontario',
+		'pe' => 'Prince Edward Island',
+		'qb' => 'Quebec',
+		'sk' => 'Saskatchewan',
+		'yk' => 'Yukon');
 	form_select($page_id, $name, $label, $data, $value);
 }
 

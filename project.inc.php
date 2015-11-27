@@ -216,8 +216,6 @@ function generic_save($mysqli, &$p, $table, $table_key)
 
 function project_save($mysqli, &$p)
 {
-	/* Update the project category (and sa nom)*/
-//	project_update_category($mysqli, $p);
 	generic_save($mysqli, $p, "projects", "pid");
 }
 

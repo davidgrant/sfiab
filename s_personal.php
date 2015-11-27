@@ -64,11 +64,11 @@ case 'save':
 	}
 	user_save($mysqli, $u);
 
-	/* If the grade changed, also load/save the project, which recomputes the category (and
-	 * only does the save if something changed), but it needs the user to be updated and
-	 * saved first */
+	/* If the grade changed, also recomputes the category (needs the user to be updated and
+	 * saved first) */
 	if($old_grade !== $u['grade']) {
 		$p = project_load($mysqli, $u['s_pid']);
+		project_update_category($mysqli, $p);		
 		project_save($mysqli, $p);
 	}
 
