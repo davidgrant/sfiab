@@ -24,6 +24,7 @@ sfiab_page_begin($u, "Configuration", $page_id);
 	<li><a href="c_config_cms.php" data-rel="external" data-ajax="false">Page Text and Signature Form</a></li>
 	<li><a href="c_config_categories.php" data-rel="external" data-ajax="false">Age Categories and Grades</a></li>
 	<li><a href="c_config_challenges.php" data-rel="external" data-ajax="false">Challenges</a></li>
+	<li><a href="c_timeslots.php" data-rel="external" data-ajax="false">Judging Timeslots</a></li>
 	<li><a href="c_config_schools.php" data-rel="external" data-ajax="false">Schools</a></li>
 	<li><a href="c_config_logo.php" data-rel="external" data-ajax="false">Fair Logo</a></li>
 	</ul>
