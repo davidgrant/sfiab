@@ -71,36 +71,7 @@ case 'i':
 	}
 	form_ajax_response(1);
 	exit();
-case 'w':
-	$pid = (int)$_POST['pid'];
-	if($pid > 0) {
-		$p = project_load($mysqli, $pid);
-		project_load_students($mysqli, $p);
 
-		$ok = true;
-		foreach($users as &$u) {
-			/* User must be "complete" */
-			if($u['s_complete'] != 1) {
-				$ok = false;
-			}
-		}
-
-		if($ok == true) {
-			$p['accepted'] = 1;
-			project_save($mysqli, $p);
-			foreach($p['students'] as &$u) {
-				$u['s_accepted'] = 1;
-				$u['s_paid'] = 0;
-				user_save($mysqli, $u);
-			}
-			form_ajax_response(0);
-		} else {
-			form_ajax_response(1);
-		}
-		exit();
-	}
-	form_ajax_response(1);
-	exit();
 
 }
 
@@ -165,6 +136,9 @@ function l_projects_load_all($mysqli, $year)
 		$p_user = user_load($mysqli, -1, -1, NULL, $j);
 		$pid = $p_user['s_pid'];
 
+		$p_user['signatures'] = array();
+		$users[$p_user['uid']] = $p_user;
+
 		if($pid == 0) {
 			print("No project for student uid={$p_user['uid']}<br/>");
 		}
@@ -175,10 +149,18 @@ function l_projects_load_all($mysqli, $year)
 			$projects[$pid]['s_complete'] = true;
 		}
 
-		$projects[$pid]['students'][] = $p_user;
+		$projects[$pid]['students'][] = &$users[$p_user['uid']];
 		if($p_user['s_complete'] == 0) {
 			$projects[$pid]['s_complete'] = false;
 		}
+	}
+
+	/* Do the same for signatures (doesn't matter if they're not enabled here) */
+	$q = $mysqli->query("SELECT * FROM signatures WHERE year='$year' and `date_signed`!='0000-00-00 00:00:00'");
+	while($s = $q->fetch_assoc()) {
+		$uid = $s['uid'];
+		$p_user = &$users[$uid];
+		$p_user['signatures'][$s['type']] = $s;
 	}
 	return $projects;
 }
@@ -262,35 +244,43 @@ foreach($projects as &$p) {
 					$status = $s['s_complete'] == 0 ? '<font color=red>(incomplete)</font>' : '<font color=green>(complete)</font>';
 ?>
 					<tr><td><?=$status?></td>
-					    <td><?=$s['name']?>, </td>
+					    <td><b><?=$s['name']?></b>, </td>
 					    <td>Grade <?=$s['grade']?>, </td>
 					    <td><?=$s['school']?></td>
 					</tr>
-<?php				} ?>
+<?php					if($config['enable_electronic_signatures']) {
+						foreach($s['signatures'] as &$sig) { 
+							$d = date('F j, g:ia', strtotime($sig['date_signed'])); ?>
+							<tr><td colspan="3" align="right"><?=$signature_types[$sig['type']]?> eSig:</td>
+							<td>By <b><?=$sig['signed_name']?></b> on <b><?=$d?></b> (<?=$sig['email']?>)</td></tr>
+<?php						}
+					}
+				} ?>
 				</table>
 				<br/>
 				<b>Registration Fee: $<?=$regfee?></b><br/>
+<?php				/* CHeck for ethics */
+				if($p['ethics']['human1'] != 0 || $p['ethics']['animals'] != 0) {
+					/* Needs ethics */
+					if(!$p['ethics_approved']) {
+						/* Needs ethics, not approved */ ?>
+						<b>Ethics: <font color="red">Required but not approved</font></b><br/>
+<?php					}
+				} ?>
+
 			</div>
 			<div class="ui-block-b" style="width:20%">
 <?php				if($accepted && $paid) {
 					$mark_as_complete_style = 'style="display:none;"';
 					$mark_as_incomplete_style = '';
-//					$mark_as_complete_without_payment_style = 'style="display:none;"';
-				} else if ($accepted && !$paid) {
-					$mark_as_complete_style = '';
-					$mark_as_incomplete_style = '';
-//					$mark_as_complete_without_payment_style = 'style="display:none;"';
 				} else {
 					$mark_as_complete_style = '';
 					$mark_as_incomplete_style = 'style="display:none;"';
-//					$mark_as_complete_without_payment_style = '';
 				}
 ?>
 
 				<a href="#" onclick="input_reg_forms_mark_as_complete(<?=$pid?>)" id="input_reg_forms_c_<?=$pid?>" <?=$mark_as_complete_style?> data-role="button" data-theme="r" >Mark as Complete</a>
 				<a href="#" onclick="input_reg_forms_mark_as_incomplete(<?=$pid?>)" id="input_reg_forms_i_<?=$pid?>" <?=$mark_as_incomplete_style?> data-role="button" data-theme="g" >Mark as Incomplete</a>
-<?php /*			<a href="#" onclick="input_reg_forms_mark_as_complete_wo_payment(<?=$pid?>)" id="input_reg_forms_w_<?=$pid?>" <?=$mark_as_complete_without_payment_style?> data-role="button" data-theme="l" >Mark as Complete<br/>Without Payment</a>
-*/ ?>
 
 			</div>
 		</div>
@@ -318,16 +308,6 @@ foreach($projects as &$p) {
 				$('#input_reg_forms_c_'+pid).show();
 				$('#input_reg_forms_w_'+pid).show();
 				$('#input_reg_forms_i_'+pid).hide();
-			}
-		}, "json");
-		return false;
-	}
-	function input_reg_forms_mark_as_complete_wo_payment(pid) {
-		$.post('c_input_signature_forms.php', { action: "w", pid: pid }, function(data) {
-			if(data.status == 0) {
-				$('#input_reg_forms_c_'+pid).show();
-				$('#input_reg_forms_w_'+pid).hide();
-				$('#input_reg_forms_i_'+pid).show();
 			}
 		}, "json");
 		return false;
