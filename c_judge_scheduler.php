@@ -5,6 +5,7 @@ require_once('user.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('email.inc.php');
+require_once('timeslots.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -65,6 +66,7 @@ case 'run_ts':
 
 sfiab_page_begin($u, "Judge Scheduler", $page_id);
 
+$timeslots = timeslots_load_all($mysqli);
 ?>
 
 
@@ -75,7 +77,8 @@ sfiab_page_begin($u, "Judge Scheduler", $page_id);
 	$form_id = $page_id.'_form';
 
 ?>	<h3>Judge Scheduler Settings</h3> 
-	<p>These settings can be changed on the <a href="c_config_variables.php#Judge_Scheduler" data-ajax="false">Configuration Variables - Judge Scheduler</a> page.
+	<p>These settings can be changed on the <a href="c_config_variables.php#Judge_Scheduler" data-ajax="false">Configuration Variables - Judge Scheduler</a> 
+	and <a href="c_timeslots.php" data-ajax="false">Timeslots</a> pages.
 		
 
 	<table data-role="table" data-mode="none" class="table_stripes">
@@ -85,7 +88,7 @@ sfiab_page_begin($u, "Judge Scheduler", $page_id);
 		if($r['var'] == 'judge_divisional_prizes' || $r['var'] == 'judge_divisional_distribution') {
 			continue;
 		} ?>
-		<tr><td><?=$r['name']?></td><td><b><?=$r['val']?></b></td></tr>
+		<tr><td width="25%"><?=$r['name']?></td><td width="75%"><b><?=$r['val']?></b></td></tr>
 <?php	} ?>
 	<tr><td>Divisional Prizes and Distribution</td><td><b>
 <?php
@@ -95,6 +98,20 @@ sfiab_page_begin($u, "Judge Scheduler", $page_id);
 		<?=$prizes[$i]?> - <?=$dist[$i]?>%<br/>
 <?php	} ?>
 	</b></td></tr>
+	<tr><td>Timeslots</td>
+		<td><table>
+<?php		foreach($timeslots as &$ts) { 
+			$start_ts = strtotime($config['date_fair_begins']) + ($ts['start'] * 60);
+			$end_ts = $start_ts + ($ts['num_timeslots'] * $ts['timeslot_length'] * 60);
+			$start = date("F j, Y h:ia", $start_ts); 
+			$end = date("h:ia", $end_ts); 
+			?>
+			<tr><td><?=$ts['name']?> -</td>
+			<td><?=$start?> - <?=$end?> -</td>
+			<td><?=$ts['num_timeslots']?> timeslots of <?=$ts['timeslot_length']?> minutes each.</td></tr>
+<?php		} ?>
+		</table>
+	</td></tr>
 	</table>
 
 	<hr/>
