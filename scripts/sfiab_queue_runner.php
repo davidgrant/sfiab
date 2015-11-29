@@ -194,7 +194,6 @@ while(true) {
 		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
 		break;
 
-
 	case 'judge_scheduler':
 		debug("Starting the judge scheduler\n");
 		debug(getcwd());
@@ -206,6 +205,20 @@ while(true) {
 		debug("Starting the tour scheduler\n");
 		debug(getcwd());
 		system("src/sfiab_annealer tours > files/tour_scheduler_log.txt");
+		$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+		break;
+
+	case 'timeslot_scheduler':
+		debug("Starting the timeslot scheduler\n");
+		debug(getcwd());
+		system("src/sfiab_annealer timeslots > files/timeslot_scheduler_log.txt");
+		$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
+		break;
+
+	case 'exhibithall_scheduler':
+		debug("Starting the exhibithall scheduler\n");
+		debug(getcwd());
+		system("src/sfiab_annealer eh > files/exhibithall_scheduler_log.txt");
 		$mysqli->real_query("UPDATE queue SET `result`='ok', `sent`=NOW() WHERE id=$db_id");
 		break;
 

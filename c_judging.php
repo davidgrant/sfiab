@@ -145,7 +145,6 @@ sfiab_page_begin($u, "Judging", $page_id);
 	<li><a href="c_timeslots.php" data-rel="external" data-ajax="false">Edit Judging Timeslots<?=$timeslot_msg?></a></li>
 	<li><a href="c_judge_sanity.php" data-rel="external" data-ajax="false">Display Judging Sanity Checks</a></li>
 	<li><a href="c_judge_scheduler.php" data-rel="external" data-ajax="false">Run the Judge Scheduler</a></li>
-	<li><a href="c_timeslots_assign.php" data-rel="external" data-ajax="false">Run the Timeslot Assignment Scheduler</a></li>
 	</ul>
 
 	<h3>Judge Score Entry</h3> 

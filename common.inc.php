@@ -426,6 +426,7 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			    'c_judge_sanity' => NULL,
 			    'c_judge_score_entry' => NULL,
 			    'c_judge_score_summary' => NULL,
+			    'c_judge_scheduler' => NULL,
 			    'c_reports' => array('Reports', 'c_reports.php'),
 			    'c_communication' => array('Send Emails', 'c_communication.php'),
 			    'c_stats' => array('Statistics and Logs', 'c_stats.php'),

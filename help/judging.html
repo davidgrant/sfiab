@@ -1,0 +1,134 @@
+<html>
+<head>Judging</head>
+
+<body>
+<h2>Judging</h2>
+
+<h3>The Judging Process</h3>
+
+<p>SFIAB makes several assumptions about the judging process.  These may not
+match perfectly with every fair, but often, at least part of the judging system
+can be used to accommodate the needs of the fair.  You are free to use, or not
+use, any of the judging features.
+
+<h4>Categories and Divisions and Challenges</h4>
+<p>Judging assumes projects are divided into age <i>Categories</i>.  These are
+often Junior (grades 7,8), Intermediate (grades 9,10), and Senior (grades
+11,12).  The categories can be configured through the configuration pages.
+
+<p>SFIAB assumes that ALL projects in an age category are judged together, and
+there is a single set of medals for each age category.  Historically,
+categories were further sub-divided into divisions, and each division was
+judged separately.  SFIAB no longer supports this model for several reasons:
+<ul> <li>It is arguably fairer to the students.  It means all the projects in a
+strong division can be acknowledged, and that the only Junior Mathematics and
+Physics project on the floor isn't guaranteed to get a Gold if it is a weak
+project.
+<li>It eliminates students who try to do a project for a specific division just
+to win a medal.  Every fair has/had weaker and stronger divisions, Health
+Science typically is a very strong division.
+<li>Many projects in different divisions can be judged by judges with the same expertise, so we can group these projects together for judging
+<li>Fewer judges are required
+<li>Streamlines the awards and award ceremony
+</ul>
+
+<p>When a student registers now, they must select a <i>Detailed Division</i>.
+There are about 100 detailed divisions, we use the ISEF divisions for this, see <a
+href=https://student.societyforscience.org/intel-isef-categories-and-subcategories">ISEF
+Divisions</a>.  The detailed division is used only for matching judges with projects.  
+
+<p>When a judge registers, they must select their top three areas of expertise
+from the same detailed division list as the students.  Again, this is used only
+to match judges with projects.
+
+<p>SFIAB also asks the students to select a <i>Challenge</i> for their project.  Challenges
+mean nothing.  They are not used in any way except to group students into floor
+locations.  They have no impact on judging or judging teams.
+
+<h4>The Judging Process</h4>
+
+<p>SFIAB assumes there are two rounds of judging.  In the first round,
+divisional judging teams score projects based on three metrics: scientific though, creativity
+and originality, and communication.  These metrics are used to compute a score
+for each project and rank them first to last.  In the second round, a number of
+<i>cusp</i> judging teams refine and re-order the projects around the barrier (cusp) between gold/silver,
+silver/bronze, bronze/honourable mention, honourable mention/nothing.
+
+<p>The theory is that a clearly strong gold project does not need to be judged
+again.  Similarly, a project that is ranked in the middle of the bronze
+projects also does not need to be judged again.  Only the projects near each
+cusp need to judged again to ensure the ordering is correct.
+
+<p>SFIAB assumes that each round 1 judging team consist of a number of judges,
+usually 3, and that they collaborate and agree on a single score for each
+project they judge.  The timeslot scheduler assumes each judge visits the
+projects independently, of course, for your fair, you are free to not use the
+timeslots if you prefer your judging teams travel together.  Each judging team
+must visit the same subset of projects however.
+
+<p>SFIAB assumes that round 2 judging teams also consist of a number of judges,
+usually 6.  The judge scheduler tries to assign round 2 judges from a
+distribution of round 1 judges.
+
+<p>Special awards judges are not assigned to specific timeslots, they are given
+a schedule of when divisional judges are NOT at the projects they must visit.
+
+<hr/>
+<h3>Judge Scheduler</h3>
+<a name="judge_scheduler"></a>
+
+<p>The judge scheduler performs the following tasks:
+
+<ul><li><b>Deletes all automatically created judging teams</b> (e.g., from a previous run of this scheduler), manually created judging teams are not touched.
+<li>Creates new judging teams for divisional, CUSP, and every special award marked as "schedule judges"
+<li>Assigns judges to judging teams
+<li>Assigns projects to divisional teams and special awards teams
+<li>Runs the timeslot scheduler to create a judging schedule for each judging team and project (printable on the reports page)
+</ul>
+
+<hr/>
+<h3>Timeslot Scheduler</h3>
+
+<p>The judging timetable is broken into a number of equal-length timeslots.  For
+example, a three hour judging period may have nine timeslots of 20 minutes
+each.
+
+The timeslot scheduler is run automatically after the Judge Scheduler, or it
+can be run separately.  Some situations where it is useful to re-calculate
+timeslots without re-calculating judging teams include:
+<ul><li>A project becomes unavailable after assignments are made, e.g., they
+forget to inform the fair they must leave early to catch a ferry until a week
+before the fair.
+<li>A change in the judging length, or the length of the timslots
+</ul>
+
+The timeslot scheduler does not change judging teams, or the projects assigned
+to judging teams.  It only calculates a timetable for each judging team and
+project.  It performs the following actions:
+<ul><li>Deletes ALL existing judge timeslot assignments and project timeslot assignments 
+<li>Computes a timetable for all projects with three different timeslots for:
+	<ul><li>divisional judges
+	<li>special awards judges
+	<li>free time
+	</ul>
+<li>Assigns all Round 1 judges on round 1 divisional judging teams to a specific timeslot to visit each project.  These will match up
+with divisional timeslots assigned to each project.
+</ul>
+
+<p>NO special awards teams are assigned to timeslots.  Instead, the system can
+print a report for a special awards judging team that lists ALL the special
+award timeslots for each project.  (Basically, when each student will be at
+their project and won't have divisional judges).
+
+<p>NO round 2 divisional (cusp) teams are assigned to timeslots for three reasons:
+<ul><li>we don't know which projects need to be judged,
+	<li>there are more than 3 judges/cusp team, there aren't enough timeslots for 1:1 timeslot assignments,
+	<li>There's no guarantee that the divisional timeslots assigned to each project actually allow an even distribution of judges.
+	</ul>
+Instead, after projects are assigned to these teams (there's a button
+to do this from the judge score entry), the system will print cusp
+judging team timeslot reports for each team that lists when each
+project is available for divisional judging.  
+
+</body>
+</html>

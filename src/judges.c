@@ -1050,14 +1050,9 @@ void judges_anneal(struct _db_data *db, int year)
 	scheduler_log(db, 90, "Doing timeslot assignments");
 
 
-	judges_timeslots(db, year);
+	judges_timeslots(db, year, 0);
 
 	scheduler_log(db, 100, "Done.");
-
-
-
-
-
 
 	printf("All done!\n");
 }
@@ -1142,10 +1137,11 @@ GPtrArray *jteams_load(struct _db_data *db, int year)
 
 
 
-void judges_timeslots(struct _db_data *db, int year)
+void judges_timeslots(struct _db_data *db, int year, int do_log)
 {
 	int itimeslot, iround, iproject, i, y;
 	GPtrArray *jteams;
+	GString *q1;
 
 	current_year = year;
 
@@ -1163,19 +1159,22 @@ void judges_timeslots(struct _db_data *db, int year)
 	jteams = jteams_load(db, year);
 
 	/* Delete old assignments */
+	if(do_log) scheduler_log(db, 1, "Deleting existing assignments");
 	db_query(db, "DELETE FROM timeslot_assignments WHERE year='%d'", year);
+
+	if(do_log) scheduler_log(db, 10, "Computing timeslot assignments");
+
+	q1 = g_string_sized_new(65536);
 
 	/* Do timeslot assignments */
 	for(i=0;i<jteams->len;i++) {
 		struct _jteam *jteam = g_ptr_array_index(jteams, i);
-		GString *q1;
 
 		/* Skip any non-divisional or non-round0 jteam */
 		if(!jteam->award->is_divisional || !jteam->round == 0) continue;
 
 		printf("Timeslots for jteam %s\n", jteam->name);
 
-		q1 = g_string_sized_new(65536);
 		g_string_assign(q1, "");
 
 		/* For every divisional round0 team, create a schedule for each
@@ -1284,9 +1283,10 @@ void judges_timeslots(struct _db_data *db, int year)
 		db_query(db, "INSERT INTO timeslot_assignments (`timeslot_id`,`timeslot_num`, `pid`,`judging_team_id`,`judge_id`,`type`,`year`) VALUES %s", 
 				q1->str);
 //		printf("%s\n", q1->str);
-		g_string_free(q1, 1);
 		printf("\n");
 	}
+	g_string_free(q1, 1);
+	if(do_log) scheduler_log(db, 100, "Done.");
 }
 
 

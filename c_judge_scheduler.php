@@ -53,7 +53,14 @@ case 'run':
 	queue_start($mysqli);
 	form_ajax_response(array('status'=>0, ));
 	exit();
-	
+
+case 'run_ts':
+	sfiab_log($mysqli, "judge_scheduler", $u, 1, "Initializing...");
+	$mysqli->real_query("INSERT INTO queue(`command`,`result`) VALUES('timeslot_scheduler','queued')");
+	queue_start($mysqli);
+	form_ajax_response(array('status'=>0, ));
+	exit();
+
 }
 
 sfiab_page_begin($u, "Judge Scheduler", $page_id);
@@ -72,7 +79,6 @@ sfiab_page_begin($u, "Judge Scheduler", $page_id);
 		
 
 	<table data-role="table" data-mode="none" class="table_stripes">
-	<thead><tr><th>Variable</th><th>Value</th></tr></thead>
 <?php	
 	$q = $mysqli->query("SELECT * FROM config WHERE category='Judge Scheduler' ORDER BY `order`,var");
 	while($r = $q->fetch_assoc()) { 
@@ -93,7 +99,7 @@ sfiab_page_begin($u, "Judge Scheduler", $page_id);
 
 	<hr/>
 	<h3>Run The Scheduler</h3> 
-	<p>The scheduler takes about one minute to run.  It will:
+	<p>The judge scheduler takes about one minute to run.  It will:
 	<ul><li><b>Delete all automatically created judging teams</b> (e.g., from a previous run of this scheduler), manually created judging teams are not touched.
 	<li>Create new judging teams for divisional, CUSP, and every special award marked as "schedule judges"
 	<li>Assign judges to teams
@@ -101,11 +107,13 @@ sfiab_page_begin($u, "Judge Scheduler", $page_id);
 	<li>Assign projects to specific judges for divisional teams
 	<li>Create a judging schedule for each judging team and project (printable on the reports page)
 	</ul>
+	<p>Additional help is is available: <a href="help/judging.html#judge_scheduler" data-ajax="false">Judge Scheduler Documentation</a>
 
 <?php
 	$form_id = $page_id.'_run_form';
 	form_begin($form_id, 'c_judge_scheduler.php');
-	form_submit_enabled($form_id, 'run', 'Run', 'Started, check status below', 'g', 'check', 'Delete all judge assignemnts and create new ones?');
+	form_submit_enabled($form_id, 'run', 'Run', 'Started, check status below', 'g', 'check', 'Delete all judging teams and assignments and create new ones?');
+	form_submit_enabled($form_id, 'run_ts', 'Assign Timeslots Only', 'Started, check status below', 'l', 'check', 'Recalculate all judge and project timetables?');
 	form_end($form_id);
 ?>
 
@@ -146,13 +154,15 @@ function judge_scheduler_update() {
 				update_ticker += 1;
 				for(x=0;x<update_ticker;x++) ticker_str += '.';
 				if(update_ticker == 3) update_ticker = 0;
-				$('#scheduler_percent').html('Running: '+data.percent+'% ' + ticker_str);
-				$('#scheduler_messages').html(data.messages);
+
 				if(data.percent != 100) {
-					setTimeout(judge_scheduler_update, 2000);
+					setTimeout(judge_scheduler_update, 1000);
+					$('#scheduler_percent').html('Running: '+data.percent+'% ' + ticker_str);
 				} else {
 					started = false;
+					$('#scheduler_percent').html('Done.');
 				}
+				$('#scheduler_messages').html(data.messages);
 			}
 		}
 	});
