@@ -77,7 +77,13 @@ sfiab_page_begin($u, "Edit Page Text", $page_id);
 	form_begin($form_id, 'c_config_cms.php');
 	$v = 'main';
 	form_select($form_id, 'name', "Page/Item", $cms_pages, $v);
-	print("<hr/>");
+?>
+	<hr/>
+	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
+	<h3>Email Replacement Keys</h3>
+	<?=print_replace_vars_table($u);?>
+	</div>
+<?php	
 	form_textbox($form_id, "text", "Text", $text);
 	form_label($form_id, "desc", "Description", $desc);
 	form_submit($form_id, 'save', 'Save', 'Saved');

@@ -60,7 +60,7 @@ sfiab_page_begin($u, 'Welcome', 'welcome');
 
 <div data-role="page" id="committee">
 	<div data-role="main" class="sfiab_page" > 
-		Under construction, coming soon.  
+		<?=cms_get($mysqli, 'committee');?>
 	</div>
 
 </div>

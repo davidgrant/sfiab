@@ -697,6 +697,39 @@ function categories_grade_range($mysqli, $year = false)
 	return array($min_grade, $max_grade);
 }
 
+function print_replace_vars_table(&$u)
+{ 
+	global $config;
+	?>
+	<p>Text in [ALL CAPS] surrounded in square brackets has special meaning.  Here is a list of replacements that will be made: </p>
+	<table>
+	<tr><td>Key</td><td>Example</td><td>Replacement</td></tr>
+	<tr><td colspan=2><b>Fair Information</b></td></tr>
+	<tr><td>[FAIRNAME]</td><td><?=$config['fair_name']?></td><td>The name of the science fair.</td></tr>
+	<tr><td>[FAIRABBR]</td><td><?=$config['fair_abbreviation']?></td><td>The abbreviation for the science fair name.</td></tr>
+	<tr><td>[LOGIN_LINK]</td><td><?=$config['fair_url']?>/index.php#login</td><td>A URL pointing to the login page on the registration site.</td></tr>
+	<tr><td>[FAIR_URL]</td><td><?=$config['fair_url']?></td><td>The main URL for the registration site.</td></tr>
+	<tr><td>[YEAR]</td><td><?=$config['year']?></td><td>The current fair year.</td></tr>
+
+	<tr><td colspan=2><b>Info Specific to the Email Recipient</b></td></tr>
+	<tr><td>[FIRSTNAME]</td><td><?=$u['firstname']?></td><td>The first name of the email recipient.</td></tr>
+	<tr><td>[LASTNAME]</td><td><?=$u['lastname']?></td><td>The last name of the email recipient.</td></tr>
+	<tr><td>[NAME]</td><td><?=$u['name']?></td><td>The full name (first + last) of the email recipient.</td></tr>
+	<tr><td>[PASSWORD]</td><td>35db324fc</td><td>The plain-text password of the mail recipient.  This only works in the "New Registration" and "Forgot Password" emails because the password is generated at the time the email is sent.  At all other times, the user's password is encoded in the database using a one-way cryptographic hash.  It cannot be unencoded. </td></tr>
+	<tr><td>[SALUTATION]</td><td>Dr. </td><td>Salutation to be used for the mail recipient. </td></tr>
+
+	<tr><td>[USERNAME]</td><td><?=$u['username']?></td><td>The username of the email recipient.</td></tr>
+	<tr><td>[USERNAME_LIST]</td><td><?=$u['username']?></td><td>A list of ALL usernames associated with the email of the recipient.</td></tr>
+	<tr><td colspan=2><b>Email Addresses</b></td></tr>
+	<tr><td>[EMAIL_CHAIR]</td><td><?=$config['email_chair']?></td><td>The chair email address.</td></tr>
+	<tr><td>[EMAIL_REGISTRATION]</td><td><?=$config['email_registration']?></td><td>The registration coordinator's email address.</td></tr>
+	<tr><td>[EMAIL_ETHICS]</td><td><?=$config['email_ethics']?></td><td>The ethics committee's email address</td></tr>
+	<tr><td>[EMAIL_CHIEFJUDGE]</td><td><?=$config['email_chiefjudge']?></td><td>The chief judge's email address.</td></tr>
+	</table>
+<?php
+}
+
+
 function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false)
 {
 	global $config;
@@ -706,6 +739,8 @@ function replace_vars($text, &$u=NULL, $additional_vars = array(), $html = false
 			'/\[CHAIR_EMAIL\]/' => $html ? mailto($config['email_chair']) : $config['email_chair'],
 			'/\[EMAIL_CHAIR\]/' => $html ? mailto($config['email_chair']) : $config['email_chair'],
 			'/\[EMAIL_REGISTRATION\]/' => $html ? mailto($config['email_registration']) : $config['email_registration'],
+			'/\[EMAIL_ETHICS\]/' => $html ? mailto($config['email_ethics']) : $config['email_ethics'],
+			'/\[EMAIL_CHIEFJUDGE\]/' => $html ? mailto($config['email_chiefjudge']) : $config['email_chiefjudge'],
 			'/\[DATE_FORMS_DUE\]/' => date('F d, Y', strtotime($config['date_student_registration_closes']) + 60*60*24),
 
 			);

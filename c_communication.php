@@ -71,30 +71,13 @@ case 'edit':
 			break;
 		}
 	}
-
 ?>
+
 	<div data-role="collapsible" data-collapsed="true" data-iconpos="right" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" >
 	<h3>Email Replacement Keys</h3>
-	<p>Text in [ALL CAPS] surrounded in square brackets has special meaning.  Here is a list of replacements the email engine will make: </p>
-	<table>
-	<tr><td>Key</td><td>Example</td><td>Replacement</td></tr>
-	<tr><td>[FAIRNAME]</td><td><?=$config['fair_name']?></td><td>The name of the science fair.</td></tr>
-	<tr><td>[FAIRABBR]</td><td><?=$config['fair_abbreviation']?></td><td>The abbreviation for the science fair name.</td></tr>
-	<tr><td>[LOGIN_LINK]</td><td><?=$config['fair_url']?>/index.php#login</td><td>A URL pointing to the login page on the registration site.</td></tr>
-	<tr><td>[FAIR_URL]</td><td><?=$config['fair_url']?></td><td>The main URL for the registration site.</td></tr>
-
-	<tr><td>[FIRSTNAME]</td><td><?=$u['firstname']?></td><td>The first name of the email recipient.</td></tr>
-	<tr><td>[LASTNAME]</td><td><?=$u['lastname']?></td><td>The last name of the email recipient.</td></tr>
-	<tr><td>[NAME]</td><td><?=$u['name']?></td><td>The full name (first + last) of the email recipient.</td></tr>
-	<tr><td>[PASSWORD]</td><td>35db324fc</td><td>The plain-text password of the mail recipient.  This only works for the "New Registration" and "Forgot Password" emails because the password is generated at the time the email is sent.  At all other times, the user's password is encoded in the database using a one-way hash.  It cannot be unencoded. </td></tr>
-	<tr><td>[SALUTATION]</td><td>Dr. </td><td>Salutation to be used for the mail recipient. </td></tr>
-
-	<tr><td>[USERNAME]</td><td><?=$u['username']?></td><td>The username of the email recipient.</td></tr>
-	<tr><td>[USERNAME_LIST]</td><td><?=$u['username']?></td><td>A list of ALL usernames associated with the email of the recipient.</td></tr>
-	<tr><td>[YEAR]</td><td><?=$config['year']?></td><td>The current fair year.</td></tr>
-	</table>
+	<?=print_replace_vars_table($u);?>
 	</div>
-
+	
 	<p>Replacement Keys can be used in the subject and body of the email.
 <?php
 
