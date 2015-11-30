@@ -145,7 +145,7 @@ sfiab_page_begin($u, "Tours", $page_id);
 	<h3>Scheduler Status</h3> 
 	<table>
 	<tr><td>Status:</td><td><div id="scheduler_percent" style="font-weight: bold;"></div></td></tr>
-	<tr><td valign="top" >Output:</td><td><div id="scheduler_messages"></div></td></tr>
+	<tr><td valign="top" >Output:</td><td><tt><div id="scheduler_messages"></div></tt></td></tr>
 	</table>
 
 	<p>The complete output log is available here: <a href="file.php?f=tour_scheduler_log" data-ajax="false">Tour Scheduler Log</a>
@@ -178,13 +178,14 @@ function tour_scheduler_update() {
 				update_ticker += 1;
 				for(x=0;x<update_ticker;x++) ticker_str += '.';
 				if(update_ticker == 3) update_ticker = 0;
-				$('#scheduler_percent').html('Running: '+data.percent+'% ' + ticker_str);
-				$('#scheduler_messages').html(data.messages);
 				if(data.percent != 100) {
-					setTimeout(tour_scheduler_update, 2000);
+					setTimeout(tour_scheduler_update, 1000);
+					$('#scheduler_percent').html('Running: '+data.percent+'% ' + ticker_str);
 				} else {
 					started = false;
+					$('#scheduler_percent').html('Done.');
 				}
+				$('#scheduler_messages').html(data.messages);
 			}
 		}
 	});

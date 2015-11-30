@@ -138,7 +138,7 @@ $timeslots = timeslots_load_all($mysqli);
 	<h3>Scheduler Status</h3> 
 	<table>
 	<tr><td>Status:</td><td><div id="scheduler_percent" style="font-weight: bold;"></div></td></tr>
-	<tr><td valign="top" >Output:</td><td><div id="scheduler_messages"></div></td></tr>
+	<tr><td valign="top" >Output:</td><td><tt><div id="scheduler_messages"></div></tt></td></tr>
 	</table>
 
 	<p>The complete output log is available here: <a href="file.php?f=judge_scheduler_log" data-ajax="false">Judge Scheduler Log</a>
