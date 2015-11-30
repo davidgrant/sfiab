@@ -17,6 +17,8 @@ $help = '
 </ul>';
 
 sfiab_page_begin($u, "Committee Main", 'c_main', $help);
+
+
 ?>
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
@@ -65,23 +67,47 @@ sfiab_page_begin($u, "Committee Main", 'c_main', $help);
 		</ul>
 <?php	} 
 
-	$now = date( 'Y-m-d H:i:s' );
 
-	$status = array();
-	$status[-1] = '<font color="red">Closed</font>';
-	$status[1]  = '<font color="green">Open</font>';
-	$status[2]  = '<font color="orange">Pre-Registration</font>';
-	$status[-2] = '<font color="blue">Not Open Yet</font>';
-	$s_reg = $status[sfiab_registration_status(NULL, 'student')];
-	$j_reg = $status[sfiab_registration_status(NULL, 'judge')];
+function l_reg_status_str($type)
+{
+	global $config;
+
+	/* Turn the status into a string */
+	switch( sfiab_registration_status(NULL, $type) ) {
+	case -1: /* Closed */
+		$str = '<font color="red">Closed</font>';
+		break;
+
+	case 1: /* Open */
+		$str = '<font color="green">Open</font>';
+		$str .= ", closes on ".date('F d, Y', strtotime($config['date_'.$type.'_registration_closes']));
+		break;
+
+	case 2: /* Open in prereg, add when it opens for real */
+		$str = '<font color="orange">Pre-Registration</font>';
+		$str .= ", opens on ".date('F d, Y', strtotime($config['date_student_registration_opens']));
+		break;
+
+	case -2: /* Not open yet */
+		$str = '<font color="blue">Not Open Yet</font>';
+		if($type == 'student' && $config['preregistration_enable']) {
+			$str .= ", pre-registration opens on ".date('F d, Y', strtotime($config['date_student_preregistration_opens']));
+		} else {
+			$str .= ", opens on ".date('F d, Y', strtotime($config['date_'.$type.'_registration_opens']));
+		}
+		break;
+	}
+
+	return $str;
+}
 	?>
 
 	<h3>Sanity Checks</h3> 
 	<ul data-role="listview" data-inset="true">
-	<li>	Student Registration: <?=$s_reg?><br/>
-	    	Judge Registration: <?=$j_reg?>
+	<li>	Student Registration: <?=l_reg_status_str('student')?><br/>
+	    	Judge Registration: <?=l_reg_status_str('judge')?>
 <?php		if($config['volunteers_enable']) { ?>
-			<br/>Volunteer Registration: <?=$j_reg?>
+			<br/>Volunteer Registration: <?=l_reg_status_str('judge')?>
 <?php		} ?>
 	</li>
 	<li><a href="c_judge_sanity.php" data-rel="external" data-ajax="false">Display Judging Sanity Checks</a></li>
