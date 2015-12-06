@@ -16,11 +16,15 @@ enum _languages {
 struct _config {
         int year;
 	int max_projects_per_judge;
-	int min_judges_per_team;
 	int max_judges_per_team;
 	int min_judges_per_cusp_team;
 	int max_judges_per_cusp_team;
 	int projects_per_sa_judge;
+	int judge_shuffle;
+	int div_times_each_project_judged;
+
+	/* Derived numbers */
+	int max_projects_per_team;
 };
 
 struct _category
@@ -67,5 +71,7 @@ void isef_divisions_load(struct _db_data *db, int year);
 int split_int_list(int *list, char *str);
 int list_contains_int(int *list, int len, int val);
 int split_str_list(char **list, char *str);
+
+int factorial(int n);
 
 #endif

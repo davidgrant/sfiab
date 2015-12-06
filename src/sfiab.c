@@ -95,25 +95,35 @@ void config_load(struct _db_data *db)
 			config.year = atoi(val);
 		if(strcmp(var, "judge_div_max_projects") == 0)
 			config.max_projects_per_judge = atoi(val);
-		if(strcmp(var, "judge_div_max_team") == 0)
-			config.max_judges_per_team = atoi(val);
+		if(strcmp(var, "div_times_each_project_judged") == 0)
+			config.div_times_each_project_judged = atoi(val);
 		if(strcmp(var, "judge_cusp_max_team") == 0)
 			config.max_judges_per_cusp_team = atoi(val);
 		if(strcmp(var, "judge_sa_max_projects") == 0)
 			config.projects_per_sa_judge = atoi(val);
-
+		if(strcmp(var, "judge_div_shuffle") == 0)
+			config.judge_shuffle = atoi(val) == 0 ? 0 : 1;
 	}
 
-	config.min_judges_per_team = config.max_judges_per_team;
 	config.min_judges_per_cusp_team = config.max_judges_per_cusp_team;
 
 	printf("Loaded SFIAB Config:\n");
 	printf("   year: %d\n", config.year);
 	printf("   Projects per Div judge: %d\n", config.max_projects_per_judge);
 	printf("   Projects per SA judge: up to %d\n", config.projects_per_sa_judge);
-	printf("   Judges per Div Team: %d\n", config.max_judges_per_team);
+	printf("   Number of times each project must be judged: %d\n", config.div_times_each_project_judged);
 	printf("   Judges per Cusp Team: %d\n", config.max_judges_per_cusp_team);
+	printf("   Judge shuffling: %d\n", config.judge_shuffle);
 
+	/* Without shuffling, the max projects are the max number of projects each judge can see, because
+	 * EVERY judge has to see ALL the projects.
+	 * With suffling there is no limit, we could keep adding judges so the shuffling keeps the projects
+	 * below the limit for each judge, so artificially cap it at twice the number projects each
+	 * judge can see.  The costs still apply for making project and judge teams, but do NOT apply
+	 * for assigning judges to projects, so big teams will effectively be random. */
+	config.max_projects_per_team = config.max_projects_per_judge * (config.judge_shuffle ? 2 : 1);
+	printf("Calculated SFIAB constants:\n");
+	printf("   Max projects per Div team: %d\n", config.max_projects_per_team);
 	
 	db_free_result(result);
 }
@@ -180,6 +190,18 @@ struct _challenge *challenge_find(int challenge_id)
 	return NULL;
 */
 }
+
+
+int factorial(int n)
+{
+	int ret = 1;
+	while(n > 1) {
+		ret *= n;
+		n--;
+	}
+	return ret;
+}
+
 
 int isef_division_find_by_div(char *div)
 {

@@ -30,6 +30,8 @@ struct _jteam {
 	int sa_only; /* If this jteam is for sa_only judges (no scheduling) */
 	int prize_id;
 
+	int num_judges_required; /* div round 1 only */
+
 	int *isef_div_count;
 	int *isef_div_mask;
 	int *lang_count;
@@ -120,31 +122,16 @@ float jteam_projects_cost(struct _annealer *annealer, int bucket_id, GPtrArray *
 	cost += (unique_langs - 1) * 75;
 	
 	/* Cost over limit */
-	if(bucket->len > config.max_projects_per_judge) {
-		cost += (bucket->len - config.max_projects_per_judge) * 100;
+	if(bucket->len > config.max_projects_per_team) {
+		cost += (bucket->len - config.max_projects_per_team) * 100;
 	}
 
 	/* Cost 1 for each project over 3/4 the max, just to break ties to
 	 * avoid one jteam with 5 projects, and another with 7 */
-	if(bucket->len > (config.max_projects_per_judge * 3 / 4)) {
-		cost += bucket->len - (config.max_projects_per_judge * 3 / 4);
+	if(bucket->len > (config.max_projects_per_team * 3 / 4)) {
+		cost += bucket->len - (config.max_projects_per_team * 3 / 4);
 	}
 
-	/* Score +200 pts for each duplicate project this team is judging, we
-	 * really don't want a jteam judging the same project twice */
-#if 0	
-	if(bucket->len > 1) {
-		for(x=0;x<bucket->len-1;x++) {
-			struct _project *p1 = g_ptr_array_index(bucket, x);
-			for(y=x+1;y<bucket->len;y++) {
-				struct _project *p2 = g_ptr_array_index(bucket, y);
-				if(p1 == p2) {
-					cost += 200;
-				}
-			}
-		}
-	}
-#endif	
 	return cost;	
 }
 
@@ -175,17 +162,10 @@ float jteam_judge_cost(struct _annealer *annealer, int bucket_id, GPtrArray *buc
 
 	/* Cost over/under */
 	if(jteam->award->is_divisional) {
-		int min, max;
-
-		if(jteam->round == 0) {
-			min = (bucket->len < config.min_judges_per_team) ? (config.min_judges_per_team - bucket->len) : 0;
-			max = (bucket->len > config.max_judges_per_team) ? (bucket->len - config.max_judges_per_team) : 0;
-		} else {
-			min = (bucket->len < config.min_judges_per_cusp_team) ? (config.min_judges_per_cusp_team - bucket->len) : 0;
-			max = (bucket->len > config.max_judges_per_cusp_team) ? (bucket->len - config.max_judges_per_cusp_team) : 0;
-		}
-		cost += min * 1000;
-		cost += max * 1000;
+		int min = (bucket->len < jteam->num_judges_required) ? (jteam->num_judges_required - bucket->len) : 0;
+		int max = (bucket->len > jteam->num_judges_required) ? (bucket->len - jteam->num_judges_required) : 0;
+		cost += min * 10000;
+		cost += max * 10000;
 
 	} else {
 		assert(0);
@@ -549,6 +529,22 @@ int judges_anneal_checks(struct _db_data *db)
 }
 
 
+int get_judges_for_project(int num_projects, int each_project_judged)
+{
+	/* This is really just the smallest n, such that
+	 * nCr > num_projects */
+	int r_fac = factorial(each_project_judged);
+	int num_judges;
+	for(num_judges=each_project_judged+1; num_judges<10; num_judges++) {
+		int max_p = factorial(num_judges) / (r_fac * factorial(num_judges - each_project_judged) );
+		if(max_p > num_projects) 
+			return num_judges;
+	}
+	return each_project_judged;
+
+}
+
+
 
 void judges_anneal(struct _db_data *db, int year)
 {
@@ -652,7 +648,7 @@ void judges_anneal(struct _db_data *db, int year)
 			/* Calculate number of jteams needed for round0 */
 			/* Add one to the jteams for each extra language to help avoid mixing languages */
 			/* 0/8 = 0, 1/8 ... 8/8 = 1,  9/8 = 2, etc.. */
-			num_jteams = ((a->projects->len - 1) / config.max_projects_per_judge) + 1 + (num_languages - 1);
+			num_jteams = ((a->projects->len - 1) / config.max_projects_per_team) + 1 + (num_languages - 1);
 
 			printf("   => %d projects, %d jteams (added %d for extra languages)\n", a->projects->len, num_jteams, num_languages - 1);
 
@@ -681,6 +677,13 @@ void judges_anneal(struct _db_data *db, int year)
 				for(y=0; y<ps->len;y++) {
 					project_print(g_ptr_array_index(ps, y));
 				}
+
+				if(config.judge_shuffle) {
+					jteam->num_judges_required = get_judges_for_project(ps->len, config.div_times_each_project_judged);
+				} else {
+					jteam->num_judges_required = config.div_times_each_project_judged;
+				}
+				printf("   => %d judges required\n", jteam->num_judges_required);
 			}
 
 			/* Create cusp teams too */
@@ -699,7 +702,9 @@ void judges_anneal(struct _db_data *db, int year)
 				jteam = jteam_create(db, jteams, name, a);
 				jteam->round = 1;
 				jteam->prize_id = prize->id;
+				jteam->num_judges_required = config.max_judges_per_cusp_team;
 				printf("JTeam %d: %s\n", jteam->num, jteam->name );
+				printf("   => %d judges required\n", jteam->num_judges_required);
 			}
 
 
@@ -719,6 +724,13 @@ void judges_anneal(struct _db_data *db, int year)
 				}
 			}
 			printf("   => Added %d projects that self-nominated\n", jteam->projects->len);
+
+			if(jteam->projects->len > 0) 
+				jteam->num_judges_required = (jteam->projects->len - 1) / config.projects_per_sa_judge + 1;
+			else 
+				jteam->num_judges_required = 1; /* Assign one judge because we want to give out the award, probably */
+			printf("   => %d judges required\n", jteam->num_judges_required);
+
 			g_ptr_array_add(a->jteams, jteam);
 
 		} else {
@@ -957,7 +969,6 @@ void judges_anneal(struct _db_data *db, int year)
 	for(x=0;x<jteams_list->len;x++) {
 		struct _jteam *jteam = g_ptr_array_index(jteams_list, x);
 		int round;
-		int judges_required;
 		GPtrArray *judge_list;
 
 		if(jteam->projects->len > ideal_projects_in_round[0]) {
@@ -981,15 +992,8 @@ void judges_anneal(struct _db_data *db, int year)
 		}
 		printf("\n");
 
-		/* Calculate required judges */
-		if(jteam->projects->len > 0) 
-			judges_required = (jteam->projects->len - 1) / config.projects_per_sa_judge + 1;
-		else 
-			judges_required = 1; /* Assign one judge because we want to give out the award, probably */
-
-
-		printf("         => %d judges are required.\n", judges_required);
-		for(i=0; i<judges_required; i++) {
+		printf("         => %d judges are required.\n", jteam->num_judges_required);
+		for(i=0; i<jteam->num_judges_required; i++) {
 			struct _judge *j;
 			int ijudge;
 			if(judge_list->len == 0) continue;
@@ -1190,10 +1194,13 @@ void judges_timeslots(struct _db_data *db, int year, int do_log)
 			/* This will produce the same scheudule twice, unless the timeslots for round1 and 2 are 
 			 * different, which they are for the GVRSF */
 			timeslot_matrix = timeslot_matrix_alloc(jteam->projects->len, ts->num_timeslots);
-			timeslot_fill(timeslot_matrix, jteam->judges->len);
 
-			/* For round2, turn all the judging slots into cusp slots */
-			if(ts->round > 0) {
+			/* Create the requested schedule */
+			if(ts->round == 0) {
+				timeslot_fill(timeslot_matrix, jteam->judges->len, config.div_times_each_project_judged);
+			} else {
+				/* For round2, turn all the judging slots into cusp slots */
+				timeslot_fill(timeslot_matrix, jteam->judges->len * 2, config.div_times_each_project_judged);
 				for(iproject=0;iproject<jteam->projects->len;iproject++) {
 					for(itimeslot=0; itimeslot<ts->num_timeslots; itimeslot++) {
 						if(timeslot_matrix->ts[iproject][itimeslot] >= 0) {

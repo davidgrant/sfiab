@@ -13,6 +13,7 @@
 #include "judges.h"
 #include "exhibithall.h"
 #include "sfiab.h"
+#include "timeslots.h"
 
 int main(int argc, char **argv) 
 {
@@ -38,6 +39,9 @@ int main(int argc, char **argv)
 	} else if(strcmp(argv[1], "eh") == 0) {
 		printf("Exhibit Hall\n");
 		exhibithall_anneal(db, config.year);
+	} else if(strcmp(argv[1], "timeslots_test") == 0) {
+		printf("Timeslots Test\n");
+		timeslot_test();
 	}
 	db_close(db);
 

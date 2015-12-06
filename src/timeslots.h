@@ -29,10 +29,12 @@ extern GPtrArray *timeslots;
 
 struct _timeslot_matrix *timeslot_matrix_alloc(int num_projects, int num_timeslots);
 
-int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges);
+int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges, int judges_per_project);
 int timeslot_adjust_for_unavailable_slot(struct _timeslot_matrix *timeslot_matrix, int unavailble_project, int unavailable_timeslot);
 void timeslots_load(struct _db_data *db, int year);
 struct _timeslot *timeslot_find_for_round(int round);
+void timeslot_print(struct _timeslot_matrix *timeslot_matrix);
+void timeslot_test(void);
 
 #endif
 

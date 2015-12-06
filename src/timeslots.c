@@ -15,6 +15,9 @@
 
 GPtrArray *timeslots = NULL;
 
+void l_timeslot_print_schedule(int *schedule, int num_timeslots);
+
+
 
 struct _timeslot_matrix *timeslot_matrix_alloc(int num_projects, int num_timeslots)
 {
@@ -67,7 +70,7 @@ int timeslot_create_schedule(int *schedule, int num_timeslots, int num_judges, i
 	int t, j, i;
 
 	/* Create a schedule given the number of timeslots, judges, and projects */
-	assert(num_projects <= num_timeslots);
+//	assert(num_projects <= num_timeslots);
 
 	for(i=0;i<num_timeslots;i++) {
 		schedule[i] = -1;
@@ -91,10 +94,16 @@ int timeslot_create_schedule(int *schedule, int num_timeslots, int num_judges, i
 			next_type = (next_type == TIMESLOT_SPECIAL) ? TIMESLOT_BREAK : TIMESLOT_SPECIAL;
 		}
 	}
+	l_timeslot_print_schedule(schedule, num_timeslots);
+	return 1;
+}
 
+void l_timeslot_print_schedule(int *schedule, int num_timeslots)
+{
+	int itimeslot;
 	printf("Schedule:");
-	for(t=0;t<num_timeslots;t++) {
-		switch(schedule[t]) {
+	for(itimeslot=0; itimeslot<num_timeslots; itimeslot++) {
+		switch(schedule[itimeslot]) {
 		case TIMESLOT_SPECIAL:
 			printf(" S");
 			break;
@@ -102,12 +111,11 @@ int timeslot_create_schedule(int *schedule, int num_timeslots, int num_judges, i
 			printf(" -");
 			break;
 		default:
-			printf(" %d", schedule[t]);
+			printf(" %d", schedule[itimeslot]);
 			break;
 		}
 	}
 	printf("\n");
-	return 1;
 }
 
 
@@ -131,8 +139,8 @@ int timeslot_has_conflict(struct _timeslot_matrix *m, int itimeslot, int type)
 
 /* filling the timeslots takes the schedule above and lays it out vertically starting with
  * the first project at timesslot 0, for this example,  7 projects, 3 judges, 9 timeslots
- * the schedule is: J0 S - J1 S - J2 S -
- * But to make it interesting and to create artifical conflicts, let's say
+ * the project schedule is: 0 S - 1 S - 2 S -    ( 0 == judge 0, S = special, - = =break )
+ * But to make it interesting and to create artificial conflicts, let's say
  * the schedule is 0 1 - - - - - - 2
  *
  * Stamp out the schedule vertically first
@@ -149,77 +157,176 @@ int timeslot_has_conflict(struct _timeslot_matrix *m, int itimeslot, int type)
  *      ts 8 > 2
  *             ^ Schedule
  *
- *  Then move on to the next judge at timeslot 0, realign the schedule to start at the
- *  index of judge 1, and move down stamping out the schedule, wrap around when at the bottom
- *
- *  Do the same in timeslot 0 until we run out of judges
+ *  Increment the start_timeslot to schedule index 1, line that up at timeslot 0, and stamp it out again
+ *  Do the same again with schedule index 2
  *
  *  Project => 1 2 3 4 5 6 7
- *      ts 0 > 0 1 2 
- *      ts 1 > 1 - 0
- *      ts 2 > - - 1
+ *      ts 0 > 0 1 - 
+ *      ts 1 > 1 - -
+ *      ts 2 > - - -
  *      ts 3 > - - -
  *      ts 4 > - - -
  *      ts 5 > - - -
- *      ts 6 > - - -
- *      ts 7 > - 2 -
- *      ts 8 > 2 0 -
- *               ^ Schedule starting at sched[1] for judge 1
- *
- *  When we run out of judges, go back to judge 0 (so the schedule starts at schedule[0]), but
- *  then move down one timeslot.  Check that we can actually start a new schedule for project 4
- *  with judge 0 in timeslot 1 (we can't), so skip it and try judge 1 (can't) skip and try judge 2
- *
- *  Project => 1 2 3 4 5 6 7
- *      ts 0 > 0 1 2 -
- *      ts 1 > 1 - 0 2
- *      ts 2 > - - 1 0
- *      ts 3 > - - - 1
- *      ts 4 > - - - -
- *      ts 5 > - - - -
- *      ts 6 > - - - -
- *      ts 7 > - 2 - -
- *      ts 8 > 2 0 - -
- *                   ^ Schedule starting at sched[8] for judge 2, shifted down one timeslot
- *
- *  Now we've hit judge 2 on timeslot 1, move to timeslot 2, and start the checks at judge 0
- *  (can't) judge 1 (can't) and judge 2 again..  Repeat until we run out of projects.
+ *      ts 6 > - - 2
+ *      ts 7 > - 2 0
+ *      ts 8 > 2 0 1
+ *               
+ *  Keep moving the schedule start index forward and stamping it out starting at timeslot 0
  *                   
  *  Project => 1 2 3 4 5 6 7
- *      ts 0 > 0 1 2 - - - - 
- *      ts 1 > 1 - 0 2 - - -
- *      ts 2 > - - 1 0 2 - - 
- *      ts 3 > - - - 1 0 2 -
- *      ts 4 > - - - - 1 0 2
- *      ts 5 > - - - - - 1 0 
- *      ts 6 > - - - - - - 1
- *      ts 7 > - 2 - - - - - 
- *      ts 8 > 2 0 - - - - - 
+ *      ts 0 > 0 1 - - - - - 
+ *      ts 1 > 1 - - - - - -
+ *      ts 2 > - - - - - - 2 
+ *      ts 3 > - - - - - 2 0
+ *      ts 4 > - - - - 2 0 1
+ *      ts 5 > - - - 2 0 1 - 
+ *      ts 6 > - - 2 0 1 - -
+ *      ts 7 > - 2 0 1 - - - 
+ *      ts 8 > 2 0 1 - - - - 
  *
- *  This is guaranteed to never put the same judge in the same timeslot for two different
- *  projects.  We could just as easily have started with project 1 and timeslot 0, then proceeded
- *  vertically down always starting with judge 0, but 
- *  - that wouldn't give judge 0 any breaks, unless we stride, which we could do
- *  - It would put more breaks at the beginning of the scheulde, we'd prefer to front-load
- *    the judges, e.g, always having all 3 judges busy in timeslot 0
- *  - it would also front-load breaks in the schedule.. we want them near the
- *    end as much as possible.
+ *   One optimization that we used to have wth the more convoluted judge layout schedule is that we could
+ *   keep all the judges busy in ts=0.  IN this example, we could detect that we won't to through all the schedule
+ *   rotations (num projects < timeslots) so we could skip up to 2 (timeslots=0 - projects=7 = 2), so we might 
+ *   instead end up with something like, skip breaks in ts=0:
+ *
+ *  Project => 1 2 3 4 5 6 7
+ *      ts 0 > 0 1 - - - - 2 
+ *      ts 1 > 1 - - - - 2 0
+ *      ts 2 > - - - - 2 0 1 
+ *      ts 3 > - - - - 0 1 -
+ *      ts 4 > - - - 2 1 - -
+ *      ts 5 > - - 2 0 - - - 
+ *      ts 6 > - - 0 1 - - -
+ *      ts 7 > - 2 1 - - - - 
+ *      ts 8 > 2 0 - - - - - 
  */
 
-int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges)
+struct _twist_data {
+	int perm;
+	int *data;
+	int num_permutations;
+	int num_per_perm;
+	int num_total;
+};
+
+void twist_init(int *indexes, int judges_per_project)
+{
+	int i;
+	for(i=0;i<judges_per_project;i++) {
+		indexes[i] = i;
+	}
+}
+
+
+int twist(int *indexes, int num_judges, int judges_per_project)
+{
+	int i, j, depth;
+
+	/* Start at the rightmost, work backwards */
+	depth = 0;
+	for(i=judges_per_project-1; i>=0; i--,depth++) {
+		if(indexes[i] < num_judges - 1 - depth) {
+			/* Yes. */
+			indexes[i]++;
+			/* Reset all pointers to the right */
+			for(j=i+1; j<judges_per_project; j++) {
+				indexes[j] = indexes[j-1] + 1;
+			}
+			return 1;
+		}
+	}
+	/* Reset the whole thing */
+	twist_init(indexes, judges_per_project);
+	return 0;
+}
+
+struct _twist_data *twist_alloc(int num_judges, int judges_per_project)
+{
+	struct _twist_data *d = malloc(sizeof(struct _twist_data));
+	int *indexes = malloc(judges_per_project * sizeof(int));
+	int i, x;
+
+	d->data = malloc(sizeof(int) * factorial(num_judges));
+	d->num_per_perm = judges_per_project;
+	d->num_total = num_judges;
+	d->num_permutations=0;
+
+	/* Populate it */
+	twist_init(indexes, judges_per_project);
+	while(1) {
+		int offset = d->num_per_perm * d->num_permutations;
+		int ret;
+
+		d->num_permutations++;
+		/* Copy in the index */
+		for(i=0;i<judges_per_project;i++) {
+			d->data[offset+i] = indexes[i];
+		}
+
+		/* Twist it, if that fails, stop */
+		ret = twist(indexes, num_judges, d->num_per_perm);
+		if(!ret) break;
+
+	}
+
+	/* Go over all the permutations, and randomly swap them */
+	for(x=0; x<d->num_permutations; x++) {
+		int src_offset = x *  d->num_per_perm;
+		int dst_offset = (rand() % d->num_permutations) *  d->num_per_perm;
+
+		/* swap */
+		for(i=0;i< d->num_per_perm;i++) {
+			indexes[i] = d->data[src_offset+i];
+			d->data[src_offset+i] = d->data[dst_offset+i];
+			d->data[dst_offset+i] = indexes[i];
+		}
+	}
+	d->perm = 0;
+
+	return d;
+}
+
+void twist_free(struct _twist_data *data)
+{
+	free(data->data);
+	free(data);
+}
+
+int *twist_get(struct _twist_data *data, int *reset)
+{
+	int *ret = &data->data[data->num_per_perm * data->perm];
+	data->perm++;
+	if(data->perm == data->num_permutations) {
+		data->perm = 0;
+		*reset = 1;
+	} else {
+		*reset = 0;
+	}
+	return ret;
+}
+
+
+int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges, int judges_per_project)
 {
 	int *schedule = malloc(timeslot_matrix->num_timeslots * sizeof(int));
-	int *judge_start_index = malloc(num_judges * sizeof(int));
+	int *judge_index;
 	int iproject, itimeslot;
-	int start_timeslot_offset, start_judge;
+	int start_schedule_index;
+	int fail_count, index_offset=0;
+	int ret = 1;
+	int skip_every = 0, skip_count = 0;
+	int i;
+	struct _twist_data *twist_data;
+	
+	twist_data = twist_alloc(num_judges, judges_per_project);
 
-	timeslot_create_schedule(schedule, timeslot_matrix->num_timeslots, num_judges, timeslot_matrix->num_projects);
+	printf("Fill for %d judges, %d judges per project\n", num_judges, judges_per_project);
+	timeslot_create_schedule(schedule, timeslot_matrix->num_timeslots, judges_per_project, timeslot_matrix->num_projects);
 
-	/* Find the index where each judge starts*/
-	for(itimeslot=0;itimeslot<timeslot_matrix->num_timeslots;itimeslot++) {
-		if(schedule[itimeslot] >= 0) {
-			judge_start_index[schedule[itimeslot]] = itimeslot;
-		}
+	/* Now many skips can we have? */
+	i = timeslot_matrix->num_timeslots - timeslot_matrix->num_projects;
+	if(i > 1) {
+		skip_every = (timeslot_matrix->num_projects / i) + 1;
 	}
 
 	/* Fill everything with unavailable */
@@ -229,44 +336,84 @@ int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges)
 		}
 	}
 
-	start_timeslot_offset = 0;
-	start_judge = 0;
+	start_schedule_index = 0;
+	fail_count = 0;
 	for(iproject=0; iproject<timeslot_matrix->num_projects; iproject++) {
-		int t;
+		int t, reset, success = 1;
 
-		/* Stop if things are misconfigured and there is no solution */
-		assert(start_timeslot_offset < timeslot_matrix->num_timeslots);
+		/* Note: incrementing start_schedule_index on failure is bad.
+		 * It more often leads to situations where the lst project
+		 * needs the same judge twice.  By forcing the correct pattern
+		 * schedule and twisting more, the distribution seems to work
+		 * out more often. */
 
-		/* See if start_judge is allowed to start on this row */
-		if(!timeslot_has_conflict(timeslot_matrix, start_timeslot_offset, start_judge)) {
-			/* The first item in the row is the judge start index - the timeslot offset */
-			t = judge_start_index[start_judge] - start_timeslot_offset;
-			/* Might be negative, wrap backwards if so */
-			if(t < 0) t += timeslot_matrix->num_timeslots;
-
-			for(itimeslot=0; itimeslot<timeslot_matrix->num_timeslots; itimeslot++) {
-				timeslot_matrix->ts[iproject][itimeslot] = schedule[t];
-//				printf("Timeslot [%d][%d] (%d) = [%d] %d\n", i, j, index, t, schedule[t]);
-				t++;
-				if(t == timeslot_matrix->num_timeslots) t=0;
+		/* Try to lay down the schedule starting at start_schedule_index */
+		t = start_schedule_index;
+		for(itimeslot=0; itimeslot<timeslot_matrix->num_timeslots; itimeslot++) {
+			if(timeslot_has_conflict(timeslot_matrix, itimeslot, schedule[t])) {
+				/* Clear the attempt */
+				for(i=0;i<timeslot_matrix->num_timeslots;i++) {
+					timeslot_matrix->ts[iproject][i] = TIMESLOT_UNAVAILABLE;
+				}
+				success = 0;
+				break;
 			}
+			timeslot_matrix->ts[iproject][itimeslot] = schedule[t];
+/*			printf("Set timeslot [%d][%d] = [%d] %d\n", iproject, itimeslot, t, schedule[t]);*/
+			t++;
+			if(t == timeslot_matrix->num_timeslots) t=0;
+		}
+
+		if(success) {
+			skip_count++;
+			if(skip_count == skip_every) {
+				skip_count = 0;
+				start_schedule_index++;
+			}
+			start_schedule_index++;
+//			if(start_schedule_index < 0) start_schedule_index += timeslot_matrix->num_timeslots;
+			if(start_schedule_index >= timeslot_matrix->num_timeslots) start_schedule_index -= timeslot_matrix->num_timeslots;
+			fail_count = 0;
+			index_offset = 0;
 		} else {
-			/* Skip assignment, retry this project with the next judge */
+			/* Try this schedule again after twisting the schedule */
 			iproject--;
 		}
 
-		start_judge++;
-		if(start_judge == num_judges) {
-			start_judge = 0;
-			start_timeslot_offset++;
+		/* twist the schedule */
+		judge_index = twist_get(twist_data, &reset);
+
+		if(reset && !success) {
+			/* Schedule was reset and we're in the fail state */
+			fail_count++;
+			if(fail_count >= 2) {
+				/* Went through an entire combination round with no success, start with permutations */
+				index_offset++;
+				if(index_offset == judges_per_project) {
+					/* Fail with permutations too */
+					printf("Reached offset=%d, judges per schedule=%d, no solution.", index_offset, judges_per_project);
+					timeslot_print(timeslot_matrix);
+					ret = 0;
+					break;
+				}
+			}
 		}
+
+		/* fill the schedule */
+		i=index_offset;
+		for(itimeslot=0; itimeslot<timeslot_matrix->num_timeslots; itimeslot++) {
+			if(schedule[itimeslot] >= 0) {
+				schedule[itimeslot] = judge_index[i];
+				i++;
+				if(i==judges_per_project) i=0;
+			}
+		}
+
 	}
 
-
+	twist_free(twist_data);
 	free(schedule);
-	free(judge_start_index);
-
-	return 1;
+	return ret;
 
 }
 
@@ -408,4 +555,107 @@ struct _timeslot *timeslot_find_for_round(int round)
 	}
 	return NULL;
 }
+
+void timeslot_print(struct _timeslot_matrix *timeslot_matrix)
+{
+	int iproject, itimeslot;
+	printf("Matrix for %d timeslots, %d projects\n", timeslot_matrix->num_timeslots, timeslot_matrix->num_projects);
+	printf("   ");
+	for(iproject=0; iproject<timeslot_matrix->num_projects; iproject++) {
+		printf("p%d ", iproject);
+	}
+	printf("\n");
+	for(itimeslot=0; itimeslot<timeslot_matrix->num_timeslots; itimeslot++) {
+		printf("%2d ", itimeslot);
+		for(iproject=0; iproject<timeslot_matrix->num_projects; iproject++) {
+			int t = timeslot_matrix->ts[iproject][itimeslot];
+			switch(t) {
+			case TIMESLOT_SPECIAL:
+				printf(" . ");
+				break;
+			case TIMESLOT_CUSP:
+				printf(" C ");
+				break;
+			case TIMESLOT_BREAK:
+				printf(" - ");
+				break;
+			case TIMESLOT_UNAVAILABLE:
+				printf(" X ");
+				break;
+			default:
+				printf(" %d ", t);
+				break;
+			}
+		}
+		printf("\n");
+	}
+}
+
+
+void timeslot_test(void)
+{
+	/* 5 projects, 5 timelsots, 3 judges, 3 judges/project */
+	struct _timeslot_matrix *timeslot_matrix;
+	int *judge_index = malloc(5 * sizeof(int));
+	int x;
+
+	printf("Twist test with judges_per_project=4, 7 judges total\n");
+	twist_init(judge_index, 4);
+	for(x=0;x<50;x++) {
+		printf("[%d %d %d %d] ", judge_index[0], judge_index[1], judge_index[2], judge_index[3]);
+		if(x%10 == 9) printf("\n");
+		twist(judge_index, 7, 4);
+	}
+	printf("\n");
+	free(judge_index);
+	
+	
+	printf("Begin timeslot test\n");
+	for(x=2;x<10; x++) {
+		timeslot_matrix = timeslot_matrix_alloc(x, 9);
+		timeslot_fill(timeslot_matrix, 3, 3);
+		timeslot_print(timeslot_matrix);
+		timeslot_matrix_free(timeslot_matrix);
+	}
+
+	timeslot_matrix = timeslot_matrix_alloc(10, 5);
+	timeslot_fill(timeslot_matrix, 6, 3);
+	timeslot_print(timeslot_matrix);
+	timeslot_matrix_free(timeslot_matrix);
+
+	timeslot_matrix = timeslot_matrix_alloc(20, 5);
+	timeslot_fill(timeslot_matrix, 10, 2);
+	timeslot_print(timeslot_matrix);
+	timeslot_matrix_free(timeslot_matrix);
+	
+}
+
+
+
+
+/* sched = 0 S 1 2 -
+ *   p0 p1 p2 p3 p4
+ * 0  0  1  2  -  S
+ * 1  S  2  -  0  1
+ * 2  1  -  0  S  2
+ * 3  2  0  S  1  -
+ * 4  -  S  1  2  0
+ *   
+ *
+ * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * */
+
+
 
