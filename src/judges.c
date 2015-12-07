@@ -679,7 +679,10 @@ void judges_anneal(struct _db_data *db, int year)
 				}
 
 				if(config.judge_shuffle) {
-					jteam->num_judges_required = get_judges_for_project(ps->len, config.div_times_each_project_judged);
+					struct _timeslot *ts = g_ptr_array_index(timeslots, 0);
+					jteam->num_judges_required = (ps->len * config.div_times_each_project_judged) / ts->num_timeslots + 1;
+
+					//get_judges_for_project(ps->len, config.div_times_each_project_judged);
 				} else {
 					jteam->num_judges_required = config.div_times_each_project_judged;
 				}
@@ -1252,7 +1255,7 @@ void judges_timeslots(struct _db_data *db, int year, int do_log)
 
 					if(timeslot_type >= 0) {
 						j = g_ptr_array_index(jteam->judges, timeslot_type);
-						printf("\t(%d)", j->id);
+						printf("\t(%d)", j ? j->id : -1);
 						timeslot_type_str = "divisional";
 					} else if(timeslot_type == TIMESLOT_BREAK) {
 						printf("\t--");
@@ -1269,6 +1272,7 @@ void judges_timeslots(struct _db_data *db, int year, int do_log)
 					} else {
 						assert(0);
 					}
+					if(j == NULL) continue;
 
 					/* Build a query for the mysql insert, we're building up a list and sending a bunch
 					 * at a time because a single INSERT for each timeslot was very slow. */

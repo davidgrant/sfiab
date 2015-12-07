@@ -308,16 +308,24 @@ int *twist_get(struct _twist_data *data, int *reset)
 
 int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges, int judges_per_project)
 {
-	int *schedule = malloc(timeslot_matrix->num_timeslots * sizeof(int));
+	int *schedule;
 	int *judge_index;
 	int iproject, itimeslot;
 	int start_schedule_index;
 	int fail_count, index_offset=0;
 	int ret = 1;
 	int skip_every = 0, skip_count = 0;
-	int i;
+	int i, retry_count = 0;
 	struct _twist_data *twist_data;
-	
+
+start:
+	schedule = malloc(timeslot_matrix->num_timeslots * sizeof(int));
+	index_offset=0;
+	ret=1;
+	skip_every=0;
+	skip_count=0;
+
+
 	twist_data = twist_alloc(num_judges, judges_per_project);
 
 	printf("Fill for %d judges, %d judges per project\n", num_judges, judges_per_project);
@@ -392,7 +400,6 @@ int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges, int 
 				if(index_offset == judges_per_project) {
 					/* Fail with permutations too */
 					printf("Reached offset=%d, judges per schedule=%d, no solution.", index_offset, judges_per_project);
-					timeslot_print(timeslot_matrix);
 					ret = 0;
 					break;
 				}
@@ -413,6 +420,16 @@ int timeslot_fill(struct _timeslot_matrix *timeslot_matrix, int num_judges, int 
 
 	twist_free(twist_data);
 	free(schedule);
+
+	if(ret == 0) {
+		retry_count++;
+		if(retry_count < 100) {
+			goto start;
+		}
+		timeslot_print(timeslot_matrix);
+	}
+	
+
 	return ret;
 
 }
@@ -627,7 +644,22 @@ void timeslot_test(void)
 	timeslot_fill(timeslot_matrix, 10, 2);
 	timeslot_print(timeslot_matrix);
 	timeslot_matrix_free(timeslot_matrix);
-	
+
+	timeslot_matrix = timeslot_matrix_alloc(7, 5);
+	timeslot_fill(timeslot_matrix, 6, 4);
+	timeslot_print(timeslot_matrix);
+	timeslot_matrix_free(timeslot_matrix);
+
+//	timeslot_matrix = timeslot_matrix_alloc(num_projects, num_timeslots);
+//	timeslot_fill(timeslot_matrix, num_judges, times_judged);
+//	timeslot_print(timeslot_matrix);
+//	timeslot_matrix_free(timeslot_matrix);
+
+	timeslot_matrix = timeslot_matrix_alloc(10, 5);
+	timeslot_fill(timeslot_matrix, 6, 4);
+	timeslot_print(timeslot_matrix);
+	timeslot_matrix_free(timeslot_matrix);
+
 }
 
 

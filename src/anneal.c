@@ -226,6 +226,12 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	}
 	printf("   => %d total items to anneal\n", i);
 
+	if(num_buckets <= 1) {
+		/* Nothing to anneal */
+		printf("   => Only 1 bucket, nothing to anneal, returning now.\n");
+		goto done;
+	}
+
 	/* Compute initial costs */
 	cost = 0;
 	for(x=0; x<num_buckets; x++) {
@@ -351,6 +357,8 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	}
 	anneal_print_buckets(&annealer);
 
+done:
+
 	/* Copy back pointers to the return array */
 	*output_buckets = malloc(sizeof(struct GPtrArray *) * num_buckets);
 	for(x=0; x<num_buckets; x++) {
@@ -360,6 +368,7 @@ int anneal( void *data_ptr, GPtrArray ***output_buckets, int num_buckets, GPtrAr
 	}
 
 	free(annealer.buckets);
+	free(annealer.item_bucket);
 
 	l_debug = 0;
 
