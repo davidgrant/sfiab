@@ -158,12 +158,14 @@ foreach($generate_rounds as $round ) {
 		if($award['type'] == 'divisional' && $round == 0) {
 			/* Round 1 */
 			$x = 0;
+			$width = 180 / count($jteam['user_ids']);
+			if($width > 30) $width = 30;
 			foreach($jteam['user_ids'] as $judge_id) {
 				$table['fields'][] = "J$x";
 				$table['header']["J$x"] = $judges[$judge_id]['firstname'];
 				$table['col']["J$x"] = array('on_overflow' => '',
 							      'align' => 'center');
-				$table['widths']["J$x"] = 30;
+				$table['widths']["J$x"] = $width;
 				$x++;
 			}
 
