@@ -29,7 +29,7 @@ require_once('user.inc.php');
  * with a space */
 function report_judges_languages($mysqli, &$report, $field, $text)
 {
-	$l = unserialize($text);
+	$l = explode(',', $text);
 	return ($l?join(' ', $l):'');
 }
 
@@ -188,7 +188,7 @@ $report_judges_fields = array(
 		'table' => 'users.phone1'),
 
 	'phone_work' => array(
-		'name' => 'Judge -- Phone2)',
+		'name' => 'Judge -- Phone2',
 		'header' => 'Phone2',
 		'width' => 1,
 		'table' => "users.phone2"),
@@ -203,7 +203,7 @@ $report_judges_fields = array(
 		'name' => 'Judge -- Languages',
 		'header' => 'Lang',
 		'width' => 0.75,
-		'table' => 'users.languages',
+		'table' => 'users.j_languages',
 		'exec_function' => 'report_judges_languages'),
 
 	'complete' =>  array(
@@ -214,11 +214,11 @@ $report_judges_fields = array(
 		'value_map' => array ('0' => 'No', '1' => 'Yes')),
 
 	'active' =>  array(
-		'name' => 'Judge -- Registration Active for this year',
+		'name' => 'Judge -- Is attending the fair this year',
 		'header' => 'Act',
 		'width' => 0.4,
-		'table' => 'users.judge_active',
-		'value_map' => array ('no' => 'No', 'yes' => 'Yes')),
+		'table' => 'users.attending',
+		'value_map' => array ('0' => 'No', '1' => 'Yes')),
 
 	'willing_chair' => array(
 		'name' => 'Judge -- Willing Lead',
@@ -249,7 +249,7 @@ $report_judges_fields = array(
 		'name' => 'Judge -- Highest Post-Secondary Degree',
 		'header' => 'Highest PSD',
 		'width' => 1.25,
-		'table' => 'users.highest_psd'),
+		'table' => 'users.j_psd'),
 
 	'j_mentored' => array(
 		'name' => 'Judge -- Has Mentored a Student/Project at the Fair',
@@ -291,7 +291,8 @@ $report_judges_fields = array(
 		'name' => 'Judge -- Special Award Only Requested',
 		'header' => 'SA Only',
 		'width' => 0.8,
-		'table' => 'users.j_sa_only'),
+		'table' => 'users.j_sa_only',
+		'value_map' => array(0 => 'No', 1 => 'Yes')),
 
 	'year' =>  array(
 		'name' => 'Judge -- Year',
@@ -319,8 +320,8 @@ $report_judges_fields = array(
 	'team_round' => array(
 		'name' => 'Judge Team -- Team Round',
 		'header' => 'Round',
-		'width' => 0.5,
-		'table' => 'judging_teams.round',
+		'width' => 0.8,
+		'table' => 'timeslots.name',
 		'components' => array('teams')),
 
 	'team_award_name' => array(
@@ -453,7 +454,8 @@ function report_judges_fromwhere($report, $components)
 	$teams_where = '';
 	if(in_array('teams', $components)) {
 		$teams_from = "LEFT JOIN judging_teams ON FIND_IN_SET(`users`.`uid`, `judging_teams`.`user_ids`)
-				LEFT JOIN awards on `awards`.`id`=`judging_teams`.`award_id`";
+				LEFT JOIN awards ON `awards`.`id`=`judging_teams`.`award_id`
+				LEFT JOIN timeslots ON `timeslots`.`round`=`judging_teams`.`round` AND `timeslots`.`year`='$year'";
 	}
 /*
 	$projects_from='';

@@ -29,7 +29,7 @@ function print_ethics_approval($mysqli, &$u)
 		if($p['ethics_approved']) {
 			$a = '<font color="green">Approved</font>. Please remember to bring all the necessary forms with you to the fair.';
 		} else {
-			$a = '<font color="red">Required</font>. Please email '.mailto($config['email_ethics']).' if you have not already done so.';
+			$a = '<font color="red">Required, not approved yet</font>. Please email '.mailto($config['email_ethics']).' if you have not already done so.';
 		}
 	} else {
 		$a = '<font color="green">Not Required</font>';
