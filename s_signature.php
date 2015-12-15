@@ -95,7 +95,7 @@ if($generate_pdf == false) {
 
 	<p>After all sections are complete for all students in this project, a
 	signature form must be printed, signed, and submitted to complete your
-	application to the  <?=$config['fair_name']?>.  Instructions for
+	application to the <?=$config['fair_name']?>.  Instructions for
 	completing the form and how/where to submit it are attached to the
 	form.
 
@@ -119,7 +119,21 @@ if($generate_pdf == false) {
 		some signatures on the printed form).  For an electronic
 		signature, we will email a link to an online form
 		to the person you need a signature from, and they can complete
-		the form online and submit it.  No paper required.
+		the form online.
+
+		<?php if($config['regfee'] > 0) { ?>
+			<p><b>NOTE:</b> If you use electronic signatures, you
+			MUST still print the first page of the signature form
+			and submit that with your payment so we know who the
+			payment is from.  Without it, we not be able to
+			complete your application.
+		<?php } ?>
+
+		<?php if($config['sig_enable_senior_marks_form']) { ?>
+			<p><b>NOTE:</b> The senior marks validation form cannot
+			be completed electronically.  It must be printed and
+			signed by a school official.  (but all other signatures can still be collected electronically)
+		<?php } ?>
 <?php	} ?>
 
 	<h4>Status of Students</h4>
