@@ -25,6 +25,7 @@ require_once('project.inc.php');
 require_once('user.inc.php');
 require_once('isef.inc.php');
 
+
 function report_students_i18n_fr($mysqli, &$report, $field, $text)
 {
 	return i18n($text, array(), array(), 'fr');
@@ -125,11 +126,17 @@ function report_student_regfee_item($mysqli, &$report, $field, $text)
 	}
 }
 
+
+
 function reports_students_isef_major($mysqli, &$report, $field, $text)
 {
+	global $config;
+	/* Note that isef.inc.php must be included from reports.inc.php for this to work, because the
+	 * function is executed in that scope */
 	global $isef_divs;
+
 	/* Given the project.isef_id, turn it into a name */
-	$id = $text;
+	$id = (int)$text;
 	if($isef_divs[$id]['parent'] != false) {
 		$parent = $isef_divs[$id]['parent'];
 		foreach($isef_divs as $k => $i) {
@@ -139,9 +146,9 @@ function reports_students_isef_major($mysqli, &$report, $field, $text)
 		}
 		return ("not found");
 	} else {
-
 		return $isef_divs[$id]['name'];
 	}
+	exit();
 }
 
 /*
