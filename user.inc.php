@@ -295,7 +295,7 @@ function user_homepage(&$u)
 	else if(in_array('committee', $u['roles']))
 		$page .= 'c_main.php';
 	else if(in_array('judge', $u['roles']))
-		$page .= 'judge_main.php';
+		$page .= 'j_main.php';
 	else if(in_array('teacher', $u['roles']))
 		$page .= 't_main.php';
 	else if(in_array('volunteer', $u['roles']))

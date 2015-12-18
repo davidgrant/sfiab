@@ -16,7 +16,7 @@ $u = user_load($mysqli);
 if(array_key_exists('switchto', $_GET)) {
 
 
-	header("Location: judge_main.php");
+	header("Location: j_main.php");
 	exit();
 }
 
