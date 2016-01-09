@@ -973,7 +973,7 @@ $report_students_fields = array(
 		'name' => 'Fair -- Year',
 		'header' => 'Year',
 		'width' => 0.5,
-		'table' => "{$config['year']}"),
+		'table' => 'users.year'),
 
 	'fair_name' => array (
 		'name' => 'Fair -- Name',
