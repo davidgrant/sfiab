@@ -258,7 +258,8 @@ function policy($name, $text, $link = '')
 ?>
 		</ul>
 
-		<h3>Before You Start Your Project: Forms</h3>
+		<hr/>
+		<h3>Before You Start Your Project: Ethics Approval and Required Forms</h3>
 		<p>Here is a list of the Youth Science Canada forms that must be completed before starting this project.  Click on the forms below to download them:
 		<ul data-role="listview" data-inset="true">
 <?php
@@ -281,12 +282,21 @@ function policy($name, $text, $link = '')
 							Ethics Committee ('.antispambot($config['email_ethics']).').  <b>Failure to recieve approval will likely result in disqualification.</b>',
 				'file.php?f=research_plan_animals');
 		}
-		if(!$forms2) {
-			policy('None', 'It does not appear that you require any ethics approval before starting your project.');
+
+		/* Humans or animals not one of the above forms, tell them they should get approval anyway */
+		if(!$forms2 && ($e['human1'] || $e['animals'])) {
+			policy('None', "You do not have to receive pre-approval before starting your project, 
+						but will need ethics approval in order to attend the {$config['fair_abbreviation']} {$config['year']}.
+						Ethics committee review before you start your project is encouraged and will be required in future years. 
+						Please send your project proposal (if applicable), letter of information, 
+						and any surveys (if survey project) given to participants to ".antispambot($config['email_ethics']).".");
+		} else if(!$forms2) {
+			policy('None', 'It does not appear that your project needs ethics approval.');
 		}
 ?>
 		</ul>
 
+		<hr/>
 		<h3>After You Complete Your Project, but Before the Fair: Forms</h3>
 
 		<p>Here is a list of the Youth Science Canada forms that must be completed after finishing this project.  Click on the forms below to download them:
