@@ -267,7 +267,7 @@ to the Science Fair Committee.
 	function <?=$form_id?>_button_enable() {
 		/* Check that all checkboxes are checked */
 		if($('#<?=$form_id?>_agree_decl_agree').is(':checked') == false) return false;
-<?php		if($config['sig_enable_release_of_information']) { ?>
+<?php		if($config['sig_enable_release_of_information'] && ($sig['type'] == 'student' || $sig['type'] == 'parent')) { ?>
 			if($('#<?=$form_id?>_agree_rel_agree').is(':checked') == false) return false;
 <?php		} ?>
 		if($('#<?=$form_id?>_agree_sig_agree').is(':checked') == false) return false;
