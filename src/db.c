@@ -171,7 +171,7 @@ int db_fetch_row_field_int(struct _db_result *result, int row_num, char *field)
 {
 	char *p = db_fetch_row_field(result, row_num, field);
 	if(p == NULL) {
-		printf("db_fetch_row_field_int retrieved a NULL pointer\n");
+		printf("db_fetch_row_field_int retrieved a NULL pointer for field %s\n", field);
 		return 0;
 	} 
 	return atoi(p);

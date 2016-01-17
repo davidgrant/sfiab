@@ -21,6 +21,7 @@ $judges = judges_load_all($mysqli, $config['year']);
 $jteams = jteams_load_all($mysqli);
 $awards = award_load_all($mysqli);
 $projects = projects_load_all($mysqli);
+$timeslots = timeslots_load($mysqli);
 
 /* $notices is divided into sections, and then a check type.  The first element of the check type array
  * is displayed if no other messages are added to it. It's like the "everything is ok" message.
@@ -46,17 +47,24 @@ foreach($jteams as &$jteam) {
 	
 
 $notices['Judging Teams'] = array();
-$notices['Judging Teams']['r1div_judges'] = array("OK All <b>$round0_div_jteam_count</b> Round 1 Divisional Judging Teams have {$config['judge_div_max_team']} judges");
+$notices['Judging Teams']['r1div_judges'] = array("OK All <b>$round0_div_jteam_count</b> Round 1 Divisional Judging Teams have  {$config['times_each_project_judged']} judges");
 $notices['Judging Teams']['r2div_judges'] = array("OK All <b>$round1_div_jteam_count</b> Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_max_team']} judges");
 $notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
 $notices['Judging Teams']['sa_judges'] = array("OK All Special Award Judging Teams have (at most) {$config['judge_sa_max_projects']} projects per judge");
 
 foreach($jteams as &$jteam) {
+
+	if($config['judge_shuffle']) {
+		$judges_required = int((count($jteam['project_ids']) * $config['times_each_project_judged']) / $num_timeslots) + 1;
+	} else {
+		$judges_required = $config['times_each_project_judged'];
+	}
+
 	if($jteam['round'] == 0 && $awards[$jteam['award_id']]['type'] == 'divisional') {
 		$c = count($jteam['user_ids']);
 		/* round1 divisional */
-		if($c < $config['judge_div_max_team']) {
-			$notices['Judging Teams']['r1div_judges'][] = "NO Round 1 Divisional Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['judge_div_max_team']}";
+		if($c < $config['times_each_project_judged']) {
+			$notices['Judging Teams']['r1div_judges'][] = "NO Round 1 Divisional Judging Team <b>{$jteam['name']}</b> has <b>$c</b> judges.  Not {$config['times_each_project_judged']}";
 		}
 	}
 	if($jteam['round'] == 1 && $awards[$jteam['award_id']]['type'] == 'divisional') {

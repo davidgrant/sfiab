@@ -817,41 +817,46 @@ void judges_anneal(struct _db_data *db, int year)
 	/* ====================================================================*/
 	/* Build a list of all cusp jteams to anneal, add the
 	 * leftover judges team, then all the cusp teams */
-	printf("Building list of Cusp JTeams and available judges...\n");
 
-	g_ptr_array_set_size(jteams_list, 0);
-	g_ptr_array_add(jteams_list, g_ptr_array_index(jteams, 0));
-	for(x=1;x<jteams->len;x++) {
-		struct _jteam *jteam = g_ptr_array_index(jteams, x);
-		if (jteam->award->is_divisional && jteam->round == 1) {
-			g_ptr_array_add(jteams_list, jteam);
+	if(timeslots->len <= 2) {
+		scheduler_log(db, 50, "Skipping second round assignments because there is only one round defined.");
+	} else {
+		printf("Building list of Cusp JTeams and available judges...\n");
+
+		g_ptr_array_set_size(jteams_list, 0);
+		g_ptr_array_add(jteams_list, g_ptr_array_index(jteams, 0));
+		for(x=1;x<jteams->len;x++) {
+			struct _jteam *jteam = g_ptr_array_index(jteams, x);
+			if (jteam->award->is_divisional && jteam->round == 1) {
+				g_ptr_array_add(jteams_list, jteam);
+			}
 		}
-	}
-	
-	g_ptr_array_set_size(judge_list, 0);
-	for(x=0;x<judges->len;x++) {
-		struct _judge *j = g_ptr_array_index(judges, x);
-		if(j->sa_only == 1) continue;
-		if(!j->available_in_round[1]) continue; /* [1] == round 2 */
-		g_ptr_array_add(judge_list, j);
-	}
-	scheduler_log(db, 50, "Assigning %d available second round judges to %d CUSP judging teams", judge_list->len, jteams_list->len);
-	printf("   Cusp teams have %d JTeams and %d judges available\n", jteams_list->len, judge_list->len);
-//	anneal_set_debug(1);
-	anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
-			&jteam_judge_cost, NULL, NULL/* progress callback*/);
+		
+		g_ptr_array_set_size(judge_list, 0);
+		for(x=0;x<judges->len;x++) {
+			struct _judge *j = g_ptr_array_index(judges, x);
+			if(j->sa_only == 1) continue;
+			if(!j->available_in_round[1]) continue; /* [1] == round 2 */
+			g_ptr_array_add(judge_list, j);
+		}
+		scheduler_log(db, 50, "Assigning %d available second round judges to %d CUSP judging teams", judge_list->len, jteams_list->len);
+		printf("   Cusp teams have %d JTeams and %d judges available\n", jteams_list->len, judge_list->len);
+	//	anneal_set_debug(1);
+		anneal(jteams_list, &judge_jteam_assignments, jteams_list->len, judge_list, 
+				&jteam_judge_cost, NULL, NULL/* progress callback*/);
 
-	for(i=0;i<jteams_list->len;i++) {
-		GPtrArray *js = judge_jteam_assignments[i];
-		struct _jteam *jteam = g_ptr_array_index(jteams_list, i);
-		jteam->judges = js;
-		printf("\n");
-		jteam_print(jteam);
-	}
-	round1_sa_judges = judge_jteam_assignments[0];
+		for(i=0;i<jteams_list->len;i++) {
+			GPtrArray *js = judge_jteam_assignments[i];
+			struct _jteam *jteam = g_ptr_array_index(jteams_list, i);
+			jteam->judges = js;
+			printf("\n");
+			jteam_print(jteam);
+		}
+		round1_sa_judges = judge_jteam_assignments[0];
 
-	free(judge_jteam_assignments);
-	judge_jteam_assignments = NULL;
+		free(judge_jteam_assignments);
+		judge_jteam_assignments = NULL;
+	}
 
 
 	/* ====================================================================*/
@@ -959,11 +964,11 @@ void judges_anneal(struct _db_data *db, int year)
 		total_projects += jteam->projects->len;
 	}
 	sa_judges_available_in_round[0] = round0_sa_judges->len;
-	sa_judges_available_in_round[1] = round1_sa_judges->len;
+	if(round1_sa_judges) sa_judges_available_in_round[1] = round1_sa_judges->len;
 	total_judges = sa_judges_available_in_round[0] + sa_judges_available_in_round[1];
 
 	ideal_projects_in_round[0] = total_projects * sa_judges_available_in_round[0] / total_judges;
-	ideal_projects_in_round[1] = total_projects * sa_judges_available_in_round[1] / total_judges;
+	if(round1_sa_judges) ideal_projects_in_round[1] = total_projects * sa_judges_available_in_round[1] / total_judges;
 
 
 	printf("   => %d projects, judges in [0]=%d, [1]=%d\n", total_projects, sa_judges_available_in_round[0], sa_judges_available_in_round[1]);
@@ -974,7 +979,7 @@ void judges_anneal(struct _db_data *db, int year)
 		int round;
 		GPtrArray *judge_list;
 
-		if(jteam->projects->len > ideal_projects_in_round[0]) {
+		if(jteam->projects->len > ideal_projects_in_round[0] && timeslots->len > 1) {
 			round = 1;
 			judge_list = round1_sa_judges;
 		} else {

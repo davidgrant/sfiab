@@ -74,6 +74,12 @@ sfiab_page_begin($u, "Judging", $page_id);
 
 	foreach($jteams as &$jteam) {
 		$round = $jteam['round'];
+
+		if($round >= $num_rounds) {
+			/* Can create teams for rounds that don't exist, like cusp teams */
+			continue;
+		}
+
 		$type = $awards[$jteam['award_id']]['type'];
 		$n_judges = count($jteam['user_ids']);
 

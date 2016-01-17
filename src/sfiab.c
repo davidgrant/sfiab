@@ -115,12 +115,18 @@ void config_load(struct _db_data *db)
 	printf("   Judges per Cusp Team: %d\n", config.max_judges_per_cusp_team);
 	printf("   Judge shuffling: %d\n", config.judge_shuffle);
 
-	/* Without shuffling, the max projects are the max number of projects each judge can see, because
-	 * EVERY judge has to see ALL the projects.
-	 * With suffling there is no limit, we could keep adding judges so the shuffling keeps the projects
-	 * below the limit for each judge, so artificially cap it at twice the number projects each
-	 * judge can see.  The costs still apply for making project and judge teams, but do NOT apply
-	 * for assigning judges to projects, so big teams will effectively be random. */
+	/* Without shuffling:
+	 * 	- the max projects is the min of:
+	 * 		- the max number of projects each judge can see, because EVERY judge has to see ALL the projects.
+	 * 		- the number of timeslots - if there are 5 timeslots, a judge cannot see more than 5 projects
+	 *
+	 * With suffling there is no limit:
+	 * 	-  we could keep adding judges so the shuffling keeps the
+	 * 	projects below the limit for each judge, so artificially cap it
+	 * 	at twice the number projects each judge can see.  The costs
+	 * 	still apply for making project and judge teams, but do NOT
+	 * 	apply for assigning judges to projects, so big teams will
+	 * 	effectively be random. */
 	config.max_projects_per_team = config.max_projects_per_judge * (config.judge_shuffle ? 2 : 1);
 	printf("Calculated SFIAB constants:\n");
 	printf("   Max projects per Div team: %d\n", config.max_projects_per_team);
