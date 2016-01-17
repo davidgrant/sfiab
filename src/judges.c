@@ -551,6 +551,7 @@ void judges_anneal(struct _db_data *db, int year)
 	int x, y, i;
 	int iproject;
 	int lang_count[NUM_LANGUAGES];
+	int enable_round_2 = 1;
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
 	GPtrArray **judge_jteam_assignments = NULL;
@@ -571,6 +572,11 @@ void judges_anneal(struct _db_data *db, int year)
 	awards_load(db, year);
 
 	timeslots_load(db, year);
+
+	if(timeslots->len <= 2) {
+		enable_round_2 = 0;
+	}
+	
 //
 	/* Remap ISEF ids to only parent id */
 	printf("Remap project's ISEF divs to parent div...\n");
@@ -690,24 +696,26 @@ void judges_anneal(struct _db_data *db, int year)
 			}
 
 			/* Create cusp teams too */
-			printf("%d prizes for CUSP\n", a->prizes->len);
-			for(i=0;i<a->prizes->len;i++) {
-				struct _prize *prize = g_ptr_array_index(a->prizes, i);
-				struct _prize *next_prize = NULL;
-				struct _jteam *jteam;
-				char name[1024];
-				if(i+1 < a->prizes->len) {
-					next_prize = g_ptr_array_index(a->prizes, i+1);
-				}
-				sprintf(name, "%s Cusp %s-%s", cat->name, prize->name, 
-					next_prize ? next_prize->name : "Nothing");
+			if(enable_round_2) {
+				printf("%d prizes for CUSP\n", a->prizes->len);
+				for(i=0;i<a->prizes->len;i++) {
+					struct _prize *prize = g_ptr_array_index(a->prizes, i);
+					struct _prize *next_prize = NULL;
+					struct _jteam *jteam;
+					char name[1024];
+					if(i+1 < a->prizes->len) {
+						next_prize = g_ptr_array_index(a->prizes, i+1);
+					}
+					sprintf(name, "%s Cusp %s-%s", cat->name, prize->name, 
+						next_prize ? next_prize->name : "Nothing");
 
-				jteam = jteam_create(db, jteams, name, a);
-				jteam->round = 1;
-				jteam->prize_id = prize->id;
-				jteam->num_judges_required = config.max_judges_per_cusp_team;
-				printf("JTeam %d: %s\n", jteam->num, jteam->name );
-				printf("   => %d judges required\n", jteam->num_judges_required);
+					jteam = jteam_create(db, jteams, name, a);
+					jteam->round = 1;
+					jteam->prize_id = prize->id;
+					jteam->num_judges_required = config.max_judges_per_cusp_team;
+					printf("JTeam %d: %s\n", jteam->num, jteam->name );
+					printf("   => %d judges required\n", jteam->num_judges_required);
+				}
 			}
 
 
@@ -818,7 +826,7 @@ void judges_anneal(struct _db_data *db, int year)
 	/* Build a list of all cusp jteams to anneal, add the
 	 * leftover judges team, then all the cusp teams */
 
-	if(timeslots->len <= 2) {
+	if(!enable_round_2) {
 		scheduler_log(db, 50, "Skipping second round assignments because there is only one round defined.");
 	} else {
 		printf("Building list of Cusp JTeams and available judges...\n");
@@ -979,7 +987,7 @@ void judges_anneal(struct _db_data *db, int year)
 		int round;
 		GPtrArray *judge_list;
 
-		if(jteam->projects->len > ideal_projects_in_round[0] && timeslots->len > 1) {
+		if(jteam->projects->len > ideal_projects_in_round[0] && enable_round_2) {
 			round = 1;
 			judge_list = round1_sa_judges;
 		} else {
