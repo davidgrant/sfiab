@@ -117,13 +117,40 @@ while(true) {
 		$mail->isSMTP();	// Use smtp
 		$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
 		$mail->Debugoutput = 'echo'; /*or 'html' friendly debug output */
-		$mail->Host = "localhost";
-		$mail->Port = 25;
-		$mail->SMTPAuth = false;	/* No auth */
+
+		switch($config['smtp_type']) {
+		case 'gmail':
+			/* Gmail */
+			$mail->Host = 'smtp-relay.gmail.com';
+			$mail->Port = 587;
+			$mail->SMTPSecure = 'tls';
+			$mail->SMTPAuth = true;
+			$mail->Username = $config['smtp_username'];
+			$mail->Password = $config['smtp_password'];
+			break;
+		case 'smtp':
+			$mail->Host = $config['smtp_host'];
+			$mail->Port = $config['smtp_port'];
+			$mail->SMTPSecure = $config['smtp_encryption'];
+			if($config['smtp_username'] != '' || $config['smtp_password'] != '') {
+				$mail->SMTPAuth = true;
+				$mail->Username = $config['smtp_username'];
+				$mail->Password = $config['smtp_password'];
+			} else {
+				$mail->SMTPAuth = false;
+			}
+			break;
+		case 'webserver':
+		default:
+			$mail->Host = "localhost";
+			$mail->Port = 25;
+			$mail->SMTPAuth = false;
+			break;
+		}
+
 		$mail->setFrom($from_addr, $from_name);
-		//Set an alternative reply-to address
-	//	$mail->addReplyTo('replyto@example.com', 'First Last');
-		//Set who the message is to be sent to
+		$mail->addReplyTo($from_addr, $from_name);
+
 		$mail->addAddress($db_email, $db_to);
 		$mail->Subject = $subject;
 		if($db_email_body_html == '') {
