@@ -127,7 +127,7 @@ sfiab_page_begin($u, "Edit Awards", $page_id, $help);
 
 					<br/><font size="-1">Presented By: <?=$a['presenter']?></font>
 
-<?php					if($a['sponsor_uid'] > 0) {
+<?php					if($a['sponsor_uid'] > 0 && array_key_exists($a['sponsor_uid'], $sponsors) ) {
 						$s = $sponsors[$a['sponsor_uid']]['organization'];
 					} else {
 						$s = "<font color=red>NOT SET</font> -- Please set a sponsor";
