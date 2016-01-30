@@ -35,8 +35,15 @@ case 'save':
 	}
 
 	$u['j_rounds'] = array();
-	for($r = 0; $r<$num_rounds; $r++) {
-		post_int($u['j_rounds'][$r], array('j_rounds', $r) );
+	if($config['judge_require_all_rounds']) {
+		/* Fill the rounds as though they selected 'yes' to each round for time availability */
+		for($r = 0; $r<$num_rounds; $r++) {
+			$u['j_rounds'][$r] = $r;
+		}
+	} else {
+		for($r = 0; $r<$num_rounds; $r++) {
+			post_int($u['j_rounds'][$r], array('j_rounds', $r) );
+		}
 	}
 	
 	$u['j_languages'] = NULL;
@@ -106,9 +113,13 @@ sfiab_page_begin($u, "Options", $page_id, $help);
 
 ?>
 	<h3>Time Availability</h3>
-	Note: You will be scheduled to judge in <b>ALL</b> of the judging rounds you answer 'Yes' to, not just one.
+<?php	if($config['judge_require_all_rounds']) { ?>
+		Note: You will be scheduled to judge in <b>ALL</b> of the judging rounds listed below.  If you are unable to commit to all the times below, you can let the committee know by selecting "No, I can't make it" on the <a href="j_main.php">Main Judging Page</a>.
+<?php	} else { ?>	
+		Note: You will be scheduled to judge in <b>ALL</b> of the judging rounds you answer 'Yes' to, not just one.
+<?php	}		
 	
-<?php	for($r=0; $r<$num_rounds; $r++) {
+	for($r=0; $r<$num_rounds; $r++) {
 		$ts = &$rounds[$r];
 		$date_str = date("F j, g:ia", $ts['start_timestamp']);
 		$date_str .= ' - '.date("g:ia", $ts['end_timestamp']);
@@ -116,7 +127,11 @@ sfiab_page_begin($u, "Options", $page_id, $help);
 		$data_values = array(-1 => 'No', $r => 'Yes');
 
 		$v = array_key_exists($r, $u['j_rounds']) ?  $u['j_rounds'][$r] : '';
-		form_radio_h($form_id, "j_rounds[$r]", "Are you available to judge in {$ts['name']} ($date_str)?", $data_values, $u['j_rounds'][$r], true);
+		if($config['judge_require_all_rounds']) {
+			form_label($form_id, "j_rounds[$r]", "{$ts['name']}", "$date_str", true);
+		} else {
+			form_radio_h($form_id, "j_rounds[$r]", "Are you available to judge in {$ts['name']} ($date_str)?", $data_values, $u['j_rounds'][$r], true);
+		}
 	}
 	form_submit($form_id, 'save','Save','Information Saved');
 	form_end($form_id);
