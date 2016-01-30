@@ -121,7 +121,7 @@ while(true) {
 		switch($config['smtp_type']) {
 		case 'gmail':
 			/* Gmail */
-			$mail->Host = 'smtp-relay.gmail.com';
+			$mail->Host = 'smtp.gmail.com';
 			$mail->Port = 587;
 			$mail->SMTPSecure = 'tls';
 			$mail->SMTPAuth = true;
