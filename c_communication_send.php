@@ -56,16 +56,27 @@ case 'send':
 		}
 		email_send($mysqli, $e['name'], $u);
 	} else {
-		/* Query all users */
-		$query = "SELECT * FROM users WHERE $year_q AND {$elist['where']}";
+		/* Query all users, fetch only email per username  */
+		$query = "SELECT * FROM users WHERE $year_q AND {$elist['where']} ORDER BY `year` DESC";
 //		print($query);
 		$r = $mysqli->query($query);
 		print($mysqli->error);
 
 		$users = array();
+		$emails = array();
 		while($ua = $r->fetch_assoc()) {
-//			print_r($ua);
-			$users[] = user_load_from_data($mysqli, $ua);
+			$u = user_load_from_data($mysqli, $ua);
+			if(array_key_exists($u['email'], $emails)) {
+				/* Email already seen, send to the same email only in the same year
+				 * e.g., multiple registrations int he same year using the same email */
+				if($emails[$u['email']] != $u['year']) {
+					continue;
+				}
+			}
+			/* Tag this email with the year to avoid dupes */
+			$emails[$u['email']] = $u['year'];
+			/* Add this user to the list of recipients */
+			$users[] = $u;
 		}
 		email_send_to_list($mysqli, $e['name'], $users);
 	}
