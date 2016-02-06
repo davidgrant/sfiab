@@ -114,6 +114,7 @@ while(true) {
 	
 		debug("   from: $from_name $from_addr\n");
 		$mail = new PHPMailer();
+		$mail->HisSMTP();	// Use smtp
 		$mail->isSMTP();	// Use smtp
 		$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
 		$mail->Debugoutput = 'echo'; /*or 'html' friendly debug output */
@@ -122,6 +123,15 @@ while(true) {
 		case 'gmail':
 			/* Gmail */
 			$mail->Host = 'smtp.gmail.com';
+			$mail->Port = 587;
+			$mail->SMTPSecure = 'tls';
+			$mail->SMTPAuth = true;
+			$mail->Username = $config['smtp_username'];
+			$mail->Password = $config['smtp_password'];
+			break;
+		case 'gmailrelay':
+			/* Gmail Relay, requires a Google Apps account*/
+			$mail->Host = 'smtp-relay.gmail.com';
 			$mail->Port = 587;
 			$mail->SMTPSecure = 'tls';
 			$mail->SMTPAuth = true;

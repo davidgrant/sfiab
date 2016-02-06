@@ -1,0 +1,1 @@
+UPDATE `config` SET `type_values` = 'webserver=Send mail directly from SFIAB|gmail=Send mail through a GMail Account|gmailrelay=Send mail through a Google Apps domain configured for relaying mail|smtp=Send mail through a specified SMTP server' WHERE `config`.`var` = 'smtp_type';
