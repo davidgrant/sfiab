@@ -121,16 +121,13 @@ if($generate_pdf == false) {
 		to the person you need a signature from, and they can complete
 		the form online.
 
-		<?php if($config['regfee'] > 0) { ?>
-			<p><b>NOTE:</b> If you use electronic signatures, you
-			MUST still print the first page of the signature form
-			and submit that with your payment so we know who the
-			payment is from.  Without it, we not be able to
-			complete your application.
-		<?php } ?>
+		<p><b>If you use electronic signatures, you
+		MUST still print and submit the first page of the signature
+		form (without signatures) to complete your application.  Your
+		application is incomplete until we have received the signature form.</b>
 
 		<?php if($config['sig_enable_senior_marks_form']) { ?>
-			<p><b>NOTE:</b> The senior marks validation form cannot
+			<p>The senior marks validation form cannot
 			be completed electronically.  It must be printed and
 			signed by a school official.  (but all other signatures can still be collected electronically)
 		<?php } ?>
@@ -155,7 +152,11 @@ if($generate_pdf == false) {
 			<h3>Electronic Signatures for <?=$user['name']?>:</h3>
 
 <?php			if(!$notice_printed) { ?>
-				<p>Note: Remember, you do not have to use electronic signatures.  You can just use the printed form below if you choose.
+				<p>You do not have to use electronic signatures.  You can just use the printed form below if you choose.
+				<p><b>If you use electronic signatures, you
+				MUST still print and submit the first page of the signature
+				form to complete your application.  Your
+				application is incomplete until we have received the signature form.</b>
 <?php				$notice_printed = true;
 			} ?>
 		
