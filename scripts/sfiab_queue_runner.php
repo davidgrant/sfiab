@@ -106,7 +106,7 @@ while(true) {
 		$from_addr = replace_vars($db_email_from_addr, $u, $rep);
 		$subject = replace_vars($db_email_subject, $u, $rep);
 		$body = replace_vars($db_email_body, $u, $rep);
-		$body = str_replace("\r", "", $body); /* Remove \r's */
+//		$body = str_replace("\r", "", $body); /* Remove \r's */
 		if($db_email_body_html != '') {
 			$body_html = replace_vars($db_email_body_html, $u, $rep, true);
 		} else {
