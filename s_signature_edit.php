@@ -126,6 +126,7 @@ foreach($users as &$user) {
 if($send_u === NULL) exit();
 
 /* Load the signature data for this user/type */
+//$q = $mysqli->query("DELETE FROM signatures WHERE uid='{$send_u['uid']}' AND `type`='$send_type'");
 $q = $mysqli->query("SELECT * FROM signatures WHERE uid='{$send_u['uid']}' AND `type`='$send_type'");
 if($q->num_rows >= 1) {
 	/* Take the first row */

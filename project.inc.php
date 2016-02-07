@@ -523,7 +523,7 @@ function signature_load($mysqli, $key, $data = NULL)
 	/* Check for something other than a base64 character A-Za-z9-0+/= */
 	if($data === NULL) {
 		if(strlen($key) != 32) exit();
-		if(preg_match("/[^A-Za-z0-9+\/\=]/", $key)) exit();
+		if(preg_match("/[^A-Za-z0-9_\=]/", $key)) exit();
 		$k = $mysqli->real_escape_string($key);
 		$q = $mysqli->query("SELECT * FROM signatures WHERE `key`='$key'");
 		print($mysqli->error);
@@ -553,6 +553,10 @@ function signature_create($mysqli, $year = NULL)
 	/* Generate a 32 character key and insert it, try again if the insert fails  (duplicate key) */
 	for($x=0;$x<100;$x++) {
 		$key = base64_encode(mcrypt_create_iv(24, MCRYPT_DEV_URANDOM));
+		/* Replace base64 chars that aren't nice on the commandline 
+		 * + and / -> _ */
+		$key = str_replace( array('+', '/'), '_', $key);
+
 		$r = $mysqli->real_query("INSERT INTO signatures(`key`,`year`) VALUES('$key','$year')");
 		if($r == true) {
 			return $key;

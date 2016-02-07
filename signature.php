@@ -15,8 +15,14 @@ function load_and_check_key($mysqli, $key)
 
 	$sig = signature_load($mysqli, $key);
 	
-	if($sig['uid'] == 0) exit();
-	if(!array_key_exists($sig['type'], $signature_types)) exit();
+	if($sig['uid'] == 0) {
+		print("Couldn't find signature link $key, sorry.");
+		exit;
+	}
+	if(!array_key_exists($sig['type'], $signature_types)) {
+		print("Couldn't find signature link $key, sorry.");
+		exit;
+	}
 
 	return $sig;
 }
@@ -56,8 +62,11 @@ case 'sign':
 	exit();
 }
 
-/* key could have + signs in it, the URL parser turns those into spaces.  Turn them back into +s */
-$key = str_replace(' ', '+', $_GET['k']);
+if(!array_key_exists('k', $_GET)) {
+	print("Invalid signature link");
+	exit();
+}
+$key = $_GET['k'];
 
 $sample = false;
 if($key == 'sample_student') {
