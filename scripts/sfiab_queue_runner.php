@@ -106,11 +106,16 @@ while(true) {
 		$from_addr = replace_vars($db_email_from_addr, $u, $rep);
 		$subject = replace_vars($db_email_subject, $u, $rep);
 		$body = replace_vars($db_email_body, $u, $rep);
+		$body = str_replace("\r", "", $body); /* Remove \r's */
 		if($db_email_body_html != '') {
 			$body_html = replace_vars($db_email_body_html, $u, $rep, true);
 		} else {
-			$body_html = '';
+			/* Turn the text body into HTML because some modern mailers (like Apple Mail) suck at text */
+			$body_html = htmlspecialchars($body);
+			$body_html = str_replace("\r", "", $body_html);
+			$body_html = str_replace("\n", "<br/>\n", $body_html);
 		}
+		
 	
 		debug("   from: $from_name $from_addr\n");
 		$mail = new PHPMailer();
@@ -162,14 +167,10 @@ while(true) {
 
 		$mail->addAddress($db_email, $db_to);
 		$mail->Subject = $subject;
-		if($db_email_body_html == '') {
-			$mail->isHTML(false);
-			$mail->Body    = $body;
-		} else {
-			$mail->isHTML(true);
-			$mail->Body    = $body_html;
-			$mail->AltBody = $body;
-		}
+		$mail->isHTML(true);
+		$mail->Body    = $body_html;
+		$mail->AltBody = $body;
+
 		debug("Send email: ".print_r($mail, true)."\n");
 
 	//	$mail->msgHTML("ile_get_contents('contents.html'), dirname(__FILE__));
