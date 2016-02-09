@@ -45,6 +45,8 @@ if(!$sample) {
 	/* Get all users associated with this project */
 	$users = user_load_all_for_project($mysqli, $u['s_pid']);
 
+	debug(print_r($users, true));
+
 	/* Check for all complete */
 	$all_complete = true;
 	foreach($users as &$user) {
@@ -136,7 +138,7 @@ if($generate_pdf == false) {
 	<h4>Status of Students</h4>
 		<ul data-role="listview" data-inset="true">
 <?php
-		foreach($users as $user) {
+		foreach($users as &$user) {
 			$c = ($user['s_complete'] == 1) ? 'class="happy"' : 'class="error"';
 			$s = ($user['s_complete'] == 1) ? 'Complete' : 'Incomplete';
 		?>
@@ -148,10 +150,15 @@ if($generate_pdf == false) {
 <?php	if($config['enable_electronic_signatures']) {
 		$notice_printed = false;
 
-		foreach($users as $user) { ?>
+		foreach($users as &$user) { ?>
 			<h3>Electronic Signatures for <?=$user['name']?>:</h3>
 
-<?php			if(!$notice_printed) { ?>
+<?php			if(!$all_complete) { ?>
+				<p>Electronic signatures are available when all the students in the project are complete
+<?php				continue;
+			}
+
+			if(!$notice_printed) { ?>
 				<p>You do not have to use electronic signatures.  You can just use the printed form below if you choose.
 				<p><b>If you use electronic signatures, you
 				MUST still print and submit the first page of the signature
@@ -319,7 +326,7 @@ if($r_decl !== NULL) {
 
 $students = "";
 $school_names = array();
-foreach($users as $user) { 
+foreach($users as &$user) {
  	if($sample) {
 		/* Skip query for generating a sample */
 		$school_names[$user['uid']] = $school_name;
@@ -332,7 +339,7 @@ foreach($users as $user) {
 
 	if($students != '') $students .= '<br/>';
 	$students .= "{$user['name']}, Grade {$user['grade']}, {$school_name}";
- }
+}
 $e = i18n("Exhibitor$plural").":";
 $w = $pdf->GetStringWidth($e) + 2;
 /* By adding hte regfee right to the end of the student table, it prevents a newline from appearing */
@@ -382,7 +389,7 @@ if($e_instr !== NULL) {
 $e_decl = cms_get($mysqli, 'sig_student_declaration', $u);
 if($e_decl !== NULL) {
 	$pdf->WriteHTML("<h3>".i18n('Exhibitor Declaration')."</h3>".nl2br($e_decl));
-	foreach($users AS $user) {
+	foreach($users AS &$user) {
 		sig($pdf, "{$user['name']} (signature)");
 	}
 	$pdf->WriteHTML("<br><hr>");
@@ -392,7 +399,7 @@ $p_decl = cms_get($mysqli, 'sig_parent_declaration', $u);
 if($p_decl !== NULL) {
 	$pdf->WriteHTML("<h3>".i18n('Parent/Guardian Declaration')."</h3>".nl2br($p_decl));
 
-	foreach($users AS $user) {
+	foreach($users AS &$user) {
 		sig($pdf, "Parent/Guardian of {$user['name']} (signature)");
 	}
 	$pdf->WriteHTML("<br><hr>");
