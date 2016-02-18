@@ -122,6 +122,8 @@ while(true) {
 		$mail->isSMTP();	// Use smtp
 		$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
 		$mail->Debugoutput = 'echo'; /*or 'html' friendly debug output */
+		$mail->Helo = gethostname();
+
 
 		switch($config['smtp_type']) {
 		case 'gmail':
