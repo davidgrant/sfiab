@@ -208,25 +208,28 @@ Notes:
 
 void tours_load(struct _db_data *db, int year)
 {
-	int x;
+	int x, index;
 	struct _db_result *result;
 
 	tours = g_ptr_array_new();
 	/* Load tours  */
 	result = db_query(db, "SELECT * FROM tours WHERE year='%d'", year);
+	index = 0;
 	for(x=0;x<result->rows; x++) {
 		struct _tour *t = malloc(sizeof(struct _tour));
-		t->name = strdup(db_fetch_row_field(result, x, "name"));
+		char *name = db_fetch_row_field(result, x, "name");
+		if(name == NULL) continue;
+		t->name = strdup(name);
 		t->id = atoi(db_fetch_row_field(result, x, "id"));
 		t->grade_min = atoi(db_fetch_row_field(result, x, "grade_min"));
 		t->grade_max = atoi(db_fetch_row_field(result, x, "grade_max"));
 		t->capacity_min = atoi(db_fetch_row_field(result, x, "capacity_min"));
 		t->capacity_max = atoi(db_fetch_row_field(result, x, "capacity_max"));
-		t->index = x;
+		if(t->capacity_max == 0) continue;
+		t->index = index++;
 		printf("%d: grade %d-%d, capacity %d-%d, %s\n", 
 			t->id, t->grade_min, t->grade_max, t->capacity_min, t->capacity_max, t->name);
 		g_ptr_array_add(tours, t);
-
 	}
 	db_free_result(result);
 }
