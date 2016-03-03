@@ -487,7 +487,7 @@ $report_students_fields = array(
 		'header' => 'Elec',
 		'width' => .5,
 		'table' => "projects.req_electricity",
-		'value_map' => array ('no' => '', 'yes' => 'Yes')),
+		'value_map' => array (0 => '', 1 => 'Yes')),
 		
 	'req_table' => array(
 		'name' => 'Project -- If the project requires a table',

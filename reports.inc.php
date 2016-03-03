@@ -430,6 +430,7 @@ function report_save_field($mysqli, $report, $type)
 	$q = $mysqli->query("SELECT * FROM reports WHERE id='$report_id'");
 	$report = $q->fetch_assoc();
 
+	$report['debug'] = false;
 	$report['col'] = array();
 	$report['sort'] = array();
 	$report['group'] = array();
@@ -603,9 +604,6 @@ function report_save_field($mysqli, $report, $type)
 	global $report_tours_fields, $report_fairs_fields;
 	global $report_fundraisings_fields;
 	global $report_filter_ops;
-
-//	print("<pre>");
-//	print_r($report);
 
 	report_init($mysqli);
 
@@ -823,6 +821,13 @@ function report_save_field($mysqli, $report, $type)
 
 	debug("Report Input: ".print_r($report, true));
 	debug("Report Query: $q\n");
+
+	if($report['debug']) {
+		print("<pre>");
+		print("Report Input: ".print_r($report, true));
+		print("Report Query: $q\n");
+	}
+
 
 	if($r == false) {
 		echo "The report database query has failed.  This is

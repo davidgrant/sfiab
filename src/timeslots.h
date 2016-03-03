@@ -2,7 +2,7 @@
 #define TIMESLOTS_H
 
 #include <glib.h>
-#include <db.h>
+#include "db.h"
 
 #define TIMESLOT_SPECIAL (-1)
 #define TIMESLOT_CUSP (-2)
