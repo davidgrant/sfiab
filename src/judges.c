@@ -646,6 +646,11 @@ void judges_anneal(struct _db_data *db, int year)
 				}
 			}
 
+			if(a->projects->len == 0) {
+				printf("   => 0 projects.  Skipping this award.\n");
+				continue;
+			}
+
 			num_languages = 0;
 			for(i=0;i<NUM_LANGUAGES;i++) {
 				if(lang_count[i] > 0) num_languages++;
