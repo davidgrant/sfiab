@@ -84,7 +84,7 @@ while(true) {
 		if($q->num_rows == 0) {
 			/* Email in queue, but the ID doesn't exist?  someone deleted it between sending an email and 
 			 * the queue starting? */
-			sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id} that doesn't exist");
+//			sfiab_log($mysqli, "email error", "Failed to send email with emails_id {$db_emails_id} that doesn't exist");
 			$mysqli->query("UPDATE queue SET `result`='failed' WHERE id=$db_id");
 			continue;
 		}
@@ -210,7 +210,7 @@ while(true) {
 	case 'push_winner':
 		print("SFIAB Queue Runner: push_winner: $db_prize_id, $db_project_id\n");
 		$result = remote_push_winner_to_fair($mysqli, $db_prize_id, $db_project_id);
-		sfiab_log($mysqli, "push winner", "Push Winner project $db_project_id for prize id $db_prize_id, result=$result");
+		sfiab_log_push_winner($mysqli, $db_fair_id, $db_award_id, $db_prize_id, $db_project_id, $result);
 		$r = ($result == 0) ? 'ok' : 'failed';
 		$mysqli->real_query("UPDATE queue SET `result`='$r', `sent`=NOW() WHERE id=$db_id");
 		break;
