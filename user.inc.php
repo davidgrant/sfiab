@@ -512,7 +512,7 @@ function user_sync($mysqli, &$fair, &$incoming_user)
 			/* Create the school */
 			$mysqli->real_query("INSERT INTO schools(`school`,`city`,`province`,`year`) VALUES('$school_name','$school_city','$school_province','$year')");
 			$school_id = $mysqli->insert_id;
-			$u['schools_id'] = (int)$schools_id;
+			$u['schools_id'] = (int)$school_id;
 			debug("sync_user: created new shcool id $school_id\n");
 		}
 		$u['schools_id'] = $school_id;

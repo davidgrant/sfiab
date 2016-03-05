@@ -450,11 +450,11 @@ function project_sync($mysqli, &$fair, &$incoming_project)
 			$m = mentor_load($mysqli, $mid);
 			$m['firstname'] = $incoming_m['firstname'];
 			$m['lastname'] = $incoming_m['lastname'];
-			$m['relation'] = $incoming_m['relation'];
 			$m['email'] = $incoming_m['email'];
-			$m['phone1'] = $incoming_m['phone1'];
-			$m['phone2'] = $incoming_m['phone2'];
-			$m['phone3'] = $incoming_m['phone3'];
+			$m['phone'] = $incoming_m['phone'];
+			$m['organization'] = $incoming_m['organization'];
+			$m['position'] = $incoming_m['position'];
+			$m['desc'] = $incoming_m['desc'];
 			mentor_save($mysqli, $m);
 		}
 	}

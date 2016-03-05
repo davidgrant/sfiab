@@ -66,6 +66,7 @@ function remote_query($mysqli, &$fair, &$cmd)
 	curl_setopt ($ch, CURLOPT_TIMEOUT, 10);
 	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
 	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, false);
 	$remote_response = curl_exec ($ch); 
 	$c_errno = curl_errno($ch);
 	$c_error = curl_error($ch);
