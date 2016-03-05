@@ -199,11 +199,9 @@ function award_li(&$a) {
 ?>			<div>
 			<b><font color="blue">This award is from the <?=$fairs[$a['upstream_fair_id']]['name']?>.  Winners will be automatically uploaded as they are assigned/removed.</font></b>
 <?php		
-			foreach($a['prizes'] as &$prize) { 
-				if($prize['upstream_register_winners']) { ?>
-					<b><font color="blue">This award has a prize that registers winner at the <?=$fairs[$a['upstream_fair_id']]['name']?>.  Once all winners are assigned you must finalize their registrations by going to Awards -> Finalize Upstream Winners.  Accounts for all the uploaded winners will be created (and they will be sent emails) only when this is done.  Assigning winners now does not create accounts or send any emails.</font></b>
-<?php				}
-			}
+			if($a['upstream_register_winners']) { ?>
+				<b><font color="blue">This award has a prize that registers winner at the <?=$fairs[$a['upstream_fair_id']]['name']?>.  Once all winners are assigned you must finalize their registrations by going to Awards -> Finalize Upstream Winners.  Accounts for all the uploaded winners will be created (and they will be sent emails) only when this is done.  Assigning winners now does not create accounts or send any emails.</font></b>
+<?php			}
 		} 
 
 			
