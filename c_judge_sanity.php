@@ -63,7 +63,7 @@ $notices['Judging Teams']['sa_judges'] = array("OK All Special Award Judging Tea
 foreach($jteams as &$jteam) {
 
 	if($config['judge_div_shuffle']) {
-		$judges_required = int((count($jteam['project_ids']) * $config['div_times_each_project_judged']) / $num_timeslots) + 1;
+		$judges_required = (int)((count($jteam['project_ids']) * $config['div_times_each_project_judged']) / $num_timeslots) + 1;
 	} else {
 		$judges_required = $config['div_times_each_project_judged'];
 	}

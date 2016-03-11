@@ -528,11 +528,12 @@ function signature_load($mysqli, $key, $data = NULL)
 		$q = $mysqli->query("SELECT * FROM signatures WHERE `key`='$key'");
 		print($mysqli->error);
 		$sig = $q->fetch_assoc();
-
-		filter_int($sig['uid']);
 	} else {
 		$sig = $data;
 	}
+
+	filter_int($sig['uid']);
+	
 	unset($sig['original']);
 	$original = $sig;
 	$sig['original'] = $original;

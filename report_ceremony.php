@@ -11,7 +11,7 @@ $mysqli = sfiab_init('committee');
 $page_id = 'c_ceremony';
 
 $script_debug = array_key_exists('debug',$_GET) ? true : false;
-$script_year = array_key_exists('year',$_GET) ? $_GET['year'] : $config['year'];
+$script_year = array_key_exists('year',$_GET) ? (int)$_GET['year'] : $config['year'];
 $script_show_pronunciation = true;
 $script_start_award_on_new_page = true;
 $script_group_by_prize = array_key_exists('group_by_prize', $_GET) ? (int)$_GET['group_by_prize'] : false;

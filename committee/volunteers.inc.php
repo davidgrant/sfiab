@@ -15,4 +15,3 @@ function volunteers_load_all($mysqli, $year)
 
 
 ?>
-

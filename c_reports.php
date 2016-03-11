@@ -163,6 +163,17 @@ $timeslots = timeslots_load_rounds($mysqli);
 	</table>
 	<br/>
 
+<?php	if($config['enable_electronic_signatures']) { ?>
+		<h3>Signed Electronic Signature Forms</h3>
+
+		<table>
+		<tr><td>Electronic Signatures: </td>
+		<td>
+			<div data-role="controlgroup" data-type="horizontal">
+			<a href="report_signatures.php" data-ajax="false" data-role="button">All Electronic Signatures</a>
+		</td></tr></table>
+		<br/>
+<?php	} ?>		
 
 	<h3>Edit Reports</h3>
 	<ul data-role="listview" data-inset="true">
