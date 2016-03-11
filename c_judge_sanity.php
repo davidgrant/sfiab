@@ -54,7 +54,8 @@ if($config['judge_div_shuffle']) {
 	$notices['Judging Teams']['r1div_judges'] = array("OK All <b>$round0_div_jteam_count</b> Round 1 Divisional Judging Teams have {$config['div_times_each_project_judged']} judges");
 }
 
-if(count($timeslots) > 1) {
+$num_timeslots = count($timeslots);
+if($num_timeslots > 1) {
 	$notices['Judging Teams']['r2div_judges'] = array("OK All <b>$round1_div_jteam_count</b> Round 2 Divisional (Cusp) Judging Teams have {$config['judge_cusp_max_team']} judges");
 }
 $notices['Judging Teams']['bad_projects'] = array("OK Projects assigned to all Judging Teams are accepted and exist");
