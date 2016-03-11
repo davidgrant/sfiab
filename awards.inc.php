@@ -95,7 +95,7 @@ function award_load_all($mysqli)
 function award_load_special_for_select($mysqli)
 {
 	global $config;
-	$q = $mysqli->query("SELECT * FROM awards WHERE year='{$config['year']}' AND schedule_judges='1' ORDER BY `name`");
+	$q = $mysqli->query("SELECT * FROM awards WHERE (`type`='special' OR `type`='other') AND year='{$config['year']}' AND schedule_judges='1' ORDER BY `name`");
 	$awards = array();
 	while($d = $q->fetch_assoc()) {
 		$awards[$d['id']] = award_load($mysqli, 0, $d);
