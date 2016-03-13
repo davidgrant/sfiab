@@ -88,7 +88,7 @@ while($r = $q->fetch_assoc()) {
 	$winners[$prize_id][] = (int)$r['pid'];
 }
 
-$projects = projects_load_all($mysqli, $config['year']);
+$projects = projects_load_all($mysqli, false, $config['year']);
 
 $page_id = 'c_award_winners';
 $help = '<p>Enter Winning Projects';
