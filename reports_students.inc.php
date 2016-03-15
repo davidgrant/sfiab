@@ -623,7 +623,7 @@ $report_students_fields = array(
 		'header' => 'Ethcs App?',
 		'width' => 0.8,
 		'table' => 'projects.ethics_approved',
-		'value_map' => array ('no' => 'No', 'yes' => 'Yes')),
+		'value_map' => array (0 => 'No', 1 => 'Yes')),
 
 	/* Awards ============================================================*/
 
