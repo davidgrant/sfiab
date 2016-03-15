@@ -612,12 +612,19 @@ $report_students_fields = array(
 
 	'ethics_forms_required' => array(
 		'start_option_group' => 'Ethics',
-		'name' => 'Ethics -- Which forms required (human, animal, none)',
+		'name' => 'Ethics -- Which forms required (Human, Animal, blank)',
 		'header' => 'Forms',
 		'width' => 1,
 		'table' => 'users.s_pid',
 		'exec_function' => 'reports_students_ethics_forms_required'),
-		
+
+	'ethics_approved' => array(
+		'name' => 'Ethics -- If the project has ethics approval (Yes/No)',
+		'header' => 'Ethcs App?',
+		'width' => 0.8,
+		'table' => 'projects.ethics_approved',
+		'value_map' => array ('no' => 'No', 'yes' => 'Yes')),
+
 	/* Awards ============================================================*/
 
 	'awards' =>  array(
