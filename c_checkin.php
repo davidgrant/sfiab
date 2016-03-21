@@ -138,7 +138,9 @@ sfiab_page_begin($u, "Checkin List", $page_id, $help);
 
 <div data-role="page" id="<?=$page_id?>" class="sfiab_page" > 
 
-	<h3>Visit List</h3>
+	<h3>Checkin and Tshirt List</h3>
+
+	<p>The "Save" button below is only for the notes field.  The Checkin and Tshirt buttons update the database immediately when clicked.
 
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="Search by project number, project ID, project title, student name, school name..." data-inset="true">
 
