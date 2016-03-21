@@ -127,6 +127,10 @@ sfiab_page_begin($u, "Students", $page_id);
 	<li><a href="" data-rel="external" data-ajax="false">Floorplanning (not yet available)</a></li>
 	</ul>
 
+	<h3>Checkin and Tshirt List</h3> 
+	<ul data-role="listview" data-inset="true">
+	<li><a href="c_checkin.php" data-rel="external" data-ajax="false">Checkin and Tshirt Lists</a></li>
+	</ul>
 	<h3>Ethics Approval</h3> 
 	<ul data-role="listview" data-inset="true">
 	<li><a href="c_input_ethics.php" data-rel="external" data-ajax="false">Input Ethics Approval for Projects</a></li>

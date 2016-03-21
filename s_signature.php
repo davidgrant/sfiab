@@ -464,7 +464,7 @@ function course_tr($c1, $c2)
 	
 
 if($config['sig_enable_senior_marks_form']) {
-	foreach($users AS $user) {
+	foreach($users AS &$user) {
 		if($user['grade'] <= 10) continue;
 
 		$pdf->AddPage();
@@ -543,7 +543,7 @@ Verification of Mark Status by an Official (a Counsellor or School Administrator
 }
 
 if($config['sig_enable_release_of_information']) {
-	foreach($users AS $user) {
+	foreach($users AS &$user) {
 		$pdf->AddPage();
 		$rel_of_info = cms_get($mysqli, 'sig_release_of_information_parent', $user);
 	 	$t = nl2br($rel_of_info);

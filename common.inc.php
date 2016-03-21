@@ -450,6 +450,8 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			    'c_input_signature_forms' => NULL,
 			    'c_communication_send' => NULL,
 			    'c_communication_queue' => NULL,
+			    'c_visit_list' => NULL,
+			    'c_checkin_list' => NULL,
 		);
 
 	$login_menu = array('register' => array('Registration', 'index.php#register'),

@@ -116,6 +116,9 @@ function user_load($mysqli, $uid=-1, $unique_uid=-1, $username=NULL, $data=NULL)
 	filter_bool($u['new']);
 	filter_bool($u['enabled']);
 	filter_bool($u['s_complete']);
+	filter_bool($u['checked_in']);
+	filter_bool($u['tshirt_given']);
+
 
 	filter_languages($u['languages']);
 
