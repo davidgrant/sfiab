@@ -162,6 +162,9 @@ function l_projects_load_all($mysqli, $year)
 		$p_user = &$users[$uid];
 		$p_user['signatures'][$s['type']] = $s;
 	}
+
+	ksort($projects);
+
 	return $projects;
 }
 
@@ -216,8 +219,7 @@ sfiab_page_begin($u, "Input Signature Forms", $page_id, $help);
 $projects = l_projects_load_all($mysqli, $config['year']);
 
 
-foreach($projects as &$p) {
-	$pid = $p['pid'];
+foreach($projects as $pid=>&$p) {
 	if($p['s_complete'] == false) continue;
 
 	$filter_text = "{$p['pid']} {$p['title']}";

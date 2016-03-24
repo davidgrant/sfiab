@@ -48,13 +48,21 @@ case 'send':
 	$elist = &$email_lists[$to];
 
 	if($to == 'one_user') {
-		$username = $_POST['username'];
-		$username = $mysqli->real_escape_string($username);
-		$u = user_load_by_username($mysqli, $username);
-		if($u === NULL) {
-			form_ajax_response(array('status'=>1, 'error'=>'Unknown username'));
+		$usernames = explode(',', $_POST['username']);
+		$users = array();
+		foreach($usernames as $username) {
+			$username = $mysqli->real_escape_string($username);
+			$uu = user_load_by_username($mysqli, $username);
+			if($uu === NULL) {
+				form_ajax_response(array('status'=>1, 'error'=>"Unknown username $username, no email sent to any user"));
+				exit;
+			}
+			$users[] = $uu;
 		}
-		email_send($mysqli, $e['name'], $u);
+
+		foreach($users as $uu) {
+			email_send($mysqli, $e['name'], $uu);
+		}
 	} else {
 		/* Query all users, fetch only email per username  */
 		$query = "SELECT * FROM users WHERE $year_q AND {$elist['where']} ORDER BY `year` DESC";
