@@ -182,9 +182,9 @@ void judges_load(struct _db_data *db, int year)
 			j->years_regional = 0;
 			j->years_national = 0;
 			j->cat_pref = 0;
-			j->isef_id_pref[0] = 0;
-			j->isef_id_pref[1] = 0;
-			j->isef_id_pref[2] = 0;
+			j->isef_id_pref[0] = 1;
+			j->isef_id_pref[1] = 1;
+			j->isef_id_pref[2] = 1;
 		} else {
 			j->num_sa = 0;
 			j->years_school = atoi(db_fetch_row_field(result, x, "j_years_school"));

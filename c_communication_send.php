@@ -51,7 +51,7 @@ case 'send':
 		$usernames = explode(',', $_POST['username']);
 		$users = array();
 		foreach($usernames as $username) {
-			$username = $mysqli->real_escape_string($username);
+			$username = $mysqli->real_escape_string(trim($username));
 			$uu = user_load_by_username($mysqli, $username);
 			if($uu === NULL) {
 				form_ajax_response(array('status'=>1, 'error'=>"Unknown username $username, no email sent to any user"));

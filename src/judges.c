@@ -727,6 +727,9 @@ void judges_anneal(struct _db_data *db, int year)
 		} else if(a->is_special) {
 			/* Just make one jteam */
 			struct _jteam *jteam;
+
+			/* Is there already a jteam for this award? */
+
 			
 			jteam = jteam_create(db, jteams, a->name, a);
 			jteam->round = 0;
@@ -798,7 +801,23 @@ void judges_anneal(struct _db_data *db, int year)
 	judge_list = g_ptr_array_new();
 	for(x=0;x<judges->len;x++) {
 		struct _judge *j = g_ptr_array_index(judges, x);
-		if(j->sa_only == 1) continue;
+		if(j->sa_only == 1) {
+			/* Make sure they only select special awards */
+			int is_really_sa_only = 1;
+			for(i=0;i<j->num_sa;i++) {
+				struct _award *a = award_find(j->sa[i]);
+				if(!a->is_special) {
+					printf("   Judge %d selected non-special award %d as sa-only.  Removing.\n", j->id, a->id);
+					j->sa_only = 0;
+					is_really_sa_only = 0;
+				}
+			}
+
+			if(is_really_sa_only) {
+				continue;
+			}
+		}
+
 		if(!j->available_in_round[0]) continue;
 		g_ptr_array_add(judge_list, j);
 	}
@@ -895,6 +914,16 @@ void judges_anneal(struct _db_data *db, int year)
 				printf("            This award has no jteam (probably because it has no prizes), could not assign judge.\n");
 				continue;
 			}
+
+			if(a->jteams->len > 1) {
+				int ijteam;
+				printf("            This award has %d jteams, not 1.\n", a->jteams->len);
+				for(ijteam=0; ijteam < a->jteams->len; ijteam++) {
+					jteam = g_ptr_array_index(a->jteams, ijteam);
+					printf("                   jteam %d: %s\n", jteam->id, jteam->name);
+				}
+			}
+
 			assert(a->jteams->len == 1);
 			
 			jteam = g_ptr_array_index(a->jteams, 0);
