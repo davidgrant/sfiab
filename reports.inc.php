@@ -868,7 +868,7 @@ function report_save_field($mysqli, $report, $type)
 					else
 						$i_c = 'n/a';
 				} else if(array_key_exists('exec_function', $fields[$g['field']]))
-					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($mysqli,$report,$f,$i[$c]));
+					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($mysqli,&$report,$f,$i[$c]));
 				else
 					$i_c=$i[$c];
 

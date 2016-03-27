@@ -79,6 +79,8 @@ int timeslot_create_schedule(int *schedule, int num_timeslots, int num_judges, i
 	stride_total = 0;
 	stride = (float)(num_timeslots) / (float)(num_judges);
 
+	/* Populate div judges first so we are guaranteed to send all the judges, spreading them out
+	 * as much as possible */
 //	printf("Stride: %f\n", stride);
 	for(j=0; j<num_judges; j++) {
 		int t = (int)(stride_total + 0.5);
@@ -87,6 +89,7 @@ int timeslot_create_schedule(int *schedule, int num_timeslots, int num_judges, i
 		stride_total += stride;
 	}
 
+	/* Alternate special/break in all remaining timeslots */
 	next_type = TIMESLOT_SPECIAL;
 	for(t=0;t<num_timeslots;t++) {
 		if(schedule[t] == -1) {
