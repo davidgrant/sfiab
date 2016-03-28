@@ -11,82 +11,77 @@ $mysqli = sfiab_db_connect();
 sfiab_load_config($mysqli);
 
 
-
-
-
-/* Create ballroom projects */
+/* Start here.
+ *
+ * Orientation:   180
+ *              270 90
+ *                 0
+ */
 $loc = array();
 $sx = 0.4;
-$sy = 5 + 0.6+18;
+$sy = 22;
 $so = 90;
 
-/* Left: 1-12, no electricity */
-$loc[] = array('eh'=>1, 'e'=>0);
-$loc[] = array('y'=>-1.2, 'r'=>3);
-$loc[] = array('y'=>-1.2*3);
-$loc[] = array('y'=>-1.2, 'r'=>3);
-$loc[] = array('y'=>-1.2*3);
-$loc[] = array('y'=>-1.2, 'r'=>3);
+/* Left: 1-16, no electricity */
+$loc[] = array('eh'=>0, 'e'=>'0');
+$loc[] = array('y'=>-1.2, 'r'=>12);
+$loc[] = array('y'=>-1.2*2);
+$loc[] = array('y'=>-1.2, 'r'=>2);
 
-/* Row 1: 13-30, 31-48: this can have 4 more projects at the bottom */
-$loc[] = array('x'=>3, 'y'=>1.2, 'o'=>180, 'e'=>1);
-$loc[] = array('y'=>1.2, 'r'=>17);
+/* Top 17-35 */
+$loc[] = array('x'=>3, 'y'=>-1.2, 'o'=>90);
+$loc[] = array('x'=>1.2, 'r'=>18);
 
+/* Row 1 36-61 */
+$loc[] = array('reset'=>true, 'x'=>4, 'y'=>18, 'o' => 270, 'e'=>1);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 $loc[] = array('x'=>.8, 'o'=>-180);
-$loc[] = array('y'=>-1.2, 'r'=>17);
+$loc[] = array('y'=>1.2, 'r'=>12);
 
-/* Row 2: 49-68, 69-88 */
+/* Row 2 61-87 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>1.2, 'r'=>19);
-
+$loc[] = array('y'=>-1.2, 'r'=>12);
 $loc[] = array('x'=>.8, 'o'=>-180);
-$loc[] = array('y'=>-1.2, 'r'=>19);
+$loc[] = array('y'=>1.2, 'r'=>12);
 
-/* Row 3: 89-108, 109-128 */
+/* Row 3 61-87 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>1.2, 'r'=>19);
-
+$loc[] = array('y'=>-1.2, 'r'=>12);
 $loc[] = array('x'=>.8, 'o'=>-180);
-$loc[] = array('y'=>-1.2, 'r'=>19);
+$loc[] = array('y'=>1.2, 'r'=>12);
 
-/* Right: 129-139  (4, 3, 2, 2)*/
+/* Row 4 61-87 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>1.2, 'r'=>3);
-$loc[] = array('y'=>1.2*3);
-$loc[] = array('y'=>1.2, 'r'=>2);
-$loc[] = array('y'=>1.2*3);
-$loc[] = array('y'=>1.2, 'r'=>1);
-$loc[] = array('y'=>1.2*5);
-$loc[] = array('y'=>1.2, 'r'=>1);
+$loc[] = array('y'=>-1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>1.2, 'r'=>12);
 
-/* Bottom: 140-145: (6, 4), 2014 only using first 6, (146,147 are spares) */
-$loc[] = array('reset'=>true, 'x'=>13.4, 'y'=>34.6, 'o' => 180);
-$loc[] = array('x'=>-1.2, 'r'=>5);
-//$loc[] = array('x'=>-2.4);
-//$loc[] = array('x'=>-1.2, 'r'=>1); // Can put up to 4 along here
+/* Row 5 140-165 */
+$loc[] = array('x'=>3, 'o'=>180);
+$loc[] = array('y'=>-1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>1.2, 'r'=>12);
 
+/* Row 6 166-193 */
+$loc[] = array('x'=>3, 'y'=>1.2, 'o'=>180);
+$loc[] = array('y'=>-1.2, 'r'=>13);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>1.2, 'r'=>13);
 
-/* And the party room */
-/* Right: 175-194 */
-$loc[] = array('reset'=>true, 'x'=>7.8, 'y'=>26.2, 'o' => 270, 'eh'=>2,'floornumber'=>175);
-$loc[] = array('y'=>-1.2, 'r'=>19);
+/* Row 7 194-121 */
+$loc[] = array('x'=>3, 'o'=>180);
+$loc[] = array('y'=>-1.2, 'r'=>13);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>1.2, 'r'=>13);
 
-/* middle: 195-212, 213-230 */
-$loc[] = array('x'=>-3.3, 'y'=>1.2, 'o'=>-180);
-$loc[] = array('y'=>1.2, 'r'=>17);
-$loc[] = array('x'=>-.8, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>17);
+/* Right wall */
+$loc[] = array('x'=>3, 'y'=>'-1', 'o'=>180, 'e'=>0);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
-/* Left: 231-250, 2014, only use up to 247, 249,250 are spares */
+/* Top right 235-237 */
+$loc[] = array('x'=>-2, 'y'=>'-2.5', 'o'=>90);
+$loc[] = array('x'=>-1.2, 'r'=>2);
 
-$loc[] = array('x'=>-3.3, 'y'=>-1.2, 'o'=>-180);
-$loc[] = array('y'=>1.2, 'r'=>17);
-
-/* Bottom, up to 4 */
-/*
-$loc[] = array('reset'=>true, 'x'=>2, 'y'=>25.8, 'o' => 180 );
-$loc[] = array('x'=>1.2, 'r'=>3);
-*/
 
 $objects = array();
 
@@ -139,16 +134,28 @@ foreach($loc as $l) {
 echo "Defined {$oid} projects.\n";
 
 echo "Saving to database...\n";
+
+$mysqli->query("DELETE FROM exhibithall WHERE type='exhibithall'");
+/*
+1 	Ballroom 	exhibithall 	0 	0 	16.4 	35 	0 	0 	0 	1,2,3,4,5,6,7	1,2	1
+2 	Partyroom 	exhibithall 	0 	0 	8.2 	26.4 	0 	0 	0 	1,2,3,4,5,6,7	2,3	1
+*/
+$mysqli->query("INSERT INTO exhibithall(`id`,`name`,`type`,`x`,`y`,`w`,`h`,`orientation`,`exhibithall_id`,`floornumber`,`challenges`,`cats`,`has_electricity`)
+		VALUES('', 'Nest','exhibithall',
+			'0','0','38.1','22.2','0','0','0','1,2,3,4,5,6,7','1,2,3','1')");
+$base_eh_id = $mysqli->insert_id;
+
 /* Save to DB */
 $mysqli->query("DELETE FROM exhibithall WHERE type='project'");
 foreach($objects as $oid=>$o) {
 	$divs = serialize($o['challenges']);
 	$cats = serialize($o['cats']);
+	$eid = $base_eh_id+$o['eh_id'];
 	$mysqli->query("INSERT INTO exhibithall(`id`,`name`,`type`,`x`,`y`,`w`,`h`,`orientation`,`exhibithall_id`,`floornumber`,`challenges`,`cats`,`has_electricity`)
 		VALUES('', '{$o['name']}','{$o['type']}',
 			'{$o['x']}','{$o['y']}','{$o['w']}','{$o['h']}',
 			'{$o['o']}',
-			'{$o['eh_id']}',
+			'{$eid}',
 			'{$o['floor_number']}','$divs','$cats',
 			'{$o['has_electricity']}')");
 }
