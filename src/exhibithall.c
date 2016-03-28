@@ -36,6 +36,7 @@ struct _exhibithall_object {
 	struct _point p, gfront;
 	int w, h;
 	int orientation;
+	int priority;
 	struct _exhibithall *eh;
 
 	struct _exhibithall_object *closest_projects[MAX_CLOSEST];
@@ -219,6 +220,9 @@ float exhibithalls_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bu
 		}
 	}
 
+	/* Slight cost for priority to keep projects out of less desirable locations */
+	cost += o->priority * 100;
+
 	if(school_matches == 0) {
 		cost += 5;
 	}
@@ -311,10 +315,32 @@ void exhibithalls_load(struct _db_data *db, int year)
 		t->h = atof(db_fetch_row_field(result, x, "h")) * 1000.0;
 		t->orientation = atof(db_fetch_row_field(result, x, "orientation"));
 		t->closest_projects_count = 0;
+		switch(t->floor_number) {
+		case 218: t->priority = 5; break;
+		case 219: t->priority = 10; break;
+		case 220: t->priority = 15; break;
+		case 221: t->priority = 20; break;
+		case 222: t->priority = 5; break;
+		case 235: t->priority = 5; break;
+		case 16: t->priority = 5; break;
+		case 17: t->priority = 5; break;
+		case 1: t->priority = 20; break;
+		case 2: t->priority = 15;break;
+		default: t->priority = 0; break;
+		}
+
+
 		printf("%d: %s:%s, (%d,%d) %dx%d @ %d, has_elec=%d\n", t->id, t->eh->name, t->name, 
 				t->p.x, t->p.y, t->w, t->h, t->orientation, t->has_electricity);
 		g_ptr_array_add(exhibithall_objects, t);
 		g_ptr_array_add(t->eh->project_objects, t);
+
+		/* Make sure the project is inisde the grid */
+		if(t->p.x < 0 || t->p.x > t->eh->w || t->p.y < 0 || t->p.y > t->eh->h) {
+			printf("   -> Project is at (%d,%d) which is outside exhibithall -> (0,0)-(%d,%d)\n", 
+							t->p.x, t->p.y,
+							t->eh->w, t->eh->h); 
+		}
 	}
 	db_free_result(result);
 }
