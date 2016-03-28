@@ -573,9 +573,10 @@ void judges_anneal(struct _db_data *db, int year)
 
 	timeslots_load(db, year);
 
-	if(timeslots->len <= 2) {
+	if(timeslots->len < 2) {
 		enable_round_2 = 0;
 	}
+	printf("Round 2: %s\n", enable_round_2 ? "enabled" : "disabled");
 	
 //
 	/* Remap ISEF ids to only parent id */
