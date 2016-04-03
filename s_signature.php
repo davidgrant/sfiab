@@ -219,7 +219,7 @@ if($generate_pdf == false) {
 
 
 <?php	if($closed) {
-		$d = 'disabled="disabled"';
+		$d = ''; //disabled="disabled"';
 	} else if($all_complete) {
 		$d = '';
 	} else {

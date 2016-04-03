@@ -124,7 +124,7 @@ foreach($generate_rounds as $round ) {
 				$row = array();
 				$project = &$projects[$pid];
 
-				$short_title = htmlentities(substr($project['title'], 0, 65));
+				$short_title = substr($project['title'], 0, 65);
 				if(strlen($project['title']) > 65) $short_title .= "...";
 
 				$html .= "<tr><td align=\"right\"><b>{$project['number']}</b> &nbsp;<br/><font size=\"+2\">&nbsp;</font><font size=\"-3\">$short_title</font></td>";
@@ -174,7 +174,7 @@ foreach($generate_rounds as $round ) {
 
 				$project = &$projects[$pid];
 
-				$short_title = htmlentities(substr($project['title'], 0, 50));
+				$short_title = substr($project['title'], 0, 50);
 				if(strlen($project['title']) > 50) $short_title .= "...";
 
 				$html .= "<b>{$project['number']}</b><font size=\"-3\"><br/>$short_title<br/><br/></font>";

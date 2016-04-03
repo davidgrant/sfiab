@@ -120,7 +120,7 @@ while(true) {
 		debug("   from: $from_name $from_addr\n");
 		$mail = new PHPMailer();
 		$mail->isSMTP();	// Use smtp
-		$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
+		$mail->SMTPDebug = 2;  /* 0=off, 1=client, 2=client and server */
 		$mail->Debugoutput = 'echo'; /*or 'html' friendly debug output */
 		$mail->Helo = gethostname();
 
@@ -197,6 +197,9 @@ while(true) {
 			$mysqli->real_query("UPDATE queue SET `result`='failed' WHERE id=$db_id");
 		}
 		sfiab_log_email_send($mysqli, $db_emails_id, $db_uid, $db_email, $mail->ErrorInfo, $mail_ok);
+		/* Extra sleep for emails */
+		sleep(4);
+
 		break;
 
 	case 'push_award':

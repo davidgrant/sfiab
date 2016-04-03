@@ -4,12 +4,11 @@ $file = $_GET['f'];
 
 
 /* Turn this into a database query */
-$files = array( "2015_ballroom.pdf",
-		"2015_partyroom.pdf",
-		"2015_schedule.pdf",
-		"2015_judgeform.pdf", 
-		"2015_safety_checklist.pdf",
-		"2015_ubcmap.pdf",
+$files = array( "2016_floorplan.pdf",
+		"2016_schedule.pdf",
+		"2016_judgeform.pdf", 
+		"2016_safety_checklist.pdf",
+		"2016_ubcmap.pdf",
 		);
 
 

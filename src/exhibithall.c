@@ -316,16 +316,9 @@ void exhibithalls_load(struct _db_data *db, int year)
 		t->orientation = atof(db_fetch_row_field(result, x, "orientation"));
 		t->closest_projects_count = 0;
 		switch(t->floor_number) {
-		case 218: t->priority = 5; break;
-		case 219: t->priority = 10; break;
-		case 220: t->priority = 15; break;
-		case 221: t->priority = 20; break;
-		case 222: t->priority = 5; break;
-		case 235: t->priority = 5; break;
-		case 16: t->priority = 5; break;
-		case 17: t->priority = 5; break;
-		case 1: t->priority = 20; break;
-		case 2: t->priority = 15;break;
+		case 218: t->priority = 15; break;
+		case 219: t->priority = 20; break;
+		case 220: t->priority = 5; break;
 		default: t->priority = 0; break;
 		}
 

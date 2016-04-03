@@ -22,65 +22,64 @@ $sx = 0.4;
 $sy = 22;
 $so = 90;
 
-/* Left: 1-16, no electricity */
-$loc[] = array('eh'=>0, 'e'=>'0');
+/* Left: 1-16 */
+$loc[] = array('eh'=>0, 'e'=>'1');
 $loc[] = array('y'=>-1.2, 'r'=>12);
-$loc[] = array('y'=>-1.2*2);
-$loc[] = array('y'=>-1.2, 'r'=>2);
 
 /* Top 17-35 */
-$loc[] = array('x'=>3, 'y'=>-1.2, 'o'=>90);
-$loc[] = array('x'=>1.2, 'r'=>18);
+$loc[] = array('x'=>0, 'y'=>-6.0, 'o'=>90);
+$loc[] = array('x'=>1.2, 'r'=>21);
 
 /* Row 1 36-61 */
-$loc[] = array('reset'=>true, 'x'=>4, 'y'=>18, 'o' => 270, 'e'=>1);
-$loc[] = array('y'=>-1.2, 'r'=>12);
-$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('reset'=>true, 'x'=>4, 'y'=>5, 'o' => 270);
 $loc[] = array('y'=>1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Row 2 61-87 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>12);
-$loc[] = array('x'=>.8, 'o'=>-180);
 $loc[] = array('y'=>1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Row 3 61-87 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>12);
-$loc[] = array('x'=>.8, 'o'=>-180);
 $loc[] = array('y'=>1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Row 4 61-87 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>12);
-$loc[] = array('x'=>.8, 'o'=>-180);
 $loc[] = array('y'=>1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Row 5 140-165 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>12);
-$loc[] = array('x'=>.8, 'o'=>-180);
 $loc[] = array('y'=>1.2, 'r'=>12);
+$loc[] = array('x'=>.8, 'o'=>-180);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Row 6 166-193 */
-$loc[] = array('x'=>3, 'y'=>1.2, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>13);
+$loc[] = array('x'=>3, 'o'=>180, 'e'=>0);
+$loc[] = array('y'=>1.2, 'r'=>12);
 $loc[] = array('x'=>.8, 'o'=>-180);
-$loc[] = array('y'=>1.2, 'r'=>13);
+$loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Row 7 194-121 */
 $loc[] = array('x'=>3, 'o'=>180);
-$loc[] = array('y'=>-1.2, 'r'=>13);
+$loc[] = array('y'=>1.2, 'r'=>12);
 $loc[] = array('x'=>.8, 'o'=>-180);
-$loc[] = array('y'=>1.2, 'r'=>13);
-
-/* Right wall */
-$loc[] = array('x'=>3, 'y'=>'-1', 'o'=>180, 'e'=>0);
 $loc[] = array('y'=>-1.2, 'r'=>12);
 
 /* Top right 235-237 */
-$loc[] = array('x'=>-2, 'y'=>'-2.5', 'o'=>90);
-$loc[] = array('x'=>-1.2, 'r'=>2);
+$loc[] = array('x'=>0,  'y'=>'-3.5', 'o'=>-90);
+$loc[] = array('x'=>1.2, 'r'=>2);
+
+/* Right wall */
+$loc[] = array('x'=>1, 'y'=>'1', 'o'=>270);
+$loc[] = array('y'=>1.2, 'r'=>12);
+
 
 
 $objects = array();
