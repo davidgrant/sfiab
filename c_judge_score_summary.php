@@ -12,7 +12,6 @@ require_once('debug.inc.php');
 
 $mysqli = sfiab_init('committee');
 
-$config['cusps'] = array(0.05, 0.10, 0.15, 0.20);
 $config['projects_per_cusp'] = 6;
 
 $u = user_load($mysqli);
@@ -39,6 +38,28 @@ $action = '';
 if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
 }
+
+/* Build a list of cusp sections names */
+$cusp_sections = array();
+for($x=0;$x<count($config['judge_divisional_prizes']); $x++) {
+	$prize_name = $config['judge_divisional_prizes'][$x];
+	$cusp_sections[] = $prize_name;
+	if($x < count($config['judge_divisional_prizes'])-1) {
+		$cusp_sections[] = $prize_name.'-'.$config['judge_divisional_prizes'][$x+1]." Cusp";
+	} else {
+		$cusp_sections[] = $prize_name.'-Nothing Cusp';
+	}
+}
+$cusp_sections[] = "Nothing";
+/* e.g, 0 - Gold
+ * 	1 = Gold-Silver Cusp
+ * 	2 = Silver
+ *	3 = S-B Cusp
+ *	4 = B
+ *	5 = B-HM Cusp
+ *	6 = HM
+ *	7 = HM-Nothing Cusp
+ *	8 = Nothing */
 
 
 $scores = array();
@@ -73,7 +94,7 @@ foreach($cats as $cid=>$c) {
 
 foreach($projects as $pid=>&$project) {
 	$projects_sorted[$project['cat_id']][$pid] = &$project;	
-	$project['cusp_index'] = 8; /* Start at 'nothing' */
+	$project['cusp_index'] = count($cusp_sections)-1; /* Start at 'nothing' */
 
 	if(!array_key_exists('cat_id', $project)) {
 		print("<pre>cat id is missing from project $pid: ".print_r($project, true));
@@ -96,8 +117,6 @@ foreach($cats as $cid=>$c) {
 	$projects_sorted[$cid] = $n;
 }
 
-$cusp_sections = array('gold','gold_cusp','silver','silver_cusp','bronze','bronze_cusp','hm','hm_cusp','nothing');
-
 /* Desired number of projects at each index, adjusted for cusp teams */
 $target_projects_at_cusp = array();
 /* Actual number of projects at each inded */
@@ -112,16 +131,17 @@ foreach($cats as $cid=>$c) {
 
 	debug("\n".$c['name']."- $total_projects projects \n");
 
-	$n_projects_at_cusp[$cid] = array_fill(0, count($config['cusps'])*2, 0);
-	$target_projects_at_cusp[$cid] = array_fill(0, count($config['cusps'])*2, 0);
-	$medal_distribution[$cid] = array_fill(0, count($config['cusps'])*2, 0);
+	$n_projects_at_cusp[$cid] = array_fill(0, count($config['judge_divisional_distribution'])*2, 0);
+	$target_projects_at_cusp[$cid] = array_fill(0, count($config['judge_divisional_distribution'])*2, 0);
+	$medal_distribution[$cid] = array_fill(0, count($config['judge_divisional_distribution'])*2, 0);
 	/* Build an array of fractions for each div award and cusp team 
 	 * even indexes = div award (not rejudged)
 	 * odd indexes = cusp team (rejudged) */
 
 	$half_projects_per_cusp = (int)($config['projects_per_cusp'] / 2);
 	$index = 0;
-	foreach($config['cusps'] as $c) {
+	foreach($config['judge_divisional_distribution'] as $c) {
+		$c /= 100;
 		$n = (int)round($c * $total_projects);
 		$medal_distribution[$cid][$index] = $n;
 		/* Each cusp has 3 parts:
@@ -159,7 +179,7 @@ foreach($cats as $cid=>$c) {
 	}
 	/* Add another half to the projects at the last cusp so the HM-nothing cusp doesn't get a target 
 	 * of just three projects, want it to be six */
-	$target_projects_at_cusp[$cid][7] += $half_projects_per_cusp;
+	$target_projects_at_cusp[$cid][$index-1] += $half_projects_per_cusp;
 
 	debug("CUSP: target project counts:\n");
 	for($index=0; $index<count($target_projects_at_cusp[$cid]); $index++) {
@@ -292,8 +312,11 @@ foreach($cats as $cid=>$c) {
 	
 }
 
-/* Should load these out of prizes */
-$plist = array('Gold', 'Silver','Bronze','Honourable Mention','Nothing');
+/* Prize list plus 'nothing' */
+$plist = $config['judge_divisional_prizes'];
+$plist[] = 'Nothing';
+
+debug("CUSP: prize list: ".print_r($plist, true));
 
 
 switch($action) {
@@ -327,9 +350,9 @@ case 'assign':
 
 	debug("   Found divisional award {$award['id']}:{$award['name']}\n");
 	/* Now iterate over the prizes find the jteam for each prize, and assign projects.
-	 * Start at HM-nothing index (index 7) and work backwards.  The prizes_in_order
+	 * Start at the last index above 'nothing' and work backwards.  The prizes_in_order
 	 * are HM -> gold */
-	$match_cusp_index = 7;
+	$match_cusp_index = count($cusp_sections)-2;
 	foreach($award['prizes_in_order'] as &$prize) {
 
 		unset($jteam);
@@ -399,10 +422,10 @@ sfiab_page_begin($u, "Judging Scores Summary", $page_id, $help);
 ?>
 
 	<p>Using the following medal distributions:
-	<ul><li>Gold: <?=$config['cusps'][0] * 100?>%
-	<li>Silver: <?=$config['cusps'][1] * 100?>%
-	<li>Bronze: <?=$config['cusps'][2] * 100?>%
-	<li>Honourable Mention: <?=$config['cusps'][3] * 100?>%
+	<ul>
+<?php	for($x=0; $x<count($config['judge_divisional_prizes']); $x++) { ?>
+		<li><?=$config['judge_divisional_prizes'][$x]?>: <?=$config['judge_divisional_distribution'][$x]?>%
+<?php	} ?>		
 	</ul>
 
 	<p>Choose a category below, review the Cusp projects, then assign the projects to Cusp judging teams.
@@ -431,10 +454,10 @@ sfiab_page_begin($u, "Judging Scores Summary", $page_id, $help);
 			
 ?>
 			<p><?=$c['name']?> Medal Allocations:
-			<ul><li>Gold: <?=$medal_distribution[$cid][0]?> project(s)
-			<li>Silver: <?=$medal_distribution[$cid][2]?> project(s)
-			<li>Bronze: <?=$medal_distribution[$cid][4]?> project(s)
-			<li>Honourable Mention: <?=$medal_distribution[$cid][6]?> project(s)
+			<ul>
+<?php			for($i=0; $i<count($config['judge_divisional_prizes']); $i++) { ?>
+				<li><?=$config['judge_divisional_prizes'][$i]?>: <?=$medal_distribution[$cid][$i*2]?> project(s)
+<?php			} ?>		
 			</ul>
 
 			<table data_role="table" data-mode="columntoggle" >
@@ -454,24 +477,8 @@ sfiab_page_begin($u, "Judging Scores Summary", $page_id, $help);
 				if($current_section != $project['cusp_index']) { 
 					$index = $project['cusp_index'];
 					$current_section = $index; ?>
-					<tr><td colspan="7"><hr/><b>
-<?php					switch($cusp_sections[$index]) {
-					case 'gold': print("Gold"); break;
-					case 'gold_cusp': print("Gold-Silver Cusp"); break;
-					case 'silver': print("Silver"); break;
-					case 'silver_cusp': print("Silver-Bronze Cusp"); break;
-					case 'bronze': print("Bronze"); break;
-					case 'bronze_cusp': print("Bronze-Honourable Mention Cusp"); break;
-					case 'hm': print("Honourable Mention"); break;
-					case 'hm_cusp': print("Honourable Mention-Nothing Cusp"); break;
-					case 'nothing': print("Nothing"); break;
-					default:
-						print("ERROR");
-						exit();
-					}  ?>
-					</b>
+					<tr><td colspan="7"><hr/><b><?=$cusp_sections[$index]?></b>
 <?php					
-
 					if($index %2 == 1) {
 						$up = $medal_distribution[$cid][$index];
 						$down = $n_projects_at_cusp[$cid][$index] - $up;
@@ -479,7 +486,7 @@ sfiab_page_begin($u, "Judging Scores Summary", $page_id, $help);
 						
 					}
 
-					if($project['cusp_index'] < 8) {
+					if($project['cusp_index'] < count($cusp_sections)-1) {
 						print(" - target: {$n_projects_at_cusp[$cid][$index]} / {$target_projects_at_cusp[$cid][$index]} project(s)");
 					} 
 					

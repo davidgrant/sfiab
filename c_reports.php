@@ -114,25 +114,42 @@ $timeslots = timeslots_load_rounds($mysqli);
 
 	<h3>Award Ceremony Scripts</h3>
 
-	<table>
-	<tr><td>Junior Awards Ceremony: </td>
-	<td>
-		<div data-role="controlgroup" data-type="horizontal">
-		<a href="report_ceremony.php?name=Junior%20Ceremony%201/3%20-%20Divisional%20Awards&award_types[]=divisional&show_pronunciation=1&group_by_prize=1&cats[]=1" data-ajax="false" data-role="button">Part 1/3 - Divisional</a>
-		<a href="report_ceremony.php?name=Junior%20Ceremony%202/3%20-%20Special%20Awards&award_types[]=special&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Part 2/3 - Special</a>
-		<a href="report_ceremony.php?name=Junior%20Ceremony%203/3%20-%20Grand%20Awards&award_types[]=grand&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Part 3/3 - Grand</a>
-		</div>
-	</td></tr>
-	<tr><td>Int+Senior Awards Ceremony: </td>
-	<td>
-		<div data-role="controlgroup" data-type="horizontal">
-		<a href="report_ceremony.php?name=Int+Senior%20Ceremony%201/4%20-%20Divisional%20Awards&award_types[]=divisional&show_pronunciation=1&group_by_prize=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">Part 1/4 - Divisional</a>
-		<a href="report_ceremony.php?name=Int+Senior%20Ceremony%202/4%20-%20Special%20Awards&award_types[]=special&show_pronunciation=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">Part 2/4 - Special</a>
-		<a href="report_ceremony.php?name=Int+Senior%20Ceremony%203/4%20-%20Junior%20Grand%20Awards&award_types[]=grand&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Part 3/4 - Junior Grand</a>
-		<a href="report_ceremony.php?name=Int+Senior%20Ceremony%204/4%20-%20Grand%20Awards&award_types[]=grand&show_pronunciation=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">Part 4/4 - Grand</a>
-		</div>
-	</td></tr>
-	</table>
+<?php 	if($config['report_split_ceremony']) { ?>
+		<table>
+		<tr><td>Junior Awards Ceremony: </td>
+		<td>
+			<div data-role="controlgroup" data-type="horizontal" data-inline="true">
+			<a href="report_ceremony.php?name=Junior%20Ceremony%201/3%20-%20Divisional%20Awards&award_types[]=divisional&show_pronunciation=1&group_by_prize=1&cats[]=1" data-ajax="false" data-role="button">Part 1/3 - Divisional</a>
+			<a href="report_ceremony.php?name=Junior%20Ceremony%202/3%20-%20Special%20Awards&award_types[]=special&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Part 2/3 - Special</a>
+			<a href="report_ceremony.php?name=Junior%20Ceremony%203/3%20-%20Grand%20Awards&award_types[]=grand&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Part 3/3 - Grand</a>
+			<a href="report_ceremony.php?name=Junior%20Presentation&award_types[]=divisional&award_types[]=special&award_types[]=grand&cats[]=1&group_by_prize=1&slides=1" data-ajax="false" data-role="button">Presentation Slides</a>
+			</div>
+			</td>
+		</td></tr>
+		<tr><td>Int+Senior Awards Ceremony: </td>
+		<td>
+			<div data-role="controlgroup" data-type="horizontal">
+			<a href="report_ceremony.php?name=Int+Senior%20Ceremony%201/4%20-%20Divisional%20Awards&award_types[]=divisional&show_pronunciation=1&group_by_prize=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">Part 1/4 - Divisional</a>
+			<a href="report_ceremony.php?name=Int+Senior%20Ceremony%202/4%20-%20Special%20Awards&award_types[]=special&show_pronunciation=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">Part 2/4 - Special</a>
+			<a href="report_ceremony.php?name=Int+Senior%20Ceremony%203/4%20-%20Junior%20Grand%20Awards&award_types[]=grand&show_pronunciation=1&cats[]=1" data-ajax="false" data-role="button">Part 3/4 - Junior Grand</a>
+			<a href="report_ceremony.php?name=Int+Senior%20Ceremony%204/4%20-%20Grand%20Awards&award_types[]=grand&show_pronunciation=1&cats[]=2&cats[]=3" data-ajax="false" data-role="button">Part 4/4 - Grand</a>
+			<a href="report_ceremony.php?name=Int+Senior%20Presentation&award_types[]=divisional&award_types[]=special&award_types[]=grand&cats[]=2&cats[]=3&group_by_prize=1&slides=1" data-ajax="false" data-role="button">Presentation Slides</a>
+			</div>
+		</td></tr>
+		</table>
+<?php	} else { ?>
+		<table>
+		<tr><td>Awards Ceremony: </td>
+		<td>
+			<div data-role="controlgroup" data-type="horizontal">
+			<a href="report_ceremony.php?name=Award%20Ceremony%201/3%20-%20Divisional%20Awards&award_types[]=divisional&show_pronunciation=1&group_by_prize=1" data-ajax="false" data-role="button">Part 1/3 - Divisional</a>
+			<a href="report_ceremony.php?name=Award%20Ceremony%202/3%20-%20Special%20Awards&award_types[]=special&show_pronunciation=1" data-ajax="false" data-role="button">Part 2/3 - Special</a>
+			<a href="report_ceremony.php?name=Award%20Ceremony%203/3%20-%20Grand%20Awards&award_types[]=grand&show_pronunciation=1" data-ajax="false" data-role="button">Part 3/3 - Grand</a>
+			<a href="report_ceremony.php?name=Presentation&award_types[]=divisional&award_types[]=special&award_types[]=grand&group_by_prize=1&slides=1" data-ajax="false" data-role="button">Presentation Slides</a>
+			</div>
+		</td></tr>
+		</table>
+<?php 	} ?>		
 	<br/>
 
 	<h3>Judging Reports and Forms</h3>

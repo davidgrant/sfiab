@@ -21,6 +21,7 @@ $script_type = 'pdf';
 $script_show_unawarded_awards = false;
 $script_show_unawarded_prizes = false;
 $script_name = array_key_exists('name',$_GET) ? $_GET['name'] : 'Award Ceremony Script';
+$script_slides = array_key_exists('slides', $_GET) ? true : false;
 
 if($script_debug) print("<pre>");
 
@@ -38,16 +39,33 @@ $cats = categories_load($mysqli, $script_year);
 $chals = challenges_load($mysqli, $script_year);
 $awards = award_load_all($mysqli, $script_year);
 
-foreach($cats as $cid=>$c) {
-	$script_show_categories[$cid] = false;
+/* If no cats are specified, show all */
+if(count($script_cats) == 0) {
+	$script_cats = array_keys($cats);
 }
 
 debug(print_r($cats, true));
 
-if($script_type == 'pdf') {
+debug("Ceremony script options: \n");
+debug("   year = $script_year\n");
+debug("   slides = ".($script_slides ? 1 : 0)."\n");
+
+if($script_slides) {
+	/* One slide per project per award */
+	$pdf=new pdf($script_name, $config['year'], "LETTER", "L");
+	$pdf->setFontSize(14);
+	$pdf->SetFont('freesans');
+	$pdf->setup_for_labels(false, false, false, 279, 215, 0, 0, 1, 1);
+	generate_title_slide($pdf, $script_name);
+
+} else if($script_type == 'pdf') {
 	$pdf=new pdf( $script_name , $script_year );
 	$pdf->setFontSize(14);
 	$pdf->SetFont('times');
+
+	$pdf->addPage();
+	$pdf->writeHTML("<br/><br/><br/><br/><br/><br/><h1>$script_name</h1>");
+
 } else {
 	$pdf = new csv($script_name, $script_year );
 }
@@ -61,7 +79,6 @@ while($r = $q->fetch_assoc()) {
 	}
 	$winners[$prize_id][] = (int)$r['pid'];
 }
-
 
 
 
@@ -87,43 +104,66 @@ function get_award_info_html($mysqli, &$award)
 	return "<table>$html</table>";
 }
 
-function get_prize_info_html(&$prize)
+/* Return a list of project IDs that won a prize, filter by 
+ * cat and whether the prize was loaded.  If no winners, return
+ * an empty array */
+function get_winning_project_ids_for_prize(&$prize)
 {
-	$cash = $prize['cash'];
-	$scholarship = $prize['scholarship'];
+	global $winners, $projects, $script_cats;
 
-	$html = '';
-	$p = array();
-	if((float)$cash != 0) $p[] = "\$$cash cash";
-	if((float)$scholarship != 0) $p[] = "\$$scholarship scholarship";
+	$winning_ids = array();
+	$prize_id = (int)$prize['id'];
 
-	if(count($p) > 0) $html .= '('.join(' / ', $p). ')<br/>';
+	/* No winners if the prize ID wasn't loaded from the winners table */
+	if(!array_key_exists($prize_id, $winners)) {
+		return $winning_ids;
+	}
 
-	return $html;
+
+	foreach($winners[$prize_id] as $project_id) {
+		if(in_array($projects[$project_id]['cat_id'], $script_cats)) {
+			$winning_ids[] = $project_id;
+		}
+	}
+	return $winning_ids;
 }
+
 
 /* Get the winners HTML block for a prize.  Filter by the
  * script cats.
  * If there are no winners (or the filter filtered them all)
  * return an empty string */
-function get_winners_html_for_prize(&$prize, &$winner_count)
+function get_winners_html_for_prize(&$prize, $title, $winning_project_ids, $show_prize_info=false)
 {
 	global $winners, $projects, $schools;
 	global $script_show_pronunciation, $script_cats;
 
-	$winner_count = 0;
-	/* No winners if the prize ID wasn't loaded from the winners table */
-	if(!array_key_exists($prize['id'], $winners)) {
-		return '';
-	}
+	$html = "<b>$title</b>";
 
-	$html = '<table>';
-	foreach($winners[$prize['id']] as $project_id) {
+	/* Show prize info if request and if there is info to show */
+	if($show_prize_info != '') {
+		$cash = $prize['cash'];
+		$scholarship = $prize['scholarship'];
+		$p = array();
+		if((float)$cash != 0) $p[] = "\$$cash cash";
+		if((float)$scholarship != 0) $p[] = "\$$scholarship scholarship";
+
+		if(count($p) > 0) $html .= ' - ('.join(' / ', $p). ')';
+	}
+	$html .= '<br/>';
+
+	if(count($winning_project_ids) == 0) {
+		$html .= '<p>No Winners';
+		return $html;
+	}
+	
+	$html .='<table>';
+	foreach($winning_project_ids as $project_id) {
 		$project =& $projects[$project_id];
 
-		if(!in_array($project['cat_id'], $script_cats)) continue;
-
-		$winner_count += 1;
+		/* Make sure no one is doing something unexpected and passing us a list of winners that
+		 * hasn't been filtered by cats */
+		assert(in_array($project['cat_id'], $script_cats));
 
 		$pn = $project['number'];
 		foreach($project['students'] as $s) {
@@ -145,72 +185,69 @@ function get_winners_html_for_prize(&$prize, &$winner_count)
 		$html .= "<tr><td></td><td></td><td></td></tr>";
 	}
 	$html .= '</table>';
-
-	if($winner_count == 0) {
-		return '';
-	}
 	return $html;
 }
 
+function generate_title_slide(&$pdf, $title)
+{
+	global $config;
+	$pdf->label_new();
+	$pdf->label_fair_logo(1,1,30,30,false);
+	$pdf->label_text(30, 5, 60, 10, $config['fair_name'], false, 'left','middle');
+	$pdf->label_text(30, 17, 50, 8, $config['year'], false, 'left','middle');
+	$pdf->label_text(10, 40, 80, 30, $title, false, 'center','middle',3);
 
-$pdf->AddPage();
+}
 
+function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
+{
+	global $projects, $schools, $config;
+	$award = $prize['award'];
 
+	foreach($winning_project_ids as $pid) {
+		$project =&$projects[$pid];
 
-if(!$script_group_by_prize) {
+		$pdf->label_new();
+		$pdf->label_fair_logo(0,0,25,25,false);
+//		$pdf->label_text(1,25,20,5,$config['year']);
+		$pdf->label_line(1,27,99,27);
 
-	foreach($awards as $aid=>&$award) {
+		if($award['type'] == 'divisional') {
+			$pdf->label_text(25, 5, 70, 8, $award['name']);
+			$pdf->label_text(25, 15, 70, 7, $prize['name']);
+		} else {
+			$pdf->label_text(25, 5, 70, 16, $award['name'], false, 'center', 'middle', 2);
+		}
 
-		/* Skip award types we're not displaying */
-		if(!in_array($award['type'], $script_award_types)) continue;
-
+		$pn = $project['number'];
 		
-		$a_html = '';
-		$a_html .= "<h3>{$award['name']}</h3>";
-		$a_html .= get_award_info_html($mysqli, $award);
+		$pdf->label_text(1, 28, 99, 5, $pn, false, 'left');
+		$pdf->label_text(5, 35, 90, 18, $project['title'], false, 'center','middle' , 2);
 
-		$award_winner_count = 0;
-		$p_html = '';
-		foreach($award['prizes_in_order'] as &$prize) {
+		$x = 60;
+		$sids = array();
+		foreach($project['students'] as $s) {
+			$pdf->label_text(5, $x, 90, 8, $s['name']);
+			$x += 9;
 
-			$prize_id = $prize['id'];
-
-			$p_html = '';
-
-			$p_html .= "<b>{$prize['name']}</b>";
-			$i_html = get_prize_info_html($prize);
-			if($i_html != '') {
-				$p_html .= ' - '.$i_html;
+			if(!in_array($s['schools_id'], $sids)) {
+				$sids[] = $s['schools_id'];
 			}
-			$p_html .= '<br/>';
-
-			$p_winner_count = 0;
-			/* This writes to $p_winner_count */
-			$w_html = get_winners_html_for_prize($prize, $p_winner_count);
-
-			if($p_winner_count == 0 && !$script_show_unawarded_prizes) {
-				continue;
-			}
-
-			$a_html .= $p_html . $w_html;
-			$award_winner_count += $p_winner_count;
 		}
+		$x += 5;
 
-		if($award_winner_count == 0 && !$script_show_unawarded_awards) {
-			continue;
+
+		foreach($sids as $sid) {
+			$pdf->label_text(5, $x, 90, 7, $schools[$sid]);
+			$x += 8;
 		}
-
-		if($script_start_award_on_new_page) 
-			$pdf->AddPage();
-
-		$pdf->writeHTML($a_html);
-
+		
 	}
 
-} else {
+}
 
-
-	/* Go through each award, and build an outer list of prize lists.  The idea is
+if($script_group_by_prize && in_array('divisional', $script_award_types)) {
+	/* Go through each divisional award, and build an outer list of prize lists.  The idea is
 	 * to group together all the divisional awards sorted by prize order (
 	 * which must be the same for all grouped prizes)
 	 * (100) Prize-Int HM, Prize S HM
@@ -224,8 +261,8 @@ if(!$script_group_by_prize) {
 
 	foreach($awards as $aid=>&$award) {
 
-		/* Skip award types we're not displaying */
-		if(!in_array($award['type'], $script_award_types)) continue;
+		/* Skip non-divisional awards */
+		if($award['type'] != 'divisional') continue;
 
 		foreach($award['prizes'] as $prize_id => &$prize) {
 
@@ -254,58 +291,139 @@ if(!$script_group_by_prize) {
 			$outer_prize_list[$prize['ord']][] =& $prize;
 		}
 	}
-
 	ksort($outer_prize_list);
+	debug("Generated outer/inner prize list: ".print_r($outer_prize_list, true)."\n");
+}
 
-	/* Now go through the outer prize list and generate the HTML, skipping
-	 * prizes with no winners if requested */
-	foreach($outer_prize_list as $order=>&$prize_list) {
 
-		$html = '';
+$divisional_printed = false;
 
-		$header_printed = false;
-		$outer_winner_count = 0;
+foreach($awards as $aid=>&$award) {
 
-		/* Foreach prize in the list */
-		foreach($prize_list as $porder=>&$prize) {
-			if(!$header_printed) {
-				/* Print the major h3 prize header 8/
-				/* Print the minor header */
-				$html .= "<h3>{$prize['name']}</h3>";
-				$header_printed = true;
+	debug("Processing award: {$award['name']}\n");
+	
+	/* Skip award types we're not displaying */
+	if(!in_array($award['type'], $script_award_types)) {
+		debug("   skip because not in award types\n");
+		continue;
+	}
+
+	if($award['type'] == 'divisional' && $script_group_by_prize) {
+
+		/* Skip if we alread printed the divisional awards/prizes */
+		if($divisional_printed) continue;
+
+		/* We found the first divisionl award.  Since divisioanl awards are being grouped by prize, we're going to print
+		 * all the divisional awards (ordered by prize) now */
+		 $divisional_printed = true;
+
+		 debug("   printing divisional awards\n");
+
+		/* Go through the outer prize list and generate the HTML, skipping
+		 * prizes with no winners if requested.
+		 * The outer prizes should lists of all the divisional HM, Bronze, Silver, Gold prizes */
+		foreach($outer_prize_list as $order=>&$prize_list) {
+
+			/* Do we need a header or a title slide? */
+			$winning_count = 0;
+			foreach($prize_list as $porder=>&$prize) {
+				$winning_project_ids = get_winning_project_ids_for_prize($prize);
+				$winning_count += count($winning_project_ids);
 			}
 
-			$award =& $prize['award'];
+			debug("   outer prize list $order has $winning_count winners\n");
+			if($winning_count == 0 && !$script_show_unawarded_awards) {
+				/* No winners, and we're not showing unawarded awards, next outer prize*/
+				continue;
+			}
 
-			/* Add a minor header for the award */
-			$minor_html = "<b>{$award['name']}</b><br/>";
+			if($script_slides) {
+				generate_title_slide($pdf, $prize['name']);
+			} else {
+				if($script_start_award_on_new_page) {
+					$pdf->AddPage();
+				}
+				/* Ok, we need a title or title slide */
+				$html = "<h3>{$prize['name']}</h3>";
+			}
 
-			$p_winner_count = 0;
-			/* This writes to $p_winner_count */
-			$w_html = get_winners_html_for_prize($prize, $p_winner_count);
+			/* Foreach prize in the list */
+			foreach($prize_list as $porder=>&$prize) {
 
-			if($p_winner_count == 0) {
-				if($script_show_unawarded_awards) {
-					$w_html = '<p>No Winners';
-				} else {
+				$winning_project_ids = get_winning_project_ids_for_prize($prize);
+
+				if(count($winning_project_ids) == 0 && !$script_show_unawarded_prizes) {
 					continue;
 				}
-			}
-			$outer_winner_count += $p_winner_count;
 
-			$html .= $minor_html . $w_html;
+				$award =& $prize['award'];
+
+				if($script_slides) {
+					generate_prize_slides($pdf, $prize, $winning_project_ids);
+				} else {
+					$html .= get_winners_html_for_prize($prize, $award['name'], $winning_project_ids, false);
+				}
+			}
+
+			/* Write out the HTML all at once for the ceremony script */
+			if(!$script_slides) {
+				$pdf->writeHTML($html);
+			}
 		}
 
-		if($outer_winner_count == 0 && !$script_show_unawarded_prizes) {
+	} else {
+
+		/* Check if this award has any prizes awarded */
+		$winner_count = 0;
+		foreach($award['prizes_in_order'] as &$prize) {
+			$winning_project_ids = get_winning_project_ids_for_prize($prize);
+			$winner_count += count($winning_project_ids);
+		}
+		debug("   total winners: $winner_count\n");
+	
+		if($winner_count == 0 && !$script_show_unawarded_awards) {
 			continue;
 		}
+		
+		if($script_slides) {
+			generate_title_slide($pdf, $award['name']);
+		} else {
+			if($script_start_award_on_new_page) {
+				$pdf->AddPage();
+			}
+			/* Ok, we need a title or title slide */
+			$html = "<h3>{$award['name']}</h3>";
+			$html .= get_award_info_html($mysqli, $award);
+		}
 
-		if($script_start_award_on_new_page) 
-			$pdf->AddPage();
+		foreach($award['prizes_in_order'] as &$prize) {
 
-		$pdf->writeHTML($html);
+			$prize_id = $prize['id'];
+			debug("   processing prize: {$prize['name']}\n");
+
+			/* This writes to $p_winner_count */
+			$winning_project_ids = get_winning_project_ids_for_prize($prize);
+			debug("      winning projects: ".join(',', $winning_project_ids)."\n");
+			
+
+			if(count($winning_project_ids) == 0 && !$script_show_unawarded_prizes) {
+				continue;
+			}
+
+			if($script_slides) {
+				generate_prize_slides($pdf, $prize, $winning_project_ids);
+			} else {
+				$html .= get_winners_html_for_prize($prize, $prize['name'], $winning_project_ids, true);
+			}
+		}
+
+		if(!$script_slides) {
+			$pdf->writeHTML($html);
+		}
 	}
+		
 }
+
 $pdf->output();
 
 ?>

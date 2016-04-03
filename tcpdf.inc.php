@@ -406,6 +406,23 @@ class pdf extends TCPDF {
 		$this->debug("Label is {$this->label_width}x{$this->label_height}\n");
 	}
 
+	function setup_for_slides()
+	{
+		/* No headers and footers */
+		$this->setPrintHeader(false);
+		$this->setPrintFooter(false);
+
+		/* No auto-pagebreaks */
+		$this->SetAutoPageBreak(false);
+
+		/* Cells exactly the size to fit text, default is 1.25 height ratio
+		 * set all-round padding to zero too 
+		 * cell height = FontSize * cell_height_ratio + top padding + bottom padding */
+		$this->setCellHeightRatio(1.0);
+		$this->setCellPaddings(0, 0, 0, 0);
+
+	}
+
 	function label_new()
 	{
 		global $config;
@@ -503,7 +520,7 @@ class pdf extends TCPDF {
 		border = true/false
 		on_overflow = truncate, ..., scale */
 
-	function label_text($x,$y,$w,$h,$text,$border,$align='center',$valign='middle',
+	function label_text($x,$y,$w,$h,$text,$border=false,$align='center',$valign='middle',
 				$max_lines=1, 
 				$fontname='helvetica',$fontstyle='',$fontsize='6',
 				$on_overflow='scale')
@@ -590,14 +607,14 @@ class pdf extends TCPDF {
 
 	function label_line($x,$y,$x2,$y2) 
 	{
-		$this->Line($this->x($x), $this->y($y), $this->x($x2), $this->x($y2));
+		$this->Line($this->x($x), $this->y($y), $this->x($x2), $this->y($y2));
 	}
 
 	function label_fair_logo($x, $y, $w, $h, $show_box)
 	{
 		global $config;
 		/* Scale image to proportinally fit in w x h */
-		$this->Image("data/logo.jpg", $this->x($x), $this->y($y), $this->w($w), $this->h($h),
+		$this->Image("files/logo.jpg", $this->x($x), $this->y($y), $this->w($w), $this->h($h),
 				'', '', '', true,
 				300, '', false, false, $show_box ? 1 : 0, true);
 	}

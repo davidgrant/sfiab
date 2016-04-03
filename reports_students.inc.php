@@ -351,8 +351,8 @@ $report_students_fields = array(
 		'name' => 'Student -- Age (when this report is created)',
 		'header' => 'Age',
 		'width' => 0.4,
-		'table' => "DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(users.dateofbirth)), '%Y')+0",
-		'table_sort' => 'users.dateofbirth'),
+		'table' => "DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(users.birthdate)), '%Y')+0",
+		'table_sort' => 'users.birthdate'),
 
 	'tshirt' =>  array(
 		'name' => 'Student -- T-Shirt Size',
@@ -885,7 +885,7 @@ $report_students_fields = array(
 		'header' => 'Mentor Name',
 		'width' => 1.75,
 		'scalable' => true,
-		'table' => "CONCAT('projects.number', ' - ', mentors.firstname, ', ', mentors.lastname)",
+		'table' => "CONCAT(projects.number, ' - ', mentors.firstname,' ', mentors.lastname)",
 		'table_sort'=> 'mentors.lastname',
 		'components' => array('mentors')),
 
@@ -957,7 +957,7 @@ $report_students_fields = array(
 		'header' => 'Description of Help',
 		'width' => 3.0,
 		'scalable' => true,
-		'table' => 'mentors.description',
+		'table' => 'mentors.desc',
 		'components' => array('mentors')),
 
 /* Fair Information */
@@ -1073,17 +1073,12 @@ $report_students_fields = array(
 				LEFT JOIN awards ON awards.id = award_prizes.award_id";
 		$awards_where = " AND winners.year='$year'";
 	}
-/*
+
 	if(in_array('awards_nominations', $components)) {
-		$awards_join = "LEFT JOIN project_specialawards_link 
-					ON(projects.id=project_specialawards_link.projects_id),
-					awards,award_types";
-		$awards_where = " AND project_specialawards_link.awards_id=awards.id
-					AND award_types.id=awards.award_types_id
-					AND awards.year='$year'
-					AND award_types.year='$year' ";
+		$awards_join = "LEFT JOIN awards ON FIND_IN_SET(awards.id, projects.sa_nom)";
+		$awards_where = " ";
 	}
-*/
+
 	$partner_join = '';
 	if(in_array('partner', $components)) {
 		$partner_join = "LEFT JOIN users AS student2
@@ -1102,7 +1097,7 @@ $report_students_fields = array(
 	if(in_array('mentors', $components)) {
 		$mentor_join = "LEFT JOIN mentors ON
 					mentors.pid=users.s_pid";
-		$mentor_where = "AND mentors.year='$year'";
+		$mentor_where = "";
 	}
 
 	$fairs_join = '';

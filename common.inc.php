@@ -67,6 +67,17 @@ function sfiab_load_config($mysqli)
 	$config['provincestate'] = 'Province';
 	$config['postalzip'] = 'Postal Code';
 
+	$a = explode(',', $config['judge_divisional_distribution']);
+	$config['judge_divisional_distribution'] = array();
+	foreach($a as $d) {
+		$config['judge_divisional_distribution'][] = (int)$d;
+	}
+	$a = explode(',', $config['judge_divisional_prizes']);
+	$config['judge_divisional_prizes'] = array();
+	foreach($a as $p) {
+		$config['judge_divisional_prizes'][] = $p;
+	}
+
 	date_default_timezone_set($config['timezone']);
 }
 
