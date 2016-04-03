@@ -195,7 +195,7 @@ function generate_title_slide(&$pdf, $title)
 	$pdf->label_fair_logo(1,1,30,30,false);
 	$pdf->label_text(30, 5, 60, 10, $config['fair_name'], false, 'left','middle');
 	$pdf->label_text(30, 17, 50, 8, $config['year'], false, 'left','middle');
-	$pdf->label_text(10, 40, 80, 30, $title, false, 'center','middle',3);
+	$pdf->label_text(10, 42, 80, 30, $title, false, 'center','middle',3);
 
 }
 
@@ -208,41 +208,63 @@ function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
 		$project =&$projects[$pid];
 
 		$pdf->label_new();
-		$pdf->label_fair_logo(0,0,25,25,false);
+		$pdf->label_fair_logo(1,1,14,14,false);
 //		$pdf->label_text(1,25,20,5,$config['year']);
-		$pdf->label_line(1,27,99,27);
+		$pdf->label_line(1,17,99,17);
 
 		if($award['type'] == 'divisional') {
-			$pdf->label_text(25, 5, 70, 8, $award['name']);
-			$pdf->label_text(25, 15, 70, 7, $prize['name']);
+			$pdf->label_text(25, 2, 70, 6, $award['name']);
+			$pdf->label_text(25, 9, 70, 6, $prize['name']);
 		} else {
-			$pdf->label_text(25, 5, 70, 16, $award['name'], false, 'center', 'middle', 2);
+			$pdf->label_text(25, 2, 70, 13, $award['name'], false, 'center', 'middle', 2);
 		}
 
 		$pn = $project['number'];
-		
-		$pdf->label_text(1, 28, 99, 5, $pn, false, 'left');
-		$pdf->label_text(5, 35, 90, 18, $project['title'], false, 'center','middle' , 2);
-
-		$x = 60;
+		/* Build a unique array of school IDs */
 		$sids = array();
 		foreach($project['students'] as $s) {
-			$pdf->label_text(5, $x, 90, 8, $s['name']);
-			$x += 9;
-
 			if(!in_array($s['schools_id'], $sids)) {
 				$sids[] = $s['schools_id'];
 			}
 		}
-		$x += 5;
 
+		$y = 18;
 
-		foreach($sids as $sid) {
-			$pdf->label_text(5, $x, 90, 7, $schools[$sid]);
-			$x += 8;
+		/* Change layout depending if the image exists */
+		$filename = "{$project['number']}.JPG";
+		if(!file_exists("files/{$config['year']}/".$filename)) {
+			$pdf->label_text(1, 18, 98, 4, $pn, false, 'right');
+			$pdf->label_text(5, 30, 90, 14, $project['title'], false, 'center','middle' , 2);
+			$y = 50;
+			foreach($project['students'] as $s) {
+				$pdf->label_text(5, $y, 90, 5, $s['name']);
+				$y += 6;
+			}
+			$y += 8;
+
+			foreach($sids as $sid) {
+				$pdf->label_text(5, $y, 90, 5, $schools[$sid]);
+				$y += 5;
+			}
+		} else {
+			/* Image file exists */
+			$pdf->label_text(1, 18, 98, 4, $pn, false, 'right');
+			$pdf->label_text(5, 22, 90, 14, $project['title'], false, 'center','middle' , 2);
+			$pdf->label_image(30, 38, 40, 40, "{$project['number']}.JPG");
+			$names = array();
+			foreach($project['students'] as $s) {
+				$names[] = $s['name'];
+			}
+			$pdf->label_text(5, 75, 90, 10, implode(' & ', $names), false, 'center', 'middle', 2);
+
+			$names = array();
+			foreach($sids as $sid) {
+				$names[] = $schools[$sid];
+			}
+			$pdf->label_text(5, 87, 90, 8, implode(' & ', $names), false, 'center', 'middle', 2);
 		}
-		
 	}
+
 
 }
 

@@ -618,6 +618,23 @@ class pdf extends TCPDF {
 				'', '', '', true,
 				300, '', false, false, $show_box ? 1 : 0, true);
 	}
+	function label_image($x, $y, $w, $h, $filename, $show_box=false)
+	{
+		global $config;
+		if(preg_match('/[^A-Za-z0-9_ \-\.]/', $filename)) {
+			print("Invalid filename: $filename");
+			exit();
+		}
+
+		if(!file_exists("files/{$config['year']}/".$filename)) {
+			return;
+		}
+		
+		/* Scale image to proportinally fit in w x h */
+		$this->Image("files/{$config['year']}/".$filename, $this->x($x), $this->y($y), $this->w($w), $this->h($h),
+				'', '', '', true,
+				300, '', false, false, $show_box ? 1 : 0, true);
+	}
 
 	function label_barcode($x, $y, $w, $h, $val) 
 	{
