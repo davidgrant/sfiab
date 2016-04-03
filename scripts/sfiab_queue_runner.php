@@ -120,7 +120,7 @@ while(true) {
 		debug("   from: $from_name $from_addr\n");
 		$mail = new PHPMailer();
 		$mail->isSMTP();	// Use smtp
-		$mail->SMTPDebug = 2;  /* 0=off, 1=client, 2=client and server */
+		$mail->SMTPDebug = 0;  /* 0=off, 1=client, 2=client and server */
 		$mail->Debugoutput = 'echo'; /*or 'html' friendly debug output */
 		$mail->Helo = gethostname();
 
