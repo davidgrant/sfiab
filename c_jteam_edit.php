@@ -25,6 +25,7 @@ foreach($js as &$j) {
 	$judges[$j['uid']] = $j;
 }
 
+
 $action = '';
 if(array_key_exists('action', $_POST)) {
 	$action = $_POST['action'];
@@ -171,7 +172,6 @@ $projects = projects_load_all($mysqli, $config['year']);
 $jteams = jteams_load_all($mysqli, $config['year']);
 $rounds = timeslots_load_rounds($mysqli);
 
-
 $page_id = 'c_jteam_list';
 
 $help = '<p>ISEF divisions:
@@ -196,7 +196,7 @@ sfiab_page_begin($u, "Judging Teams List", $page_id, $help);
 <?php	
 	foreach($rounds as $round=>&$r) {
 		$judge_list = array();
-		foreach($judges as &$j) {
+		foreach($judges as $jid=>&$j) {
 			if(in_array($round, $j['j_rounds']) && $j['j_complete'] == 1 && $j['attending']) {
 				/* Is this judge on a jteam in ths round? */
 				$found = false;
@@ -238,10 +238,12 @@ sfiab_page_begin($u, "Judging Teams List", $page_id, $help);
 				}
 			
 			}
+			unset($j);
 ?>			</table>	
 			</div></div>
 		</div>
 <?php	}
+	unset($r);
 ?>
 					
 	<h3>Judging Teams</h3>
@@ -270,8 +272,10 @@ sfiab_page_begin($u, "Judging Teams List", $page_id, $help);
 				}
 				jteam_li($jteam);
 			}
+			unset($jteam);
 		}
 	}
+	unset($r);
 ?>
 
 </ul>
@@ -375,6 +379,8 @@ function project_row(&$p, $tr = true)
 	}
 }
 
+
+
 function jteam_li(&$jteam) {
 
 	global $jteams, $page_id, $isef_divs, $awards, $cats, $judges, $projects, $rounds;
@@ -437,9 +443,10 @@ function jteam_li(&$jteam) {
 <div style="display:none">
 	<table id="j_tr">
 	<?php
-	foreach($judges as &$j) {
+	foreach($judges as $jid=>&$j) {
 		judge_row($j);
 	}
+	unset($j);
 	?>
 	</table>
 	<table id="p_tr">
@@ -447,6 +454,7 @@ function jteam_li(&$jteam) {
 	foreach($projects as $pid=>&$p) {
 		project_row($p);
 	}
+	unset($p);
 	?>
 	</table>
 </div>

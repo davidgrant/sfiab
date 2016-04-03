@@ -39,6 +39,17 @@ function jteam_load($mysqli, $jteam_id, $pdata = false)
 	filter_int($jteam['prize_id']);
 	filter_int($jteam['cusp_n_up']);
 
+	/* HACK Remove zeros because sometimes they get added, not sure how */
+	$l = array();
+	foreach($jteam['user_ids'] as $uid) {
+		if($uid > 0) {
+			$l[] = $uid;
+		}
+	}
+	$jteam['user_ids'] = $l;
+
+
+
 	unset($jteam['original']);
 	$original = $jteam;
 	$jteam['original'] = $original;
