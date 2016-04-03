@@ -92,8 +92,8 @@ $timeslots = timeslots_load_all($mysqli);
 <?php	} ?>
 	<tr><td>Divisional Prizes and Distribution</td><td><b>
 <?php
-	$prizes = explode(',', $config['judge_divisional_prizes']);
-	$dist = explode(',', $config['judge_divisional_distribution']);
+	$prizes = $config['judge_divisional_prizes'];
+	$dist = $config['judge_divisional_distribution'];
 	for($i=0;$i<count($prizes);$i++) { ?>
 		<?=$prizes[$i]?> - <?=$dist[$i]?>%<br/>
 <?php	} ?>
