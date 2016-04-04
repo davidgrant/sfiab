@@ -258,9 +258,8 @@ function award_update_divisional($mysqli)
 	 * appear.  The first in judge_divisional_prizes is the highest award, so
 	 * it gets the highest order... count them and work backwards */
 	$div_prizes = array();
-	$t = explode(",", $config['judge_divisional_prizes']);
-	$order = count($t);
-	foreach($t as $prize_name) {
+	$order = count($config['judge_divisional_prizes']);
+	foreach($config['judge_divisional_prizes'] as $prize_name) {
 		$div_prizes[trim($prize_name)] = $order;
 		$order -= 1;
 	}
