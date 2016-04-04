@@ -114,13 +114,16 @@ case 'addimage':
 		exit();
 	}
 
+
 	$ratio = $h / $w;
-	foreach(array($w, 500, 100) as $s) {
-		$i = imagecreate($w, round($ratio * $s));
+	debug("Source image {$w}x{$h}, ratio=$ratio\n");
+	foreach(array($w, 500, 100) as $new_w) {
+		$new_h = round($new_w * $ratio);
+		$i = imagecreate($new_w, $new_h);
 		imagecolorallocate($i,255,255,255);
 		imagecolortransparent($i,0);
-		imagecopyresized($i, $image, 0, 0, 0, 0, $s, round($ratio * $s), $w, $h);
-		$f = ($s == $w) ? "logo.jpg" : "logo-$s.jpg";
+		imagecopyresized($i, $image, 0, 0, 0, 0, $new_w, $new_h, $w, $h);
+		$f = ($new_w == $w) ? "logo.jpg" : "logo-$new_w.jpg";
 		imagejpeg($i, "files/$f",95);
 		imagedestroy($i);
 	}
