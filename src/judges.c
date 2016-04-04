@@ -807,6 +807,12 @@ void judges_anneal(struct _db_data *db, int year)
 			int is_really_sa_only = 1;
 			for(i=0;i<j->num_sa;i++) {
 				struct _award *a = award_find(j->sa[i]);
+				if(!a) {
+					printf("   Judge %d selected award %d that doesn't exist.  Removing.\n", j->id, j->sa[i]);
+					j->sa_only = 0;
+					is_really_sa_only = 0;
+					continue;
+				}
 				if(!a->is_special) {
 					printf("   Judge %d selected non-special award %d as sa-only.  Removing.\n", j->id, a->id);
 					j->sa_only = 0;
