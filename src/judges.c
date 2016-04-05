@@ -555,7 +555,7 @@ void judges_anneal(struct _db_data *db, int year)
 	GPtrArray *jteams;
 	GPtrArray *jteams_list, *judge_list;
 	GPtrArray **judge_jteam_assignments = NULL;
-	GPtrArray *round0_sa_judges, *round1_sa_judges;
+	GPtrArray *round0_sa_judges, *round1_sa_judges = NULL;
 
 	current_year = year;
 

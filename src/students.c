@@ -203,6 +203,7 @@ void judges_load(struct _db_data *db, int year)
 
 		/* Turn the list of available rounds into a mask */
 		memset(j->available_in_round, 0, sizeof(int) * 8);
+		memset(jround, 0, sizeof(int) * 8);
 		i = split_int_list(jround, db_fetch_row_field(result, x, "j_rounds"));
 		for(y=0; y<i; y++) {
 			j->available_in_round[jround[y]] = 1;
