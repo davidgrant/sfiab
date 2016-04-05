@@ -1015,6 +1015,7 @@ void judges_anneal(struct _db_data *db, int year)
 	sa_judges_available_in_round[0] = round0_sa_judges->len;
 	if(round1_sa_judges) sa_judges_available_in_round[1] = round1_sa_judges->len;
 	total_judges = sa_judges_available_in_round[0] + sa_judges_available_in_round[1];
+	if(total_judges == 0) total_judges = 1;
 
 	ideal_projects_in_round[0] = total_projects * sa_judges_available_in_round[0] / total_judges;
 	if(round1_sa_judges) ideal_projects_in_round[1] = total_projects * sa_judges_available_in_round[1] / total_judges;
