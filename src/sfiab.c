@@ -22,7 +22,7 @@ int split_int_list(int *list, char *str)
 	char *p;
 
 	/* Special case, return nothing if the string is empty */
-	if(str[0] == 0) {
+	if(str == NULL || str[0] == 0) {
 		list[0] = 0;
 		return 0;
 	}
