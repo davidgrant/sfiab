@@ -33,23 +33,31 @@ foreach($cfg as $k=>&$v) {
 $action = array_key_exists('action', $_POST) ? $_POST['action'] : '';
 switch($action) {
 case 'save':
+	$need_update_divisional = False;
 	/* Scan everythign that was just saved */
 	foreach($_POST as $p=>$v) {
 		if(substr($p, 0, 4) == 'cfg_') {
 			$var = substr($p, 4);
 			$val = $mysqli->real_escape_string($v);
 			$mysqli->real_query("UPDATE config SET `val`='$val' WHERE `var`='$var'");
-			$config[$var] = $val;
 
 			/* Do variable-dependent things when a variable is saved */
 			switch($var) {
 			case 'judge_divisional_prizes':
-				debug("config judge_divisional_prizes was saved, running award_update_divisional()\n");
-				award_update_divisional($mysqli);
+				$need_update_divisional = True;
 				break;
 			}
 		}
 	}
+
+	/* Reload config */
+	sfiab_load_config($mysqli);
+
+	/* Do any additional updates with the new config */
+	if($need_update_divisional) {
+		debug("config judge_divisional_prizes was saved, running award_update_divisional()\n");
+		award_update_divisional($mysqli);
+	}		
 	form_ajax_response(0);
 	exit();
 }
