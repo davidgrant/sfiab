@@ -154,6 +154,10 @@ foreach($generate_rounds as $round ) {
 		$table['total'] = 0;
 		$table['data'] = array();
 
+		if(count($jteam['user_ids']) == 0) {
+			$pdf->WriteHTML("<h3>No Judges Assigned</h3>");
+			continue;
+		}
 		
 		if($award['type'] == 'divisional' && $round == 0) {
 			/* Round 1 */

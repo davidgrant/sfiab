@@ -332,6 +332,11 @@ start:
 	twist_data = twist_alloc(num_judges, judges_per_project);
 
 	printf("Fill for %d judges, %d judges per project\n", num_judges, judges_per_project);
+	if(judges_per_project > num_judges) {
+		/* Catch an impossible situation */
+		printf("NOTICE: Reducing judges per project to %d because there are only %d judges\n", num_judges, num_judges);
+		judges_per_project = num_judges;
+	}
 	timeslot_create_schedule(schedule, timeslot_matrix->num_timeslots, judges_per_project, timeslot_matrix->num_projects);
 
 	/* Now many skips can we have? */
