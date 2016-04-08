@@ -182,7 +182,7 @@ function get_winners_html_for_prize(&$prize, $title, $winning_project_ids, $show
 		$html .= "<tr><td></td><td></td><td></td></tr>";
 		$html .= "<tr><td></td><td colspan=\"2\">{$project['title']}</td></tr>";
 		$html .= "<tr><td></td><td></td><td></td></tr>";
-		$html .= "<tr><td></td><td></td><td></td></tr>";
+		$html .= "<tr><td colspan=\"3\"><hr/></td></tr>";
 	}
 	$html .= '</table>';
 	return $html;
@@ -224,6 +224,9 @@ function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
 		$sids = array();
 		foreach($project['students'] as $s) {
 			if(!in_array($s['schools_id'], $sids)) {
+				if($schools[$s['schools_id']] == "My School is not Listed") {
+					continue;
+				}
 				$sids[] = $s['schools_id'];
 			}
 		}
@@ -231,7 +234,7 @@ function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
 		$y = 18;
 
 		/* Change layout depending if the image exists */
-		$filename = "{$project['number']}.JPG";
+		$filename = "{$project['number']}.jpg";
 		if(!file_exists("files/{$config['year']}/".$filename)) {
 			$pdf->label_text(1, 18, 98, 4, $pn, false, 'right');
 			$pdf->label_text(5, 30, 90, 14, $project['title'], false, 'center','middle' , 2);
@@ -250,7 +253,7 @@ function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
 			/* Image file exists */
 			$pdf->label_text(1, 18, 98, 4, $pn, false, 'right');
 			$pdf->label_text(5, 22, 90, 14, $project['title'], false, 'center','middle' , 2);
-			$pdf->label_image(30, 38, 40, 40, "{$project['number']}.JPG");
+			$pdf->label_image(30, 38, 40, 40, "{$project['number']}.jpg");
 			$names = array();
 			foreach($project['students'] as $s) {
 				$names[] = $s['name'];
