@@ -75,6 +75,42 @@ case 'padd':
 	}
 	form_ajax_response(array('status'=>$error, 'happy'=>get_prize_count($prize) ));
 	exit();
+
+case 'padd_mass':
+	/* Add a project to a prize */
+	$prize_id = (int)$_POST['prize_id'];
+	$pids = $_POST['pid'];
+	$prize = prize_load($mysqli, $prize_id);
+
+	$projects = projects_load_all($mysqli, false, $config['year']);
+	foreach($projects as $pid=>$p) {
+		$key = sprintf("%03d", $p['floor_number']);
+		$map[$key] = $pid;
+	}
+	
+	/* This insert may fail because the table is keyed to unique (prize, project, year).  That's
+	 * ok, just read the error and return that so the javascirpt doesn't think the insert was 
+	 * successful */
+	$error = 0;
+	foreach($pids as $pid) {
+		if(array_key_exists($pid, $map)) {
+			$ipid = $map[$pid];
+			$mysqli->query("INSERT INTO winners(`award_prize_id`,`pid`,`year`,`fair_id`) 
+					VALUES('$prize_id','$ipid','{$config['year']}','0')");
+		
+			if($mysqli->errno == 0) {
+				if($prize['upstream_prize_id'] > 0) {
+					remote_queue_push_winner_to_fair($mysqli, $prize['id'], $ipid);
+				}
+			} else {
+				$error = 1;
+			}
+		} else {
+			$error = 1;
+		}
+	}
+	form_ajax_response(array('status'=>$error, 'happy'=>get_prize_count($prize) ));
+	exit();
 }
 
 /* Load all winners */
@@ -250,6 +286,7 @@ function award_li(&$a) {
     <ul data-inset="true">
       <li><a href="#prize_editor_all" data-ajax="false">All Projects</a></li>
       <li><a href="#prize_editor_eligible" data-ajax="false">Eligible Projects</a></li>
+      <li><a href="#prize_editor_mass" data-ajax="false">Mass Entry</a></li>
     </ul>
   </div>
   <div id="prize_editor_eligible" class="ui-body-d ">
@@ -269,6 +306,14 @@ function award_li(&$a) {
 	form_select_filter("prize_editor_all", "psel", NULL, $optlist, $val);
 ?>
 	<button type="submit" data-role="button" onclick="prize_padd();" data-inline="true" data-icon="check" data-theme="g" >Add</button>
+	<button type="submit" data-role="button" onclick="prize_cancel_edit();" data-inline="true" data-icon="delete" >Done</button>
+  </div>
+  <div id="prize_editor_mass" class="ui-body-d ">
+<?php
+	$val = '';
+	form_text("prize_editor_all", "pmass", NULL, $val);
+?>
+	<button type="submit" data-role="button" onclick="prize_padd_mass();" data-inline="true" data-icon="check" data-theme="g" >Add</button>
 	<button type="submit" data-role="button" onclick="prize_cancel_edit();" data-inline="true" data-icon="delete" >Done</button>
   </div>
 </div>
@@ -335,6 +380,23 @@ function prize_padd()
 			/* Append the [X] to the new tr in the award table */
 			$( "#prize_"+current_prize_id+' tr[id="'+id+'"]').append("<td id='X'><a href=\"#\" onclick=\"prize_pdel("+id+");\">[X]</a></td>");
 			$("#prize_count_"+current_prize_id).html(data.happy);
+		}
+	}, "json");
+	return false;
+}
+function prize_padd_mass()
+{
+	var ids = $("#prize_editor_all_pmass").val().split(" ");
+	$.post('c_award_winners.php', { action: "padd_mass", prize_id:current_prize_id, pid: ids }, function(data) {
+		if(data.status == 0) {
+			for (var x = 0; i < ids.length; x++) {
+				var id = ids[x];
+				/* Add to award list */
+				$('#p_tr tr[id="'+id+'"]').clone().appendTo('#prize_'+current_prize_id);
+				/* Append the [X] to the new tr in the award table */
+				$( "#prize_"+current_prize_id+' tr[id="'+id+'"]').append("<td id='X'><a href=\"#\" onclick=\"prize_pdel("+id+");\">[X]</a></td>");
+				$("#prize_count_"+current_prize_id).html(data.happy);
+			}
 		}
 	}, "json");
 	return false;
