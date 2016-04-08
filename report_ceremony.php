@@ -165,24 +165,23 @@ function get_winners_html_for_prize(&$prize, $title, $winning_project_ids, $show
 		 * hasn't been filtered by cats */
 		assert(in_array($project['cat_id'], $script_cats));
 
+		/* nobr means keep this entire tr on the same page */
+		$html .= '<tr nobr="true">';
+
 		$pn = $project['number'];
+		$html .= "<td width=\"25mm\" align=\"center\">$pn</td>";
+
+		$html .= "<td width=\"160mm\"><table>";
 		foreach($project['students'] as $s) {
-			$n = '<b>'.$s['name'].'</b>';
+			$html .= '<tr><td width=\"80mm\"><b>'.$s['name'].'</b>';
 			if($script_show_pronunciation && trim($s['pronounce']) != '') {
-				$n .= "<br/>&nbsp;&nbsp;&nbsp;({$s['pronounce']})";
+				$html .= "<br/>&nbsp;&nbsp;&nbsp;({$s['pronounce']})";
 			}
-
-			$html .= "<tr><td width=\"25mm\" align=\"center\">$pn</td>";
-			$html .= "<td width=\"80mm\">$n</td>";
-			$html .= "<td width=\"80mm\">{$schools[$s['schools_id']]}</td></tr>";
-			$pn = '';
+			$html .= '</td><td width=\"80mm\">'.$schools[$s['schools_id']].'</td></tr>';
 		}
-
-
-		$html .= "<tr><td></td><td></td><td></td></tr>";
-		$html .= "<tr><td></td><td colspan=\"2\">{$project['title']}</td></tr>";
-		$html .= "<tr><td></td><td></td><td></td></tr>";
-		$html .= "<tr><td colspan=\"3\"><hr/></td></tr>";
+		$html .= '</table>';
+		$html .= "<br/><br/>{$project['title']}<br/><hr/>";
+		$html .='</td></tr>';
 	}
 	$html .= '</table>';
 	return $html;
