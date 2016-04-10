@@ -126,7 +126,7 @@ function get_cwsf_winners_for_xml($mysqli, &$winners)
 				"projectid"=>$project['pid'],
 				"projectnumber"=>$project['number'],
 				"title"=>$project['title'],
-				"abstract"=>$project['summary'],
+				"abstract"=>$project['abstract'],
 				"category_id"=>$cwsf_agecategory,
 				"division_id"=>$challenges[$project['challenge_id']]['cwsf_division_id'],
 				"projectdivisions_id"=>$project['challenge_id'],
