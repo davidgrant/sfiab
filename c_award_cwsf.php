@@ -162,7 +162,7 @@ case 'register':
 //	print_r($_POST['xml']);
 
 	$ch = curl_init(); /// initialize a cURL session
-	curl_setopt ($ch, CURLOPT_URL,"https://secure.ysf-fsj.ca/registration/xmlregister.php");
+	curl_setopt ($ch, CURLOPT_URL,"https://secure.youthscience.ca/registration/xmlregister.php");
 	curl_setopt ($ch, CURLOPT_HEADER, 0); /// Header control
 	curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET
 	curl_setopt ($ch, CURLOPT_POSTFIELDS, "xml=".$_POST['xml']);  /// put the query string here starting with "?"
@@ -171,6 +171,7 @@ case 'register':
 	curl_setopt ($ch, CURLOPT_TIMEOUT, 360);
 	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
 	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, false);
 //	$datastream = "deadbeef";
 	$datastream = curl_exec ($ch); /// execute the curl session and return the output to a variable $datastream
 	$datastream = str_replace(" standalone=\"yes\"","",$datastream);
