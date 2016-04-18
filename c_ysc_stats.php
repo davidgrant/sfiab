@@ -111,7 +111,7 @@ case 'send':
 //	print_r($_POST['xml']);
 			
 	$ch = curl_init(); /// initialize a cURL session
-	curl_setopt ($ch, CURLOPT_URL,"https://secure.ysf-fsj.ca/registration/xmlaffiliation.php");
+	curl_setopt ($ch, CURLOPT_URL,"https://secure.youthscience.ca/registration/xmlaffiliation.php");
 	curl_setopt ($ch, CURLOPT_HEADER, 0); /// Header control
 	curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET
 	curl_setopt ($ch, CURLOPT_POSTFIELDS, "xml=".$xml);  /// put the query string here starting with "?"
