@@ -120,6 +120,7 @@ case 'send':
 	curl_setopt ($ch, CURLOPT_TIMEOUT, 360);
 	curl_setopt ($ch, CURLOPT_SSLVERSION, 3);
 	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, false);
 //	$datastream = "deadbeef";
 	$datastream = curl_exec ($ch); /// execute the curl session and return the output to a variable $datastream
 	$datastream = str_replace(" standalone=\"yes\"","",$datastream);
