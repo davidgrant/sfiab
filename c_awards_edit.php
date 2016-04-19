@@ -50,6 +50,7 @@ case 'save_back':
 		$a['feeder_fair_ids'] = array();
 		post_array($a['feeder_fair_ids'], 'feeder_fair_ids', $fairs);
 		post_bool($a['upstream_register_winners'], 'upstream_register_winners');
+		post_bool($a['cwsf_award'],'cwsf_award');
 	}
 
 	post_bool($a['include_in_script'],'include_in_script');
@@ -265,6 +266,7 @@ function print_prize_div($form_id, &$p, $show)
 
 	form_yesno($form_id, 'schedule_judges', 'Schedule Judges', $a);
 	form_yesno($form_id, 'include_in_script', 'Include in Ceremony Script', $a);
+	form_yesno($form_id, 'cwsf_award', 'CWSF Award (winners go on to the CWSF)', $a);
 	form_text($form_id, 'presenter', "Presenter", $a);
 	form_submit($form_id, 'save', 'Save Award and Prize(s)', 'Award and Prize(s) Saved');
 	form_submit($form_id, 'save_back', 'Save Award and Prize(s) and Go Back', 'Save Award and Prize(s) and Go Back');
