@@ -397,6 +397,7 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			      's_mentor' => array('Mentor Info', 's_mentor.php'),
 			      's_awards' => array('Award Selection', 's_awards.php'),
 			      's_signature' => array('Signature Form', 's_signature.php'),
+			      's_payment' => array('Payment', 's_payment.php'),
 			      );
 	if(!$config['tours_enable']) {
 		unset($student_menu['s_tours']);
@@ -818,6 +819,39 @@ function cms_get($mysqli, $name, &$u = NULL)
 		return $r;
 	}
 	return NULL;
+}
+
+
+function compute_per_user_reg_fee($mysqli, &$p, &$users)
+{
+	global $config;
+	/* Return an array indexed by uid, each item is an array with the per-user regfee items and total */
+	$ret = array();
+	$ret['total'] = 0;
+	foreach($users as &$u) {
+		$ret[$u['uid']] = array();
+
+		$subtotal = 0;
+		$ret[$u['uid']][0] = array( 'id' => 'Registration Fee',
+				'text' => "Fair Registration (per student)",
+				'base' => $config['regfee'],
+				'num' => 1,
+				'ext' => $config['regfee']);
+
+		$subtotal += $config['regfee'];
+		if($u['tshirt'] != 'none' && $config['tshirt_enable']) {
+			$tsc = floatval($config['tshirt_cost']);		
+			$ret[$u['uid']][1] = array( 'id' => 'T-Shirt',
+						'text' => "T-Shirt",
+						'base' => $tsc,
+						'num' => 1,
+						'ext' => $tsc);
+			$subtotal += $tsc;
+		}
+		$ret[$u['uid']]['subtotal'] = $subtotal;
+		$ret['total'] += $subtotal;
+	}
+	return $ret;
 }
 
 function compute_registration_fee($mysqli, &$p, &$users)
