@@ -145,14 +145,8 @@ foreach($projects as &$p) {
 	}
 
 	$filter_text = "{$p['pid']} {$p['title']}";
-	$accepted = $p['students'][0]['s_accepted'] ? true : false;
-	$paid = $p['students'][0]['s_paid'] ? true : false;
 	foreach($p['students'] as &$s) {
 		$filter_text .= " {$s['name']} {$s['school']}";
-		if($accepted != $s['s_accepted'])
-			$accepted = false;
-		if($paid != $s['s_paid'])
-			$paid = false;
 
 	}
 

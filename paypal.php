@@ -12,6 +12,11 @@ $u = user_load($mysqli);
 if(array_key_exists('checkout', $_POST)) {
 	/* First entry, construct the fees to be sent */
 
+	if(!array_key_exists('payfor', $_POST)) {
+		/* User hit pay without selecting any boxes */
+		exit();
+	}
+
 	/* Load fees from $u */
 	$fees = array();
 

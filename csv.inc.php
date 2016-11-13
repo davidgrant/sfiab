@@ -45,7 +45,6 @@ class csv
 		$table_cols = count($table['fields']);
 		$first = true;
 		foreach($table['fields'] as $f) {
-			$col = $table['col'][$f];
 			if(!$first) $this->csvdata.=$this->str_separator;
 			$this->csvdata .= '"'.$table['header'][$f].'"';
 			$first = false;
@@ -55,8 +54,6 @@ class csv
 		foreach($table['data'] as $row) {
 			$first = true;
 			foreach($table['fields'] as $f) {
-				$col = $table['col'][$f];
-
 				$d = addslashes($row[$f]);
 
 				if(!$first) $this->csvdata.=$this->str_separator;

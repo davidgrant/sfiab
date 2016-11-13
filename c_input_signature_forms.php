@@ -38,7 +38,6 @@ case 'c':
 
 			foreach($p['students'] as &$u) {
 				$u['s_accepted'] = 1;
-				$u['s_paid'] = 1;
 				user_save($mysqli, $u);
 			}
 			form_ajax_response(0);
@@ -63,7 +62,6 @@ case 'i':
 		foreach($p['students'] as &$u) {
 			/* User must be "complete" */
 			$u['s_accepted'] = 0;
-			$u['s_paid'] = 0;
 			user_save($mysqli, $u);
 		}
 		form_ajax_response(0);
@@ -218,6 +216,17 @@ sfiab_page_begin($u, "Input Signature Forms", $page_id, $help);
 
 $projects = l_projects_load_all($mysqli, $config['year']);
 
+$q = $mysqli->query("SELECT * FROM payments WHERE year='{$config['year']}' ORDER BY order_time");
+$payments_by_user = array();
+while( ($r = $q->fetch_assoc()) ) {
+	if(!array_key_exists($r['uid'], $payments_by_user)) {
+		$payments_by_user[$r['uid']] = array();
+	}
+
+	$payments_by_user[$r['uid']][] = $r;
+}
+
+
 
 foreach($projects as $pid=>&$p) {
 	if($p['s_complete'] == false) continue;
@@ -231,10 +240,26 @@ foreach($projects as $pid=>&$p) {
 			$accepted = false;
 		if($paid != $s['s_paid'])
 			$paid = false;
+	}
 
+	$total_paid = 0;
+	$payments = array();
+	foreach($p['students'] as &$s) {
+		if(!array_key_exists($s['uid'], $payments_by_user)) continue;
+		foreach($payments_by_user[$s['uid']] as $r) {
+			$total_paid += $r['amount'];
+			$payments[] = $r;
+		}
 	}
 
 	list($regfee, $regitems) = compute_registration_fee($mysqli, $p, $p['students']);
+
+	$paid_colour = 'red';
+	if($total_paid == $regfee ) {
+		$paid_colour = 'green';
+	} else if($total_paid > $regfee) {
+		$paid_colour = 'blue';
+	}
 	
 ?>
 	<li id="received_form_<?=$p['pid']?>" data-filtertext="<?=$filter_text?>">
@@ -260,8 +285,18 @@ foreach($projects as $pid=>&$p) {
 				} ?>
 				</table>
 				<br/>
-				<b>Registration Fee: $<?=$regfee?></b><br/>
-<?php				/* CHeck for ethics */
+				<b>Registration Fee: $<font color=<?=$paid_colour?>><?=$regfee?></font></b><br/>
+<?php				/* Check for payments */
+				if($config['paypal_enable']) { ?>
+					<table>
+<?php					foreach($payments as $r) { ?>
+						<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>PayPal on </td><td><?=$r['order_time']?>: </td><td>$<?=sprintf("%.02f", $r['amount'])?></td><td>(<?=$r['transaction_id']?>)</td></tr>
+<?php					} ?>
+					</table>
+<?php				}
+
+
+				/* CHeck for ethics */
 				if($p['ethics']['human1'] != 0 || $p['ethics']['animals'] != 0) {
 					/* Needs ethics */
 					if(!$p['ethics_approved']) {
@@ -272,7 +307,7 @@ foreach($projects as $pid=>&$p) {
 
 			</div>
 			<div class="ui-block-b" style="width:20%">
-<?php				if($accepted && $paid) {
+<?php				if($accepted) {
 					$mark_as_complete_style = 'style="display:none;"';
 					$mark_as_incomplete_style = '';
 				} else {
