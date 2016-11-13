@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `time` datetime NOT NULL,
   `items` text NOT NULL,
   `notes` text NOT NULL,
+  `year` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 

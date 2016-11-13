@@ -190,7 +190,18 @@ $timeslots = timeslots_load_rounds($mysqli);
 			<a href="report_signatures.php" data-ajax="false" data-role="button">All Electronic Signatures</a>
 		</td></tr></table>
 		<br/>
-<?php	} ?>		
+<?php	} ?>
+<?php	if($config['paypal_enable']) { ?>
+		<h3>PayPal Payments</h3>
+
+		<table>
+		<tr><td>Payments: </td>
+		<td>
+			<div data-role="controlgroup" data-type="horizontal">
+			<a href="report_payments.php" data-ajax="false" data-role="button">Payments CSV</a>
+		</td></tr></table>
+		<br/>
+<?php	} ?>
 
 	<h3>Edit Reports</h3>
 	<ul data-role="listview" data-inset="true">
