@@ -27,6 +27,7 @@ function paypal_build_fees_data($fees)
 
 function paypal_set_express_checkout($fees)
 {
+	global $config;
 	/* 1. Build a set of fees, start an express checkout
 	   2. Paypal responds with a token.
 	   3. Redirect the webpage to paypal and pass paypal back the token 
@@ -38,8 +39,8 @@ function paypal_set_express_checkout($fees)
 	$data = paypal_build_fees_data($fees);
 	$data += array(	
 			'L_BILLINGAGREEMENTDESCRIPTION0' => 'Agreement',
-			'CANCELURL' => 'http://muon/sfiab/s_payment.php',
-			'RETURNURL' => 'http://muon/sfiab/paypal.php',
+			'CANCELURL' => $config['fair_url'].'/s_payment.php',
+			'RETURNURL' => $config['fair_url'].'/paypal.php',
 			    );
 
 	/* Save the fees for do_express_checkout */
@@ -52,7 +53,8 @@ function paypal_set_express_checkout($fees)
 		        'cmd'    => '_express-checkout',
 		        'token'  => $res['TOKEN'],
    		 );
-		$redirectURL = sprintf('https://www.sandbox.paypal.com/cgi-bin/webscr?%s', http_build_query($query));
+		$sandbox = $config['paypal_sandbox'] ? 'sandbox.' : '';
+		$redirectURL = sprintf('https://www.'.$sandbox.'paypal.com/cgi-bin/webscr?%s', http_build_query($query));
 		header('Location: ' . $redirectURL);
 	} else {
 		print("Paypal query failed: {$res['L_LONGMESSAGE0']}.  No payment processed.");
