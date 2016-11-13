@@ -27,7 +27,7 @@ $tshirt_sizes = array('none' => 'None',
 			'large' => 'Large',
 			'xlarge' => 'X-Large' );
 
-$pages_disabled_in_preregistration = array ('s_tours', 's_awards','s_signature' );
+$pages_disabled_in_preregistration = array ('s_tours', 's_awards','s_signature', 's_payment' );
 
 $signature_types = array('student' => 'Exhibitor', 'parent' => 'Parent/Guardian', 'teacher'=>'Teacher', 'ethics'=>'Supervisor');
 
