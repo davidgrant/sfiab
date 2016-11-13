@@ -1,7 +1,7 @@
 <?php
 require_once('project.inc.php');
 require_once('timeslots.inc.php');
-
+require_once('debug.inc.php');
 $incomplete_errors = array();
 
 function incomplete_user_fields($mysqli, $required_fields, &$u)
@@ -87,7 +87,7 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 
 	$ret = array();
 
-	if($u['uid'] == $_SESSION['uid'] && array_key_exists($section, $_SESSION['incomplete']) && !$force_update) {
+	if($mysqli !== NULL && $u['uid'] == $_SESSION['uid'] && array_key_exists($section, $_SESSION['incomplete']) && !$force_update) {
 	   	$ret_list = array_merge($ret_list, $_SESSION['incomplete'][$section]);
 		return count($_SESSION['incomplete'][$section]);
 	}
@@ -212,7 +212,14 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		break;
 
 	case 's_ethics':
-		$p = project_load($mysqli, $u['s_pid']);
+		/* In pre-reg non-logged in mode, just take $u as the project,
+		 * and work based on that.  Don't do any db queries.
+		 * This only happens for ethics and safety */
+		if($mysqli == NULL) {
+			$p = $u;
+		} else {
+			$p = project_load($mysqli, $u['s_pid']);
+		}
 		$e = $p['ethics'];
 
 		incomplete_check_bool($ret, $e, array('human1', 'animals', 'agree'));
@@ -238,7 +245,14 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		}
 		break;
 	case 's_safety':
-		$p = project_load($mysqli, $u['s_pid']);
+		/* In pre-reg non-logged in mode, just take $u as the project,
+		 * and work based on that.  Don't do any db queries 
+		 * This only happens for ethics and safety */
+		if($mysqli == NULL) {
+			$p = $u;
+		} else {
+			$p = project_load($mysqli, $u['s_pid']);
+		}
 		$e = $p['safety'];
 
 		incomplete_check_bool($ret, $e, array('bio1','hazmat1','mech1','institution','display1','display2','display3', 'agree'));
@@ -373,8 +387,10 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 	}
 
 	/* Save for later */
-	if($u['uid'] == $_SESSION['uid']) {
-		$_SESSION['incomplete'][$section] = $ret;
+	if($mysqli !== NULL) {
+		if($u['uid'] == $_SESSION['uid']) {
+			$_SESSION['incomplete'][$section] = $ret;
+		}
 	}
    	$ret_list = array_merge($ret_list, $ret);
 	return count($ret);

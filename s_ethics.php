@@ -5,57 +5,69 @@ require_once('user.inc.php');
 require_once('incomplete.inc.php');
 
 
+$a = array('human1', 'humansurvey1', 'humantest1', 
+		'humanfood1', 'humanfood2', 'humanfood6', 'humanfood5', 'humanfood4', 'humanfood3', 
+		'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2', 
+		'animals', 'animal_vertebrate', 'animal_ceph', 'animal_tissue', 'animal_drug', 'agree' );
+
 $mysqli = sfiab_init(NULL);
 
 $logged_in = false;
 if(sfiab_logged_in()) {
 	sfiab_check_access($mysqli, array('student'), false);
 	$logged_in = true;
-}
 
-$page_id = 's_ethics';
-
-if($logged_in) {
 	$u = user_load($mysqli);
 	$p = project_load($mysqli, $u['s_pid']);
 	$closed = sfiab_registration_is_closed($u);
-
-	$action = '';
-	if(array_key_exists('action', $_POST)) {
-		$action = $_POST['action'];
-	}
-
-	switch($action) {
-	case 'save':
-		if($closed) exit();
-		$a = array('human1', 'humansurvey1', 'humantest1', 
-			'humanfood1', 'humanfood2', 'humanfood6', 'humanfood5', 'humanfood4', 'humanfood3', 
-			'humanfooddrug', 'humanfoodlow1', 'humanfoodlow2', 
-			'animals', 'animal_vertebrate', 'animal_ceph', 'animal_tissue', 'animal_drug', 'agree' );
-
-		foreach($a as $f) {
-			if(!array_key_exists($f, $_POST)) {
-				$p['ethics'][$f] = NULL;
-			} else {
-				post_bool($p['ethics'][$f], $f);
-			}
-		}
-		project_save($mysqli, $p);
-
-		incomplete_check($mysqli, $ret, $u, $page_id, true);
-		break;
-	}
-
-	incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
 } else {
-	/* In not-logged-in mode, dont' show anything as incomplete, and
-	 * definitley don't do any database queries (except loading config) */
+	/* Not logged in, create a fake project with ethics so we can save this page */
 	$u = NULL;
-	$p = NULL;
 	$closed = false;
-	$incomplete_fields = array();
+	$p = array(
+		'ethics' => array()
+	);
+	foreach($a as $a_type) {
+		$p['ethics'][$a_type] = NULL;
+	}
 }
 
+
+
+$page_id = 's_ethics';
+
+
+$action = '';
+if(array_key_exists('action', $_POST)) {
+	$action = $_POST['action'];
+}
+
+switch($action) {
+case 'save':
+	if($closed) exit();
+
+	foreach($a as $f) {
+		if(!array_key_exists($f, $_POST)) {
+			$p['ethics'][$f] = NULL;
+		} else {
+			post_bool($p['ethics'][$f], $f);
+		}
+	}
+
+	if($logged_in) {
+		/* Only save to the db if the user is logged in, else just keep the fake project around */
+		project_save($mysqli, $p);
+		incomplete_check($mysqli, $ret, $u, $page_id, true);
+	}
+	break;
+}
+
+$incomplete_fields = array();
+if($logged_in) {
+	incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
+} else {
+	incomplete_fields_check(NULL, $incomplete_fields, $page_id, $p);
+}
 
 
 $help = '<p>Please complete all the questions on this page about ethics';

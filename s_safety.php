@@ -4,11 +4,39 @@ require_once('form.inc.php');
 require_once('user.inc.php');
 require_once('incomplete.inc.php');
 
-$mysqli = sfiab_init('student');
+$a = array('display1', 'display2', 'display3',
+			'institution',
+			'electrical1', 'electrical2', 'electrical3', 'electrical4',
+			'animals1', 'animals2', 'animals3',
+			'bio1', "bio2", "bio3", "bio4", "bio5", "bio6",
+			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
+			'food1', "food2", "food3", "food4", "food5",
+			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7',
+			'agree');
 
-$u = user_load($mysqli);
-$p = project_load($mysqli, $u['s_pid']);
-$closed = sfiab_registration_is_closed($u);
+$mysqli = sfiab_init(NULL);
+
+$logged_in = false;
+if(sfiab_logged_in()) {
+	sfiab_check_access($mysqli, array('student'), false);
+	$logged_in = true;
+
+	$u = user_load($mysqli);
+	$p = project_load($mysqli, $u['s_pid']);
+	$closed = sfiab_registration_is_closed($u);
+
+} else {
+	/* Not logged in, create a fake project with ethics so we can save this page */
+	$u = NULL;
+	$closed = false;
+	$p = array(
+		'ethics' => array()
+	);
+	foreach($a as $a_type) {
+		$p['safety'][$a_type] = NULL;
+	}
+}
+
 
 $page_id = 's_safety';
 
@@ -20,15 +48,6 @@ if(array_key_exists('action', $_POST)) {
 switch($action) {
 case 'save':
 	if($closed) exit();
-	$a = array('display1', 'display2', 'display3',
-			'institution',
-			'electrical1', 'electrical2', 'electrical3', 'electrical4',
-			'animals1', 'animals2', 'animals3',
-			'bio1', "bio2", "bio3", "bio4", "bio5", "bio6",
-			'hazmat1', "hazmat2", "hazmat3", "hazmat4", "hazmat5",
-			'food1', "food2", "food3", "food4", "food5",
-			'mech1', "mech2", "mech3", "mech4", "mech5", "mech6", 'mech7',
-			'agree');
 
 	foreach($a as $f) {
 		if(!array_key_exists($f, $_POST)) {
@@ -37,14 +56,20 @@ case 'save':
 			post_bool($p['safety'][$f], $f);
 		}
 	}
-	project_save($mysqli, $p);
-
-	incomplete_check($mysqli, $ret, $u, $page_id, true);
+	if($logged_in) {
+		project_save($mysqli, $p);
+		incomplete_check($mysqli, $ret, $u, $page_id, true);
+	}
 	break;
 }
 
 
-incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
+$incomplete_fields = array();
+if($logged_in) {
+	incomplete_check($mysqli, $incomplete_fields, $u, $page_id);
+} else {
+	incomplete_fields_check(NULL, $incomplete_fields, $page_id, $p);
+}
 
 $help = '<p>Please complete all the questions on this page about safety';
 
