@@ -470,6 +470,11 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			    'login' => array('Login', 'index.php#login'),
 		);
 
+	$prescreen_menu = array('s_ethics' => array('Ethics Intractive Flowchart', 's_ethics.php'),
+				's_safety' => array('Safety Interactive Flowchart', 's_safety.php'),
+		);
+		
+
 	$account_menu = array('a_change_password' => array('Change Password', 'a_change_password.php'),
 			      'a_delete_account' => array('Delete Account', 'a_delete_account.php'),
 		);
@@ -539,6 +544,12 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 	}
 ?>
 	</ul>
+
+<?php	if(!sfiab_logged_in()) { ?>
+		<ul data-role="listview" data-inset="true" class="jqm-list ui-alt-icon ui-nodisc-icon">
+<?php		sfiab_print_left_nav_menu_entries($u, $current_page_id, $prescreen_menu, true); ?>
+		</ul>
+<?php	} ?>
 	</div>
 	<script>
 //		.mobile.changePage( ".sfiab_page", { allowSamePageTransition:true } );
