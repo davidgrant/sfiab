@@ -21,6 +21,7 @@ function paypal_build_fees_data($fees)
 			'PAYMENTREQUEST_0_ITEMAMT' => $total,
 			'PAYMENTREQUEST_0_TAXAMT' => 0,
 			'NOSHIPPING' => '1');
+	debug("Paypal build fees:".print_r($data, true)."\n");
 	return $data;
 }
 
@@ -187,112 +188,148 @@ function paypal_get_transaction_details($token)
 		}
 	}
 	return $res;
-		/* Array (
-			    [TOKEN] => EC-5XN21764CV239260F
-			    [BILLINGAGREEMENTACCEPTEDSTATUS] => 0
-			    [CHECKOUTSTATUS] => PaymentActionCompleted
-			    [TIMESTAMP] => 2016-10-30T17:26:09Z
-			    [CORRELATIONID] => 79c04a9867fc4
-			    [ACK] => Success
-			    [VERSION] => 124.0
-			    [BUILD] => 26593028
-			    [EMAIL] => dave@gvrsf.ca
-			    [PAYERID] => XPBM2CUQU8VDA
-			    [PAYERSTATUS] => unverified
-			    [FIRSTNAME] => David
-			    [LASTNAME] => Grant
-			    [COUNTRYCODE] => CA
-			    [ADDRESSSTATUS] => Confirmed
-			    [CURRENCYCODE] => CAD
-			    [AMT] => 55.00
-			    [ITEMAMT] => 55.00
-			    [SHIPPINGAMT] => 0.00
-			    [HANDLINGAMT] => 0.00
-			    [TAXAMT] => 0.00
-			    [INSURANCEAMT] => 0.00
-			    [SHIPDISCAMT] => 0.00
-			    [TRANSACTIONID] => 50F78584TP014673W
-			    [INSURANCEOPTIONOFFERED] => false
-			    [L_NAME0] => Registration
-			    [L_QTY0] => 1
-			    [L_TAXAMT0] => 0.00
-			    [L_AMT0] => 55.00
-			    [L_DESC0] => Registration Fee
-			    [PAYMENTREQUEST_0_CURRENCYCODE] => CAD
-			    [PAYMENTREQUEST_0_AMT] => 55.00
-			    [PAYMENTREQUEST_0_ITEMAMT] => 55.00
-			    [PAYMENTREQUEST_0_SHIPPINGAMT] => 0.00
-			    [PAYMENTREQUEST_0_HANDLINGAMT] => 0.00
-			    [PAYMENTREQUEST_0_TAXAMT] => 0.00
-			    [PAYMENTREQUEST_0_INSURANCEAMT] => 0.00
-			    [PAYMENTREQUEST_0_SHIPDISCAMT] => 0.00
-			    [PAYMENTREQUEST_0_TRANSACTIONID] => 50F78584TP014673W
-			    [PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID] => dave-facilitator@gvrsf.ca
-			    [PAYMENTREQUEST_0_INSURANCEOPTIONOFFERED] => false
-			    [PAYMENTREQUEST_0_SOFTDESCRIPTOR] => PAYPAL *TESTFACILIT
-			    [PAYMENTREQUEST_0_ADDRESSSTATUS] => Confirmed
-			    [L_PAYMENTREQUEST_0_NAME0] => Registration
-			    [L_PAYMENTREQUEST_0_QTY0] => 1
-			    [L_PAYMENTREQUEST_0_TAXAMT0] => 0.00
-			    [L_PAYMENTREQUEST_0_AMT0] => 55.00
-			    [L_PAYMENTREQUEST_0_DESC0] => Registration Fee
-			    [PAYMENTREQUESTINFO_0_TRANSACTIONID] => 50F78584TP014673W
-			    [PAYMENTREQUESTINFO_0_ERRORCODE] => 0
-			)
-		*/
+	
+}
+
+function paypal_get_oauth2_token()
+{
+	$res = paypal_api('POST', '/v1/oauth2/token', NULL, true);
+	/* {
+  "scope":"https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card https://api.paypal.com/v1/vault/credit-card/.*",
+  "access_token":"Access-Token",
+  "token_type":"Bearer",
+  "app_id":"APP-6XR95014SS315863X",
+  "expires_in":28800
+}	*/
+
+	/* Or an error:
+ Array
+(
+    [error] => unsupported_grant_type
+    [error_description] => Grant Type is NULL
+) */
+	if(array_key_exists('error', $res)) {
+		debug("paypal_get_oauth2_token failed: ".print_r($res, true)."\n");
+		return false;
+	}
+
+	$_SESSION['paypal_token'] = $res['access_token'];
+	$_SESSION['paypal_token_type'] = $res['token_type'];
+	debug("Set SESSION token to {$res['token_type']} {$res['access_token']}\n");
+	return true;
+}
+
+function paypal_get_or_create_experience_profile()
+{
+	global $config;
+	$ret = paypal_api('GET', '/v1/payment-experience/web-profiles');
+	/* Find the profile with our fair name */
+	foreach($ret as $p) {
+		if($p['name'] == $config['fair_name']) {
+			debug("Found existing experience id {$p['id']}\n");
+			return $p['id'];
+		}
+	}
+
+	/* Profile not found, create it */
+	return paypal_create_experience_profile();
 }
 
 
+function paypal_create_experience_profile()
+{
+	global $config;
+	$data = array(	'name' => $config['fair_name'],
+			'presentation' => array('brand_name' => 'GVRSF'),
+			'input_fields' => array('no_shipping' => 1,
+						'address_override' => 0),
+			);
+	$ret = paypal_api('POST', '/v1/payment-experience/web-profiles', $data);
+/* 	{
+	  "id": "XP-CP6S-W9DY-96H8-MVN2"
+	} */
+	if(!array_key_exists('id', $ret)) {
+		return NULL;
+	}
+	return $ret['id'];
+}
 
-function paypal_post($method, $post_data)
+function paypal_api($method, $api, $data = NULL, $auth = false)
 {
 	global $config;
 
-	$arr = array(
-	    	'METHOD' => $method,
-		'VERSION' => '124.0',
-		'LOCALECODE' => 'en_CA',
-		);
-	if($config['paypal_sandbox']) {
-		$arr += array( 	'USER' => $config['paypal_sandbox_user'],
-				'PWD' => $config['paypal_sandbox_pwd'],
-				'SIGNATURE' => $config['paypal_sandbox_signature']);
-	} else {
-		$arr += array( 	'USER' => $config['paypal_user'],
-				'PWD' => $config['paypal_pwd'],
-				'SIGNATURE' => $config['paypal_signature']);
+	debug("paypal_api: $method : $api\n");
+
+	if(!isset($_SESSION['paypal_token']) && $auth == false) {
+		/* Try to get a token */
+		$res = paypal_get_oauth2_token();
+		if($res == false) return;
 	}
-	$arr += $post_data;		
+
+	$headers = array();
+	if($data === NULL) {
+		$data = array();
+	}
+
+	$paypal_url = $config['paypal_sandbox'] ? 'https://api.sandbox.paypal.com' : 'https://api.paypal.com';
+	$paypal_url .= $api;
 
 	$curl = curl_init();
 
-	$paypal_url = $config['paypal_sandbox'] ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api.paypal.com/nvp';
- 
+	if($auth) {
+		/* Auth uses different headers and non-json encoded post data */
+		$client_id = $config['paypal_sandbox'] ? $config['paypal_sandbox_client_id'] : $config['paypal_client_id'];
+		$secret = $config['paypal_sandbox'] ? $config['paypal_sandbox_secret'] : $config['paypal_secret'];
+
+		$data['grant_type'] = 'client_credentials';
+
+		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($curl, CURLOPT_USERPWD, $client_id.':'.$secret);
+		$headers[] = 'Accept: application/json';
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+	} else {
+		$token_type = $_SESSION['paypal_token_type'];
+		$token = $_SESSION['paypal_token'];
+		$headers[] = 'Content-Type: application/json';
+		$headers[] = "Authorization: $token_type $token";
+		switch($method) {
+		case 'POST':
+			curl_setopt($curl, CURLOPT_POST, true);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+			break;
+		case "PUT":
+			curl_setopt($curl, CURLOPT_PUT, 1);
+			break;
+		default:
+			if(count($data)) {
+				$paypal_url .= '?'.http_build_query($data);
+			}
+			break;
+		}
+        }
+
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($curl, CURLOPT_POST, true);
 	curl_setopt($curl, CURLOPT_URL, $paypal_url);
-	curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($arr));
-	debug("Curl send: ".print_r($arr, true)."\n");
- 	$res = curl_exec($curl);
-	debug("Curl response: ".print_r($res, true)."\n");
+	curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+	debug("Curl send $paypal_url: \n");
+	debug("Headers:".print_r($headers, true)."\nData:".print_r(json_encode($data), true)."\n");
+ 	$res = json_decode(curl_exec($curl), true);
+	$c_errno = curl_errno($curl);
+	$c_error = curl_error($curl);
+	debug("Curl response (error: $c_errno $c_error): ".print_r($res, true)."\n");
+
+	curl_close($curl);
 
 	if(!$res) {
 		/* Curl failed */
 		print("Failed to send anything to the PayPal server.  Payment not processed.");
 		exit();
 	}
-	curl_close($curl);
  
-	$response_array = array();
- 
-	if (preg_match_all('/(?<var>[^\=]+)\=(?<val>[^&]+)&?/', $res, $matches)) {
-    		foreach ($matches['var'] as $offset=>$var) {
-		        $data[$var] = urldecode($matches['val'][$offset]);
-		}
-	}
-	debug("Curl parsed response: ".print_r($data, true)."\n");
-	return $data;
+	return $res;
     
 }
 

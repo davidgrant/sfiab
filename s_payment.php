@@ -60,8 +60,7 @@ provided.
 
 
 <?php
-	form_begin($form_id, 'paypal.php', $closed, false);
-	form_hidden($form_id,  "checkout", "checkout");
+	form_begin($form_id, 'paypal.php/checkout', $closed, false);
 	$total = 0;
 ?>
 	<table width=90% border=1>
@@ -114,6 +113,8 @@ provided.
 		</td></tr>
 		
 <?php	} 
+
+
 	$display = ($total == 0) ? 'style="display:none;"' : '';
 ?>
 	</table>
@@ -126,8 +127,9 @@ provided.
 		<td width="30%"><b><span id="s_total">$<?=sprintf("%.02f", $total)?></span></b><td>
 		</tr>
 		<tr><td align=center <?=$display?> colspan=2>
-			<div id="s_payment_total_form">
+			<div id="paypal-button-35" method="post" action="paypal.php/checkout35">
 			</div>
+			<div id="paypal-button"></div>
 		</td></tr>
 		</table>
 	</td>
@@ -143,40 +145,63 @@ provided.
 
 </div></div>
 
+<?php
+
+unset($_SESSION['paypal_token']);
+unset($_SESSION['paypal_token_type']);
+
+$env = $config['paypal_sandbox'] ? 'sandbox' : 'production';
+
+?>
+<script src="https://www.paypalobjects.com/api/checkout.js" data-version-4></script>
+
 <script>
-	window.paypalCheckoutReady = function () {
-		paypal.checkout.setup('NJZ242JH9FYMA', { 
-			environment: 'sandbox',
-			buttons: [ {
-				container: 's_payment_total_form',
-				type: 'checkout',
-				  color: 'gold',
-			       size: 'medium',
-			       shape: 'pill'
-				} ]
-			}) };
+/*
+window.paypalCheckoutReady = function() {
+    paypal.checkout.setup('<?=$config['paypal_merchant_id']?>', {
+        environment: '<?=$env?>',
+        container: 'paypal-button-35'
+    });
+};
+*/
+paypal.Button.render({
+    
+        env: '<?=$env?>', // Specify 'sandbox' for the test environment
+        payment: function(resolve, reject) {
+			formdata = $("#<?=$form_id?>").serialize();
 
-
-	$( "#<?=$form_id?> :input" ).change(function(event) {
-		var total=0;
-<?php		for($i=0; $i<count($amounts); $i++) { ?>
-			if($("#check_<?=$i?>").is(":checked")) {
-				total += <?=$amounts[$i]?>;
-			}
-<?php		} ?>
-		$("#s_total").text("$"+total.toFixed(2));
-
-		if(total == 0) {
-			$("#s_payment_total_form").hide();
-		} else {
-			$("#s_payment_total_form").show();
+			paypal.request.post("<?=$config['fair_url']?>/paypal.php/checkout", { data: formdata} )
+		                .then(function(data) { resolve(data.paymentID); })
+                		.catch(function(err) { reject(err); });
+	        },
+        onAuthorize: function(data, actions) {
+            		paypal.request.post('//paypal.php/authorize', { paymentID: data.paymentID, payerID: data.payerID })
+		                .then(function(data) { /* Go to a success page */ })
+		                .catch(function(err) { /* Go to an error page  */ });
 		}
+}, '#paypal-button');
+
+
+
+$( "#<?=$form_id?> :input" ).change(function(event) {
+	var total=0;
+<?php	for($i=0; $i<count($amounts); $i++) { ?>
+		if($("#check_<?=$i?>").is(":checked")) {
+			total += <?=$amounts[$i]?>;
+		}
+<?php	} ?>
+	$("#s_total").text("$"+total.toFixed(2));
+
+	if(total == 0) {
+		$("#s_payment_total_form").hide();
+	} else {
+		$("#s_payment_total_form").show();
+	}
 		
-	});
+});
 			
 </script>
 
-<script src="//www.paypalobjects.com/api/checkout.js" async></script>
 	
 <?php
 sfiab_page_end();
