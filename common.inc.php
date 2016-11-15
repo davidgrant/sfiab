@@ -836,23 +836,26 @@ function cms_get($mysqli, $name, &$u = NULL)
 function compute_per_user_reg_fee($mysqli, &$p, &$users)
 {
 	global $config;
+	global $tshirt_sizes;
 	/* Return an array indexed by uid, each item is an array with the per-user regfee items and total */
 	$ret = array();
 	$ret['total'] = 0;
+	$item = 0;
 	foreach($users as &$u) {
 		$ret[$u['uid']] = array();
 
 		$subtotal = 0;
-		$ret[$u['uid']][0] = array( 'id' => 'Registration Fee',
+		$ret[$u['uid']][$item++] = array( 'id' => 'Registration Fee',
 				'text' => "Fair Registration (per student)",
 				'base' => $config['regfee'],
 				'num' => 1,
 				'ext' => $config['regfee']);
 
 		$subtotal += $config['regfee'];
-		if($u['tshirt'] != 'none' && $config['tshirt_enable']) {
+		/* Have they selected a valid tshirt and are tshirts enabled? */
+		if(array_key_exists($u['tshirt'], $tshirt_sizes) && $u['tshirt'] != 'none' && $config['tshirt_enable']) {
 			$tsc = floatval($config['tshirt_cost']);		
-			$ret[$u['uid']][1] = array( 'id' => 'T-Shirt',
+			$ret[$u['uid']][$item++] = array( 'id' => 'T-Shirt',
 						'text' => "T-Shirt",
 						'base' => $tsc,
 						'num' => 1,

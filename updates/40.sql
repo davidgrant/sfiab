@@ -23,12 +23,12 @@ CREATE TABLE IF NOT EXISTS `payments` (
 INSERT INTO `config` (`var`, `val`, `category`, `type`, `type_values`, `order`, `name`, `description`) VALUES 
 	('paypal_enable', '0', 'PayPal', 'yesno', '', '10', 'Enable PayPal', 'Enable the PayPal payment processing module'),
 	('paypal_sandbox', '0', 'PayPal', 'yesno', '', '20', 'Enable PayPal Sandbox Mode', 'In Sandbox mode, no payments are processed'),
-	('paypal_merchant_id', '', 'PayPal', 'text', '', '30', 'PayPal Marchant ID', 'Paypal Merchant ID'),
-	('paypal_user', '', 'PayPal', 'text', '', '40', 'PayPal USER', 'Paypal API username (NOT your paypal login!)'),
-	('paypal_pwd', '', 'PayPal', 'text', '', '50', 'PayPal PWD', 'Paypal API password  (NOT your paypal password!)'),
-	('paypal_signature', '', 'PayPal', 'text', '', '60', 'PayPal SIGNATURE', 'Paypal API Signature'),
-	('paypal_sandbox_user', '', 'PayPal', 'text', '', '70', 'PayPal USER', 'Paypal Sandbox API username (NOT your paypal login!)'),
-	('paypal_sandbox_pwd', '', 'PayPal', 'text', '', '80', 'PayPal PWD', 'Paypal Sandbox API password  (NOT your paypal password!)'),
-	('paypal_sandbox_signature', '', 'PayPal', 'text', '', '90', 'PayPal SIGNATURE', 'Paypal Sandbox API Signature');
+	('paypal_merchant_id', '', 'PayPal', 'text', '', '30', 'PayPal Merchant ID', 'Paypal Merchant ID'),
+	('paypal_account', '', 'PayPal', 'text', '', '40', 'PayPal REST API Account', 'Paypal REST API Account (NOT your paypal login!).  See https://developer.paypal.com/developer/applications and the REST API apps section'),
+	('paypal_client_id', '', 'PayPal', 'text', '', '50', 'PayPal REST API ClientID', 'Paypal REST API ClientID'),
+	('paypal_secret', '', 'PayPal', 'text', '', '60', 'PayPal REST API Secret', 'Paypal REST API Secret'),
+	('paypal_sandbox_acount', '', 'PayPal', 'text', '', '70', 'PayPal Sandbox REST API Secret', 'Paypal Sandbox REST API Account (NOT your paypal login!)'),
+	('paypal_sandbox_client_id', '', 'PayPal', 'text', '', '80', 'PayPal Sandbox REST API Secret', 'Paypal Sandbox REST API ClientID'),
+	('paypal_sandbox_secret', '', 'PayPal', 'text', '', '90', 'PayPal Sandbox REST API Secret', 'Paypal Sandbox REST API Secret');
 
 ALTER TABLE `users` CHANGE `s_paid` `s_paid` INT NOT NULL DEFAULT '0';
