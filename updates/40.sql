@@ -1,24 +1,26 @@
 CREATE TABLE IF NOT EXISTS `payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `method` enum('cash','cheque','paypal') NOT NULL,
-  `payer_firstname` tinytext NOT NULL,
-  `payer_lastname` tinytext NOT NULL,
-  `payer_email` tinytext NOT NULL,
-  `payer_country` varchar(8) NOT NULL,
-  `amount` float NOT NULL,
-  `fees` float NOT NULL,
-  `token` varchar(32) NOT NULL,
-  `transaction_id` varchar(32) NOT NULL,
-  `receipt_id` varchar(32) NOT NULL,
-  `status` ENUM( 'success', 'pending', 'failed' ) NOT NULL,
-  `order_time` datetime NOT NULL,
-  `time` datetime NOT NULL,
-  `items` text NOT NULL,
-  `notes` text NOT NULL,
+  `uid` int(11) DEFAULT NULL,
+  `method` enum('cash','cheque','paypal') DEFAULT NULL,
+  `payer_firstname` tinytext,
+  `payer_lastname` tinytext,
+  `payer_email` tinytext,
+  `payer_country` varchar(8) DEFAULT NULL,
+  `amount` float DEFAULT NULL,
+  `token` varchar(32) DEFAULT NULL,
+  `transaction_id` varchar(32) DEFAULT NULL,
+  `receipt_id` varchar(32) DEFAULT NULL,
+  `status` enum('created','completed','pending','failed','cancelled') DEFAULT NULL,
+  `created_time` datetime DEFAULT NULL,
+  `completed_time` datetime DEFAULT NULL,
+  `fees` float DEFAULT NULL,
+  `items` text,
+  `notes` text,
   `year` int(11) NOT NULL,
+  `payfor_uids` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
 
 INSERT INTO `config` (`var`, `val`, `category`, `type`, `type_values`, `order`, `name`, `description`) VALUES 
 	('paypal_enable', '0', 'PayPal', 'yesno', '', '10', 'Enable PayPal', 'Enable the PayPal payment processing module'),

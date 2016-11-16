@@ -44,6 +44,10 @@ $form_id=$page_id.'_form';
 
 <div data-role="page" id="<?=$page_id?>"><div data-role="main" class="sfiab_page" > 
 
+<?php
+sfiab_page_messages();
+?>
+
 <h3>Registration Fee Payment</h3>
 
 <p>Please select the student(s) to pay for below, then click on the PayPal
@@ -69,7 +73,7 @@ provided.
 
 		$confirm_code = '';
 		if($user['s_paid'] > 0) {
-			$q = $mysqli->query("SELECT transaction_id FROM payments WHERE id={$user['s_paid']}");
+			$q = $mysqli->query("SELECT receipt_id FROM payments WHERE id={$user['s_paid']}");
 			$r = $q->fetch_row();
 			$confirm_code = $r[0];
 		} ?>
@@ -95,7 +99,7 @@ provided.
 				if(!is_array($d)) continue; 
 				?>
 				<tr><td width="70%"><?=$d['text']?></td>
-				<td width="30%">$<?=sprintf("%.02f", $d['base'] * $d['num'])?></td>
+				<td align=center width="30%">$<?=sprintf("%.02f", $d['base'] * $d['num'])?></td>
 				</tr>
 <?php			} ?>
 			<tr>
@@ -104,7 +108,7 @@ provided.
 				<td></td>
 <?php			} else { ?>
 				<td align=right>Subtotal</td>
-				<td>$<?=sprintf("%.02f", $fee_data[$user['uid']]['subtotal'])?></td>
+				<td align=center >$<?=sprintf("%.02f", $fee_data[$user['uid']]['subtotal'])?></td>
 <?php			} ?>
 				
 			</tr>
@@ -124,12 +128,12 @@ provided.
 	<td width=90%>
 		<table width="100%" cellspacing="20">
 		<tr><td width="70%" align=right><b>Total</b></td>
-		<td width="30%"><b><span id="s_total">$<?=sprintf("%.02f", $total)?></span></b><td>
+		<td width="30%" align=center><b><span id="s_total">$<?=sprintf("%.02f", $total)?></span></b><td>
 		</tr>
-		<tr><td align=center <?=$display?> colspan=2>
-			<div id="paypal-button-35" method="post" action="paypal.php/checkout35">
-			</div>
-			<div id="paypal-button"></div>
+		<tr><td></td><td align=left  >
+			<form <?=$display?> id="paypal-button-35" method="post" action="paypal.php/checkout35">
+			</form>
+			<div <?=$display?> id="paypal-button"></div>
 		</td></tr>
 		</table>
 	</td>
@@ -165,22 +169,22 @@ window.paypalCheckoutReady = function() {
 };
 */
 paypal.Button.render({
-    
-        env: '<?=$env?>', // Specify 'sandbox' for the test environment
+        env: '<?=$env?>',
         payment: function(resolve, reject) {
 			formdata = $("#<?=$form_id?>").serialize();
-
-			paypal.request.post("<?=$config['fair_url']?>/paypal.php/checkout", { data: formdata} )
+			paypal.request.post("<?=$config['fair_url']?>/paypal.php/checkout", { data: formdata } )
 		                .then(function(data) { resolve(data.paymentID); })
                 		.catch(function(err) { reject(err); });
 	        },
         onAuthorize: function(data, actions) {
-            		paypal.request.post('//paypal.php/authorize', { paymentID: data.paymentID, payerID: data.payerID })
-		                .then(function(data) { /* Go to a success page */ })
-		                .catch(function(err) { /* Go to an error page  */ });
+            		paypal.request.post("<?=$config['fair_url']?>/paypal.php/authorize", { paymentID: data.paymentID, payerID: data.payerID })
+		                .then(function(data) { 
+					/* data is whatever paypal.php/authorize passes back */
+					window.location="s_payment.php";
+				})
+		                .catch(function(err) { window.location="s_payment.php"; });
 		}
 }, '#paypal-button');
-
 
 
 $( "#<?=$form_id?> :input" ).change(function(event) {
@@ -193,11 +197,10 @@ $( "#<?=$form_id?> :input" ).change(function(event) {
 	$("#s_total").text("$"+total.toFixed(2));
 
 	if(total == 0) {
-		$("#s_payment_total_form").hide();
+		$("#paypal-button").hide();
 	} else {
-		$("#s_payment_total_form").show();
+		$("#paypal-button").show();
 	}
-		
 });
 			
 </script>

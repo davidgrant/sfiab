@@ -637,6 +637,37 @@ function sfiab_page_begin(&$u, $title, $page_id="", $help="")
 	}
 }
 
+function sfiab_page_messages()
+{
+	if(array_key_exists('messages', $_SESSION)) {
+		foreach($_SESSION['messages'] as $m) {
+			$cl = '';
+			switch(substr($m, 0, 4)) {
+			case 'ERR ': $cl = 'error'; break;
+			case 'HAP ': $cl = 'happy'; break;
+			case 'INF ': $cl = 'info'; break;
+			}
+
+			if($cl == '') {
+				$cl = 'info';
+			} else {
+				$m = substr($m, 4);
+			} ?>
+			<div width=100% class="<?=$cl?>"><?=$m?></div>
+<?php
+		}
+	}
+	$_SESSION['messages'] = array();
+}
+
+function sfiab_message($text)
+{
+	if(!array_key_exists('messages', $_SESSION)) {
+		$_SESSION['messages'] = array();
+	}
+	$_SESSION['messages'][] = $text;
+}
+
 function sfiab_page_end()
 {
 	output_end();

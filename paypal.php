@@ -65,9 +65,13 @@ if($action == 'checkout') {
 	$transaction = array('amount' => array(),
 			     'item_list' => array('items' => array()));
 	$total = 0;
+	$uids = array();
 	foreach($users as &$user) {
-		$uid = $user['uid'];
+		$uid = (int)$user['uid'];
 		if(in_array($uid, $payfor_uids)) {
+			/* Build a uid array just in case there is any funniness in the passed in payfor_uids */
+			$uids[] = $uid;
+			/* Add all items for this uid */
 			foreach($fee_data[$uid] as $index=>$d) {
 				if(!is_array($d)) continue;
 				$item = array('quantity' => $d['num'],
@@ -90,10 +94,29 @@ if($action == 'checkout') {
 	$payment['transactions'][] = $transaction;
 
 	$res = paypal_api('POST', '/v1/payments/payment', $payment);
-/*
-   [id] => PAY-6B744200WW232480SLAUNSHY
-    [intent] => sale
-    [state] => created
+
+	if(!array_key_exists('state', $res) || $res['state'] != 'created') {
+		debug("ERROR: Return from /payment doesn't contain a state=created, aborted payment\n");
+		print(json_encode(array()));
+		exit();
+	}
+	/* Failed */
+	/* Record some details about this payment so we don't have to
+	 * use session or other variables to get info to the /execute */
+	$pay = payment_create($mysqli);
+	$pay['status'] = 'created';
+	$pay['transaction_id'] = $res['id'];
+	$pay['payfor_uids'] = $uids;
+	$pay['amount'] = sprintf("%.02f", $total);
+	$pay['uid'] = $u['uid'];
+	$pay['method'] = 'paypal';
+	$pay['created_time'] = date('Y-m-d H:i:s', time(NULL));
+	payment_save($mysqli, $pay);
+
+/*		 
+	[id] => PAY-6B744200WW232480SLAUNSHY
+	[intent] => sale
+	[state] => created
     [payer] => Array
         (
             [payment_method] => paypal
@@ -189,19 +212,108 @@ if($action == 'checkout') {
 
 if($action == 'cancel') {
 	/* User cancelled payment */
+	sfiab_message("INF Payment Cancelled");
 	header('Location: s_payment.php');
 	exit();
 }
 
-
 if($action == 'return') {
+	/* Final return URL I think */
+	header('Location: s_payment.php');
+	exit();
+}
+
+/* Paypal callback to let us know a payment is authorized, send an 
+ * execute to complete it */
+if($action == 'authorize') {
+	/* BIG NOTE: anyone who is logged in could post here with a random
+	 * payment ID and payerID, * we created a record of this payment in the
+	 * DB, look it up and make sure it's int he created state.
+	 * PayPal won't let it /execute unless the payer has authorized it, so
+	 * if someone does manage to guess the paymentID, paypal will reject it
+	 * below */
+
+	/* 3.5 
 	$payment_id = $_GET['paymentId'];
 	$token = $_GET['token'];
 	$payer_id = $_GET['PayerID'];
+	/*
 
+	/* 4.0 */
+	$payment_id = $_POST['paymentID'];
+	$payer_id = $_POST['payerID'];
+
+	/* FInd the payment by payment_id */
+	$pay = payment_load_by_transaction_id($mysqli, $payment_id);
+
+	if($pay == NULL) {
+		/* Not found */
+		exit();
+	}
+
+	$pay['completed_time'] = date('Y-m-d H:i:s', time(NULL));
 
 	$res = paypal_api('POST', "/v1/payments/payment/$payment_id/execute/", 
 				array('payer_id' => $payer_id));
+
+	if($res['state'] == 'approved') {
+		/* Find the sale response */
+		$sale = $res['transactions'][0]['related_resources'][0]['sale'];
+		$sale_state = $mysqli->real_escape_string($sale['state']);
+
+		$payer = $res['payer']['payer_info'];
+		$pay['payer_firstname'] = $payer['first_name'];
+		$pay['payer_lastname'] = $payer['last_name'];
+		$pay['payer_country'] = $payer['country_code'];
+		$pay['payer_email'] = $payer['email'];
+
+		if($sale_state == 'completed') {
+			/* Build a list of items from paypal and serialize them */
+			$pay['items'] = serialize($res['transactions'][0]['item_list']);
+			$pay['receipt_id'] = $sale['id'];
+			$pay['status'] = 'completed';
+
+			if((float)$sale['amount']['total'] != $pay['amount']) {
+				debug("executing payment, database pay={$pay['amount']}, but paypal returned {$sale['amount']['total']}\n");
+				exit();
+			}
+			if($pay['transaction_id'] != $sale['parent_payment']) {
+				debug("executing payment, database transaction_id={$pay['transaction_id']}, but paypal returned {$sale['parent_payment']}\n");
+				exit();
+			}
+			if($pay['uid'] != $u['uid']) {
+				debug("executing payment, database uid={$pay['uid']}, but page loaded {$u['uid']}\n");
+				exit();
+			}
+
+
+			$pay['fees'] = (float)$sale['transaction_fee']['value'];
+			$pay['notes'] =  $res['transactions'][0]['invoice_number'];
+
+
+			/* Set users to paid */
+			foreach($pay['payfor_uids'] as $uid) {
+				debug("Setting paid status for user {$uid} = {$pay['id']}\n");
+				$u = user_load($mysqli, $uid);
+				$u['s_paid'] = $pay['id'];
+				user_save($mysqli, $u);
+			}
+		} else {
+			/* state is not completed */
+			$pay['status'] = 'failed';
+		}
+	} else {
+		/* state is not completed */
+		$pay['status'] = 'failed';
+	}
+
+	payment_save($mysqli, $pay);
+
+	sfiab_message("HAP Payment Successful.  Your receipt ID is displayed below.");
+	$response = array('status' => 0);
+	print(json_encode($response));
+	exit();
+
 	/*
 
 Curl response: Array
