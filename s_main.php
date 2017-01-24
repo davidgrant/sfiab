@@ -44,7 +44,7 @@ function print_ethics_approval($mysqli, &$u)
 
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
-	<h4>Your registration ID is: <?=$u['s_pid']?></h4>
+	<h3>Your registration ID is: <?=$u['s_pid']?></h3>
 
 <?php	if(!$closed) {
 		/* Check for any incoming project requests */
