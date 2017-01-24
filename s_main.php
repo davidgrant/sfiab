@@ -44,6 +44,8 @@ function print_ethics_approval($mysqli, &$u)
 
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
+	<h4>Your registration ID is: <?=$u['s_pid']?></h4>
+
 <?php	if(!$closed) {
 		/* Check for any incoming project requests */
 		$q = $mysqli->query("SELECT * FROM partner_requests WHERE to_uid='{$u['uid']}'");
@@ -169,13 +171,6 @@ function print_ethics_approval($mysqli, &$u)
 	General inquires sent to: <?=mailto($config['email_chair'])?>. If you're not sure, send an
 	email to both, we're all friendly people.
 	</ul>
-
-	<p>A few things have changed in the registration system.  Most significantly:
-	<ul>
-	<li>You no longer need a registration ID.  You just need a username and a password.  Parents/Teachers: Multiple students can share the same email address now.
-	<li>For partner projects, each student needs a separate account now.  One student then invites the other to the project at which point the projects are linked (but the student information, emergency contact, and tour selection remains separate for each student).
-	</ul>
-
 
 </div></div>
 
