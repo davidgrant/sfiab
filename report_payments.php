@@ -14,12 +14,13 @@ sfiab_load_config($mysqli);
 $csv = new csv('sfiab_payments');
 
 $table = array(	'fields' => array(),
-		'header' => array(	'order_time' => 'Date',
+		'header' => array(	'completed_time' => 'Date',
 					'uid' => 'UserID',
 					's_pid' => 'ProjectID',
 					'amount' => 'Amount',
 					'fees' => 'Fees',
 					'transaction_id' => 'Confirmation',
+					'receipt_id' => 'Receipt',
 					'Method' => 'Method',
 					'payer_firstname' => 'Payer_Firstname',
 					'payer_lastname' => 'Payer_Lastname',
@@ -30,15 +31,16 @@ $table = array(	'fields' => array(),
 		);
 $table['fields'] = array_keys($table['header']);
 
-$q = $mysqli->query("SELECT * FROM payments WHERE year='{$config['year']}' ORDER BY order_time");
+$q = $mysqli->query("SELECT * FROM payments WHERE year='{$config['year']}' AND status='completed' ORDER BY completed_time");
 while( ($r = $q->fetch_assoc()) ) {
 	$u = user_load($mysqli, $r['uid']);
-	$table['data'][] = array(	'order_time' => $r['order_time'],
+	$table['data'][] = array(	'completed_time' => $r['completed_time'],
 					'uid' => $r['uid'],
 					's_pid' => $u['s_pid'],
 					'amount' => $r['amount'],
 					'fees' => $r['fees'],
 					'transaction_id' => $r['transaction_id'],
+					'receipt_id' => $r['receipt_id'],
 					'Method' => $r['method'],
 					'payer_firstname' => $r['payer_firstname'],
 					'payer_lastname' => $r['payer_lastname'],

@@ -114,7 +114,7 @@ if($action != NULL) {
 <div id="paypal-button"></div>
 
 
-<script src="https://www.paypalobjects.com/api/checkout.js" data-version-4></script>
+<script src="https://www.paypalobjects.com/api/checkout.js"></script>
 
 <script>
     paypal.Button.render({

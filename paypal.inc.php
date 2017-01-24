@@ -4,6 +4,8 @@ require_once('user.inc.php');
 require_once('filter.inc.php');
 require_once('project.inc.php');
 
+// http://www.getcreditcardnumbers.com/generated-credit-card-numbers
+
 function paypal_get_oauth2_token()
 {
 	$res = paypal_api('POST', '/v1/oauth2/token', NULL, true);
