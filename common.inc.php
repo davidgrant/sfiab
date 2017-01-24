@@ -397,11 +397,10 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			      's_mentor' => array('Mentor Info', 's_mentor.php'),
 			      's_awards' => array('Award Selection', 's_awards.php'),
 			      's_signature' => array('Signature Form', 's_signature.php'),
-			      's_payment' => array('Payment', 's_payment.php'),
+			      's_payment' => array('Registration Fee', 's_payment.php'),
 			      );
-	if(!$config['tours_enable']) {
-		unset($student_menu['s_tours']);
-	}
+	if(!$config['tours_enable']) unset($student_menu['s_tours']);
+	
 
 	$judge_menu = array('j_home' => array('Judge Home', 'j_main.php'),
 			    'j_personal' => array('Personal Info', 'j_personal.php'),

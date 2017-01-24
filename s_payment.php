@@ -50,12 +50,22 @@ sfiab_page_messages();
 
 <h3>Registration Fee Payment</h3>
 
+<?php if($config['paypal_enabled']) { ?>
+
 <p>Please select the student(s) to pay for below, then click on the PayPal
 button to begin the payment process.
 
 <p>Your payment details are not stored in our registration system.  All we
 store is a confirmation code from PayPal indicating whether payment was
 successful.
+
+<?php } else { ?>
+<p>The payment information is shown below.  Your Project Number is <b><font size=+2><?=$u['s_pid']?></font></b>.  Please include this number on the cheque.
+
+<p><?=cms_get($mysqli, 'sig_form_postamble', $u)?>
+
+<?php } ?>
+
 
 <p><b>Disclaimer:</b> Payment does not guarantee admission into the fair.
 We reserve the right to reject any project for any reason.  If we are
@@ -131,9 +141,11 @@ provided.
 		<td width="30%" align=center><b><span id="s_total">$<?=sprintf("%.02f", $total)?></span></b><td>
 		</tr>
 		<tr><td></td><td align=left  >
-			<form <?=$display?> id="paypal-button-35" method="post" action="paypal.php/checkout35">
-			</form>
-			<div <?=$display?> id="paypal-button"></div>
+<?php			if($config['paypal_enable']) {		
+				<form <?=$display?> id="paypal-button-35" method="post" action="paypal.php/checkout35">
+				</form>
+				<div <?=$display?> id="paypal-button"></div>
+<?php			} ?>				
 		</td></tr>
 		</table>
 	</td>
