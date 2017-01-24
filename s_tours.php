@@ -62,7 +62,17 @@ sfiab_page_begin($u, "Student Tour Selection", $page_id, $help);
 		</div></div>
 	
 <?php		sfiab_page_end();
+		exit();
 	}
+
+	if($config['tours_temporarily_disabled']) { ?>
+		<p>Tour selection is not available yet, please check back soon.  
+		</div></div>
+	
+<?php		sfiab_page_end();
+		exit();
+	}
+
 ?>
 
 

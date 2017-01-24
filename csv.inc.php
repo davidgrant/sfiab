@@ -28,7 +28,7 @@ class csv
 	var $str_newline;
 	var $page_subheader;
 
-	function csv($subheader,$sep=",",$nl="\r\n")
+	function __construct($subheader,$sep=",",$nl="\r\n")
 	{
 		$this->page_subheader=$subheader;
 		$this->str_separator = $sep;

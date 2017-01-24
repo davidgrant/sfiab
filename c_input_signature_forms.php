@@ -6,6 +6,7 @@ require_once('incomplete.inc.php');
 require_once('project.inc.php');
 require_once('filter.inc.php');
 require_once('project_number.inc.php');
+require_once('paypal.inc.php');
 
 $mysqli = sfiab_init('committee');
 
@@ -216,16 +217,14 @@ sfiab_page_begin($u, "Input Signature Forms", $page_id, $help);
 
 $projects = l_projects_load_all($mysqli, $config['year']);
 
-$q = $mysqli->query("SELECT * FROM payments WHERE year='{$config['year']}' ORDER BY order_time");
-$payments_by_user = array();
+$q = $mysqli->query("SELECT * FROM payments WHERE year='{$config['year']}' AND  `status`='completed' ORDER BY completed_time");
+$payment_for_user = array();
 while( ($r = $q->fetch_assoc()) ) {
-	if(!array_key_exists($r['uid'], $payments_by_user)) {
-		$payments_by_user[$r['uid']] = array();
+	$payment = payment_load($mysqli, 0, NULL, $r);
+	foreach($payment['payfor_uids'] as $uid) {
+		$payment_for_user[$uid] = $payment;
 	}
-
-	$payments_by_user[$r['uid']][] = $r;
 }
-
 
 
 foreach($projects as $pid=>&$p) {
@@ -243,23 +242,24 @@ foreach($projects as $pid=>&$p) {
 	}
 
 	$total_paid = 0;
-	$payments = array();
+	$all_paid = true;
 	foreach($p['students'] as &$s) {
-		if(!array_key_exists($s['uid'], $payments_by_user)) continue;
-		foreach($payments_by_user[$s['uid']] as $r) {
-			$total_paid += $r['amount'];
-			$payments[] = $r;
+		if(!array_key_exists($s['uid'], $payment_for_user)) {
+			$all_paid = false;
+			continue;
 		}
+		$total_paid = $payment_for_user[$s['uid']]['amount'];
 	}
 
 	list($regfee, $regitems) = compute_registration_fee($mysqli, $p, $p['students']);
 
-	$paid_colour = 'red';
-	if($total_paid == $regfee ) {
+	if($all_paid == false) {
+		$paid_colour = 'red';
+		$paid = "";
+	} else {
 		$paid_colour = 'green';
-	} else if($total_paid > $regfee) {
-		$paid_colour = 'blue';
-	}
+		$paid = ' (Paid)';
+	} 
 	
 ?>
 	<li id="received_form_<?=$p['pid']?>" data-filtertext="<?=$filter_text?>">
@@ -285,12 +285,18 @@ foreach($projects as $pid=>&$p) {
 				} ?>
 				</table>
 				<br/>
-				<b>Registration Fee: $<font color=<?=$paid_colour?>><?=$regfee?></font></b><br/>
+				<b>Registration Fee: $<font color=<?=$paid_colour?>><?=$regfee?></font></b><?=$paid?><br/>
 <?php				/* Check for payments */
 				if($config['paypal_enable']) { ?>
 					<table>
-<?php					foreach($payments as $r) { ?>
-						<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>PayPal on </td><td><?=$r['order_time']?>: </td><td>$<?=sprintf("%.02f", $r['amount'])?></td><td>(<?=$r['transaction_id']?>)</td></tr>
+<?php					foreach($p['students'] as &$s) {
+						if(!array_key_exists($s['uid'], $payment_for_user)) continue; 
+						$r = $payment_for_user[$s['uid']]; ?>
+
+						<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>PayPal on </td><td><?=$r['completed_time']?> for <?=$s['name']?>: </td>
+							<td>$<?=sprintf("%.02f", $r['amount'])?></td>
+							<td>(Transaction: <?=$r['transaction_id']?>, Receipt: <?=$r['receipt_id']?>)</td>
+						</tr>
 <?php					} ?>
 					</table>
 <?php				}
