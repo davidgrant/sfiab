@@ -60,9 +60,9 @@ store is a confirmation code from PayPal indicating whether payment was
 successful.
 
 <?php } else { ?>
-<p>The payment information is shown below.  Your Registration Number is <b><font size=+2><?=$u['s_pid']?></font></b>.  Please include this number on the cheque.
+<p>Your Registration Number is <b><font size=+2><?=$u['s_pid']?></font></b>.  
 
-<p><?=cms_get($mysqli, 'sig_form_postamble', $u)?>
+<p><?=cms_get($mysqli, 'student_payment_page', $u)?>
 
 <?php } ?>
 
@@ -71,7 +71,6 @@ successful.
 We reserve the right to reject any project for any reason.  If we are
 unfortunately unable to accommodate your project a full refund will be
 provided.
-
 
 <?php
 	form_begin($form_id, 'paypal.php/checkout', $closed, false);
