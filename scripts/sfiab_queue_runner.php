@@ -56,7 +56,7 @@ $mysqli->real_query("UPDATE config SET val='".time(NULL)."' WHERE var='queue_loc
 
 $q = $mysqli->prepare("SELECT `id`,`command`,`year`,`fair_id`,`award_id`,`prize_id`,`project_id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`additional_replace` 
 				FROM queue WHERE result='queued' LIMIT 1");
-$q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body`,`bodyhtml` FROM emails WHERE id = ?");
+$q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body`, FROM emails WHERE id = ?");
 //loop forever, but not really, it'll get break'd as soon as there's nothing left to send
 while(true) {
 
@@ -79,7 +79,7 @@ while(true) {
 		$q1->bind_param('i', $db_emails_id);
 		$q1->execute();
 		$q1->store_result();
-		$q1->bind_result($db_email_name, $db_email_from_name, $db_email_from_addr, $db_email_subject, $db_email_body, $db_email_body_html);
+		$q1->bind_result($db_email_name, $db_email_from_name, $db_email_from_addr, $db_email_subject, $db_email_body);
 
 		if($q->num_rows == 0) {
 			/* Email in queue, but the ID doesn't exist?  someone deleted it between sending an email and 
@@ -107,15 +107,10 @@ while(true) {
 		$subject = replace_vars($db_email_subject, $u, $rep);
 		$body = replace_vars($db_email_body, $u, $rep);
 //		$body = str_replace("\r", "", $body); /* Remove \r's */
-		if($db_email_body_html != '') {
-			$body_html = replace_vars($db_email_body_html, $u, $rep, true);
-		} else {
-			/* Turn the text body into HTML because some modern mailers (like Apple Mail) suck at text */
-			$body_html = htmlspecialchars($body);
-			$body_html = str_replace("\r", "", $body_html);
-			$body_html = str_replace("\n", "<br/>\n", $body_html);
-		}
-		
+		/* Turn the text body into HTML because some modern mailers (like Apple Mail) suck at text */
+		$body_html = htmlspecialchars($body);
+		$body_html = str_replace("\r", "", $body_html);
+		$body_html = str_replace("\n", "<br/>\n", $body_html);
 	
 		debug("   from: $from_name $from_addr\n");
 		$mail = new PHPMailer();
