@@ -56,7 +56,7 @@ $mysqli->real_query("UPDATE config SET val='".time(NULL)."' WHERE var='queue_loc
 
 $q = $mysqli->prepare("SELECT `id`,`command`,`year`,`fair_id`,`award_id`,`prize_id`,`project_id`,`emails_id`,`to_uid`,`to_name`,`to_email`,`additional_replace` 
 				FROM queue WHERE result='queued' LIMIT 1");
-$q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body`, FROM emails WHERE id = ?");
+$q1 = $mysqli->prepare("SELECT `name`,`from_name`,`from_email`,`subject`,`body` FROM emails WHERE id = ?");
 //loop forever, but not really, it'll get break'd as soon as there's nothing left to send
 while(true) {
 
