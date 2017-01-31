@@ -400,6 +400,7 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			      's_payment' => array('Registration Fee', 's_payment.php'),
 			      );
 	if(!$config['tours_enable']) unset($student_menu['s_tours']);
+	if(!$config['student_enable_award_selection']) unset($student_menu['s_awards']);
 	
 
 	$judge_menu = array('j_home' => array('Judge Home', 'j_main.php'),

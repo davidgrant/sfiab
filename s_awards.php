@@ -79,6 +79,15 @@ sfiab_page_begin($u, "Student Award Nomination", $page_id, $help);
 <?php
 	incomplete_check($mysqli, $fields, $u, $page_id);
 
+	if(!$config['student_enable_award_selection']) {
+		/* If they somehow get here, but it's disabled in the menu too */
+?>		<h3>Special Award Selection</h3>
+		<p>No Awards to select.
+		</div></div>
+<?php		sfiab_page_end();
+		exit();
+	}
+
 	if($p['cat_id'] <= 0) {
 		/* Category hasn't been selected yet */
 ?>
