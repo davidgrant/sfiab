@@ -280,6 +280,9 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 		break;
 
 	case 's_awards':
+		if(!$config['student_enable_award_selection']) {
+			break;
+		}
 		$p = project_load($mysqli, $u['s_pid']);
 		if(count($p['sa_nom']) == 0) {
 			$ret[] = 'award';

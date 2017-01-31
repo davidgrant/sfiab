@@ -36,7 +36,7 @@ case 'save':
 
 case 'del':
 	/* Delete tour */
-	$tid = (int)$_POST['tid'];
+	$tid = (int)$_POST['id'];
 	if($tid > 0) {
 		$mysqli->real_query("DELETE FROM tours WHERE id='$tid'");
 		form_ajax_response(0);
