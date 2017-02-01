@@ -1,6 +1,7 @@
 <?php
+require_once('common.inc.php');
 
-$mysqli = sfiab_init(array());
+$mysqli = sfiab_init(NULL);
 $year= $config['year'];
 
 $q = $mysqli->query("SELECT * FROM users WHERE 
