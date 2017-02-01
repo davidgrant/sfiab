@@ -1,10 +1,4 @@
 <?php
-require_once('common.inc.php');
-require_once('form.inc.php');
-require_once('user.inc.php');
-require_once('project.inc.php');
-require_once('filter.inc.php');
-require_once('committee/students.inc.php');
 
 $mysqli = sfiab_init(array());
 $year= $config['year'];
