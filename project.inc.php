@@ -62,6 +62,8 @@ function project_filter(&$p)
 	filter_bool($p['ethics_approved']);
 	filter_str_list($p['unavailable_timeslots']);
 	filter_int_list($p['sa_nom']);
+	filter_bool_or_null($p['cwsf_rsf_has_competed']);
+	filter_bool_or_null($p['cwsf_rsf_will_compete']);
 
 	if(!is_array($p['ethics'])) {
 		if($p['ethics'] == NULL) {

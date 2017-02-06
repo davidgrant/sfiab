@@ -524,6 +524,20 @@ $report_students_fields = array(
 		'table' => 'projects.isef_id',
 		'exec_function' => 'reports_students_isef_major'),
 
+	'project_other_rsf_has_competed' => array(		
+		'name' => 'Project -- Has competed at another RSF that selects projects for CWSF',
+		'header' => 'RSF Competed',
+		'width' => .5,
+		'table' => 'projects.cwsf_rsf_has_competed',
+		'value_map' => array (0 => 'No', 1 => 'Yes')),
+
+	'project_plan_to_compete_for_cwsf' => array(		
+		'name' => 'Project -- Plans to compete at another RSF that selects projects for CWSF',
+		'header' => 'RSF Competed',
+		'width' => .5,
+		'table' => 'projects.cwsf_rsf_will_compete',
+		'value_map' => array (0 => 'No', 1 => 'Yes')),
+
 	'school' =>  array(
 		'start_option_group' => 'School Information',
 		'name' => 'School -- Name',

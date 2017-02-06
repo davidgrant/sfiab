@@ -288,6 +288,15 @@ function incomplete_fields_check($mysqli, &$ret_list, $section, &$u, $force_upda
 			$ret[] = 'award';
 		}
 		break;
+
+	case 's_cwsf':
+		if(!$config['student_enable_cwsf_eligibility']) {
+			break;
+		}
+		$p = project_load($mysqli, $u['s_pid']);
+		incomplete_check_bool($ret, $p, array('cwsf_rsf_has_competed', 'cwsf_rsf_will_compete'));
+		break;
+
 	case 's_signature':
 		$users = user_load_all_for_project($mysqli, $u['s_pid']);
 		/* Each user needs to be complete */
