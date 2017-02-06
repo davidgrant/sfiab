@@ -396,11 +396,13 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			      's_safety' => array('Project Safety', 's_safety.php'),
 			      's_mentor' => array('Mentor Info', 's_mentor.php'),
 			      's_awards' => array('Award Selection', 's_awards.php'),
+			      's_cwsf' => array('Canada-Wide Eligibility', 's_cwsf.php'),
 			      's_signature' => array('Signature Form', 's_signature.php'),
 			      's_payment' => array('Registration Fee', 's_payment.php'),
 			      );
 	if(!$config['tours_enable']) unset($student_menu['s_tours']);
 	if(!$config['student_enable_award_selection']) unset($student_menu['s_awards']);
+	if(!$config['student_enable_cwsf_eligibility']) unset($student_menu['s_cwsf']);
 	
 
 	$judge_menu = array('j_home' => array('Judge Home', 'j_main.php'),
