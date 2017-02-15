@@ -177,6 +177,14 @@ case 'change_pw':
 	user_change_password($mysqli, $edit_u, $pw1);
 	form_ajax_response(0);
 	exit();
+case 'sig_del':
+	$key = $mysqli->real_escape_string($_POST['key']);
+	if(strlen($key) != 32) {
+		exit();
+	}
+	$mysqli->query("DELETE FROM signatures WHERE `key`='$key'");
+	form_ajax_response(array('status'=>0, 'location'=>"c_user_edit.php?uid=$edit_uid"));
+	exit();
 }
 
 
@@ -257,6 +265,64 @@ if(in_array('student', $edit_u['roles'])) { ?>
 	form_submit($form_id, 'psave', 'Save', 'Project Saved');
 	form_submit($form_id, 'psave_back', 'Save and Go Back', 'Project Saved');
 	form_end($form_id); 
+
+?>	<h3>Electronic Signatures</h3>
+
+	<table data-role="table" data-mode="none" class="table_stripes">
+	<tbody>
+<?php
+	/* Load electronic signatures */
+	$q = $mysqli->query("SELECT * FROM signatures WHERE uid='{$edit_u['uid']}'");
+	$sigs = array();
+	while($r = $q->fetch_assoc()) {
+		$sig = signature_load($mysqli, NULL, $r);
+		$sigs[$sig['type']] = $sig;
+	}
+	foreach(array('student','parent','teacher') as $sig_type) {
+		$sig_name = $signature_types[$sig_type];
+		if(array_key_exists($sig_type, $sigs)) {
+			$sig = $sigs[$sig_type];
+		} else {
+			$sig = NULL;
+		}
+
+		if($sig == NULL || $sig['date_sent'] == '0000-00-00 00:00:00') {
+			/* Doesn't exist */
+			$sent = 'Not Sent';
+			$status = 0;
+		} else if ($sig['date_signed'] != '0000-00-00 00:00:00') {
+			$sent = "Signed by {$sig['signed_name']} ({$sig['email']}) on ".date('F j, g:ia', strtotime($sig['date_signed']));
+			$status = 2;
+		} else {
+			/* Not signed yet */
+			$sent = "Sent to {$sig['name']} ({$sig['email']}) on ".date('F j, g:ia', strtotime($sig['date_sent']));
+			$status = 1;
+		}?>
+		<tr >
+		<td align="center"><?=$sig_name?></td>
+		<td align="center"><?=$sent?></td>
+		<td align="left">
+<?php 		if($status != 0) {
+			if($status == 1) { ?>
+				<span class="info" data-mini="true"  data-inline="true" data-role="button" data-theme="r" data-ajax="false">Waiting for Signature</span>
+<?php 			} else { /* Signed */?>
+				<span class="happy" data-mini="true"  data-inline="true" data-role="button" data-theme="g" data-ajax="false">Signature Received</span>
+<?php 			} 
+			$form_id = $page_id.'_sig_form_'.$sig_type;
+			form_begin($form_id, 'c_user_edit.php');
+			form_hidden($form_id, 'uid', $edit_u['uid']);
+			form_hidden($form_id, 'key', $sig['key']);
+			form_button($form_id, 'sig_del', 'Delete Signature', 'r', 'delete', 'Confirm, delete this signaure?');
+			form_end($form_id); 
+		} ?>
+		</td>
+		</tr>
+
+<?php	} ?>
+	</tbody>
+	</table>
+<?php
+
 }
 
 
