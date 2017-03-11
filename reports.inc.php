@@ -506,9 +506,18 @@ function report_save_field($mysqli, $report, $type)
 		}
 	}
 
-	foreach($report_options as $o=>$d) {
-		if(!array_key_exists($o, $report['option'])) {
-			$report['option'][$o] = $d['default'];
+	/* Sanitize options */
+	foreach($report_options as $option_name=>$option_data) {
+		/* If an option doesn't exist, set it to the default value */
+		if(!array_key_exists($option_name, $report['option'])) {
+			$report['option'][$option_name] = $option_data['default'];
+			continue;
+		}
+
+		/* If an option is incorrectly set, set it to the default value */
+		if(!array_key_exists($report['option'][$option_name], $option_data['values'])) {
+			$report['option'][$option_name] = $option_data['default'];
+			continue;
 		}
 	}
 

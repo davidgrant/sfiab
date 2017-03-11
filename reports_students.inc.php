@@ -390,12 +390,6 @@ $report_students_fields = array(
 		'scalable' => true,
 		'table' => 'projects.title' ),
 
-	'summary' => array(
-		'name' => 'Project -- Short Summary',
-		'header' => 'Short Summary',
-		'width' => 2,
-		'table' => 'projects.summary' ),
-
 	'division' =>  array(
 		'name' => 'Project -- Challenge',
 		'header' => 'Challenge',

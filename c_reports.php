@@ -48,8 +48,9 @@ case 'download':
 	$year = (int)$_GET['year'];
 	$r['year'] = $year;
 
-	if(array_key_exists($_GET['type'], $report_options['type']['values']))
+	if(array_key_exists($_GET['type'], $report_options['type']['values'])) {
 		$r['option']['type'] = $_GET['type'];
+	}
 
 	report_gen($mysqli, $r);
 	exit();
