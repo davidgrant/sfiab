@@ -1110,7 +1110,7 @@ $report_students_fields = array(
 
 	$fairs_join = '';
 	if(in_array('fairs', $components)) {
-		$fairs_join = "LEFT JOIN fairs ON fairs.id=projects.fairs_id";
+		$fairs_join = "LEFT JOIN fairs ON fairs.id=users.fair_id";
 	}
 
 	$regitems_join = '';
