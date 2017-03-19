@@ -146,6 +146,7 @@ case 'purge':
 			$mysqli->real_query("DELETE FROM projects WHERE pid='{$edit_u['s_pid']}'");
 			$mysqli->real_query("DELETE FROM mentors WHERE pid='{$edit_u['s_pid']}'");
 		}
+		$mysqli->real_query("DELETE FROM signatures WHERE `uid`='$edit_uid'");
 	}
 	/* Do this for all users, doesn't matter if it's a student or not */
 	$mysqli->real_query("DELETE FROM partner_requests WHERE to_uid='$edit_uid' OR from_uid='$edit_uid'");

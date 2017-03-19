@@ -64,12 +64,12 @@ foreach($projects as $pid=>&$project) {
 		$uid = $student['uid'];
 		/* If a specific UID is specified, and it's not what we're looking for, skip it */
 		if($sig_uid != -1 && !$sig_uid != $uid) {
-			print("$uid mismatch");
+//			print("$uid mismatch");
 			continue;
 		}
 
 		if(!array_key_exists($uid, $sigs)) {
-			print("$uid doesn't exist");
+//			print("$uid doesn't exist");
 			continue;
 		}
 
