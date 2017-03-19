@@ -221,7 +221,7 @@ float exhibithalls_cost(struct _annealer *annealer, int bucket_id, GPtrArray *bu
 	}
 
 	/* Slight cost for priority to keep projects out of less desirable locations */
-	cost += o->priority * 100;
+//	cost += o->priority * 100;
 
 	if(school_matches == 0) {
 		cost += 5;
@@ -272,9 +272,18 @@ void exhibithalls_load(struct _db_data *db, int year)
 {
 	int x;
 	struct _db_result *result;
+	int limit = 0;
+	char orderstr[64] = "";
 
 	exhibithalls = g_ptr_array_new();
 	exhibithall_objects = g_ptr_array_new();
+
+	if(projects && projects->len > 0) {
+		limit = projects->len;
+		printf("   -> Limit to %d project locations\n", limit);
+		sprintf(orderstr, "ORDER BY priority ASC LIMIT %d", limit);
+	}
+
 
 	/* Load exhibithalls  */
 	result = db_query(db, "SELECT * FROM exhibithall WHERE `type`='exhibithall'");
@@ -299,8 +308,8 @@ void exhibithalls_load(struct _db_data *db, int year)
 	}
 	db_free_result(result);
 
-	/* Load exhibithall_objects   */
-	result = db_query(db, "SELECT * FROM exhibithall WHERE `type`='project'");
+	/* Load exhibithall_objects, limit by the number of projects (limit) sorted by prioirty */
+	result = db_query(db, "SELECT * FROM exhibithall WHERE `type`='project' %s", orderstr);
 	for(x=0;x<result->rows; x++) {
 		struct _exhibithall_object *t = malloc(sizeof(struct _exhibithall_object));
 		t->index = x;
@@ -314,13 +323,8 @@ void exhibithalls_load(struct _db_data *db, int year)
 		t->w = atof(db_fetch_row_field(result, x, "w")) * 1000.0;
 		t->h = atof(db_fetch_row_field(result, x, "h")) * 1000.0;
 		t->orientation = atof(db_fetch_row_field(result, x, "orientation"));
+		t->priority = atoi(db_fetch_row_field(result, x, "priority"));
 		t->closest_projects_count = 0;
-		switch(t->floor_number) {
-		case 218: t->priority = 15; break;
-		case 219: t->priority = 20; break;
-		case 220: t->priority = 5; break;
-		default: t->priority = 0; break;
-		}
 
 
 		printf("%d: %s:%s, (%d,%d) %dx%d @ %d, has_elec=%d\n", t->id, t->eh->name, t->name, 
@@ -328,7 +332,7 @@ void exhibithalls_load(struct _db_data *db, int year)
 		g_ptr_array_add(exhibithall_objects, t);
 		g_ptr_array_add(t->eh->project_objects, t);
 
-		/* Make sure the project is inisde the grid */
+		/* Make sure the project is inside the grid */
 		if(t->p.x < 0 || t->p.x > t->eh->w || t->p.y < 0 || t->p.y > t->eh->h) {
 			printf("   -> Project is at (%d,%d) which is outside exhibithall -> (0,0)-(%d,%d)\n", 
 							t->p.x, t->p.y,
@@ -560,14 +564,13 @@ void exhibithall_anneal(struct _db_data *db, int year)
 	categories_load(db, year);
 	challenges_load(db, year);
 
-	printf("Loading Exhibit Halls and Objects...\n");
-	exhibithalls_load(db, year);
 	printf("Loading Students and Projects...\n");
 	students_load(db, year);
 	projects_load(db, year);
 	projects_crosslink_students();
 
-
+	printf("Loading Exhibit Halls and Objects...\n");
+	exhibithalls_load(db, year);
 
 	grid_size = 1000; /* 1 meter, hopefully smaller */
 	for(i=0;i<exhibithall_objects->len;i++) {
