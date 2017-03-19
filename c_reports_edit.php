@@ -143,6 +143,11 @@ case 'delete':
 	report_delete($mysqli, $rid);
 	form_ajax_response(array('status'=>0, 'location'=>'c_reports_edit.php'));
 	exit();
+
+case 'new':
+	$report = report_create($mysqli);
+	form_ajax_response(array('status'=>0, 'location'=>"c_reports_edit.php?rid={$report['id']}"));
+	exit();
 }
 
 
@@ -169,6 +174,7 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 	form_begin($form_id, "c_reports_edit.php");
 	form_select_optgroup($form_id, 'rid', 'Report', $report_sec, $rid);
 	form_button($form_id, 'load', 'Load');
+	form_button($form_id, 'new', 'Create New');
 //	form_button($form_id, 'dupe', 'Duplicate');
 //	form_button($form_id, 'try', 'Try');
 	form_button($form_id, 'delete', 'Delete', 'r', 'delete', 'Are you sure you want to delete this report?');
@@ -190,11 +196,6 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 		<h4>Report Information</h4>
 
 <?php
-
-		$report_types = array('student' => 'Student Report', 'judge' => 'Judge Report', 
- 			'award' => 'Award Report', 'committee' => 'Committee Member Report',
-			'school' => 'School Report', 'volunteer' => 'Volunteer Report',
-			'tour' => 'Tour Report', 'fair' => 'Feeder Fair Report' );
 
 		$report_fields = array();
 		$gr = '';

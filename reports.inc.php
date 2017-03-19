@@ -329,7 +329,16 @@ foreach($report_stock as $n=>$v) {
 	$report_options['stock']['values'][$n] = $v['name'];
 }
 
+$report_types = array('student' => 'Student Report', 'judge' => 'Judge Report', 
+ 			'award' => 'Award Report', 'committee' => 'Committee Member Report',
+			'school' => 'School Report', 'volunteer' => 'Volunteer Report',
+			'tour' => 'Tour Report', 'fair' => 'Feeder Fair Report' );
+
+
 $report_initialized = false;
+
+
+
 function report_init($mysqli) 
 {
 	global $report_students_fields, $report_judges_fields, $report_awards_fields;
@@ -424,6 +433,7 @@ function report_save_field($mysqli, $report, $type)
 	global $report_schools_fields, $report_volunteers_fields;
 	global $report_tours_fields, $report_fairs_fields;
 	global $report_col_align, $report_col_valign;
+	global $report_types;
 
 	$report = array();
 
@@ -439,6 +449,10 @@ function report_save_field($mysqli, $report, $type)
 	$report['filter'] = array();
 
 	filter_bool($report['use_abs_coords']);
+
+	if(!array_key_exists($report['type'], $report_types)) {
+		$report['type'] = 'student';
+	}
 
 	$fieldvar = "report_{$report['type']}s_fields";
 /*	if(is_array($$fieldvar)) 
@@ -580,6 +594,14 @@ function report_save_field($mysqli, $report, $type)
 	report_save_field($mysqli, $report, 'filter');
 	return $report['id'];
  }
+
+function report_create($mysqli)
+{
+	$mysqli->query("INSERT INTO reports (`id`) VALUES ('')");
+	$report_id = $mysqli->insert_id;
+	$report = report_load($mysqli, $report_id);
+	return $report;
+}
 
  function report_load_all($mysqli) 
  {
