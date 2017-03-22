@@ -456,7 +456,7 @@ $report_students_fields = array(
 		'header' => 'Project Title and Abstract',
 		'width' => 5.00,
 		'scalable' => true,
-		'table' => "CONCAT('Title: ', projects.title, '\nSummary: ', projects.tagline', '\n', projects.abstract)" ),
+		'table' => "CONCAT('Title: ', projects.title, '\nSummary: ', projects.tagline, '\n', projects.abstract)" ),
 
 	'language' => array(
 		'name' => 'Project -- Language',
