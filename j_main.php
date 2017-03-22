@@ -48,6 +48,8 @@ sfiab_page_begin($u, "Judge Main", $page_id, $help);
 ?>
 	<h3>Hello <?=$u['firstname']?>,</h3>
 
+	<p><?=cms_get($mysqli, 'j_main', $u);?>
+
 	<p>Help for all pages is available by pressing the information icon <a href="#help_panel_j_home" data-role="button" data-icon="info" data-inline="true" data-iconpos="notext" class="ui-nodisc-icon ui-alt-icon"></a> on the top right of the page.
 
 <?php
