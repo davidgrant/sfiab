@@ -32,6 +32,11 @@ if(array_key_exists('action', $_POST)) {
 }
 
 switch($action) {
+case 'new':
+	$jteam = jteam_create($mysqli);
+	form_ajax_response(array('status'=>0,'location'=>'c_jteam_edit.php'));
+	exit();
+
 case 'jdel':
 	/* Remove a judge from a judging team */
 	$jteam_id = (int)$_POST['jteam_id'];
@@ -276,10 +281,18 @@ sfiab_page_begin($u, "Judging Teams List", $page_id, $help);
 		}
 	}
 	unset($r);
+
+	
 ?>
 
 </ul>
 <?php
+
+	$form_id = "create_jteam";
+	form_begin($form_id, "c_jteam_edit.php");
+	form_button($form_id, 'new', 'Create New Team');
+	form_end($form_id);
+
 
 function judge_header()
 {
@@ -391,12 +404,14 @@ function jteam_li(&$jteam) {
 		$filter_text .= ' '.$j['name'];
 	}
 	$r = &$rounds[$jteam['round']];
+
+	$award_str = $jteam['award_id'] > 0 ? $awards[$jteam['award_id']]['name'] : 'None';
 ?>
 	<li id="jteam_list_<?=$jteam['id']?>" data-filtertext="<?=$filter_text?>">
 		<h3>#<?=$jteam['num']?> - <?=$jteam['name']?></h3>
 		<div class="ui-grid-a">
 		<div class="ui-block-a">
-		Award: <b><?=$jteam['award_id']?>: <?=$awards[$jteam['award_id']]['name']?></b><br/>
+		Award: <b><?=$jteam['award_id']?>: <?=$award_str?></b><br/>
 		Round: <b><?=$r['name']?></b><br/>
 		<table id="j_jteam_<?=$jteam['id']?>">
 
@@ -407,8 +422,9 @@ function jteam_li(&$jteam) {
 		</table>
 		<br/>
 		<div id="jteam_list_<?=$jteam['id']?>_control" data-role="controlgroup" data-type="horizontal" data-mini="true">
-		    <a href="#" onclick="jteam_enable_edit(<?=$jteam['id']?>)" class="ui-btn ui-corner-all ui-btn-inline">Edit</a>
+		    <a href="#" onclick="jteam_enable_edit(<?=$jteam['id']?>)" class="ui-btn ui-corner-all ui-btn-inline">Edit Judges/Projects</a>
 		    <a href="#" onclick="jteam_jautoadd(<?=$jteam['id']?>)" class="ui-btn ui-corner-all  ui-btn-inline">Auto-add Best Judge</a>
+		    <a href="c_jteam_edit_jteam.php?id=<?=$jteam['id']?>" class="ui-btn ui-corner-all  ui-btn-inline">Edit Team</a>
 		</div>
 
 		<div id="jteam_list_<?=$jteam['id']?>_function" style="display:none;">
@@ -614,7 +630,7 @@ function jteam_jadd()
 			count_span.text(parseInt(count_span.text()) - 1);
 		}
 	}, "json");
-
+	return false;
 }
 
 
@@ -639,7 +655,7 @@ function jteam_jautoadd(jteam_id)
 			count_span.text(parseInt(count_span.text()) - 1);
 		}
 	}, "json");
-
+	return false;
 }
 
 

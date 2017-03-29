@@ -48,8 +48,6 @@ function jteam_load($mysqli, $jteam_id, $pdata = false)
 	}
 	$jteam['user_ids'] = $l;
 
-
-
 	unset($jteam['original']);
 	$original = $jteam;
 	$jteam['original'] = $original;
@@ -90,5 +88,12 @@ function jteam_save($mysqli, &$jteam)
 	generic_save($mysqli, $jteam, "judging_teams", "id");
 }
 
+function jteam_create($mysqli)
+{
+	global $config;
+	$mysqli->real_query("INSERT INTO judging_teams (`name`,`autocreated`,`year`) VALUES ('New Judging Team', '0','{$config['year']}')");
+	$id = $mysqli->insert_id;
+	return jteam_load($mysqli, $id);
+}
 
 ?>
