@@ -1251,7 +1251,9 @@ void judges_timeslots(struct _db_data *db, int year, int do_log)
 		struct _jteam *jteam = g_ptr_array_index(jteams, i);
 
 		/* Skip any non-divisional or non-round0 jteam */
-		if(!jteam->award->is_divisional || !jteam->round == 0) continue;
+		if(!jteam->award) continue;
+		if(!jteam->award->is_divisional) continue;
+		if(!jteam->round == 0) continue;
 
 		printf("Timeslots for jteam %s\n", jteam->name);
 

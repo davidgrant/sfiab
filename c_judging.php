@@ -80,10 +80,13 @@ sfiab_page_begin($u, "Judging", $page_id);
 			continue;
 		}
 
-		$type = $awards[$jteam['award_id']]['type'];
 		$n_judges = count($jteam['user_ids']);
-
-		if($type == 'grand' || $type == 'other') $type = 'special';
+		if($jteam['award_id'] < 1) {
+			$type = 'special';
+		} else {
+			$type = $awards[$jteam['award_id']]['type'];
+			if($type == 'grand' || $type == 'other') $type = 'special';
+		}
 
 		$jteam_count[$round][$type] += 1;
 		$jteam_judge_count[$round][$type] += $n_judges;
