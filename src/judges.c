@@ -41,6 +41,8 @@ struct _jteam {
 };
 
 void jteam_print(struct _jteam *jteam) ;
+GPtrArray *jteams_load(struct _db_data *db, int year);
+
 
 
 void scheduler_log(struct _db_data *db, int result, char *msg, ...)
@@ -559,8 +561,6 @@ void judges_anneal(struct _db_data *db, int year)
 
 	current_year = year;
 
-	jteams = g_ptr_array_new();
-
 	students_load(db, year);
 	projects_load(db, year);
 	projects_crosslink_students();
@@ -602,6 +602,24 @@ void judges_anneal(struct _db_data *db, int year)
 	printf("Delete current autocreated judging teams...\n");
 	db_query(db, "DELETE FROM judging_teams WHERE year='%d' and autocreated='1'", year);
 	scheduler_log(db, 2, "Deleting old auto-created judging teams and assignments");
+
+	/* ====================================================================*/
+	/* Load all remaining teams */
+	jteams = jteams_load(db, year);
+	for(i=0;i<jteams->len;i++) {
+		int j;
+		struct _jteam *jteam = g_ptr_array_index(jteams, i);
+
+		/* The judge is also not available if they're already on a team */
+		for(j=0; j<jteam->judges->len; j++) {
+			struct _judge *judge = g_ptr_array_index(jteam->judges, j);
+			/* Mark this judge as unavailable in this round */
+			judge->available_in_round[jteam->round] = 0;
+			printf("   Judge %d not available in round %d because on a manually created jteam\n", judge->id, jteam->round);
+		}
+	}
+	g_ptr_array_free(jteams, 1);
+	jteams = g_ptr_array_new();
 
 
 	/* ====================================================================*/
@@ -824,8 +842,8 @@ void judges_anneal(struct _db_data *db, int year)
 				continue;
 			}
 		}
-
 		if(!j->available_in_round[0]) continue;
+
 		g_ptr_array_add(judge_list, j);
 	}
 	scheduler_log(db, 25, "Assigning %d available first round judges to %d divisional judging teams", judge_list->len, jteams_list->len);
