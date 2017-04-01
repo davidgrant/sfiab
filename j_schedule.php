@@ -36,6 +36,15 @@ $timeslots = timeslots_load_all($mysqli);
 
 	$found_assignment = false;
 
+	/* Print a message if judigng assignemnts are not shown, then skip all
+	 * the code below */
+	if($config['judge_show_assignments'] == false) { ?>
+		<p>Judging assignments are not available yet.
+<?php		
+		/* Skip all the code below by setting timeslots to an empty array */
+		$timeslots = array();		
+	}
+
 	foreach($timeslots as $timeslot_id => &$ts) {
 		$header_printed = false;
 
@@ -47,9 +56,8 @@ $timeslots = timeslots_load_all($mysqli);
 		$round_end = date('g:ia', $ts['end_timestamp']);
 
 ?>		<h3><?=$ts['name']?> - <?=$round_start?> - <?=$round_end?></h3>
-<?php		
 
-		foreach($jteams as &$jteam) {
+<?php		foreach($jteams as &$jteam) {
 			if($jteam['round'] != $ts['round']) continue;
 
 			$found_assignment = true;

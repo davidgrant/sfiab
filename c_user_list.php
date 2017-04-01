@@ -45,7 +45,7 @@ foreach($_GET as $k=>$v) {
 	case 'status':
 		if(!is_array($_GET['status'])) exit();
 		foreach($_GET['status'] as $s) {
-			if(in_array($s, array('complete', 'active','new'))) {
+			if(in_array($s, array('complete', 'active','new','accepted'))) {
 				$status[] = $s;
 			}
 		}
@@ -141,7 +141,7 @@ sfiab_page_begin($u, "User List", $page_id);
 		$years_sel["-1"] = "Latest for each user";
 		form_check_group($form_id, 'years', "Show Years", $years_sel, $years);
 
-		$status_sel = array('complete' => 'Complete', 'active' => 'Active', 'new' => 'New');
+		$status_sel = array('complete' => 'Complete', 'active' => 'Active', 'new' => 'New', 'accepted' => 'Accepted (students only)');
 		form_check_group($form_id, 'status', "Show Status", $status_sel, $status);
 
 		$attending_sel = array('attending' => "Attending", 'not_attending'=>'Not Attending');
@@ -247,7 +247,7 @@ while($user_data = $q->fetch_assoc()) {
 
 <thead><tr>
 	<th >Name / Email</th>
-	<th data-priority="1">Username</th>
+	<th data-priority="2">Username</th>
 	<th data-priority="1">School</th>
 	<th data-priority="2">Reg ID</th>
 	<th data-priority="2">Proj Num</th>
@@ -270,9 +270,13 @@ foreach($users as &$user) {
 
 		if($status != '') $status .= ', ';
 		if($user['attending']) {
+			$accepted = NULL;
 			switch($r) {
 			case 'judge': $complete = $user['j_complete']; break;
-			case 'student': $complete = $user['s_complete']; break;
+			case 'student': 
+				$complete = $user['s_complete']; 
+				$accepted = $user['s_accepted'];
+				break;
 			case 'volunteer': $complete = $user['v_complete']; break;
 			default: $complete = NULL;
 			}
@@ -280,7 +284,11 @@ foreach($users as &$user) {
 			if($complete === NULL) {
 				; // Nothing.
 			} else if($complete == true) {
-				$status .= '<font color="green">Complete</font>';
+				if($accepted == true) {
+					$status .= '<font color="green">Complete+Accepted</font>';
+				} else {
+					$status .= '<font color="green">Complete</font>';
+				}
 			} else {
 				$status .= '<font color="orange">Incomplete</font>';
 			}

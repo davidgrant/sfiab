@@ -472,7 +472,7 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			    'login' => array('Login', 'index.php#login'),
 		);
 
-	$prescreen_menu = array('s_ethics' => array('Ethics Intractive Flowchart', 's_ethics.php'),
+	$prescreen_menu = array('s_ethics' => array('Ethics Interactive Flowchart', 's_ethics.php'),
 				's_safety' => array('Safety Interactive Flowchart', 's_safety.php'),
 		);
 		
