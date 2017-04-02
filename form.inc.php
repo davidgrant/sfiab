@@ -82,12 +82,10 @@ function form_int($page_id, $name, $label, &$value = '', $min=NULL, $max=NULL)
 	$minv = ($min === NULL) ? '' : "min=\"$min\"";
 	$maxv = ($max === NULL) ? '' : "max=\"$max\"";
 	$d = $form_disabled ? ' disabled="disabled"': '';
-?>
-	<div class="ui-field-contain">
-		<label for="<?=$id?>" <?=form_inc($name)?>><?=$label?>:</label>
-		<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> <?=$d?> >
-	</div>
-<?php
+
+	form_label_div_begin($id, $name, $label); ?>
+	<input id="<?=$id?>" name="<?=$name?>" value="<?=$v?>" placeholder="<?=$placeholder?>" data-clear-btn="true" type="number" <?=$min?> <?=$max?> <?=$d?> >
+<?php	form_label_div_end();
 }
 
 $__form_label_div_label = '';

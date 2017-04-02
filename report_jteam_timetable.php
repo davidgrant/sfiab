@@ -215,13 +215,16 @@ foreach($generate_rounds as $round ) {
 
 
 			$table['header']['time'] = 'Project';
+			/* 9 timeslots with width 20 fit, more than 9, scale appropriately */
+			$width = ($ts['num_timeslots'] <= 9) ? 20 : (180 / $ts['num_timeslots']);
 			for($itimeslot=0; $itimeslot<$ts['num_timeslots']; $itimeslot++) {
 				$table['fields'][] = "T$itimeslot";
 				$table['header']["T$itimeslot"] = date("g:i", $ts['timeslots'][$itimeslot]['start_timestamp']);
 				$table['col']["T$itimeslot"] = array('on_overflow' => '',
 							      'align' => 'center');
-				$table['widths']["T$itimeslot"] = 20;
+				$table['widths']["T$itimeslot"] = $width;
 			}
+			debug(print_r($table, true));
 
 			$sorted_project_ids = array();
 			foreach($jteam['project_ids'] as $pid) {
