@@ -544,7 +544,7 @@ $report_students_fields = array(
 		'header' => 'School Address',
 		'width' => 3.0,
 		'scalable' => true,
-		'table' => "CONCAT(schools.address, ', ', schools.city, ', ', schools.province_code, ', ', schools.postalcode)" ),
+		'table' => "CONCAT(schools.address, ', ', schools.city, ', ', schools.province, ', ', schools.postalcode)" ),
 
 	'teacher' => array(
 		'name' => 'School -- Teacher Name (as entered by the student)',
@@ -587,7 +587,7 @@ $report_students_fields = array(
 		'name' => 'School -- '.$config['provincestate'],
 		'header' => $config['provincestate'],
 		'width' => 0.75,
-		'table' => 'schools.province_code' ),
+		'table' => 'schools.province' ),
 
 	'school_city_prov' =>  array(
 		'name' => 'School -- City, '.$config['provincestate'].' (for mailing)',
@@ -650,19 +650,19 @@ $report_students_fields = array(
 		'table' => 'awards.name',
 		'components' => array('awards')),
 
-	'award_excludefromac' => array(
-		'name' => 'Award -- Exclude from Award Ceremony (Yes/No)',
-		'header' => 'Exclude',
+	'award_include_in_script' => array(
+		'name' => 'Award -- Include in Award Ceremony',
+		'header' => 'Include',
 		'width' => .5,
-		'table' => "awards.excludefromac",
-		'value_map' => array ('no' => 'No', 'yes' => 'Yes')),
+		'table' => "awards.include_in_script",
+		'value_map' => array ('0' => 'No', '1' => 'Yes')),
 
 	'order' =>  array(
 		'name' => 'Award -- Order',
 		'header' => 'Award Order',
 		'width' => 0.5,
-		'table' => 'awards.order',
-		'table_sort' => 'awards.order',
+		'table' => 'awards.ord',
+		'table_sort' => 'awards.ord',
 		'components' => array('awards')),
 
 	'award_type' => array(
@@ -686,7 +686,7 @@ $report_students_fields = array(
 		'header' => 'Award Name',
 		'width' => 4,
 		'table' => "CONCAT(projects.number,' ', awards.name)",
-		'table_sort' => 'awards.order',
+		'table_sort' => 'awards.ord',
 		'components' => array('awards')),
 
 	'award_prize_name' => array(

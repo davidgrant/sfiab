@@ -233,13 +233,23 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 				foreach($d['fontstyle'] as $s) {
 					form_hidden($form_id, "col[$index][fontstyle][]", $s);
 				}
-				form_hidden($form_id, "col[$index][fontsize]", $d['fontsize']);
-				form_hidden($form_id, "col[$index][x]", $d['x']);
-				form_hidden($form_id, "col[$index][y]", $d['y']);
-				form_hidden($form_id, "col[$index][w]", $d['w']);
-				form_hidden($form_id, "col[$index][h]", $d['h']);
-				form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
-				form_hidden($form_id, "col[$index][h_rows]", $d['h_rows']);
+				if($r['option']['type'] == 'label') {
+					form_int($form_id, "col[$index][fontsize]", "Label $i Font Size", $d['fontsize']);
+					form_int($form_id, "col[$index][x]", "Label $i X", $d['x']);
+					form_int($form_id, "col[$index][y]", "Label $i Y", $d['y']);
+					form_int($form_id, "col[$index][w]", "Label $i Width", $d['w']);
+					form_int($form_id, "col[$index][h]", "Label $i Height", $d['h']);
+					form_int($form_id, "col[$index][h_rows]", "Label $i Num Rows (0=auto)", $d['h_rows']);
+					form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
+				} else {
+					form_hidden($form_id, "col[$index][fontsize]", $d['fontsize']);
+					form_hidden($form_id, "col[$index][x]", $d['x']);
+					form_hidden($form_id, "col[$index][y]", $d['y']);
+					form_hidden($form_id, "col[$index][w]", $d['w']);
+					form_hidden($form_id, "col[$index][h]", $d['h']);
+					form_hidden($form_id, "col[$index][min_w]", $d['min_w']);
+					form_hidden($form_id, "col[$index][h_rows]", $d['h_rows']);
+				}
 				print("<br/>");
 ?>				
 <?php			}
@@ -255,13 +265,23 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 			form_radio_h($form_id, "col[$index][on_overflow]", "Column $index Overflow", $report_col_on_overflow, $v, '', false, false, true);
 			form_hidden($form_id, "col[$index][fontname]", $v);
 			form_hidden($form_id, "col[$index][fontstyle][]", $v);
-			form_hidden($form_id, "col[$index][fontsize]", $v);
-			form_hidden($form_id, "col[$index][x]", $v);
-			form_hidden($form_id, "col[$index][y]", $v);
-			form_hidden($form_id, "col[$index][w]", $v);
-			form_hidden($form_id, "col[$index][h]", $v);
-			form_hidden($form_id, "col[$index][min_w]", $v);
-			form_hidden($form_id, "col[$index][h_rows]", $v);
+			if($r['option']['type'] == 'label') {
+				form_int($form_id, "col[$index][fontsize]", "Label $index Font Size", $v);
+				form_int($form_id, "col[$index][x]", "Label $index X",$v);
+				form_int($form_id, "col[$index][y]", "Label $index Y", $v);
+				form_int($form_id, "col[$index][w]", "Label $index Width", $v);
+				form_int($form_id, "col[$index][h]", "Label $index Height", $v);
+				form_int($form_id, "col[$index][h_rows]", "Label $index Num Rows (0=auto)", $v);
+				form_hidden($form_id, "col[$index][min_w]", $v);
+			} else {
+				form_hidden($form_id, "col[$index][fontsize]", $v);
+				form_hidden($form_id, "col[$index][x]", $v);
+				form_hidden($form_id, "col[$index][y]", $v);
+				form_hidden($form_id, "col[$index][w]", $v);
+				form_hidden($form_id, "col[$index][h]", $v);
+				form_hidden($form_id, "col[$index][min_w]", $v);
+				form_hidden($form_id, "col[$index][h_rows]", $v);
+				}
 			print("<br/>");
 		}
 
