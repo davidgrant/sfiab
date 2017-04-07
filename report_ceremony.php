@@ -231,8 +231,19 @@ function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
 		$y = 18;
 
 		/* Change layout depending if the image exists */
-		$filename = "{$project['number']}.jpg";
-		if(!file_exists("files/{$config['year']}/".$filename)) {
+		$filename = NULL;
+		$possible_filenames = array("{$project['number']}.jpg", 
+					    "{$project['floor_number']}.jpg",
+					    sprintf("%03d.jpg", $project['floor_number']));
+		foreach($possible_filenames as $f) {
+			debug("Trying: $f");
+			if(file_exists("files/{$config['year']}/".$f)) {
+				$filename = $f;
+				break;
+			}
+		}
+
+		if($filename == NULL) {
 			$pdf->label_text(1, 18, 98, 4, $pn, false, 'right');
 			$pdf->label_text(5, 30, 90, 14, $project['title'], false, 'center','middle' , 2);
 			$y = 50;
@@ -250,7 +261,7 @@ function generate_prize_slides(&$pdf, &$prize, &$winning_project_ids)
 			/* Image file exists */
 			$pdf->label_text(1, 18, 98, 4, $pn, false, 'right');
 			$pdf->label_text(5, 22, 90, 14, $project['title'], false, 'center','middle' , 2);
-			$pdf->label_image(30, 38, 40, 40, "{$project['number']}.jpg");
+			$pdf->label_image(30, 38, 40, 40, $filename);
 			$names = array();
 			foreach($project['students'] as $s) {
 				$names[] = $s['name'];
