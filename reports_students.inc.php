@@ -650,6 +650,13 @@ $report_students_fields = array(
 		'table' => 'awards.name',
 		'components' => array('awards')),
 
+	'award_name_and_prize_name' =>  array(
+		'name' => 'Award -- Name + Prize Name',
+		'header' => 'Award+Prize Name',
+		'width' => 4,
+		'table' => "CONCAT(awards.name, ': ', award_prizes.name)",
+		'components' => array('awards')),
+
 	'award_include_in_script' => array(
 		'name' => 'Award -- Include in Award Ceremony',
 		'header' => 'Include',
