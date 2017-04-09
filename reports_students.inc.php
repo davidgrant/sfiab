@@ -1131,7 +1131,7 @@ $report_students_fields = array(
 	}
 
 
-	switch($report['option']['include_registrations']) {
+	switch($report['include_registrations']) {
 	case 'complete':
 		$reg_where = "AND users.s_accepted='1'";
 		break;

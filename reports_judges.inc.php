@@ -485,7 +485,7 @@ function report_judges_fromwhere($report, $components)
 			$year_where = '';
 		}
 	}
-	switch($report['option']['include_registrations']) {
+	switch($report['include_registrations']) {
 	case 'complete':
 		$reg_where = "AND users.j_complete='1'";
 		break;

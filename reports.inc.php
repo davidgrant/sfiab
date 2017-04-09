@@ -25,7 +25,7 @@ require_once('isef.inc.php'); /* Required for student/isef_div to work, function
 require_once('csv.inc.php');
 require_once('tcpdf.inc.php');
 
- $report_filter_ops = array(	0 => '=',
+$report_filter_ops = array(	0 => '=',
  			1 => '<=',
 			2 => '>=',
 			3 => '<',
@@ -35,61 +35,67 @@ require_once('tcpdf.inc.php');
 			7 => 'IS NOT',
 			8 => 'LIKE',
 			9 => 'NOT LIKE ',
+			10 => 'IN',
+			11 => 'NOT IN',
 		);
 
- $report_col_on_overflow = array('nothing' => 'Do Nothing', 'wrap' => 'Wrap Text', 'truncate' => 'Truncate Text', '...' => 'Truncate and add ...', 'scale' => 'Scale Down Font');
- $report_col_align = array ('left' => 'Left', 'right' => 'Right', 'center' => 'Centered', 'full' => 'Full Justification');
- $report_col_valign = array ('top' => 'Top', 'bottom' => 'Bottom', 'middle' => 'Middle');
+$report_col_on_overflow = array('nothing' => 'Do Nothing', 'wrap' => 'Wrap Text', 'truncate' => 'Truncate Text', '...' => 'Truncate and add ...', 'scale' => 'Scale Down Font');
+$report_col_align = array ('left' => 'Left', 'right' => 'Right', 'center' => 'Centered', 'full' => 'Full Justification');
+$report_col_valign = array ('top' => 'Top', 'bottom' => 'Bottom', 'middle' => 'Middle');
+$report_font_styles = array('bold' => 'Bold','italic'=> 'Italics','underline'=> 'Underline','strikethrough'=> 'Strikethrough');
 
- $report_font_styles = array('bold' => 'Bold','italic'=> 'Italics','underline'=> 'Underline','strikethrough'=> 'Strikethrough');
- 
- $report_options = array();
- $report_options['type'] = array('desc' => 'Report Format',
+$report_options = array();
+$report_options['format'] = array('desc' => 'Report Format',
+ 				'format' => 'all',
  				'values' => array('pdf'=>'PDF', 'csv'=>'CSV', 'label'=>'Label'),
-				'default' => 'pdf'
-		);
- $report_options['group_new_page'] = array('desc' => 'Start each new grouping on a new page',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'no'
-		);
- $report_options['allow_multiline'] = array('desc' => 'Allow table rows to span multiple lines',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'no'
-		);
- $report_options['fit_columns'] = array('desc' => 'Scale column widths to fit on the page width',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'no'
-		);
- $report_options['label_box'] = array('desc' => 'Draw a box around each label',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'no'
-		);
- $report_options['field_box'] = array('desc' => 'Draw a box around each text field on the label',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'no'
-		);
- $report_options['label_fairname'] = array('desc' => 'Print the fair name at the top of each label',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'yes'
-		);
- $report_options['label_logo'] = array('desc' => 'Print the fair logo at the top of each label',
- 					'values' => array('no'=>'No', 'yes'=>'Yes'),
-					'default' => 'yes'
-		);
- $report_options['default_font_size'] = array('desc' => 'Default font size to use in the report',
+				'default' => 'pdf');
+$report_options['default_font_size'] = array('desc' => 'Default font size to use in the report',
+ 					'format' => 'all',
  					'values' => array(
-					'10'=>'10', 
-					'11'=>'11', '12'=>'12', 
-					'13'=>'13', '14'=>'14', '15'=>'15', '16'=>'16', '18'=>'18',
-					'20'=>'20', '22'=>'22', '24'=>'24'),
-					'default' => '11'
-		);
+					10=>'10', 
+					11=>'11', 12=>'12', 
+					13=>'13', 14=>'14', 15=>'15', 16=>'16', 18=>'18',
+					20=>'20', 22=>'22', 24=>'24'),
+					'default' => 11);
 $report_options['include_registrations'] = array('desc' => 'Include data from complete registrations',
+					'format' => 'all',
  					'values' => array('all'=>'All registered users, regardless of status', 
-							'almost'=>'(Students only) that are accepted or complete (pending sig form, but not accepted)', 
-							'complete'=>'Only accepted registrations'),
-					'default' => 'complete'
-		);
+							'almost'=>'(Students only) Complete students but not accepted (no sig form entered yet)',
+							'complete'=>'Complete registrations (For students, complete+accepted)'),
+					'default' => 'complete');
+
+$report_options['group_new_page'] = array('desc' => 'Start each new grouping on a new page',
+	 				'format' => 'pdf',
+ 					'values' => array(0=>'No', 9=>'Yes', 1=> 'Only Group 1'),
+					'default' => 0);
+$report_options['allow_multiline'] = array('desc' => 'Allow table rows to span multiple lines',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+	 				'format' => 'pdf',
+					'default' => 0);
+$report_options['fit_columns'] = array('desc' => 'Scale column widths to fit on the page width',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+	 				'format' => 'pdf',
+					'default' => 0);
+$report_options['use_abs_coords'] = array('desc' => 'Use absolute (millimeter) coordinates for label locations instead of percentages',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+ 	 				'format' => 'label',
+					'default' => 0);
+$report_options['label_box'] = array('desc' => 'Draw a box around each label',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+	 				'format' => 'label',
+					'default' => 0);
+$report_options['field_box'] = array('desc' => 'Draw a box around each text field on the label',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+ 	 				 'format' => 'label',
+					'default' => 0);
+$report_options['label_fairname'] = array('desc' => 'Print the fair name at the top of each label',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+ 	 				'format' => 'label',
+					'default' => 1);
+$report_options['label_logo'] = array('desc' => 'Print the fair logo at the top of each label',
+ 					'values' => array('0'=>'No', '1'=>'Yes'),
+ 	 				'format' => 'label',
+					'default' => 1);
 //$report_options['total'] = array('desc' => 'Sum the value of table items at te bottom of each table',
  //					'values' => array('no'=>'No', 'yes'=>'Yes'),
 //					'default' => 'no'
@@ -321,9 +327,10 @@ LRP 180		99765	5967	4	1 3/4 x 1/2 	80 */
 			);
 
 
-/* Add stock optiosn to the report options array */
+/* Add stock options to the report options array */
 $report_options['stock'] = array('desc' => "Paper Type",
                                 'values' => array(),
+				'format' => 'all',
 				'default' => 'fullpage');
 foreach($report_stock as $n=>$v) {
 	$report_options['stock']['values'][$n] = $v['name'];
@@ -387,31 +394,27 @@ function report_save_field($mysqli, $report, $type)
 	$x = 0;
 	foreach($report[$type] as $k=>$v) {
 		
-		if($type == 'option') {
-			/* field, value, x, y, w, min_w, h, h_rows, align, valign, fn, fs, fsize, overflow */
-			$vals = "'$k','$v','0','0','0',NULL,'0','0','','','','','0','truncate'";
+//		print_r($v);
+		$f_field = array_key_exists('field', $v) ? "'".$mysqli->real_escape_string($v['field'])."'" : "''";
+		$f_value = array_key_exists('value', $v) ? "'".$mysqli->real_escape_string($v['value'])."'" : "''";
+		$f_x = array_key_exists('x', $v) ? "'".((float)$v['x'])."'" : "'0'";
+		$f_y = array_key_exists('y', $v) ? "'".((float)$v['y'])."'" : "'0'";
+		$f_w = array_key_exists('w', $v) ? "'".((float)$v['w'])."'" : "'0'";
+		$f_h = array_key_exists('h', $v) ? "'".((float)$v['h'])."'" : "'0'";
+		$f_h_rows = array_key_exists('h_rows', $v) ? "'".((int)$v['h_rows'])."'" : "'0'";
+		$f_min_w = (array_key_exists('min_w', $v) && $v['min_w'] != NULL) ? "'".((float)$v['min_w'])."'" : "NULL";
+		$f_align = array_key_exists('align', $v) ? "'".$mysqli->real_escape_string($v['align'])."'" : "''";
+		$f_valign = array_key_exists('valign', $v) ? "'".$mysqli->real_escape_string($v['valign'])."'" : "''";
+		$f_fontname = array_key_exists('fontname', $v) ? "'".$mysqli->real_escape_string($v['fontname'])."'" : "''";
+		$f_fontsize = array_key_exists('fontsize', $v) ? "'".((float)$v['fontsize'])."'" : "'0'";
+		$f_on_overflow = array_key_exists('on_overflow', $v) ? "'".$mysqli->real_escape_string($v['on_overflow'])."'" : "''";
+		if(array_key_exists('fontstyle', $v)) {
+			$f_fontstyle = "'".$mysqli->real_escape_string(implode(',', $v['fontstyle']))."'";
 		} else {
-//			print_r($v);
-			$f_field = array_key_exists('field', $v) ? "'".$mysqli->real_escape_string($v['field'])."'" : "''";
-			$f_value = array_key_exists('value', $v) ? "'".$mysqli->real_escape_string($v['value'])."'" : "''";
-			$f_x = array_key_exists('x', $v) ? "'".((float)$v['x'])."'" : "'0'";
-			$f_y = array_key_exists('y', $v) ? "'".((float)$v['y'])."'" : "'0'";
-			$f_w = array_key_exists('w', $v) ? "'".((float)$v['w'])."'" : "'0'";
-			$f_h = array_key_exists('h', $v) ? "'".((float)$v['h'])."'" : "'0'";
-			$f_h_rows = array_key_exists('h_rows', $v) ? "'".((int)$v['h_rows'])."'" : "'0'";
-			$f_min_w = (array_key_exists('min_w', $v) && $v['min_w'] != NULL) ? "'".((float)$v['min_w'])."'" : "NULL";
-			$f_align = array_key_exists('align', $v) ? "'".$mysqli->real_escape_string($v['align'])."'" : "''";
-			$f_valign = array_key_exists('valign', $v) ? "'".$mysqli->real_escape_string($v['valign'])."'" : "''";
-			$f_fontname = array_key_exists('fontname', $v) ? "'".$mysqli->real_escape_string($v['fontname'])."'" : "''";
-			$f_fontsize = array_key_exists('fontsize', $v) ? "'".((float)$v['fontsize'])."'" : "'0'";
-			$f_on_overflow = array_key_exists('on_overflow', $v) ? "'".$mysqli->real_escape_string($v['on_overflow'])."'" : "''";
-			if(array_key_exists('fontstyle', $v)) {
-				$f_fontstyle = "'".$mysqli->real_escape_string(implode(',', $v['fontstyle']))."'";
-			} else {
-				$f_fontstyle = "''";
-			}
-			$vals = "$f_field, $f_value, $f_x, $f_y, $f_w, $f_min_w, $f_h, $f_h_rows, $f_align, $f_valign, $f_fontname, $f_fontstyle, $f_fontsize, $f_on_overflow";
+			$f_fontstyle = "''";
 		}
+		$vals = "$f_field, $f_value, $f_x, $f_y, $f_w, $f_min_w, $f_h, $f_h_rows, $f_align, $f_valign, $f_fontname, $f_fontstyle, $f_fontsize, $f_on_overflow";
+
 		if($q != '') $q .= ',';
 		$q .= "({$report['id']},'$type','$x',$vals)";
 		$x++;
@@ -445,11 +448,20 @@ function report_save_field($mysqli, $report, $type)
 	$report['sort'] = array();
 	$report['group'] = array();
 	$report['distinct'] = array();
-	$report['option'] = array();
 	$report['filter'] = array();
 
 	filter_bool($report['use_abs_coords']);
+	filter_bool($report['allow_multiline']);
+	filter_bool($report['fit_columns']);
+	filter_bool($report['label_box']);
+	filter_bool($report['field_box']);
+	filter_bool($report['label_fairname']);
+	filter_bool($report['label_logo']);
+	filter_int($report['group_new_page']);
+	filter_int($report['default_font_size']);
 
+	if($report['default_font_size'] <= 0) $report['default_font_size'] = $report_options['default_font_size']['default'];
+	
 	if(!array_key_exists($report['type'], $report_types)) {
 		$report['type'] = 'student';
 	}
@@ -470,67 +482,47 @@ function report_save_field($mysqli, $report, $type)
 	while($a = $q->fetch_assoc()) {
 		$f = $a['field'];
 		$t = $a['type'];
-		switch($t) {
-		case 'option':
-			/* We dont' care about order, just construct
-			 * ['option'][name] = value; */
-//			if(!array_key_exists($f, $report_options)) {
-//				print("Type[$type] Field[$f] not allowed.\n");
-//				continue;
-//			}
-			$report['option'][$f] = $a['value'];
-			break;
-
-		default:
-//			if(!in_array($f, $allow_fields)) {
-//				print("Type[$type] Field[$f] not allowed.\n");
-//				continue;
-//			}
-			/* Pull out all the data */
-			$val = $a;
-			filter_float_or_null($val['ord']);
-			filter_float_or_null($val['x']);
-			filter_float_or_null($val['y']);
-			filter_float_or_null($val['w']);
-			filter_float_or_null($val['h']);
-			filter_float_or_null($val['min_w']);
-			filter_float_or_null($val['h_rows']);
-			filter_float_or_null($val['fontsize']);
-			if($val['fontstyle'] == '')
-				$val['fontstyle'] = array();
-			else
-				$val['fontstyle'] = explode(',', $val['fontstyle']);
+//		if(!in_array($f, $allow_fields)) {
+//			print("Type[$type] Field[$f] not allowed.\n");
+//			continue;
+//		}
+		/* Pull out all the data */
+		$val = $a;
+		filter_float_or_null($val['ord']);
+		filter_float_or_null($val['x']);
+		filter_float_or_null($val['y']);
+		filter_float_or_null($val['w']);
+		filter_float_or_null($val['h']);
+		filter_float_or_null($val['min_w']);
+		filter_float_or_null($val['h_rows']);
+		filter_float_or_null($val['fontsize']);
+		if($val['fontstyle'] == '')
+			$val['fontstyle'] = array();
+		else
+			$val['fontstyle'] = explode(',', $val['fontstyle']);
 
 
-			/* Check sanity of options just because we can */
-			$style_opts = array ('bold');
-			if(!array_key_exists($val['align'], $report_col_align)) $val['align'] = 'left';
-			if(!array_key_exists($val['valign'], $report_col_valign)) $val['valign'] = 'top';
-			foreach($val['fontstyle'] as $s) {
-				if(!in_array($s, $style_opts)) {
-					print("Unknown style '$s'");
-					exit();
-				}
+		/* Check sanity of options just because we can */
+		$style_opts = array ('bold');
+		if(!array_key_exists($val['align'], $report_col_align)) $val['align'] = 'left';
+		if(!array_key_exists($val['valign'], $report_col_valign)) $val['valign'] = 'top';
+		foreach($val['fontstyle'] as $s) {
+			if(!in_array($s, $style_opts)) {
+				print("Unknown style '$s'");
+				exit();
 			}
-			
-
-			/* Save this column in the right order spot */
-			$report[$t][$val['ord']] = $val;
-			break;
 		}
+		
+
+		/* Save this column in the right order spot */
+		$report[$t][$val['ord']] = $val;
 	}
 
 	/* Sanitize options */
 	foreach($report_options as $option_name=>$option_data) {
-		/* If an option doesn't exist, set it to the default value */
-		if(!array_key_exists($option_name, $report['option'])) {
-			$report['option'][$option_name] = $option_data['default'];
-			continue;
-		}
-
 		/* If an option is incorrectly set, set it to the default value */
-		if(!array_key_exists($report['option'][$option_name], $option_data['values'])) {
-			$report['option'][$option_name] = $option_data['default'];
+		if(!array_key_exists($report[$option_name], $option_data['values'])) {
+			$report[$option_name] = $option_data['default'];
 			continue;
 		}
 	}
@@ -544,6 +536,7 @@ function report_save_field($mysqli, $report, $type)
 
  function report_save($mysqli, $report)
  {
+ 	global $report_options;
  	if($report['id'] == 0) {
 		/* New report */
 		$mysqli->query("INSERT INTO reports (`id`) VALUES ('')");
@@ -571,14 +564,22 @@ function report_save_field($mysqli, $report, $type)
 	print("</pre>");
 */
 
- 	$mysqli->real_query("UPDATE reports SET 
+	$opt_query = '';
+	foreach($report_options as $o=>$d) {
+		$v = $mysqli->real_escape_string($report[$o]);
+		$opt_query .= ",`$o`='$v'";
+	}
+	$q = "UPDATE reports SET 
 			`name`='".$mysqli->real_escape_string($report['name'])."',
 			`section`='".$mysqli->real_escape_string($report['section'])."',
 			`desc`='".$mysqli->real_escape_string($report['desc'])."',
 			`creator`='".$mysqli->real_escape_string($report['creator'])."',
-			`type`='".$mysqli->real_escape_string($report['type'])."',
-			`use_abs_coords`='".(int)$report['use_abs_coords']."'
-			WHERE `id`={$report['id']}");
+			`type`='".$mysqli->real_escape_string($report['type'])."'
+			$opt_query
+			WHERE `id`={$report['id']}";
+
+	debug("Save Report: ".$q."\n");
+	$mysqli->real_query($q);
 	print($mysqli->error);
 
 	/* First delete all existing fields */
@@ -590,7 +591,6 @@ function report_save_field($mysqli, $report, $type)
 	report_save_field($mysqli, $report, 'group');
 	report_save_field($mysqli, $report, 'sort');
 	report_save_field($mysqli, $report, 'distinct');
-	report_save_field($mysqli, $report, 'option');
 	report_save_field($mysqli, $report, 'filter');
 	return $report['id'];
  }
@@ -641,7 +641,6 @@ function report_create($mysqli)
 	$fieldvar = "report_{$report['type']}s_fields";
 	$fields = $$fieldvar;
 
-	$gen_mode = '';
 	$fieldname = array();
 
 	$table['header']=array();
@@ -650,60 +649,43 @@ function report_create($mysqli)
 	$table['fields'] = array();
 	$table['data'] = array();
 	$table['total']=0;
-	$table['cell_border'] = $report['option']['label_box'] == 'yes' ? true : false;
+	$table['cell_border'] = $report['label_box'];
 
 	/* Validate the stock */
-	if($report['option']['stock'] != '') {
-		if(!array_key_exists($report['option']['stock'], $report_stock)) {
-			print("Invalid stock [{$report['option']['stock']}]");
+	if($report['stock'] != '') {
+		if(!array_key_exists($report['stock'], $report_stock)) {
+			print("Invalid stock [{$report['stock']}]");
 			exit();
 		}
 	}
 
-	$show_box = ($report['option']['label_box'] == 'yes') ? true : false;
-	$show_fair = ($report['option']['label_fairname'] == 'yes') ? true : false;
-	$show_logo = ($report['option']['label_logo'] == 'yes') ? true : false;
-
-	$fontsize = $report['option']['default_font_size'];
+	$fontsize = (int)$report['default_font_size'];
 	if($fontsize == 0) $fontsize = 10;
 
-	switch($report['option']['type']) {
+	$stock = $report_stock[$report['stock']];
+
+	switch($report['format']) {
 	case 'csv':
 		$rep=new csv(i18n($report['name']));
-		$gen_mode = 'table';
 		break;
 
 	case 'pdf': case '':
 		/* FIXME: handle landscape pages in here */
-		$label_stock = $report_stock[$report['option']['stock']];
-		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'], $label_stock['page_format'], $label_stock['page_orientation']);
+		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'], $stock['page_format'], $stock['page_orientation']);
 		$rep->setup_for_tables('helvetica', $fontsize);
-		$gen_mode = 'table';
 		break;
 
 	case 'label':
-
-//		$report['option']['field_box'] = 'yes';
-
-		$label_stock = $report_stock[$report['option']['stock']];
-		$show_box = ($report['option']['label_box'] == 'yes') ? true : false;
-		$show_fair = ($report['option']['label_fairname'] == 'yes') ? true : false;
-		$show_logo = ($report['option']['label_logo'] == 'yes') ? true : false;
-
-//		print("<pre>");
-//		print_r($report);
-
-		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'],$label_stock['page_format'], $label_stock['page_orientation']);
-		$rep->setup_for_labels($show_box, $show_fair, $show_logo, 
-				$label_stock['label_width'] * 25.4, $label_stock['label_height'] * 25.4,
-				$label_stock['x_spacing'] * 25.4, $label_stock['y_spacing'] * 25.4,
-				$label_stock['rows'], $label_stock['cols']);
+		$rep=new pdf("{$report['section']} -- {$report['name']}", $report['year'],$stock['page_format'], $stock['page_orientation']);
+		$rep->setup_for_labels($report['label_box'], $report['label_fairname'], $report['label_logo'],
+				$stock['label_width'] * 25.4, $stock['label_height'] * 25.4,
+				$stock['x_spacing'] * 25.4, $stock['y_spacing'] * 25.4,
+				$stock['rows'], $stock['cols']);
 		$rep->set_use_abs_coords($report['use_abs_coords']);
-		$gen_mode = 'label';
 		break;
 
 	default:
-		echo "Invalid type [{$report['option']['type']}]";
+		echo "Invalid format [{$report['format']}]";
 		exit;
 	}
 	
@@ -729,7 +711,7 @@ function report_create($mysqli)
 
 	/* Determine the scale factor (use the label width so
 	 * we can enforce margins) */
-	if($report['option']['fit_columns'] == 'yes') { // && $total_width > $label_stock['label_width'])  {
+	if($report['fit_columns']) { // && $total_width > $label_stock['label_width'])  {
 		$static_width = $total_width - $scale_width;
         if($scale_width) 
             $scale_factor = ($label_stock['label_width'] - $static_width) / $scale_width;
@@ -888,39 +870,50 @@ function report_create($mysqli)
 //		echo "<pre>"; print_r($i);
 
 		if($n_groups > 0) {
-			$group_change = false;
-			/* See if any of the "group" fields have changed */
+			$changed_group = 0;
+			/* See if any of the "group" fields have changed, and which one
+			 * 0 == no change
+			 * 1 == group 1 (outer-most group) changed */
+			$igroup = 0;
 			foreach($report['group'] as $x=>$g) {
+				$igroup++;
 				$c = $fieldname[$g['field']];
-
 				if(array_key_exists('value_map', $fields[$g['field']])) {
 					if(array_key_exists($i[$c], $fields[$g['field']]['value_map']))
 						$i_c = $fields[$g['field']]['value_map'][$i[$c]];
 					else
 						$i_c = 'n/a';
-				} else if(array_key_exists('exec_function', $fields[$g['field']]))
+				} else if(array_key_exists('exec_function', $fields[$g['field']])) {
 					$i_c=call_user_func_array($fields[$g['field']]['exec_function'], array($mysqli,&$report,$f,$i[$c]));
-				else
+				} else {
 					$i_c=$i[$c];
+				}
 
-				if(!array_key_exists($c, $last_group_data) || $last_group_data[$c] != $i_c)
-					$group_change = true;
+				if(!array_key_exists($c, $last_group_data) || $last_group_data[$c] != $i_c) {
+					/* Record the lowest (outermost) changed group */
+					if($igroup < $changed_group || $changed_group == 0) {
+						$changed_group = $igroup;
+					}
+					debug("Report Gen: Group $c changed, igroup=$igroup\n");
+				}
 
 				$last_group_data[$c] = $i_c;
 			}
 
-			if($group_change) {
+			if($changed_group > 0) {
 				/* Dump the last table */
 				if(count($table['data'])) {
 				//	print_r($table);
 					$rep->add_table($table);
 					$table['data'] = array();
 					$table['total'] = 0;
-					/* Start a new page AFTER a table is
-					* dumped, so the first page doesn't
-					* end up blank */
-					if($report['option']['group_new_page'] == 'yes') {
-						$rep->AddPage();	
+					/* When the group changes, check if the changed group is at or lower than the group needed to start a new page.
+					 * e.g., a report can be grouped by (1) schoolboard, and (2) school name, but a group_new_page==1 means a new page
+					 * is started only when (1) changes */
+					debug("Report Gen: changed_group=$changed_group, report group_new_page={$report['group_new_page']}\n");
+					if($report['group_new_page'] >= $changed_group) {
+						debug("Report Gen: new page!\n");
+						$rep->AddPage();
 					} else {
 						$rep->hr();
 						$rep->vspace(-0.1);
@@ -936,14 +929,14 @@ function report_create($mysqli)
 
 		$data = array();
 
-		if($gen_mode == 'label') {
+		if($report['format'] == 'label') {
 			$rep->label_new();
 		}
 
 		foreach($report['col'] as $o=>$d) {
 			$f = $d['field'];
 
-			/* Get the final value through a value map, funciton, or directly
+			/* Get the final value through a value map, function, or directly
 			 * from the SQL query */
 			if(array_key_exists('value_map', $fields[$f])) {
 				if(array_key_exists($i["C$o"], $fields[$f]['value_map']))
@@ -973,21 +966,23 @@ function report_create($mysqli)
 			}
 
 			/* Format as apporpriate for the report type */
-			if($gen_mode == 'table') {
+			switch($report['format']) {
+			case 'pdf': 
+			case 'csv':
 				$data[$f] = $v;
-			} else if($gen_mode == 'label') {
-				/* Setup additional options */
-				$show_box = ($report['option']['field_box'] == 'yes') ? true : false;
+				break;
 
+			case 'label':
+				/* Setup additional options */
 				switch($f) {
 				case 'static_box':
 					$rep->label_rect($d['x'], $d['y'], $d['w'], $d['h']);
 					break;
 				case 'fair_logo':
-					$rep->label_fair_logo($d['x'], $d['y'], $d['w'], $d['h'], $show_box);
+					$rep->label_fair_logo($d['x'], $d['y'], $d['w'], $d['h'], $report['field_box']);
 					break;
 				case "projectbarcode":
-					$rep->label_barcode($d['x'], $d['y'], $d['w'], $d['h'], "reg.gvrsf.ca/?p=$v");
+					$rep->label_barcode($d['x'], $d['y'], $d['w'], $d['h'], $config['fair_url']."/?p=$v");
 					break;
 
 /*
@@ -1008,19 +1003,27 @@ function report_create($mysqli)
 					}
 
 					$rep->label_text($d['x'], $d['y'], $d['w'], $d['h'],
-							$v, $show_box, $d['align'], $d['valign'],
+							$v, $report['field_box'], $d['align'], $d['valign'],
 							$d['h_rows'],
 							$d['fontname'],$d['fontstyle'],$d['fontsize'],
 							$d['on_overflow']);
 
 					break;
 				}
+				break;
+
+			default:
+				print("Unknown report format");
+				exit();
+				break;
 			}
 
 		}
 		if(count($data)) $table['data'][] = $data;
 	}
 
+	
+	debug(print_r($table, true));
 	if(count($table['data'])) {
 		$rep->add_table($table);
 	}
