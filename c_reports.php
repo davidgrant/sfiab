@@ -28,8 +28,8 @@ case 'get_options':
 	$r = report_load($mysqli, $rid);
 
 	$vals = array();
-	$vals['type'] = $r['option']['type'];
-	$vals['include_registrations'] = $r['option']['include_registrations'];
+	$vals['format'] = $r['format'];
+	$vals['include_registrations'] = $r['include_registrations'];
 	$vals['test'] = time(NULL);
 
 	form_ajax_response(array('status'=>0, 'val'=>$vals));
@@ -42,14 +42,14 @@ case 'download':
 	/* Add report overrides */
 	$include_registrations = $_GET['include_registrations'];
 	if(array_key_exists($include_registrations, $report_options['include_registrations']['values'])) {
-		$r['option']['include_registrations'] = $include_registrations;
+		$r['include_registrations'] = $include_registrations;
 	}
 
 	$year = (int)$_GET['year'];
 	$r['year'] = $year;
 
-	if(array_key_exists($_GET['type'], $report_options['type']['values'])) {
-		$r['option']['type'] = $_GET['type'];
+	if(array_key_exists($_GET['format'], $report_options['format']['values'])) {
+		$r['format'] = $_GET['format'];
 	}
 
 	report_gen($mysqli, $r);
@@ -102,7 +102,7 @@ $timeslots = timeslots_load_rounds($mysqli);
 			$years[(int)$x] = $x;
 		}
 	        form_radio_h($form_id, 'year', "Year", $years, $options);
-	        form_radio_h($form_id, 'type', "Report Format", $report_options['type']['values'], $options);
+	        form_radio_h($form_id, 'format', "Report Format", $report_options['format']['values'], $options);
 	        form_select($form_id, 'include_registrations', "Include Registrations", $report_options['include_registrations']['values'], $options);
 		$t = '';
 	        form_text($form_id, 'test', "test", $t);

@@ -58,7 +58,13 @@ function post_report()
 	post_text($report['creator'], 'creator');
 	post_text($report['desc'], 'desc');
 	post_text($report['type'], 'type');
-	post_bool($report['use_abs_coords'], 'use_abs_coords');
+
+	if(array_key_exists('option', $_POST)) {
+		foreach($_POST['option'] as $o=>$v) {
+			if(!array_key_exists($o, $report_options)) continue;
+			post_text($report[$o], array('option',$o));
+		}
+	}
 
 	/* For these, just do $report['col'][$i]['field'] = $_POST['col'][$i] */
 	foreach(array('col') as $c) {
@@ -114,14 +120,8 @@ function post_report()
 			post_text($report[$c][$i]['value'], array($c, $i, 'value'));
 		}
 	}
+	debug("Loaded postted report: ".print_r($report, true));
 
-	$report['option'] = array();
-	if(array_key_exists('option', $_POST)) {
-		foreach($_POST['option'] as $o=>$v) {
-			if(!array_key_exists($o, $report_options)) continue;
-			post_text($report['option'][$o], array('option',$o));
-		}
-	}
 	return $report;
 }
 
@@ -215,7 +215,17 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 		form_textbox($form_id, 'desc', 'Description', $r);
 		form_text($form_id, 'creator', 'Creator', $r);
 		form_select($form_id, 'type', 'Type', $report_types, $r);
-		form_yesno($form_id, 'use_abs_coords', "Use Absolute Coords on Labels", $r);
+?>		<h4>Options</h4>
+<?php		foreach($report_options as $o=>$d) {
+			$v = $r[$o];
+			$display = "";
+			if($d['format'] != 'all' && $d['format'] != $r['format']) {
+				$display = 'style="display:none;"';
+			}
+?>			<div class="option_for_<?=$d['format']?>" <?=$display?> > 
+<?php			form_select($form_id, "option[$o]", $d['desc'], $d['values'], $v);
+?>			</div>
+<?php		}
 
 ?>		<h4>Report Data</h4>
 <?php		if(count($r['col'])) {
@@ -233,7 +243,7 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 				foreach($d['fontstyle'] as $s) {
 					form_hidden($form_id, "col[$index][fontstyle][]", $s);
 				}
-				if($r['option']['type'] == 'label') {
+				if($r['format'] == 'label') {
 					form_int($form_id, "col[$index][fontsize]", "Label $i Font Size", $d['fontsize']);
 					form_int($form_id, "col[$index][x]", "Label $i X", $d['x']);
 					form_int($form_id, "col[$index][y]", "Label $i Y", $d['y']);
@@ -265,7 +275,7 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 			form_radio_h($form_id, "col[$index][on_overflow]", "Column $index Overflow", $report_col_on_overflow, $v, '', false, false, true);
 			form_hidden($form_id, "col[$index][fontname]", $v);
 			form_hidden($form_id, "col[$index][fontstyle][]", $v);
-			if($r['option']['type'] == 'label') {
+			if($r['format'] == 'label') {
 				form_int($form_id, "col[$index][fontsize]", "Label $index Font Size", $v);
 				form_int($form_id, "col[$index][x]", "Label $index X",$v);
 				form_int($form_id, "col[$index][y]", "Label $index Y", $v);
@@ -318,13 +328,6 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 			form_text($form_id, "filter[$x][value]", 'Filter '.($x+1).' Value', $v);
 		}
 
-?>		<h4>Options</h4>
-<?php		foreach($report_options as $o=>$d) {
-			$v = array_key_exists($o, $r['option']) ? $r['option'][$o] : $d['default'];
-			form_select($form_id, "option[$o]", $d['desc'], $d['values'], $v);
-		}
-		
-
 		form_submit($form_id, 'save', 'Save', 'Saved');
 //		form_button($form_id, 'dupe', 'Duplicate');
 //		form_button($form_id, 'try', 'Try');
@@ -337,9 +340,25 @@ sfiab_page_begin($u, "Edit Reports", $page_id, $help);
 
 </div></div>
 
+<script>
+$( "#c_report_editorform_edit_option\\[format\\]" ).on('change', function(event) {
+	var val = $( "#c_report_editorform_edit_option\\[format\\]" ).val();
+	$(".option_for_all").show();
+	if( val == 'pdf') {
+		$(".option_for_pdf").show();
+		$(".option_for_label").hide();
+	} else if ( val  == 'label') {
+		$(".option_for_pdf").hide();
+		$(".option_for_label").show();
+	} else {
+		$(".option_for_pdf").hide();
+		$(".option_for_label").hide();
+	}
+
+});
+</script>
+
 <?php
-
-
 sfiab_page_end();
 
 exit();
