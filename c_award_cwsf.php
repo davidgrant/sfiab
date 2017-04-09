@@ -73,7 +73,6 @@ foreach($award['prizes'] as &$p) {
 
 $winners = prize_load_winners($mysqli, $prize);
 
-
 function get_cwsf_winners_for_xml($mysqli, &$winners)
 {
 	global $config, $challenges;
@@ -159,13 +158,15 @@ case 'register':
 		exit();
 	}
 
-//	print_r($_POST['xml']);
+	$xml = urldecode($_POST['xml']);
+
+//	print_r($xml);
 
 	$ch = curl_init(); /// initialize a cURL session
 	curl_setopt ($ch, CURLOPT_URL,"https://secure.youthscience.ca/registration/xmlregister.php");
 	curl_setopt ($ch, CURLOPT_HEADER, 0); /// Header control
 	curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET
-	curl_setopt ($ch, CURLOPT_POSTFIELDS, "xml=".$_POST['xml']);  /// put the query string here starting with "?"
+	curl_setopt ($ch, CURLOPT_POSTFIELDS, "xml=".$xml);  /// put the query string here starting with "?"
 	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); /// This allows the output to be set into a variable $datastream
 //	curl_setopt ($ch, CURLOPT_POSTFIELDSIZE, 0);
 	curl_setopt ($ch, CURLOPT_TIMEOUT, 360);
@@ -302,7 +303,7 @@ sfiab_page_begin($u, "CWSF Registration", $page_id, $help);
 
 	$form_id = $page_id.'_form';
 	form_begin($form_id, 'c_award_cwsf.php');
-	form_hidden($form_id, 'xml', $xmldata);
+	form_hidden($form_id, 'xml', urlencode($xmldata));
 	form_button($form_id, 'register', 'Send Data to YSC');
 	form_end($form_id);
 ?>
