@@ -713,10 +713,10 @@ function report_create($mysqli)
 	 * we can enforce margins) */
 	if($report['fit_columns']) { // && $total_width > $label_stock['label_width'])  {
 		$static_width = $total_width - $scale_width;
-        if($scale_width) 
-            $scale_factor = ($label_stock['label_width'] - $static_width) / $scale_width;
-        else
-            $scale_factor = 1.0;
+	        if($scale_width) 
+			$scale_factor = ($stock['label_width'] - $static_width) / $scale_width;
+	        else
+			$scale_factor = 1.0;
 	} else {
 		$scale_factor = 1.0;
 	}

@@ -647,6 +647,7 @@ $report_students_fields = array(
 		'name' => 'Award -- Name',
 		'header' => 'Award Name',
 		'width' => 4,
+		'scalable' => true,
 		'table' => 'awards.name',
 		'components' => array('awards')),
 
@@ -654,6 +655,7 @@ $report_students_fields = array(
 		'name' => 'Award -- Name + Prize Name',
 		'header' => 'Award+Prize Name',
 		'width' => 4,
+		'scalable' => true,
 		'table' => "CONCAT(awards.name, ': ', award_prizes.name)",
 		'components' => array('awards')),
 
