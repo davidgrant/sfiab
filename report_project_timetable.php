@@ -182,7 +182,8 @@ foreach($projects as $pid=>&$p) {
 	<li>You may not get a judge during every judging time slot.
 	<li>Please don't leave your project just because you don't have a judge at the beginning of a time slot, you might miss a judge.
 	<li>Special Award Judges, VIPs, and Committee Members may visit your project at any time during judging time slots (except during your breaks).
-	<li>Please remain inside the exhibit halls during your breaks.  You are free move between Ballroom and the Partyroom, and of course go to the washroom.
+	<li>Please remain inside the exhibit hall during your breaks.
+	<li>You may go to the washroom at any time.
 	</ul>");
 
 }

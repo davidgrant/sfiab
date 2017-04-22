@@ -1,4 +1,8 @@
 <?php
+require_once('common.inc.php');
+
+$mysqli = sfiab_init(array('student'));
+
 
 $file = $_GET['f'];
 
@@ -14,6 +18,7 @@ $files = array( "2017_floorplan.pdf",
 
 $filename = '';
 $mimetype = '';
+$in_year_dir = false;
 switch($file) {
 case 'logo':
 	$filename = 'logo.jpg';
@@ -44,6 +49,18 @@ case 'tour_scheduler_log':
 	break;
 
 default:
+	/* Allow JPEGs in files/fairyear/ */
+	if(preg_match("/[A-Za-z0-9_ \-]*.jpg/", $file)) {
+		if(!sfiab_user_is_a('student') && !sfiab_user_is_a('committee')) {
+			/* Only let students load photos */
+			print("Not allowed");
+			exit();
+		}
+		$filename = $file;
+		$in_year_dir = true;
+		break;
+	}
+
 	/* Allow a passed-in file only if it appears in our database of files.  Below we exit if the filename contains
 	 * any characters other than a-z, A-Z, 0-9, -._ strip out directories and
 	 * force a file access in files/ */
@@ -56,12 +73,12 @@ default:
 
 if($filename != '') {
 
-	if(preg_match('/[^A-Za-z0-9_\-\.]/', $filename)) {
+	if(preg_match('/[^A-Za-z0-9_\-\. ]/', $filename)) {
 		print("Invalid filename: $filename");
 		exit();
 	}
 
-	if($filename[0] == '.') {
+	if($filename[0] == '.' || $filename[0] == '/') {
 		/* Forbid files starting with . (that includes ..) */
 		print("Invalid filename: $filename");
 		exit();
@@ -91,7 +108,15 @@ if($filename != '') {
 	/* So now we know the filename only has A-Za-z0-9_- in it (and doesn't
 	 * have any . or / or other funny characters that might change the directory)
 	 * Construct the filename relative to files/ */
-	$filename = "files/".$file_info['filename'].".".$file_info['extension'];
+	if($in_year_dir) {
+		$filename = "files/{$config['year']}/".$file_info['filename'].".".$file_info['extension'];
+	} else {
+		$filename = "files/".$file_info['filename'].".".$file_info['extension'];
+	}
+	if(!file_exists($filename)) {
+		print("Not found :(");
+		exit();
+	}
 
 	header("Pragma: public");
 	header("Expires: 0");
