@@ -1,5 +1,7 @@
 <?php
 require_once('common.inc.php');
+require_once('user.inc.php');
+require_once('project.inc.php');
 
 $mysqli = sfiab_init(array('student'));
 
@@ -56,6 +58,43 @@ default:
 			print("Not allowed");
 			exit();
 		}
+
+		$u = user_load($mysqli);
+		$p = project_load($mysqli, $u['s_pid']);
+
+		/* Make sure this student is allowed to download this photo */
+		$possible_filenames = array("{$p['number']}", 
+			  		  "{$p['floor_number']}",
+					    sprintf("%03d", $p['floor_number']));
+		$files = array();		
+		foreach($possible_filenames as $f) {
+			if(preg_match('/[^A-Za-z0-9 _\-]/', $f)) {
+				/* STring contains non alphanumeric+space characters */
+				continue;
+			}
+
+			$fn = "files/{$config['year']}/$f.jpg";
+			debug("Trying: $fn");
+			if(file_exists("$fn")) {
+				$files[] = "$f.jpg";
+			}
+
+			/* Alos try adding _number to the end of it */
+			for($x = 1; $x < 50; $x++) {
+				$fn = "files/{$config['year']}/{$f}_{$x}.jpg";
+				debug("Trying: $fn");
+				if(file_exists("$fn")) {
+					$files[] = "{$f}_{$x}.jpg";
+				} else {
+					break;
+				}
+			}
+		}
+		if(!in_array($file, $files)) {
+			print("Not allowed.");
+			exit();
+		}
+
 		$filename = $file;
 		$in_year_dir = true;
 		break;
