@@ -75,7 +75,11 @@ sfiab_page_begin($u, "Project Information", $page_id, $help);
 	$chals = challenges_load($mysqli);
 	$cats = categories_load($mysqli);
 	$legal_ids = project_get_legal_category_ids($mysqli, $p['pid']);
-	$isef_data = isef_get_div_names();
+	if($config['judge_scheduler_use_detailed_subdivisions'] == 1) {
+		$isef_data = isef_get_div_names();
+	} else {
+		$isef_data = isef_get_major_div_names();
+	}
 
 	foreach($chals as $cid=>$c) {
 		$chals_data[$cid] = $c['name'];
@@ -95,7 +99,8 @@ sfiab_page_begin($u, "Project Information", $page_id, $help);
 	form_text($form_id, 'title', "Title", $p);
 	form_select($form_id, 'challenge_id', "Challenge", $chals_data, $p);
 	form_label($form_id, 'cat_id', 'Age Category', $cat_name);
-	form_select_optgroup($form_id, 'isef_id', "Detailed Division", $isef_data, $p);
+	form_select_optgroup($form_id, 'isef_id', "Detailed Division <br/>(for judge matching)", $isef_data, $p);
+
 	form_lang($form_id, 'language', "Judging Language", $p);
 	form_yesno($form_id, 'req_electricity', "Electricity Needed", $p);
 	form_textbox($form_id, 'tagline', "One-Sentence Summary", $p,

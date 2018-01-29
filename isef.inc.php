@@ -236,6 +236,21 @@ function isef_get_div_names()
 	return $ret;
 }
 
+function isef_get_major_div_names()
+{
+	global $isef_divs;
+
+	$ret = array();
+
+	$ret["Detailed Divisions"] = array();
+	foreach($isef_divs as $id=>$d) {
+		if($d['parent'] === false) {
+			$ret["Detailed Divisions"][$id] = $d['name'];
+		}
+	}
+	return $ret;
+
+}
 
 
 ?>

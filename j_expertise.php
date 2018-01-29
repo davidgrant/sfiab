@@ -72,7 +72,11 @@ sfiab_page_begin($u, "Expertise", $page_id, $help);
 	form_disable_message($page_id, $closed);
 
 	$cats = categories_load($mysqli);
-	$isef_data = isef_get_div_names();
+	if($config['judge_scheduler_use_detailed_subdivisions'] == 1) {
+		$isef_data = isef_get_div_names();
+	} else {
+		$isef_data = isef_get_major_div_names();
+	}
 
 	$cats_data = array('0'=>'No Preference');
 	foreach($cats as $cid=>$c) {
@@ -115,15 +119,17 @@ sfiab_page_begin($u, "Expertise", $page_id, $help);
 	<h3>Judging Preferences</h3>
 	Select your top three detailed divisions to judge and an age category
 	preference if you have one.  We use this to match you with projects to
-	judge.  For the divisions, we will also match you with projects in the
-	same general division with slightly less priority.  That means if you
-	select "Biochemistry--Medicinal", you will also be matched with
-	projects in "Biochemistry--Analytical" and all other Biochemistry
-	divisions as well.  We will do our best to match you with projects 
+	judge.  We will do our best to match you with projects 
 	only in divisions you select, but we cannot guarantee that all projects 
 	you are assigned to judge will be a perfect match.
-<?php
 
+<?php	if($config['judge_scheduler_use_detailed_subdivisions'] == 1) { ?>
+		<p>For the divisions, we will also match you with projects in the
+		same general division with slightly less priority.  That means if you
+		select "Biochemistry--Medicinal", you will also be matched with
+		projects in "Biochemistry--Analytical" and all other Biochemistry
+		divisions as well.  
+<?php	}		
 	
 	form_select_optgroup($form_id, 'j_div_pref[0]', "Detailed Division 1", $isef_data, $u);
 	form_select_optgroup($form_id, 'j_div_pref[1]', "Detailed Division 2", $isef_data, $u);
