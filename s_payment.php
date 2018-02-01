@@ -52,17 +52,17 @@ sfiab_page_messages();
 
 <?php if($config['paypal_enable']) { ?>
 
-<p>Please select the student(s) to pay for below, then click on the PayPal
-button to begin the payment process.
+	<p>Please select the student(s) to pay for below, then click on the PayPal
+	button to begin the payment process.
 
-<p>Your payment details are not stored in our registration system.  All we
-store is a confirmation code from PayPal indicating whether payment was
-successful.
+	<p>Your payment details are not stored in our registration system.  All we
+	store is a confirmation code from PayPal indicating whether payment was
+	successful.
 
 <?php } else { ?>
-<p>Your Registration Number is <b><font size=+2><?=$u['s_pid']?></font></b>.  
+	<p>Your Registration Number is <b><font size=+2><?=$u['s_pid']?></font></b>.  
 
-<p><?=cms_get($mysqli, 'student_payment_page', $u)?>
+	<p><?=cms_get($mysqli, 'student_payment_page', $u)?>
 
 <?php } ?>
 
