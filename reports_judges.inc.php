@@ -23,6 +23,8 @@
 require_once('common.inc.php');
 require_once('project.inc.php');
 require_once('user.inc.php');
+require_once('filter.inc.php');
+require_once('isef.inc.php');
 
 
 /* Take the language array in users_judge, unserialize it, and join it
@@ -120,6 +122,32 @@ function report_judges_time_availability($mysqli, &$report, $field, $text)
                 }
 	}
 	return 'No';
+}
+
+function report_judges_cat_pref($mysqli, &$report, $field, $text)
+{
+	if($text == 0) {
+		return "No Preference";
+	}
+	$cats = categories_load($mysqli);
+	if(array_key_exists($text, $cats)) return $cats[$text]['name'];
+	return "N/A";
+}
+
+function report_judges_div_pref($mysqli, &$report, $field, $text)
+{
+	global $isef_divs;
+	$prefs = $text;
+	filter_int_list($prefs);
+
+	$index = 3;
+	switch($field) {
+	case "j_div_pref0": $index = 0; break;
+	case "j_div_pref1": $index = 1; break;
+	case "j_div_pref2": $index = 2; break;
+	}
+	if(array_key_exists($index, $prefs)) return $isef_divs[$prefs[$index]]['name'];
+	return "N/A";
 }
 
 /* Components:  languages, teams */
@@ -250,6 +278,31 @@ $report_judges_fields = array(
 		'header' => 'Highest PSD',
 		'width' => 1.25,
 		'table' => 'users.j_psd'),
+
+	'j_cat_pref' => array(
+		'name' => 'Judge -- Age Category Pref',
+		'header' => 'Cat Pref',
+		'width' => 1.25,
+		'table' => 'users.j_cat_pref',
+		'exec_function' => 'report_judges_cat_pref'),
+	'j_div_pref0' => array(
+		'name' => 'Judge -- Detailed Division Pref 1',
+		'header' => 'Div Pref 1',
+		'width' => 1.25,
+		'table' => 'users.j_div_pref',
+		'exec_function' => 'report_judges_div_pref'),
+	'j_div_pref1' => array(
+		'name' => 'Judge -- Detailed Division Pref 2',
+		'header' => 'Div Pref 2',
+		'width' => 1.25,
+		'table' => 'users.j_div_pref',
+		'exec_function' => 'report_judges_div_pref'),
+	'j_div_pref2' => array(
+		'name' => 'Judge -- Detailed Division Pref 3',
+		'header' => 'Div Pref 3',
+		'width' => 1.25,
+		'table' => 'users.j_div_pref',
+		'exec_function' => 'report_judges_div_pref'),
 
 	'j_mentored' => array(
 		'name' => 'Judge -- Has Mentored a Student/Project at the Fair',
