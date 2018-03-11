@@ -109,6 +109,10 @@ foreach($generate_rounds as $round ) {
 
 		if($filter_jteam != 0 && $jteam_id != $filter_jteam) continue;
 
+		if(!array_key_exists($jteam['award_id'], $awards)) {
+			/* A judging team with no award can happen if they create a judging team and don't assign it to an award. */
+			continue;
+		}
 		$award = $awards[$jteam['award_id']];
 		$n_judges = count($jteam['user_ids']);
 

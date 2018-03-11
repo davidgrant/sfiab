@@ -79,7 +79,7 @@ $report_awards_fields = array(
 		'name' => 'Award -- Order',
 		'header' => 'Award Order',
 		'width' => 0.5,
-		'table' => 'awards.order' ),
+		'table' => 'awards.ord' ),
 
 	'cwsfaward' =>  array(
 		'name' => 'Award -- CWSF Award',
