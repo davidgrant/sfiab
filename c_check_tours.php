@@ -101,20 +101,28 @@ foreach($students_accepted_without_tour as &$s) {
 	<td>
 <?php
 	$x = 1;
-	foreach($s['tour_id_pref'] as $tour_id_pref) { ?>
-		<?=$x?>: #<?=$tours[$tour_id_pref]['num']?> - <?=$tours[$tour_id_pref]['name']?><br/>
-		
+	foreach($s['tour_id_pref'] as $tour_id_pref) { 
+		if(!array_key_exists($tour_id_pref, $tours)) {
+			/* Not found, did someone edit tours after registration opened? */
+			$tour_name = "Tour not found (tours edited after registration opened?)";
+		} else {
+			$tour_name = "#{$tours[$tour_id_pref]['num']} - {$tours[$tour_id_pref]['name']}";
+		} ?>
+
+		<?=$x?>: <?=$tour_name?>
 <?php		$x++;
 	} ?>
 	</td>
 	<td>
 <?php
-	foreach($s['tour_id_pref'] as $tour_id_pref) { ?>
-		<b><?=$tours[$tour_id_pref]['count']?></b> / <?=$tours[$tour_id_pref]['capacity_max']?><br/>
+	foreach($s['tour_id_pref'] as $tour_id_pref) { 
+		if(array_key_exists($tour_id_pref, $tours)) { ?>
+			<b><?=$tours[$tour_id_pref]['count']?></b> / <?=$tours[$tour_id_pref]['capacity_max']?>
+<?php		} ?>
+		<br/>
 <?php		
 	} ?>
 	</td>
-	
 
 	<td><a href="c_user_edit.php?uid=<?=$s['uid']?>" data-mini="true"  data-role="button" data-iconpos="notext" data-icon="gear" data-ajax="false">
 	</td></tr>
