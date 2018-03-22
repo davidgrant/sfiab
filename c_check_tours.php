@@ -109,7 +109,7 @@ foreach($students_accepted_without_tour as &$s) {
 			$tour_name = "#{$tours[$tour_id_pref]['num']} - {$tours[$tour_id_pref]['name']}";
 		} ?>
 
-		<?=$x?>: <?=$tour_name?>
+		<?=$x?>: <?=$tour_name?><br/>
 <?php		$x++;
 	} ?>
 	</td>
