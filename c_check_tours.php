@@ -104,7 +104,7 @@ foreach($students_accepted_without_tour as &$s) {
 	foreach($s['tour_id_pref'] as $tour_id_pref) { 
 		if(!array_key_exists($tour_id_pref, $tours)) {
 			/* Not found, did someone edit tours after registration opened? */
-			$tour_name = "Tour not found (tours edited after registration opened?)";
+			$tour_name = "<font color=red><b>Tour not found </b></font>(tours edited after registration opened?)";
 		} else {
 			$tour_name = "#{$tours[$tour_id_pref]['num']} - {$tours[$tour_id_pref]['name']}";
 		} ?>
