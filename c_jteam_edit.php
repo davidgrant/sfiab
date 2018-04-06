@@ -441,7 +441,7 @@ function jteam_li(&$jteam) {
 		</tr>
 <?php		foreach($jteam['project_ids'] as $pid) {
 			if(!array_key_exists($pid, $projects) || !array_key_exists('pid', $projects[$pid])) { ?>
-				<tr><td></td><td><font color=red>INVALID PROJECT Project ID <?=$pid?></font></td><td></td><td></td></tr>
+				<tr id="<?=$pid?>"><td></td><td><font color=red>INVALID PROJECT Project ID <?=$pid?></font></td><td></td><td></td><td></td></tr>
 <?php			} else { 
 				project_row($projects[$pid]);
 			}
