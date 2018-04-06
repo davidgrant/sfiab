@@ -440,10 +440,11 @@ function jteam_li(&$jteam) {
 			<td align="center">Lang</td>
 		</tr>
 <?php		foreach($jteam['project_ids'] as $pid) {
-				if(!array_key_exists($pid, $projects) || !array_key_exists('pid', $projects[$pid])) {
-					print("pid $pid doesn't exist in accepted projects!");
-				}
-			project_row($projects[$pid]);
+			if(!array_key_exists($pid, $projects) || !array_key_exists('pid', $projects[$pid])) { ?>
+				<tr><td></td><td><font color=red>INVALID PROJECT Project ID <?=$pid?></font></td><td></td><td></td></tr>
+<?php			} else { 
+				project_row($projects[$pid]);
+			}
 		} ?>
 		</table>
 		</div>
