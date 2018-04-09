@@ -401,7 +401,7 @@ function sfiab_print_left_nav(&$u, $menu, $current_page_id="")
 			      's_payment' => array('Registration Fee', 's_payment.php'),
 			      's_download' => array('Photos and Downloads', 's_download.php'),
 			      );
-	if($config['fair_abbreviation'] != 'GVRSF') unset($student_menu['s_download']);	/* Only GVRSF for now, uploads aren't ready */
+	if($config['fair_abbreviation'] != 'GVRSF' && $config['fair_abbreviation'] != 'ERSF') unset($student_menu['s_download']);	/* Only GVRSF for now, uploads aren't ready */
 	if(!$config['tours_enable']) unset($student_menu['s_tours']);
 	if(!$config['student_enable_award_selection']) unset($student_menu['s_awards']);
 	if(!$config['student_enable_cwsf_eligibility']) unset($student_menu['s_cwsf']);
