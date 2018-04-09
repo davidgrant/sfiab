@@ -45,16 +45,12 @@ $page_id = "c_award_cwsf";
 $challenges = challenges_load($mysqli);
 
 foreach($challenges as &$c) {
+	/* Default so we assign the project to some challenge */
+	$c['cwsf_division_id'] = 0;
+	/* Try for a better match */
 	foreach($cwsf_divisions as $did=>$d) {
 		if(strcmp($d, $c['name']) == 0) $c['cwsf_division_id'] = $did;
 	}
-
-	if(!array_key_exists('cwsf_division_id', $c)) {
-		print("Couldn't match cwsf challenge $did=>$d with anything in ");
-		print_r($challenges);
-		exit();
-	}
-
 }
 
 $award = award_load_cwsf($mysqli);
