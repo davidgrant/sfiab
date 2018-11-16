@@ -36,7 +36,7 @@ require_once('stats.inc.php');
 function remote_query($mysqli, &$fair, &$cmd)
 {
 	/* Create a token, 128 chars */
-	$v = base64_encode(random_bytes(96));
+	$v = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
 	$mysqli->real_query("UPDATE fairs SET token='$v' WHERE id='{$fair['id']}'");
 
 	if($fair['password'] === NULL || $fair['url'] === NULL) {
@@ -125,7 +125,7 @@ function remote_encrypt(&$fair, $text)
 {
 	global $config;
 
-	$v = random_bytes(96);
+	$v = mcrypt_create_iv(96, MCRYPT_DEV_URANDOM);
 
 	/* encrypt the password with our private key, then the remote's public key */
 	if(!openssl_private_encrypt($v, $enc1, $config['private_key'])) {
