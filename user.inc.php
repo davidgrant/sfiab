@@ -15,7 +15,7 @@ function user_load_all_for_project($mysqli, $pid)
 
 function user_change_password($mysqli, &$u, $new_password)
 {
-	$u['salt'] = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
+	$u['salt'] = base64_encode(random_bytes(96));
 	$hashed_pw = hash('sha512', $new_password);
 	$u['password'] = hash('sha512', $hashed_pw.$u['salt']);
 	$u['password_expired'] = 0;
