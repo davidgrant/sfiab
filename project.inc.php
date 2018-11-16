@@ -555,7 +555,7 @@ function signature_create($mysqli, $year = NULL)
 
 	/* Generate a 32 character key and insert it, try again if the insert fails  (duplicate key) */
 	for($x=0;$x<100;$x++) {
-		$key = base64_encode(random_bytes(24));
+		$key = base64_encode(mcrypt_create_iv(24, MCRYPT_DEV_URANDOM));
 		/* Replace base64 chars that aren't nice on the commandline 
 		 * + and / -> _ */
 		$key = str_replace( array('+', '/'), '_', $key);

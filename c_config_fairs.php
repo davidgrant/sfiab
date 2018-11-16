@@ -48,7 +48,7 @@ case 'add':
 case 'pass':
 	$id = (int)$_POST['id'];
 	$f = fair_load($mysqli, $id);
-	$f['password'] = base64_encode(random_bytes(96)));
+	$f['password'] = base64_encode(mcrypt_create_iv(96, MCRYPT_DEV_URANDOM));
 	fair_save($mysqli, $f);
 	form_ajax_response(array('status'=>0, 'val' => array('password' => $f['password']))) ;
 	exit();
