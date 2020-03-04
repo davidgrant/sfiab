@@ -123,11 +123,6 @@ if($generate_pdf == false) {
 		to the person you need a signature from, and they can complete
 		the form online.
 
-		<p><b>If you use electronic signatures, you
-		MUST still print and submit the first page of the signature
-		form (without signatures) to complete your application.  Your
-		application is incomplete until we have received the signature form.</b>
-
 		<?php if($config['sig_enable_senior_marks_form']) { ?>
 			<p>The senior marks validation form cannot
 			be completed electronically.  It must be printed and
@@ -160,10 +155,6 @@ if($generate_pdf == false) {
 
 			if(!$notice_printed) { ?>
 				<p>You do not have to use electronic signatures.  You can just use the printed form below if you choose.
-				<p><b>If you use electronic signatures, you
-				MUST still print and submit the first page of the signature
-				form to complete your application.  Your
-				application is incomplete until we have received the signature form.</b>
 <?php				$notice_printed = true;
 			} ?>
 		
